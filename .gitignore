@@ -7,5 +7,24 @@
 
 # Fresh build directory
 _fresh/
-# npm dependencies
+
+# npm dependencies (for npm interop)
 node_modules/
+
+# Deno cache (optional, usually not in project root)
+/deno_dir/
+
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage reports
+coverage/
+
+# Misc
+*.bak
+*.tmp

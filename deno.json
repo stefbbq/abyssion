@@ -30,6 +30,10 @@
     "**/_fresh/*"
   ],
   "imports": {
+    "@islands/": "./islands/",
+    "@components/": "./components/",
+    "@lib/": "./lib/",
+    "@libgl/": "./lib/gl/",
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
     "phosphor-react": "npm:phosphor-react@^1.4.1",
     "preact": "https://esm.sh/preact@10.22.0",
@@ -44,7 +48,8 @@
   },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "lib": ["dom", "esnext"]
   },
   "nodeModulesDir": "auto"
 }
