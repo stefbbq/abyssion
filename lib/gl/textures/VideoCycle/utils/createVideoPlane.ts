@@ -9,11 +9,7 @@ import { VIDEO_CYCLE_CONFIG } from '../config.ts'
  */
 export const createVideoPlane = (THREE: typeof import('three'), scene: THREE.Scene) => {
   const geometry = new THREE.PlaneGeometry(16, 9)
-  const material = new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0, // Start invisible
-    side: THREE.FrontSide,
-  })
+  const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, side: THREE.FrontSide })
   const mesh = new THREE.Mesh(geometry, material)
   mesh.position.z = VIDEO_CYCLE_CONFIG.position.z
 

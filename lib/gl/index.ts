@@ -7,7 +7,7 @@ import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addLensFlares } from './scene/addLensFlares.ts'
 import { createPlaneGeometry } from './scene/createPlaneGeometry.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
-import { DebugOverlay } from './debug/DebugOverlay.ts' // Debug overlay for UI and DOF
+import { DebugOverlay } from './debug/DebugOverlay.ts'
 import { setupKeyboardControls, setupOrbitControls } from './controls/OrbitControlsSetup.ts'
 import { createLogoLayer } from './layers/index.ts'
 import { createGeometricLayer } from './layers/GeometricLayer.ts'
@@ -34,7 +34,14 @@ export const initLogo3D = async (options: InitOptions) => {
   let controls: any = undefined
 
   // Add video background if enabled
-  const videoBackground = await addVideoBackground(THREE, scene)
+  const videoBackground = await addVideoBackground(THREE, scene, renderer, camera)
+  const rendererState: RendererState = {
+    scene,
+    camera,
+    renderer,
+    composer: undefined,
+    videoBackground,
+  }
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
@@ -126,8 +133,8 @@ export const initLogo3D = async (options: InitOptions) => {
         focusPlane.quaternion.copy(camera.quaternion)
       }
     }
-    if (typeof window !== 'undefined') {
-      ;(window as any).alignFocusPlane = alignFocusPlane
+    if (typeof globalThis !== 'undefined') {
+      ;(globalThis as any).alignFocusPlane = alignFocusPlane
     }
 
     function hideFocusPlane() {
@@ -251,6 +258,7 @@ export const initLogo3D = async (options: InitOptions) => {
     THREE,
     uiOverlay: uiLayer, // 2D HUD overlay
     shapeLayer, // 3D shape layer around the logo
+    videoBackground,
   }
 
   // Set up layer regeneration function
@@ -311,7 +319,7 @@ export const initLogo3D = async (options: InitOptions) => {
 
     // Remove event listeners
     keyboardCleanup()
-    window.removeEventListener('resize', handleResize)
+    globalThis.removeEventListener('resize', handleResize)
 
     // Clean up video background
     if (videoBackground) {

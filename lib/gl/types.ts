@@ -59,8 +59,8 @@ export type RendererState = {
   stencilTexture: any
   THREE: any
   uiOverlay: UIOverlay
-  shapeLayer: Group // 3D shape layer for scene elements around the logo
-  videoBackground?: VideoBackgroundManager // Optional video background
+  shapeLayer: Group
+  videoBackground?: VideoBackgroundManager
 }
 
 // Bloom parameters

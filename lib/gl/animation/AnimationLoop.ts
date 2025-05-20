@@ -4,7 +4,7 @@ import { DEFAULT_BLOOM_PARAMS, POST_PROCESSING_CONFIG } from '../scene/config.ts
 import { createLogoLayer } from '../layers/index.ts'
 
 // Get random interval between 1-4 seconds
-const getRandomInterval = () => 1000 + Math.random() * 3000 // 1-4 seconds in milliseconds
+const getRandomInterval = () => 1000 + Math.random() * 3000
 
 // Tracking variables
 let mouseX = 0
@@ -20,8 +20,8 @@ export const setupMouseTracking = (container: HTMLElement) => {
 
   const handleMouseMove = (event: MouseEvent) => {
     // Calculate normalized mouse position (-1 to 1)
-    mouseX = (event.clientX / window.innerWidth) * 2 - 1
-    mouseY = (event.clientY / window.innerHeight) * 2 - 1
+    mouseX = (event.clientX / globalThis.innerWidth) * 2 - 1
+    mouseY = (event.clientY / globalThis.innerHeight) * 2 - 1
 
     // Calculate target rotation based on mouse position
     targetRotationX = mouseY * MOUSE_COEFFICIENT
@@ -29,10 +29,10 @@ export const setupMouseTracking = (container: HTMLElement) => {
   }
 
   // Add mouse move listener
-  window.addEventListener('mousemove', handleMouseMove)
+  globalThis.addEventListener('mousemove', handleMouseMove)
 
   // Return cleanup function
-  return () => window.removeEventListener('mousemove', handleMouseMove)
+  return () => globalThis.removeEventListener('mousemove', handleMouseMove)
 }
 
 /**
@@ -260,7 +260,7 @@ export const startAnimationLoop = (state: RendererState) => {
   const animate = () => {
     // Align the focus plane to the camera if present
     if (typeof window !== 'undefined' && typeof (window as any).alignFocusPlane === 'function') {
-      (window as any).alignFocusPlane()
+      ;(window as any).alignFocusPlane()
     }
     // Request next frame first and store the ID
     animationId = requestAnimationFrame(animate)
@@ -275,11 +275,9 @@ export const startAnimationLoop = (state: RendererState) => {
     state.scene.rotation.y += (targetRotationY - state.scene.rotation.y) * 0.05
 
     // Update video background if present
-    if (state.videoBackground) {
-      state.videoBackground.update(TIME_INCREMENT)
-    }
+    if (state.videoBackground) state.videoBackground.update(TIME_INCREMENT)
 
-    // Check if it's time to regenerate layers
+    // Check if it's time to regenerate logo layers
     const currentTime = Date.now()
     if (currentTime - lastRegenerateTime > nextRegenerateInterval) {
       // Regenerate layers

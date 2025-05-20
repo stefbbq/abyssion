@@ -1,53 +1,59 @@
 import * as THREE from 'three'
 import { VIDEO_CYCLE_CONFIG } from './config.ts'
 import { debugVideoAccess } from './utils/debugVideoAccess.ts'
-import { getRandomSwitchDuration } from './utils/getRandomSwitchDuration.ts'
 import { createVideoPlane } from './utils/createVideoPlane.ts'
 import { calculateScale } from './utils/calculateScale.ts'
-import { seekToRandomPosition } from './utils/seekToRandomPosition.ts'
 import { loadVideo } from './utils/loadVideo.ts'
-// Using inline implementation instead of the imported function
-// import { isVideoReady } from './utils/isVideoReady.ts'
+import { isVideoReady as _isVideoReady } from './utils/isVideoReady.ts'
+import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
 import { getNextVideoIndex } from './utils/getNextVideoIndex.ts'
 import type { VideoBackgroundManager } from '../../types.ts'
 
-/**
- * Create a video cycle manager that cycles through videos
- * with customizable behavior based on configuration
- */
+type BufferObject = {
+  mesh: THREE.Mesh
+  material: THREE.MeshBasicMaterial
+  geometry: THREE.PlaneGeometry
+  _plannedStartTime?: number
+  _plannedDuration?: number
+  _plannedVideoIndex?: number
+  _playStartTime?: number // timestamp (ms) when play() resolved for preroll tracking
+}
+
 export const createVideoCycle = async (
   THREE: typeof import('three'),
   scene: THREE.Scene,
 ): Promise<VideoBackgroundManager> => {
   // Try to debug server access first
   const workingPath = await debugVideoAccess()
+
   if (workingPath) {
     console.log(`Using detected working path: ${workingPath}`)
-    // Update the config to use the working path
     VIDEO_CYCLE_CONFIG.videos.path = workingPath
   } else {
     console.warn('⚠️ Could not detect a working path for videos. Server configuration issue likely.')
     console.warn('Try checking: 1) CORS settings 2) Static file serving 3) MIME types for .webm')
   }
 
-  // Array to store loaded video elements and textures
   const videos: HTMLVideoElement[] = []
   const videoTextures: THREE.VideoTexture[] = []
   let currentVideoIndex = 0
   let nextVideoIndex = 0
-  let recentVideoIndices: number[] = [] // Track recent videos to avoid repeating
+  let recentVideoIndices: number[] = []
   let timeSinceLastSwitch = 0
   const currentOpacity = VIDEO_CYCLE_CONFIG.appearance.opacity
-
-  let switchDuration = getRandomSwitchDuration()
+  const VIDEO_SWAP_TIMEOUT_MS = 1000
+  const PREPARE_PREROLL_MS = 500 // allow hidden video to decode more frames before considering ready
+  const PREROLL_SECONDS = 2 // ensure the next video has played for at least this long hidden
+  const PREROLL_MIN_PROGRESS = 0.15 // relax: require ~3 frames of progress at 24fps
+  let switchDuration = 10
 
   // Create two layers - one visible, one hidden for buffering
   const frontBuffer = createVideoPlane(THREE, scene)
   const backBuffer = createVideoPlane(THREE, scene)
 
   // Track which buffer is currently visible
-  let activeBuffer = frontBuffer
-  let hiddenBuffer = backBuffer
+  let activeBuffer: BufferObject = frontBuffer
+  let hiddenBuffer: BufferObject = backBuffer
 
   // Update scale on window resize
   const handleResize = () => {
@@ -61,78 +67,202 @@ export const createVideoCycle = async (
   // Initialize both buffers
   calculateScale(frontBuffer)
   calculateScale(backBuffer)
-  
+
   // Ensure the active buffer is visible from the start
   activeBuffer.material.opacity = currentOpacity
   activeBuffer.material.needsUpdate = true
 
   /**
-   * Check if a video at the given index is ready for playback
-   */
-  const checkVideoReady = (index: number): boolean => {
-    return index >= 0 && 
-           index < videos.length && 
-           videos[index] && 
-           videos[index].readyState >= 3 && // HAVE_FUTURE_DATA or higher
-           !isNaN(videos[index].duration) &&
-           videos[index].videoWidth > 0 // Ensure video has dimensions
-  }
-
-  /**
    * Prepare the hidden buffer with the next video
    */
-  const prepareNextVideo = async (videoIndex: number) => {
-    if (videoIndex < 0 || videoIndex >= videos.length) {
-      console.warn(`Invalid video index: ${videoIndex}`)
-      return
-    }
+  const prepareNextVideo = async (initialIndex: number): Promise<number> => {
+    const maxAttempts = videos.length
+    let attempts = 0
+    const triedIndices: number[] = []
+    let videoIndex = initialIndex
+    let found = false
 
-    // Set texture and play video
-    const texture = videoTextures[videoIndex]
-    hiddenBuffer.material.map = texture
-    hiddenBuffer.material.needsUpdate = true
-
-    // Make sure video is ready to play
-    const video = videos[videoIndex]
-    if (!video) {
-      console.warn(`Video at index ${videoIndex} is not available`)
-      return
-    }
-
-    // Log the video's readiness state
-    console.log(`Video ${videoIndex} - readyState: ${video.readyState}, dimensions: ${video.videoWidth}x${video.videoHeight}`)
-
-    // Force video to play regardless of previous state
-    try {
-      // First seek to a random position
-      await seekToRandomPosition(video)
-      
-      // Make sure it's playing
-      if (video.paused) {
-        console.log(`Playing video ${videoIndex}`)
-        await video.play()
-      } else {
-        console.log(`Video ${videoIndex} already playing`)
+    while (attempts < maxAttempts) {
+      if (videoIndex < 0 || videoIndex >= videos.length || triedIndices.includes(videoIndex)) {
+        videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
+        attempts++
+        continue
       }
-    } catch (error) {
-      console.error('Error preparing video:', error)
+
+      triedIndices.push(videoIndex)
+
+      const texture = videoTextures[videoIndex]
+      const video = videos[videoIndex]
+
+      if (!video || !texture) {
+        console.warn(`Video or texture at index ${videoIndex} is not available`)
+        videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
+        attempts++
+        continue
+      }
+
+      console.log(`Trying to prepare video ${videoIndex}, readyState: ${video.readyState}, rez: ${video.videoWidth}x${video.videoHeight}`)
+
+      // Check readiness
+      if (video.readyState < 3 || isNaN(video.duration) || video.videoWidth <= 0) {
+        console.warn(`Video ${videoIndex} is not ready or has invalid duration/size`)
+        videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
+        attempts++
+      }
+
+      let startTime = 0
+      let duration = 0
+
+      try {
+        const result = await getNewStartTimeAndDuration(
+          video,
+          VIDEO_CYCLE_CONFIG.cycling.minVideoLength + PREROLL_SECONDS,
+          VIDEO_CYCLE_CONFIG.cycling.maxVideoLength + PREROLL_SECONDS,
+        )
+        startTime = result.startTime
+        duration = result.duration
+
+        if (duration < VIDEO_CYCLE_CONFIG.cycling.minVideoLength) {
+          console.warn(`[${new Date().toLocaleTimeString()}] Not enough time left in video ${videoIndex} after seeking. Skipping.`)
+          videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
+          attempts++
+          continue
+        }
+
+        // Visible duration excludes preroll period
+        const visibleDuration = duration - PREROLL_SECONDS
+        switchDuration = visibleDuration
+        video.currentTime = startTime
+        await video.play().catch(() => {})
+        // Give the video a bit more time to decode frames before we mark the buffer ready
+        await new Promise((resolve) => setTimeout(resolve, PREPARE_PREROLL_MS))
+
+        // Record the moment play was initiated for preroll timing
+        hiddenBuffer._playStartTime = Date.now()
+
+        // Swap in the NEW texture but first capture the previous one so we pause the correct video
+        const previousTexture = hiddenBuffer.material.map as THREE.VideoTexture | null
+
+        hiddenBuffer.material.map = texture
+        hiddenBuffer.material.needsUpdate = true
+
+        // Pause the *previous* hidden buffer's video (now no longer referenced)
+        if (previousTexture) {
+          const prevVideoIdx = videoTextures.indexOf(previousTexture)
+          if (prevVideoIdx !== -1 && videos[prevVideoIdx]) {
+            videos[prevVideoIdx].pause()
+            console.log(`[${new Date().toLocaleTimeString()}] Paused previous hidden video at index ${prevVideoIdx}`)
+          }
+        }
+
+        console.log(
+          `[${new Date().toLocaleTimeString()}] Prepared next video index ${videoIndex}: will start at ${startTime.toFixed(2)}s, play for ${
+            duration.toFixed(2)
+          }s`,
+        )
+        hiddenBuffer._plannedStartTime = startTime
+        hiddenBuffer._plannedDuration = duration
+        hiddenBuffer._plannedVideoIndex = videoIndex
+
+        found = true
+        break
+      } catch (error) {
+        console.error(`[${new Date().toLocaleTimeString()}] Error seeking to random position:`, error)
+        videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
+        attempts++
+        continue
+      }
     }
+
+    if (!found) {
+      console.error('Failed to prepare any valid next video')
+      return -1 // Indicate failure
+    }
+    return videoIndex
   }
 
   /**
-   * Swap the buffers to show the prepared video
+   * Swap the buffers to show the prepared video, ensuring the new video starts playing before the visual switch.
    */
-  const swapBuffers = () => {
-    // Swap active and hidden buffers
-    const temp = activeBuffer
-    activeBuffer = hiddenBuffer
-    hiddenBuffer = temp
+  const swapBuffers = async () => {
+    const plannedVideoIndex = hiddenBuffer._plannedVideoIndex
+    const plannedStartTime = hiddenBuffer._plannedStartTime
+    const plannedDuration = hiddenBuffer._plannedDuration
+    const newVideoElement = videos[plannedVideoIndex]
 
-    // Make active buffer visible
-    activeBuffer.material.opacity = currentOpacity
+    if (plannedVideoIndex === undefined || plannedStartTime === undefined || plannedDuration === undefined) {
+      console.error(`[${new Date().toLocaleTimeString()}] Critical error: Planned video state not found on hiddenBuffer. Cannot swap.`)
+      nextVideoIndex = -1 // Force re-preparation
+      return
+    }
 
-    // Make hidden buffer invisible
-    hiddenBuffer.material.opacity = 0
+    if (!newVideoElement) {
+      console.error(`[${new Date().toLocaleTimeString()}] Video at index ${plannedVideoIndex} not found for new buffer. Cannot swap.`)
+      nextVideoIndex = -1 // Force re-preparation
+      return
+    }
+
+    try {
+      await Promise.race([
+        newVideoElement.play(),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Video ${plannedVideoIndex} play timed out after ${VIDEO_SWAP_TIMEOUT_MS}ms`)),
+            VIDEO_SWAP_TIMEOUT_MS,
+          )
+        ),
+      ])
+
+      console.log(`[${new Date().toLocaleTimeString()}] Play initiated for video ${plannedVideoIndex} at ${plannedStartTime.toFixed(2)}s`)
+
+      // Capture reference to the video in the currently active buffer (which will become hidden) so we can pause it after the swap
+      const oldActiveVideoTexture = activeBuffer.material.map as THREE.VideoTexture | null
+      const oldActiveVideoElement = oldActiveVideoTexture ? (oldActiveVideoTexture.image as HTMLVideoElement) : null
+
+      // Swap active and hidden buffer references
+      const temp = activeBuffer
+      activeBuffer = hiddenBuffer
+      hiddenBuffer = temp
+
+      // Update opacities: new active is visible, new hidden is invisible
+      activeBuffer.material.opacity = currentOpacity
+      hiddenBuffer.material.opacity = 0
+      activeBuffer.material.needsUpdate = true
+      hiddenBuffer.material.needsUpdate = true
+
+      // Delay pausing the video that is now hidden to avoid a hitch caused by immediate pause()
+      if (oldActiveVideoElement && !oldActiveVideoElement.paused) {
+        setTimeout(() => {
+          oldActiveVideoElement.pause()
+          console.log(
+            `[${new Date().toLocaleTimeString()}] (delayed) Paused video in hidden buffer (previously active): ${
+              videos.indexOf(
+                oldActiveVideoElement,
+              )
+            }`,
+          )
+        }, 500) // pause after 0.5 s so decode pipeline stays warm during the swap frame
+      }
+
+      // Update current video state
+      currentVideoIndex = plannedVideoIndex
+      // visible play time excludes the preroll seconds already consumed while hidden
+      switchDuration = plannedDuration - PREROLL_SECONDS
+      timeSinceLastSwitch = 0 // Reset timer for the new video
+
+      console.log(`[${new Date().toLocaleTimeString()}] Swapped to video ${currentVideoIndex}.`)
+      console.log(`New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
+
+      const candidateForNext = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
+
+      prepareNextVideo(candidateForNext).then((preparedIdx) => {
+        nextVideoIndex = preparedIdx
+        if (preparedIdx === -1) console.warn(`[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
+      })
+    } catch (e) {
+      console.error(`[${new Date().toLocaleTimeString()}] Error playing or timeout for video ${plannedVideoIndex} during swap: `, e)
+      nextVideoIndex = -1 // Force re-preparation of a (potentially different) video
+    }
   }
 
   /**
@@ -141,36 +271,25 @@ export const createVideoCycle = async (
   const loadVideos = async () => {
     try {
       console.log('Loading video backgrounds...')
-
-      // Path to the video manifest
       const manifestPath = `${VIDEO_CYCLE_CONFIG.videos.path}manifest.json`
-
-      // Fetch the manifest
       let videoFiles: string[] = []
 
       try {
         const response = await fetch(manifestPath)
-        if (!response.ok) {
-          throw new Error(`Failed to fetch manifest: ${response.status} ${response.statusText}`)
-        }
+
+        if (!response.ok) throw new Error(`Failed to fetch manifest: ${response.status} ${response.statusText}`)
 
         const manifest = await response.json()
-        if (manifest && manifest.videos && Array.isArray(manifest.videos)) {
-          videoFiles = manifest.videos.map((video: any) => {
-            if (typeof video === 'string') {
-              return video
-            } else if (video && video.file) {
-              return video.file
-            }
+
+        if (Array.isArray(manifest)) {
+          videoFiles = manifest.map((video: any) => {
+            if (typeof video === 'string') return video
+            else if (video && video.file) return video.file
             return null
           }).filter(Boolean)
         }
       } catch (error) {
         console.error('Error loading video manifest:', error)
-        console.warn('Falling back to default video')
-
-        // Fallback to a single default video if available
-        videoFiles = ['default.webm']
       }
 
       if (videoFiles.length === 0) {
@@ -207,26 +326,44 @@ export const createVideoCycle = async (
         recentVideoIndices = [currentVideoIndex] // Initialize recent indices
 
         // Set initial texture on active buffer
-        activeBuffer.material.map = videoTextures[currentVideoIndex]
-        activeBuffer.material.opacity = currentOpacity
-        activeBuffer.material.needsUpdate = true
+        const initialVideo = videos[currentVideoIndex]
+        const initialTexture = videoTextures[currentVideoIndex]
 
-        if (activeBuffer.material.map) {
-          console.log('✅ Video texture assigned to material for initial video')
+        activeBuffer.material.map = initialTexture
+        activeBuffer.material.opacity = currentOpacity // Make the initial active buffer visible
+        activeBuffer.material.needsUpdate = true
+        console.log('✅ Video texture assigned to material for initial video')
+
+        // Ensure we have a video and texture to play
+        if (initialVideo && initialTexture) {
+          try {
+            const startTime = await seekToRandomPosition(initialVideo, VIDEO_CYCLE_CONFIG.cycling.minVideoLength)
+            initialVideo.currentTime = startTime
+            await initialVideo.play()
+            console.log(
+              `[${new Date().toLocaleTimeString()}] Initial video ${currentVideoIndex} started at ${startTime.toFixed(2)}s`,
+            )
+          } catch (e) {
+            console.error(`[${new Date().toLocaleTimeString()}] Error starting initial video ${currentVideoIndex}:`, e)
+          }
         } else {
-          console.warn('❌ Video texture NOT assigned to material for initial video')
+          // This case should ideally not be reached if videos & videoTextures are populated
+          console.warn('❌ Initial video or texture missing, cannot start playback.')
         }
 
         console.log(`Initial video set to ${currentVideoIndex}`)
 
         // Prepare next video on hidden buffer if we have more than one video
         if (videos.length > 1) {
-          nextVideoIndex = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
-          await prepareNextVideo(nextVideoIndex)
+          const candidateIndex = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
+          nextVideoIndex = await prepareNextVideo(candidateIndex) // Store the result
+          if (nextVideoIndex === -1) {
+            console.warn(
+              `[${new Date().toLocaleTimeString()}] Initial prepareNextVideo failed to find a video. Cycling may be impaired.`,
+            )
+          }
         }
-      } else {
-        console.warn('No videos could be loaded from the specified directory')
-      }
+      } else console.warn('No videos could be loaded from the specified directory')
     } catch (error) {
       console.error('Error loading video backgrounds:', error)
     }
@@ -235,57 +372,91 @@ export const createVideoCycle = async (
   /**
    * Update function called every frame
    */
-  const update = (delta: number) => {
+  const update = async (delta: number) => {
     if (!VIDEO_CYCLE_CONFIG.enabled || videos.length < 2) return
 
     // Check if it's time to switch videos
     timeSinceLastSwitch += delta
 
+    // Ensure preroll requirement met
+    const prerollTimeMet =
+      hiddenBuffer._playStartTime !== undefined && Date.now() - hiddenBuffer._playStartTime >= PREROLL_SECONDS * 1000
+
+    // Make sure the hidden video has actually advanced in playback (decoded frames)
+    let prerollProgressMet = false
+    const hiddenVideoTex = hiddenBuffer.material.map as THREE.VideoTexture | null
+    if (hiddenVideoTex) {
+      const hv = hiddenVideoTex.image as HTMLVideoElement
+      if (!isNaN(hv.currentTime) && hiddenBuffer._plannedStartTime !== undefined) {
+        prerollProgressMet = hv.currentTime - hiddenBuffer._plannedStartTime >= PREROLL_MIN_PROGRESS
+      }
+    }
+
+    const prerollMet = prerollTimeMet && prerollProgressMet
+
+    // Debug
+    if (!prerollMet && prerollTimeMet && !prerollProgressMet) {
+      console.log(
+        '⏳ preroll: time met but video progress insufficient',
+        ((hiddenVideoTex?.image as HTMLVideoElement | undefined)?.currentTime ?? 0).toFixed(2),
+        'planned',
+        hiddenBuffer._plannedStartTime?.toFixed(2),
+      )
+    }
+
+    if (!prerollMet) return
+
     if (timeSinceLastSwitch >= switchDuration) {
-      // Swap buffers to show the already-prepared video
-      swapBuffers()
+      if (nextVideoIndex !== -1 && nextVideoIndex !== currentVideoIndex) {
+        // Swap buffers to show the already-prepared video
+        await swapBuffers() // Await the swap, as it now involves async play()
 
-      // Update recent video indices
-      recentVideoIndices.unshift(currentVideoIndex)
-      if (recentVideoIndices.length > VIDEO_CYCLE_CONFIG.cycling.antiRepeat) {
-        recentVideoIndices.pop()
-      }
+        // Update recent video indices
+        recentVideoIndices.unshift(nextVideoIndex) // Use nextVideoIndex as it's now current
+        if (recentVideoIndices.length > VIDEO_CYCLE_CONFIG.cycling.antiRepeat) recentVideoIndices.pop()
 
-      // Update current index
-      currentVideoIndex = nextVideoIndex
+        currentVideoIndex = nextVideoIndex
+        timeSinceLastSwitch = 0
 
-      // Reset timer
-      timeSinceLastSwitch = 0
-      switchDuration = getRandomSwitchDuration()
+        console.log(`[${new Date().toLocaleTimeString()}] Switched to video ${currentVideoIndex}.`)
+        console.log(`New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
 
-      // Log the switch
-      console.log(`Switched to video ${currentVideoIndex}, next switch in ${switchDuration.toFixed(2)}s`)
+        const candidateForNext = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
 
-      // Find next video to prepare
-      let attempts = 0
-      const maxAttempts = 10
-      let foundNext = false
+        prepareNextVideo(candidateForNext).then((preparedIdx) => {
+          nextVideoIndex = preparedIdx
+          if (preparedIdx === -1) console.warn(`[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
+        })
+      } else if (nextVideoIndex === -1) {
+        console.warn(
+          `[${new Date().toLocaleTimeString()}] Time to switch, but nextVideoIndex is -1 (preparation failed). Attempting to re-prepare.`,
+        )
+        timeSinceLastSwitch = 0 // Reset timer to avoid rapid re-attempts if prep is slow
+        const candidateForNextAfterFailure = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
+        prepareNextVideo(candidateForNextAfterFailure).then((preparedIdx) => {
+          nextVideoIndex = preparedIdx
+        })
+      } else {
+        // This case (nextVideoIndex === currentVideoIndex) should ideally not happen if getNextVideoIndex and anti-repeat work correctly.
+        // Or it could mean only one video is loaded.
+        // Reset timer and try to prepare a different video if possible.
+        timeSinceLastSwitch = 0
+        if (videos.length > 1) {
+          console.warn(
+            `[${
+              new Date().toLocaleTimeString()
+            }] Time to switch, but nextVideoIndex (${nextVideoIndex}) is same as current (${currentVideoIndex}). Attempting to re-prepare.`,
+          )
+          const candidateForNextSameIndex = getNextVideoIndex(
+            currentVideoIndex,
+            [...recentVideoIndices, currentVideoIndex],
+            videos.length,
+          )
 
-      // Try to find a ready video that's different from recent ones
-      while (!foundNext && attempts < maxAttempts) {
-        // Select next video avoiding recent ones
-        const candidateIndex = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
-
-        // Check if it's ready
-        if (checkVideoReady(candidateIndex)) {
-          nextVideoIndex = candidateIndex
-          foundNext = true
-
-          // Prepare the selected video on the hidden buffer
-          prepareNextVideo(nextVideoIndex)
+          prepareNextVideo(candidateForNextSameIndex).then((preparedIdx) => {
+            nextVideoIndex = preparedIdx
+          })
         }
-
-        attempts++
-      }
-
-      // If we couldn't find a ready video, try again next frame
-      if (!foundNext) {
-        console.warn('Could not find a ready video for next switch')
       }
     }
   }
@@ -297,11 +468,9 @@ export const createVideoCycle = async (
     // Remove event listeners
     globalThis.removeEventListener('resize', handleResize)
 
-    // Remove both buffer meshes
+    // Remove buffer meshes
     scene.remove(frontBuffer.mesh)
     scene.remove(backBuffer.mesh)
-
-    // Dispose geometries and materials
     frontBuffer.geometry.dispose()
     frontBuffer.material.dispose()
     backBuffer.geometry.dispose()

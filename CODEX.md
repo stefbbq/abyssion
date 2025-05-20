@@ -129,15 +129,6 @@ Building a modern band website called "abyssion" with interactive elements and m
 - No tangled dependencies or init order issues
 
 
-## 🧰 Optional Libraries
-
-| Purpose          | Lib        |
-|------------------|------------|
-| Validation       | `zod`      |
-| Functional core  | `rambda`   |
-| State mgmt (UI)  | `valtio` or `signals` |
-| GL renderer      | `three`    |
-
 
 ## 🚫 Anti-Patterns
 

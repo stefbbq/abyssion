@@ -4,7 +4,6 @@
  * Custom shader implementation for the electric logo effect
  */
 
-import type { Color, ShaderMaterial, Texture } from 'three'
 import type { ShaderParams } from './types.ts'
 
 // Vertex shader

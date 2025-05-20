@@ -88,9 +88,7 @@ export const createPostProcessing = async (
     vertexShader: sharpeningVertexShader,
     fragmentShader: sharpeningFragmentShader,
   })
-  if (POST_PROCESSING_CONFIG.sharpening.enabled) {
-    composer.addPass(sharpeningPass)
-  }
+  if (POST_PROCESSING_CONFIG.sharpening.enabled) composer.addPass(sharpeningPass)
 
   /**
    * FinalPass
