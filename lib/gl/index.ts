@@ -1,4 +1,5 @@
 import type { InitOptions, RendererState } from './types.ts'
+import { log, lc } from '../logger/index.ts'
 import { DEFAULT_BLOOM_PARAMS, PLANE_HEIGHT, PLANE_WIDTH, RENDERER_CONFIG } from './scene/config.ts'
 import { createScene } from './scene/createScene.ts'
 import { createCamera } from './scene/createCamera.ts'
@@ -18,7 +19,7 @@ import { startAnimationLoop } from './animation/AnimationLoop.ts'
 /**
  * Initialize the Logo3D renderer
  */
-export const initLogo3D = async (options: InitOptions) => {
+export const initGL = async (options: InitOptions) => {
   const { width, height, outlineTexturePath, stencilTexturePath, container } = options
 
   // We need to dynamically import three.js since it's a client-side only library
@@ -33,15 +34,8 @@ export const initLogo3D = async (options: InitOptions) => {
   let debugOverlay: DebugOverlay | undefined
   let controls: any = undefined
 
-  // Add video background if enabled
+  // Add video background
   const videoBackground = await addVideoBackground(THREE, scene, renderer, camera)
-  const rendererState: RendererState = {
-    scene,
-    camera,
-    renderer,
-    composer: undefined,
-    videoBackground,
-  }
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
@@ -166,9 +160,7 @@ export const initLogo3D = async (options: InitOptions) => {
 
   // Show camera and plane Zs in debug panel
   function updateDebugInfo() {
-    let planesZ = state.planes
-      ? state.planes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>')
-      : ''
+    let planesZ = state.planes ? state.planes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>') : ''
     debugOverlay?.setDebugInfo(
       `<b>Camera Z:</b> ${camera.position.z.toFixed(3)}<br>${planesZ}`,
     )
@@ -183,11 +175,11 @@ export const initLogo3D = async (options: InitOptions) => {
     stencilTexturePath,
     (texture: any) => {
       // Just log basic success message
-      console.log('Stencil texture loaded successfully')
+      log(lc.GL, 'Stencil texture loaded successfully')
     },
     undefined,
     (error: any) => {
-      console.error('Error loading stencil texture:', error)
+      log.error(lc.GL, 'Error loading stencil texture:', error)
     },
   )
 
@@ -196,11 +188,11 @@ export const initLogo3D = async (options: InitOptions) => {
     outlineTexturePath,
     (texture: any) => {
       // Just log basic success message
-      console.log('Outline texture loaded successfully')
+      log(lc.GL, 'Outline texture loaded successfully')
     },
     undefined,
     (error: any) => {
-      console.error('Error loading outline texture:', error)
+      log.error(lc.GL, 'Error loading outline texture:', error)
     },
   )
 
@@ -293,7 +285,7 @@ export const initLogo3D = async (options: InitOptions) => {
 
     // Defensive check and debug logging for overlay rendering
     if (!uiLayer || !uiLayer.scene || !uiLayer.camera) {
-      console.warn('uiLayer, scene, or camera is undefined:', {
+      log.warn(lc.GL, 'uiLayer, scene, or camera is undefined:', {
         uiLayer,
         scene: uiLayer?.scene,
         camera: uiLayer?.camera,
@@ -304,7 +296,7 @@ export const initLogo3D = async (options: InitOptions) => {
     try {
       renderer.render(uiLayer.scene, uiLayer.camera)
     } catch (e) {
-      console.error('Error rendering UI overlay:', e, { uiLayer, scene: uiLayer.scene, camera: uiLayer.camera })
+      log.error(lc.GL, 'Error rendering UI overlay:', e, { uiLayer, scene: uiLayer.scene, camera: uiLayer.camera })
     }
     renderer.autoClear = true // Restore default
   }

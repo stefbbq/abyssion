@@ -1,4 +1,3 @@
-import { Fragment, h } from 'preact'
 import { Head } from '$fresh/runtime.ts'
 import Logo3D from '@islands/Home.tsx'
 import { IconBrandSoundcloud } from 'https://esm.sh/@tabler/icons-preact@2.30.0'

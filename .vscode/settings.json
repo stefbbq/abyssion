@@ -15,5 +15,9 @@
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
   "css.customData": [".vscode/tailwind.json"],
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "node_modules": true,
+    "_fresh": true
+  }
 }

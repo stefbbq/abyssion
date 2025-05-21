@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks'
-import { initLogo3D, type InitOptions } from '@libgl/index.ts'
+import { initGL, type InitOptions } from '@libgl/index.ts'
 
 type Props = {
   width?: number
@@ -17,7 +17,7 @@ export default function Home({ width = 500, height = 500 }: Props) {
   useEffect(() => {
     if (!containerRef.current) return
 
-    // Initialize with configuration
+    // Initialize GL environment
     const options: InitOptions = {
       width,
       height,
@@ -26,11 +26,18 @@ export default function Home({ width = 500, height = 500 }: Props) {
       container: containerRef.current,
     }
 
-    // Call renderer init and store cleanup function
-    const cleanup = initLogo3D(options)
+    let cleanupFunction: (() => void) | undefined
 
-    // Return cleanup function to handle unmounting
-    return cleanup
+    const initialize = async () => {
+      const cleanup = await initGL(options)
+      if (typeof cleanup === 'function') cleanupFunction = cleanup
+    }
+
+    initialize()
+
+    return () => {
+      if (cleanupFunction) cleanupFunction()
+    }
   }, [width, height])
 
   return (

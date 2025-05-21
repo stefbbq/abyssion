@@ -4,10 +4,7 @@
  */
 export const debugVideoAccess = async (): Promise<string | null> => {
   console.log('Debugging video access...')
-  // Skipping legacy testPaths for video detection. Using manifest-based video loading.
   console.log('[VideoBackground] Skipping legacy test paths. Will use manifest-based video loading only.')
-
-  // Optionally, you can still test static file serving with an image
   console.log('Testing static file access with favicon.ico as a general static file check...')
 
   // Try to load an image from various paths to test general static file access

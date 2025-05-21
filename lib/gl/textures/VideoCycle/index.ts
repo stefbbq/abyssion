@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { lc, log } from '@lib/logger/index.ts'
 import { VIDEO_CYCLE_CONFIG } from './config.ts'
 import { debugVideoAccess } from './utils/debugVideoAccess.ts'
 import { createVideoPlane } from './utils/createVideoPlane.ts'
@@ -27,11 +28,11 @@ export const createVideoCycle = async (
   const workingPath = await debugVideoAccess()
 
   if (workingPath) {
-    console.log(`Using detected working path: ${workingPath}`)
+    log(lc.GL, `Using detected working path: ${workingPath}`)
     VIDEO_CYCLE_CONFIG.videos.path = workingPath
   } else {
-    console.warn('⚠️ Could not detect a working path for videos. Server configuration issue likely.')
-    console.warn('Try checking: 1) CORS settings 2) Static file serving 3) MIME types for .webm')
+    log.warn(lc.GL, '⚠️ Could not detect a working path for videos. Server configuration issue likely.')
+    log.warn(lc.GL, 'Try checking: 1) CORS settings 2) Static file serving 3) MIME types for .webm')
   }
 
   const videos: HTMLVideoElement[] = []
@@ -95,13 +96,16 @@ export const createVideoCycle = async (
       const video = videos[videoIndex]
 
       if (!video || !texture) {
-        console.warn(`Video or texture at index ${videoIndex} is not available`)
+        log.warn(lc.GL_TEXTURES, `Video or texture at index ${videoIndex} is not available`)
         videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
         attempts++
         continue
       }
 
-      console.log(`Trying to prepare video ${videoIndex}, readyState: ${video.readyState}, rez: ${video.videoWidth}x${video.videoHeight}`)
+      log(
+        lc.GL_TEXTURES,
+        `Trying to prepare video ${videoIndex}, readyState: ${video.readyState}, rez: ${video.videoWidth}x${video.videoHeight}`,
+      )
 
       // Check readiness
       if (video.readyState < 3 || isNaN(video.duration) || video.videoWidth <= 0) {
@@ -151,11 +155,12 @@ export const createVideoCycle = async (
           const prevVideoIdx = videoTextures.indexOf(previousTexture)
           if (prevVideoIdx !== -1 && videos[prevVideoIdx]) {
             videos[prevVideoIdx].pause()
-            console.log(`[${new Date().toLocaleTimeString()}] Paused previous hidden video at index ${prevVideoIdx}`)
+            log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Paused previous hidden video at index ${prevVideoIdx}`)
           }
         }
 
-        console.log(
+        log(
+          lc.GL_TEXTURES,
           `[${new Date().toLocaleTimeString()}] Prepared next video index ${videoIndex}: will start at ${startTime.toFixed(2)}s, play for ${
             duration.toFixed(2)
           }s`,
@@ -167,7 +172,7 @@ export const createVideoCycle = async (
         found = true
         break
       } catch (error) {
-        console.error(`[${new Date().toLocaleTimeString()}] Error seeking to random position:`, error)
+        log.error(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Error seeking to random position:`, error)
         videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
         attempts++
         continue
@@ -175,7 +180,7 @@ export const createVideoCycle = async (
     }
 
     if (!found) {
-      console.error('Failed to prepare any valid next video')
+      log.error(lc.GL, 'Failed to prepare any valid next video')
       return -1 // Indicate failure
     }
     return videoIndex
@@ -213,7 +218,10 @@ export const createVideoCycle = async (
         ),
       ])
 
-      console.log(`[${new Date().toLocaleTimeString()}] Play initiated for video ${plannedVideoIndex} at ${plannedStartTime.toFixed(2)}s`)
+      log(
+        lc.GL_TEXTURES,
+        `[${new Date().toLocaleTimeString()}] Play initiated for video ${plannedVideoIndex} at ${plannedStartTime.toFixed(2)}s`,
+      )
 
       // Capture reference to the video in the currently active buffer (which will become hidden) so we can pause it after the swap
       const oldActiveVideoTexture = activeBuffer.material.map as THREE.VideoTexture | null
@@ -234,7 +242,8 @@ export const createVideoCycle = async (
       if (oldActiveVideoElement && !oldActiveVideoElement.paused) {
         setTimeout(() => {
           oldActiveVideoElement.pause()
-          console.log(
+          log(
+            lc.GL_TEXTURES,
             `[${new Date().toLocaleTimeString()}] (delayed) Paused video in hidden buffer (previously active): ${
               videos.indexOf(
                 oldActiveVideoElement,
@@ -250,17 +259,21 @@ export const createVideoCycle = async (
       switchDuration = plannedDuration - PREROLL_SECONDS
       timeSinceLastSwitch = 0 // Reset timer for the new video
 
-      console.log(`[${new Date().toLocaleTimeString()}] Swapped to video ${currentVideoIndex}.`)
-      console.log(`New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
+      log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Swapped to video ${currentVideoIndex}.`)
+      log(lc.GL_TEXTURES, `New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
 
       const candidateForNext = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
 
       prepareNextVideo(candidateForNext).then((preparedIdx) => {
         nextVideoIndex = preparedIdx
-        if (preparedIdx === -1) console.warn(`[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
+        if (preparedIdx === -1) log.warn(lc.GL, `[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
       })
     } catch (e) {
-      console.error(`[${new Date().toLocaleTimeString()}] Error playing or timeout for video ${plannedVideoIndex} during swap: `, e)
+      log.error(
+        lc.GL_TEXTURES,
+        `[${new Date().toLocaleTimeString()}] Error playing or timeout for video ${plannedVideoIndex} during swap: `,
+        e,
+      )
       nextVideoIndex = -1 // Force re-preparation of a (potentially different) video
     }
   }
@@ -270,7 +283,7 @@ export const createVideoCycle = async (
    */
   const loadVideos = async () => {
     try {
-      console.log('Loading video backgrounds...')
+      log(lc.GL_TEXTURES, 'Loading video backgrounds...')
       const manifestPath = `${VIDEO_CYCLE_CONFIG.videos.path}manifest.json`
       let videoFiles: string[] = []
 
@@ -297,12 +310,12 @@ export const createVideoCycle = async (
         return
       }
 
-      console.log(`Found ${videoFiles.length} videos in manifest`)
+      log(lc.GL_TEXTURES, `Found ${videoFiles.length} videos in manifest`)
 
       // Try to load each video
       for (const file of videoFiles) {
         const videoPath = `${VIDEO_CYCLE_CONFIG.videos.path}${file}`
-        console.log(`Attempting to load video: ${videoPath}`)
+        log(lc.GL_TEXTURES, `Attempting to load video: ${videoPath}`)
 
         const { video, texture, success } = await loadVideo(videoPath)
 
@@ -312,7 +325,7 @@ export const createVideoCycle = async (
         }
       }
 
-      console.log(`Successfully loaded ${videos.length} of ${videoFiles.length} videos`)
+      log(lc.GL_TEXTURES, `Successfully loaded ${videos.length} of ${videoFiles.length} videos`)
 
       if (videos.length === 0) {
         console.error('Failed to load any videos from any paths')
@@ -332,7 +345,7 @@ export const createVideoCycle = async (
         activeBuffer.material.map = initialTexture
         activeBuffer.material.opacity = currentOpacity // Make the initial active buffer visible
         activeBuffer.material.needsUpdate = true
-        console.log('✅ Video texture assigned to material for initial video')
+        log(lc.GL, '✅ Video texture assigned to material for initial video')
 
         // Ensure we have a video and texture to play
         if (initialVideo && initialTexture) {
@@ -340,32 +353,31 @@ export const createVideoCycle = async (
             const startTime = await seekToRandomPosition(initialVideo, VIDEO_CYCLE_CONFIG.cycling.minVideoLength)
             initialVideo.currentTime = startTime
             await initialVideo.play()
-            console.log(
-              `[${new Date().toLocaleTimeString()}] Initial video ${currentVideoIndex} started at ${startTime.toFixed(2)}s`,
-            )
+            log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Initial video ${currentVideoIndex} began at ${startTime.toFixed(2)}s`)
           } catch (e) {
-            console.error(`[${new Date().toLocaleTimeString()}] Error starting initial video ${currentVideoIndex}:`, e)
+            log.error(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Error starting initial video ${currentVideoIndex}:`, e)
           }
         } else {
           // This case should ideally not be reached if videos & videoTextures are populated
-          console.warn('❌ Initial video or texture missing, cannot start playback.')
+          log.warn(lc.GL_TEXTURES, '❌ Initial video or texture missing, cannot start playback.')
         }
 
-        console.log(`Initial video set to ${currentVideoIndex}`)
+        log(lc.GL_TEXTURES, `Initial video set to ${currentVideoIndex}`)
 
         // Prepare next video on hidden buffer if we have more than one video
         if (videos.length > 1) {
           const candidateIndex = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
           nextVideoIndex = await prepareNextVideo(candidateIndex) // Store the result
           if (nextVideoIndex === -1) {
-            console.warn(
+            log.warn(
+              lc.GL_TEXTURES,
               `[${new Date().toLocaleTimeString()}] Initial prepareNextVideo failed to find a video. Cycling may be impaired.`,
             )
           }
         }
-      } else console.warn('No videos could be loaded from the specified directory')
+      } else log.warn(lc.GL_TEXTURES, 'No videos could be loaded from the specified directory')
     } catch (error) {
-      console.error('Error loading video backgrounds:', error)
+      log.error(lc.GL_TEXTURES, 'Error loading video backgrounds:', error)
     }
   }
 
@@ -379,8 +391,7 @@ export const createVideoCycle = async (
     timeSinceLastSwitch += delta
 
     // Ensure preroll requirement met
-    const prerollTimeMet =
-      hiddenBuffer._playStartTime !== undefined && Date.now() - hiddenBuffer._playStartTime >= PREROLL_SECONDS * 1000
+    const prerollTimeMet = hiddenBuffer._playStartTime !== undefined && Date.now() - hiddenBuffer._playStartTime >= PREROLL_SECONDS * 1000
 
     // Make sure the hidden video has actually advanced in playback (decoded frames)
     let prerollProgressMet = false
@@ -396,7 +407,8 @@ export const createVideoCycle = async (
 
     // Debug
     if (!prerollMet && prerollTimeMet && !prerollProgressMet) {
-      console.log(
+      log(
+        lc.GL_TEXTURES,
         '⏳ preroll: time met but video progress insufficient',
         ((hiddenVideoTex?.image as HTMLVideoElement | undefined)?.currentTime ?? 0).toFixed(2),
         'planned',
@@ -418,17 +430,20 @@ export const createVideoCycle = async (
         currentVideoIndex = nextVideoIndex
         timeSinceLastSwitch = 0
 
-        console.log(`[${new Date().toLocaleTimeString()}] Switched to video ${currentVideoIndex}.`)
-        console.log(`New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
+        log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Switched to video ${currentVideoIndex}.`)
+        log(lc.GL_TEXTURES, `New switchDuration: ${switchDuration.toFixed(2)}s (from hiddenBuffer preparation)`)
 
         const candidateForNext = getNextVideoIndex(currentVideoIndex, recentVideoIndices, videos.length)
 
         prepareNextVideo(candidateForNext).then((preparedIdx) => {
           nextVideoIndex = preparedIdx
-          if (preparedIdx === -1) console.warn(`[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
+          if (preparedIdx === -1) {
+            log.warn(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] prepareNextVideo failed. Cycling may pause/skip.`)
+          }
         })
       } else if (nextVideoIndex === -1) {
-        console.warn(
+        log.warn(
+          lc.GL_TEXTURES,
           `[${new Date().toLocaleTimeString()}] Time to switch, but nextVideoIndex is -1 (preparation failed). Attempting to re-prepare.`,
         )
         timeSinceLastSwitch = 0 // Reset timer to avoid rapid re-attempts if prep is slow
@@ -442,7 +457,8 @@ export const createVideoCycle = async (
         // Reset timer and try to prepare a different video if possible.
         timeSinceLastSwitch = 0
         if (videos.length > 1) {
-          console.warn(
+          log.warn(
+            lc.GL_TEXTURES,
             `[${
               new Date().toLocaleTimeString()
             }] Time to switch, but nextVideoIndex (${nextVideoIndex}) is same as current (${currentVideoIndex}). Attempting to re-prepare.`,
