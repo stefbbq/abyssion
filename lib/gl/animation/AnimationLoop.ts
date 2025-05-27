@@ -1,7 +1,11 @@
 import type { RendererState } from '../types.ts'
-import { ANIMATION_CONFIG, USER_REACTIVITY } from './config.ts'
-import { DEFAULT_BLOOM_PARAMS, POST_PROCESSING_CONFIG } from '../scene/config.ts'
+import animationConfig from '../../configAnimation.json' with { type: 'json' }
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import { createLogoLayer } from '../layers/index.ts'
+import ms from 'ms'
+
+const { animationConfig: animation, userReactivity } = animationConfig
+const { postProcessingConfig } = sceneConfig
 
 // Get random interval between 1-4 seconds
 const getRandomInterval = () => 1000 + Math.random() * 3000
@@ -15,8 +19,8 @@ let lastRegenerateTime = 0
 let nextRegenerateInterval = getRandomInterval()
 
 // Setup mouse tracking
-export const setupMouseTracking = (container: HTMLElement) => {
-  const { MOUSE_COEFFICIENT } = USER_REACTIVITY
+export const setupMouseTracking = () => {
+  const { mouseCoefficient } = userReactivity
 
   const handleMouseMove = (event: MouseEvent) => {
     // Calculate normalized mouse position (-1 to 1)
@@ -24,8 +28,8 @@ export const setupMouseTracking = (container: HTMLElement) => {
     mouseY = (event.clientY / globalThis.innerHeight) * 2 - 1
 
     // Calculate target rotation based on mouse position
-    targetRotationX = mouseY * MOUSE_COEFFICIENT
-    targetRotationY = mouseX * MOUSE_COEFFICIENT
+    targetRotationX = mouseY * mouseCoefficient
+    targetRotationY = mouseX * mouseCoefficient
   }
 
   // Add mouse move listener
@@ -84,7 +88,7 @@ export const animateRandomLayer = (plane: any, layer: any, time: number, index: 
           plane.position.x = Math.sin(time * 0.4 + index * 0.7) * movementScale
           plane.position.y = Math.cos(time * 0.3 + index * 0.9) * movementScale * 0.8
         }
-      }, 50 + Math.random() * 100)
+      }, ms('50ms') + Math.random() * ms('100ms'))
     }
 
     // Occasional opacity flickers for random layers
@@ -97,7 +101,7 @@ export const animateRandomLayer = (plane: any, layer: any, time: number, index: 
         if (plane && plane.material.uniforms) {
           plane.material.uniforms.opacity.value = originalOpacity
         }
-      }, 50 + Math.random() * 150)
+      }, ms('50ms') + Math.random() * ms('150ms'))
     }
   }
 }
@@ -137,32 +141,30 @@ export const updateLayerShaderTime = (plane: any, layer: any, time: number) => {
 export const updateFinalPassEffects = (finalPass: any, time: number) => {
   if (finalPass.uniforms) {
     // Make sure we use modulated time to prevent accumulation
-    finalPass.uniforms.time.value = time % 1000
+    finalPass.uniforms.time.value = time % ms('1000ms')
 
     // Basic protection to prevent time from growing too large
-    if (time > 100000) time = 0
+    if (time > ms('100s')) time = 0
 
     const {
-      CHROMA_GLITCH_PROBABILITY,
-      CHROMA_GLITCH_INTENSITY_MIN,
-      CHROMA_GLITCH_INTENSITY_MAX,
-      CHROMA_GLITCH_RESET_DELAY,
-    } = ANIMATION_CONFIG
+      chromaGlitchProbability,
+      chromaGlitchIntensityMin,
+      chromaGlitchIntensityMax,
+      chromaGlitchResetDelay,
+    } = animation
+
+    const { finalPass: { chromaStrength: defaultChromaStrength } } = postProcessingConfig
 
     // Occasionally increase chromatic aberration for a glitch effect
-    if (Math.random() < CHROMA_GLITCH_PROBABILITY) {
+    if (Math.random() < chromaGlitchProbability) {
       // Store original value for reference
-      const defaultChromaStrength = POST_PROCESSING_CONFIG.finalPass.chromaStrength
       const currentChromaStrength = finalPass.uniforms.chromaStrength.value
 
       // If the current value is already significantly higher than default,
       // don't increase it further to prevent accumulated growth
-      if (currentChromaStrength > defaultChromaStrength * 2) {
-        return
-      }
+      if (currentChromaStrength > defaultChromaStrength * 2) return
 
-      const intensityMultiplier = CHROMA_GLITCH_INTENSITY_MIN +
-        Math.random() * (CHROMA_GLITCH_INTENSITY_MAX - CHROMA_GLITCH_INTENSITY_MIN)
+      const intensityMultiplier = chromaGlitchIntensityMin + Math.random() * (chromaGlitchIntensityMax - chromaGlitchIntensityMin)
 
       // Apply the effect but with a maximum cap
       const newValue = defaultChromaStrength * intensityMultiplier
@@ -170,15 +172,12 @@ export const updateFinalPassEffects = (finalPass: any, time: number) => {
 
       // Reset after a short delay
       setTimeout(() => {
-        if (finalPass.uniforms) {
-          // Reset to the default value, not the original which might already be elevated
-          finalPass.uniforms.chromaStrength.value = defaultChromaStrength
-        }
-      }, CHROMA_GLITCH_RESET_DELAY)
+        if (finalPass.uniforms) finalPass.uniforms.chromaStrength.value = defaultChromaStrength
+      }, chromaGlitchResetDelay)
     } else if (Math.random() < 0.001) {
       // Occasionally reset to default value even without a glitch
       // This provides recovery from any accumulated aberration
-      finalPass.uniforms.chromaStrength.value = POST_PROCESSING_CONFIG.finalPass.chromaStrength
+      finalPass.uniforms.chromaStrength.value = defaultChromaStrength
     }
   }
 }
@@ -192,23 +191,23 @@ let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
 export const updateBloomEffect = (bloomPass: any, _bloomParams: any, time: number) => {
   if (!bloomPass) return
   const {
-    BLOOM_PULSE_FREQUENCY,
-    BLOOM_PULSE_INTENSITY,
-    BLOOM_STRENGTH,
-    BLOOM_OVERRIDE_PROBABILITY,
-    BLOOM_OVERRIDE_INTENSITY,
-    BLOOM_OVERRIDE_DURATION_MIN,
-    BLOOM_OVERRIDE_DURATION_MAX,
-  } = ANIMATION_CONFIG
+    bloomPulseFrequency,
+    bloomPulseIntensity,
+    bloomStrength,
+    bloomOverrideProbability,
+    bloomOverrideIntensity,
+    bloomOverrideDurationMin,
+    bloomOverrideDurationMax,
+  } = animation
 
   // Handle override
-  if (!bloomOverrideActive && Math.random() < BLOOM_OVERRIDE_PROBABILITY) {
+  if (!bloomOverrideActive && Math.random() < bloomOverrideProbability) {
     bloomOverrideActive = true
-    bloomPass.strength = BLOOM_STRENGTH * BLOOM_OVERRIDE_INTENSITY
+    bloomPass.strength = bloomStrength * bloomOverrideIntensity
     if (bloomOverrideTimeout) clearTimeout(bloomOverrideTimeout)
+
     // Pick a random duration between min and max
-    const duration = BLOOM_OVERRIDE_DURATION_MIN +
-      Math.random() * (BLOOM_OVERRIDE_DURATION_MAX - BLOOM_OVERRIDE_DURATION_MIN)
+    const duration = bloomOverrideDurationMin + Math.random() * (bloomOverrideDurationMax - bloomOverrideDurationMin)
     bloomOverrideTimeout = setTimeout(() => {
       bloomOverrideActive = false
     }, duration)
@@ -216,31 +215,22 @@ export const updateBloomEffect = (bloomPass: any, _bloomParams: any, time: numbe
     return
   }
 
-  if (bloomOverrideActive) {
-    bloomPass.strength = BLOOM_STRENGTH * BLOOM_OVERRIDE_INTENSITY
-  } else {
-    bloomPass.strength = BLOOM_STRENGTH + Math.sin(time * BLOOM_PULSE_FREQUENCY) * BLOOM_PULSE_INTENSITY
-  }
+  if (bloomOverrideActive) bloomPass.strength = bloomStrength * bloomOverrideIntensity
+  else bloomPass.strength = bloomStrength + Math.sin(time * bloomPulseFrequency) * bloomPulseIntensity
 }
 
 /**
  * Update the dithering shader pass
  */
 export const updateDitheringPass = (ditheringPass: any, time: number) => {
-  if (ditheringPass.uniforms) {
-    // Update time uniform for animated noise pattern
-    ditheringPass.uniforms.time.value = time
-  }
+  if (ditheringPass.uniforms) ditheringPass.uniforms.time.value = time
 }
 
 /**
  * Update the sharpening pass if needed
  */
 export const updateSharpeningPass = (sharpeningPass: any, width: number, height: number) => {
-  if (sharpeningPass.uniforms && sharpeningPass.uniforms.resolution) {
-    // Update resolution if window size has changed
-    sharpeningPass.uniforms.resolution.value.set(width, height)
-  }
+  if (sharpeningPass.uniforms && sharpeningPass.uniforms.resolution) sharpeningPass.uniforms.resolution.value.set(width, height)
 }
 
 /**
@@ -248,11 +238,11 @@ export const updateSharpeningPass = (sharpeningPass: any, width: number, height:
  */
 export const startAnimationLoop = (state: RendererState) => {
   let time = 0
-  const { TIME_INCREMENT } = ANIMATION_CONFIG
+  const { timeIncrement } = animation
   let animationId: number
 
   // Set up mouse tracking
-  const cleanupMouseTracking = setupMouseTracking(state.renderer.domElement)
+  const cleanupMouseTracking = setupMouseTracking()
 
   // Create logo layer manager
   const logoLayer = createLogoLayer(state.THREE)
@@ -264,7 +254,7 @@ export const startAnimationLoop = (state: RendererState) => {
     }
     // Request next frame first and store the ID
     animationId = requestAnimationFrame(animate)
-    time += TIME_INCREMENT
+    time += timeIncrement
 
     // Update orbit controls
     state.controls.update()
@@ -275,7 +265,7 @@ export const startAnimationLoop = (state: RendererState) => {
     state.scene.rotation.y += (targetRotationY - state.scene.rotation.y) * 0.05
 
     // Update video background if present
-    if (state.videoBackground) state.videoBackground.update(TIME_INCREMENT)
+    if (state.videoBackground) state.videoBackground.update(timeIncrement)
 
     // Check if it's time to regenerate logo layers
     const currentTime = Date.now()
@@ -313,7 +303,7 @@ export const startAnimationLoop = (state: RendererState) => {
 
     // Update post-processing effects
     updateFinalPassEffects(state.finalPass, time)
-    updateBloomEffect(state.bloomPass, DEFAULT_BLOOM_PARAMS, time)
+    updateBloomEffect(state.bloomPass, sceneConfig.postProcessingConfig.bloom, time)
     updateDitheringPass(state.ditheringPass, time)
     updateSharpeningPass(state.sharpeningPass, state.renderer.domElement.width, state.renderer.domElement.height)
 

@@ -1,13 +1,12 @@
-import * as THREE from 'three'
 import { GeometricOptions } from '../GeometricLayer.ts'
-import { ORBITAL_PARTICLES_CONFIG } from '../config.ts'
+import { getOrbitalParticlesConfig } from '../config.ts'
 
 /**
- * Creates particle distributions along orbital paths
+ * creates particle distributions along orbital paths
  */
 export const createOrbitalParticles = (
   THREE: typeof import('three'),
-  options: GeometricOptions = ORBITAL_PARTICLES_CONFIG,
+  options: GeometricOptions = getOrbitalParticlesConfig(),
 ) => {
   const {
     radius = 1,

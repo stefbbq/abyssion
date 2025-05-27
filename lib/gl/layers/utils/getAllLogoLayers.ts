@@ -1,4 +1,4 @@
-import { STATIC_LOGO_LAYERS } from '../config.ts'
+import { getStaticLogoLayers } from '../config.ts'
 import { LogoLayer } from '../LogoLayer.ts'
 import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
 
@@ -6,11 +6,13 @@ import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
  * Get all logo layers (static + random), sorted by z-position
  */
 export const getAllLogoLayers = (THREE: typeof import('three')): LogoLayer[] => {
-  // Always keep the stencil layer from STATIC_LAYERS
-  const stencilLayer = STATIC_LOGO_LAYERS.find((layer) => layer.isStencil)
+  const staticLogoLayers = getStaticLogoLayers()
 
-  // Get non-stencil static layers
-  const staticLayers = STATIC_LOGO_LAYERS.filter((layer) => !layer.isStencil)
+  // always keep the stencil layer from static layers
+  const stencilLayer = staticLogoLayers.find((layer: LogoLayer) => layer.isStencil)
+
+  // get non-stencil static layers
+  const staticLayers = staticLogoLayers.filter((layer: LogoLayer) => !layer.isStencil)
 
   // Generate new random layers
   const randomLayers = createRandomLogoLayers(THREE)

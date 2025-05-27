@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { VIDEO_CYCLE_CONFIG } from '../config.ts'
+import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import ms from 'ms'
 
 /**
@@ -15,6 +15,7 @@ export const loadVideo = (path: string): Promise<{
   success: boolean
 }> => {
   return new Promise((resolve) => {
+    const { cycling: { playbackSpeed } } = videoCycleConfig
     const video = document.createElement('video')
 
     // Set video attributes
@@ -24,7 +25,7 @@ export const loadVideo = (path: string): Promise<{
     video.crossOrigin = 'anonymous'
     video.playsInline = true
     video.preload = 'auto'
-    video.playbackRate = VIDEO_CYCLE_CONFIG.cycling.playbackSpeed
+    video.playbackRate = playbackSpeed
 
     // Create a timeout for loading
     const timeout = setTimeout(() => {
@@ -74,11 +75,9 @@ export const loadVideo = (path: string): Promise<{
       })
     }
 
-    // Set up event listeners
+    // Set up event listeners and get loadin'
     video.addEventListener('canplay', handleCanPlay)
     video.addEventListener('error', handleError)
-
-    // Set source and load
     video.src = path
     video.load()
   })

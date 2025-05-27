@@ -1,0 +1,181 @@
+{
+  "geometricOptions": {
+    "dashedOrbits": {
+      "radius": 1,
+      "minRadius": 1,
+      "maxRadius": 2,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "minOpacity": 0.5,
+      "maxOpacity": 1,
+      "variationFactor": 1,
+      "linewidth": 1,
+      "count": 6,
+      "zPosition": -1
+    },
+    "concentricRings": {
+      "radius": 1,
+      "minRadius": 0.5,
+      "maxRadius": 1.5,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "opacity": 0.4,
+      "minOpacity": 0.1,
+      "maxOpacity": 1,
+      "segments": 128,
+      "variationFactor": 1,
+      "thickness": 0.01,
+      "count": 6
+    },
+    "celestialBodies": {
+      "radius": 1,
+      "minRadius": 0.5,
+      "maxRadius": 1.5,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "opacity": 0.8,
+      "minOpacity": 0.1,
+      "maxOpacity": 1,
+      "planarDistribution": false,
+      "variationFactor": 1,
+      "scale": 1
+    },
+    "orbitalGrids": {
+      "radius": 1,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "opacity": 0.15,
+      "variationFactor": 0.01
+    },
+    "orbitalMarkers": {
+      "radius": 1,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "opacity": 0.7,
+      "variationFactor": 1
+    },
+    "orbitalParticles": {
+      "radius": 1,
+      "height": 0.5,
+      "rotationAngle": 0,
+      "opacity": 0.4,
+      "variationFactor": 1,
+      "scale": 1
+    }
+  },
+  "staticLogoLayers": [
+    {
+      "isStencil": true,
+      "opacity": 1.0,
+      "zPos": 0,
+      "noiseScale": 0.4,
+      "noiseOffset": 1,
+      "noiseRate": 50,
+      "fps": 6,
+      "isRandom": false
+    },
+    {
+      "isStencil": false,
+      "opacity": 0.2,
+      "zPos": -0.1,
+      "noiseScale": 0.2,
+      "noiseOffset": 0.4,
+      "noiseRate": 0.1,
+      "fps": 12,
+      "isRandom": true
+    },
+    {
+      "isStencil": false,
+      "opacity": 0.8,
+      "zPos": 0.1,
+      "noiseScale": 4.0,
+      "noiseOffset": 0.2,
+      "noiseRate": 0.7,
+      "fps": 8,
+      "isRandom": true
+    },
+    {
+      "isStencil": false,
+      "opacity": 0.25,
+      "zPos": -0.4,
+      "noiseScale": 5.0,
+      "noiseOffset": 0.3,
+      "noiseRate": 1.3,
+      "fps": 2,
+      "isRandom": true
+    },
+    {
+      "isStencil": false,
+      "opacity": 0.3,
+      "zPos": 0.2,
+      "noiseScale": 1,
+      "noiseOffset": 0.5,
+      "noiseRate": 100,
+      "fps": 4,
+      "isRandom": true
+    }
+  ],
+  "randomLayerConfig": {
+    "minLayers": 5,
+    "maxAdditionalLayers": 6,
+    "cyanProbability": 0.4,
+    "magentaProbability": 0.4,
+    "opacityBase": 0.05,
+    "zBaseRange": 0.15,
+    "zVarianceBase": 0.1,
+    "frontBias": 0.7,
+    "noiseScaleBase": 1
+  },
+  "uiOverlayConfig": {
+    "cornerMargin": 60,
+    "crosshairSize": 20,
+    "crosshairLineThickness": 1,
+    "crosshairCenterRadius": 5,
+    "crosshairOpacity": 0.8,
+    "triangleOffset": 30,
+    "triangleSize": 10,
+    "triangleThickness": 1,
+    "triangleOpacity": 0.7,
+    "centralCircleRadius": 40,
+    "centralCircleSegments": 12,
+    "centralCircleGap": 0.1,
+    "centralCircleThickness": 2,
+    "centralCircleOpacity": 0.6,
+    "centerCrosshairSize": 15,
+    "centerCrosshairThickness": 0.5,
+    "centerCrosshairRadius": 2,
+    "centerCrosshairOpacity": 0.8,
+    "arcRadius": 60,
+    "arcSegments": 16,
+    "arcThickness": 1,
+    "arcStartOffset": 0.4,
+    "arcLength": 0.8,
+    "arcOpacity": 0.4,
+    "infoPanelBorderThickness": 2,
+    "infoPanelCornerRadius": 10,
+    "gridScaleFactor": 0.9,
+    "gridOpacity": 0.2,
+    "infoPanelConfig": [
+      { "xPosition": "center", "yPosition": "top", "margin": 50, "width": 200, "height": 60, "opacity": 0.3 },
+      { "xPosition": "left", "yPosition": "center", "margin": 90, "width": 120, "height": 200, "opacity": 0.3 },
+      { "xPosition": "right", "yPosition": "center", "margin": 90, "width": 120, "height": 200, "opacity": 0.3 },
+      { "xPosition": "center", "yPosition": "bottom", "margin": 50, "width": 200, "height": 60, "opacity": 0.3 }
+    ],
+    "hexagonConfig": {
+      "count": 6,
+      "radius": 15,
+      "thickness": 1,
+      "opacity": 0.3,
+      "distanceFactor": 0.4
+    }
+  },
+  "shapeLayerConfig": {
+    "radius": 1,
+    "height": 1,
+    "techShapesCount": 12,
+    "minDistance": 0.5,
+    "maxDistance": 2,
+    "rotationSpeed": 0.002,
+    "opacity": 0.2
+  }
+}

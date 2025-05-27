@@ -1,4 +1,4 @@
-import { DEFAULT_BLOOM_PARAMS, POST_PROCESSING_CONFIG } from './config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import {
   ditheringFragmentShader,
   ditheringVertexShader,
@@ -30,7 +30,7 @@ export const createPostProcessing = async (
   renderer: import('three').WebGLRenderer,
   width: number,
   height: number,
-  bloomParams: BloomParams = DEFAULT_BLOOM_PARAMS,
+  bloomParams: BloomParams = sceneConfig.postProcessingConfig.bloom,
 ) => {
   const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js')
   const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js')
@@ -62,7 +62,7 @@ export const createPostProcessing = async (
    * Adds film grain and scanlines to the rendered image, simulating the look of analog film and adding subtle movement and texture.
    * This enhances depth perception and reduces the digital "cleanliness" of the render.
    */
-  const { film } = POST_PROCESSING_CONFIG
+  const { film } = sceneConfig.postProcessingConfig
   const filmPass = new FilmPass(
     film.noiseIntensity,
     film.scanlineIntensity,
@@ -90,27 +90,29 @@ export const createPostProcessing = async (
    * Enhances fine details and edges in the image, counteracting any softness introduced by previous effects (like bloom or bokeh).
    * Helps keep the final result crisp and visually striking.
    */
+  const { sharpening } = sceneConfig.postProcessingConfig
   const sharpeningPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
-      sharpStrength: { value: POST_PROCESSING_CONFIG.sharpening.strength },
+      sharpStrength: { value: sharpening.strength },
       resolution: { value: new THREE.Vector2(width, height) },
     },
     vertexShader: sharpeningVertexShader,
     fragmentShader: sharpeningFragmentShader,
   })
-  if (POST_PROCESSING_CONFIG.sharpening.enabled) composer.addPass(sharpeningPass)
+  if (sharpening.enabled) composer.addPass(sharpeningPass)
 
   /**
    * FinalPass
    * Applies final color grading and chromatic aberration (subtle color fringing on edges) to give the render a unique visual signature.
    * This is the last "creative" pass before output.
    */
+  const { finalPass: finalPassConfig } = sceneConfig.postProcessingConfig
   const finalPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
       time: { value: 0 },
-      chromaStrength: { value: POST_PROCESSING_CONFIG.finalPass.chromaStrength },
+      chromaStrength: { value: finalPassConfig.chromaStrength },
     },
     vertexShader: finalPassVertexShader,
     fragmentShader: finalPassFragmentShader,
@@ -127,9 +129,9 @@ export const createPostProcessing = async (
     uniforms: {
       tDiffuse: { value: null },
       time: { value: 0 },
-      ditherStrength: { value: POST_PROCESSING_CONFIG.finalPass.ditherStrength },
-      ditherFrequency: { value: POST_PROCESSING_CONFIG.finalPass.ditherFrequency },
-      ditherAnimation: { value: POST_PROCESSING_CONFIG.finalPass.ditherAnimation },
+      ditherStrength: { value: finalPassConfig.ditherStrength },
+      ditherFrequency: { value: finalPassConfig.ditherFrequency },
+      ditherAnimation: { value: finalPassConfig.ditherAnimation },
     },
     vertexShader: ditheringVertexShader,
     fragmentShader: ditheringFragmentShader,

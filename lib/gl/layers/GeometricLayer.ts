@@ -3,7 +3,7 @@
  */
 
 import { createShapeLayer } from './utils/createShapeLayer.ts'
-import { SHAPE_LAYER_CONFIG } from './config.ts'
+import { getShapeLayerConfig } from './config.ts'
 import {
   createCelestialBodies,
   createConcentricRings,
@@ -19,25 +19,29 @@ import {
  */
 export const createGeometricLayer = (
   THREE: typeof import('three'),
-  radius = SHAPE_LAYER_CONFIG.RADIUS,
-  height = SHAPE_LAYER_CONFIG.HEIGHT,
-  rotationAngle = 0, // Angle from the main plane in radians
-  planarConstraint = true, // When true, forces all elements to stay on the same plane
+  radius?: number,
+  height?: number,
+  rotationAngle = 0, // angle from the main plane in radians
+  planarConstraint = true, // when true, forces all elements to stay on the same plane
 ) => {
-  // Create a group to hold all the shapes
+  const shapeConfig = getShapeLayerConfig()
+  const effectiveRadius = radius ?? shapeConfig.radius
+  const effectiveHeight = height ?? shapeConfig.height
+
+  // create a group to hold all the shapes
   const shapeGroup = new THREE.Group()
 
-  // First create the base shape layer using the existing function
+  // first create the base shape layer using the existing function
   // const baseLayer = createShapeLayer(THREE, {
-  //   radius,
+  //   radius: effectiveRadius,
   //   variationFactor: 1.0,
   // })
   // shapeGroup.add(baseLayer)
 
-  // Create the geometric layer components directly
-  const geometricRadius = radius * 1
-  const color = SHAPE_LAYER_CONFIG.PRIMARY_COLOR
-  const secondaryColor = SHAPE_LAYER_CONFIG.SECONDARY_COLOR
+  // create the geometric layer components directly
+  const geometricRadius = effectiveRadius * 1
+  const color = shapeConfig.primaryColor
+  const secondaryColor = shapeConfig.secondaryColor
 
   // Global opacity modifier to make everything more faded
   const opacityModifier = 0.7

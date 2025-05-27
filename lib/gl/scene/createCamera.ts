@@ -1,4 +1,4 @@
-import { CAMERA_CONFIG } from './config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
@@ -7,18 +7,19 @@ import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 export const createCamera = (
   THREE: typeof import('three'),
 ): Promise<import('three').PerspectiveCamera> => {
+  const { cameraConfig } = sceneConfig
   const responsiveDimensions = getBaselineDimensions()
 
   const camera = new THREE.PerspectiveCamera(
     responsiveDimensions.fov,
     globalThis.innerWidth / globalThis.innerHeight, // Use actual screen dimensions
-    CAMERA_CONFIG.near,
-    CAMERA_CONFIG.far,
+    cameraConfig.near,
+    cameraConfig.far,
   )
 
   camera.position.z = responsiveDimensions.cameraZ
-  camera.position.x = CAMERA_CONFIG.position.x
-  camera.position.y = CAMERA_CONFIG.position.y
+  camera.position.x = cameraConfig.position.x
+  camera.position.y = cameraConfig.position.y
 
   return camera
 }

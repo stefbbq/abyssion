@@ -1,5 +1,4 @@
-import { PLANE_HEIGHT, PLANE_WIDTH } from '../config.ts'
-import { CAMERA_CONFIG } from '../config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
  * Responsive dimension configuration for 3D scene elements
@@ -35,13 +34,15 @@ export interface ResponsiveDimensions {
  * - Logo sized appropriately for the viewport
  */
 export const getBaselineDimensions = (): ResponsiveDimensions => {
+  const { planeWidth, planeHeight, cameraConfig } = sceneConfig
+
   // Use the configured baseline dimensions
-  const logoWidth = PLANE_WIDTH // 8 units
-  const logoHeight = PLANE_HEIGHT // ~5.12 units (8 / 1.5625 aspect ratio)
+  const logoWidth = planeWidth // 8 units
+  const logoHeight = planeHeight // ~5.12 units (8 / 1.5625 aspect ratio)
 
   // Use configured camera settings as baseline
-  const fov = CAMERA_CONFIG.fov // 60 degrees
-  const cameraZ = CAMERA_CONFIG.position.z // 5 units
+  const fov = cameraConfig.fov // 60 degrees
+  const cameraZ = cameraConfig.position.z // 5 units
 
   // Calculate video plane size to cover the viewport at baseline camera distance
   // For a 16:9 screen at 60° FOV and camera distance of 5 units

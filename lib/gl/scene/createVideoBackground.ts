@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { VIDEO_BACKGROUND_CONFIG } from './config.ts'
+import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculatePlaneSize } from './utils/calculatePlaneSize.ts'
 import { createVideoCycle } from '../textures/VideoCycle/index.ts'
@@ -14,7 +14,7 @@ export const createVideoBackground = async (
   scene: THREE.Scene,
   camera: THREE.PerspectiveCamera,
 ): Promise<VideoBackgroundManager | undefined> => {
-  if (!VIDEO_BACKGROUND_CONFIG.enabled) return undefined
+  if (!videoCycleConfig.enabled) return undefined
 
   // Get baseline dimensions including video plane sizing
   const { videoPlaneWidth, videoPlaneHeight } = getBaselineDimensions()
@@ -28,7 +28,7 @@ export const createVideoBackground = async (
       side: THREE.FrontSide,
     })
     const mesh = new THREE.Mesh(geometry, material)
-    mesh.position.z = VIDEO_BACKGROUND_CONFIG.position.z
+    mesh.position.z = videoCycleConfig.position.z
     scene.add(mesh)
 
     return { mesh, material, geometry }
@@ -42,7 +42,7 @@ export const createVideoBackground = async (
     const { cameraZ, fov } = getBaselineDimensions()
 
     // Calculate the size needed to cover the current viewport
-    const requiredSize = calculatePlaneSize(fov, cameraZ, VIDEO_BACKGROUND_CONFIG.position.z)
+    const requiredSize = calculatePlaneSize(fov, cameraZ, videoCycleConfig.position.z)
 
     // Calculate scale factors based on current plane size vs required size
     const scaleX = (requiredSize.width * 1.1) / videoPlaneWidth // 10% overflow
@@ -50,7 +50,7 @@ export const createVideoBackground = async (
 
     // Use the larger scale to ensure full coverage
     const scale = Math.max(scaleX, scaleY)
-    const configScale = VIDEO_BACKGROUND_CONFIG.position.scale || 1
+    const configScale = videoCycleConfig.position.scale || 1
     const finalScale = scale * configScale
 
     // Apply scale to both planes

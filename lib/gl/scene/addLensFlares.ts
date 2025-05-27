@@ -1,4 +1,4 @@
-import { LENS_FLARE_CONFIG } from './config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
  * Creates a procedural texture for lens flare elements
@@ -19,11 +19,8 @@ const createFlareTexture = (
   canvas.width = size
   canvas.height = size
   const context = canvas.getContext('2d')!
-
   const center = size / 2
   const threeColor = new THREE.Color(color)
-
-  // Create gradient based on flare type
   const gradient = context.createRadialGradient(center, center, 0, center, center, center)
 
   switch (type) {
@@ -45,8 +42,8 @@ const createFlareTexture = (
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
       break
 
-    case 'streak':
-      // Horizontal streak for Mass Effect style
+    case 'streak': {
+      // Mass Effect style streak
       context.fillStyle = 'rgba(0, 0, 0, 0)'
       context.fillRect(0, 0, size, size)
 
@@ -68,7 +65,7 @@ const createFlareTexture = (
       context.fillRect(0, center - 2, size, 4)
 
       return new THREE.CanvasTexture(canvas)
-
+    }
     case 'glow':
       // Soft glow
       gradient.addColorStop(0, `rgba(${threeColor.r * 255}, ${threeColor.g * 255}, ${threeColor.b * 255}, 0.6)`)
@@ -103,32 +100,33 @@ export const addLensFlares = async (
   scene: import('three').Scene,
 ): Promise<import('three').PointLight> => {
   const { LensflareElement, Lensflare } = await import('three/examples/jsm/objects/Lensflare.js')
+  const { lensFlare } = sceneConfig.postProcessingConfig
 
   // Create the main light source
   const flareLight = new THREE.PointLight(
     0xffffff,
-    LENS_FLARE_CONFIG.lightIntensity,
-    LENS_FLARE_CONFIG.lightDistance,
+    lensFlare.lightIntensity,
+    lensFlare.lightDistance,
   )
-  flareLight.position.set(...LENS_FLARE_CONFIG.lightPosition)
+  flareLight.position.set(...lensFlare.lightPosition)
   scene.add(flareLight)
 
   // Create the lens flare object
   const lensflare = new Lensflare()
 
   // Create procedural textures for different flare elements
-  const mainFlareTexture = createFlareTexture(THREE, 512, 'main', LENS_FLARE_CONFIG.mainFlare.colorHex)
-  const ringTexture = createFlareTexture(THREE, 256, 'ring', LENS_FLARE_CONFIG.secondaryFlare.colorHex)
-  const streakTexture = createFlareTexture(THREE, 1024, 'streak', LENS_FLARE_CONFIG.mainFlare.colorHex)
-  const glowTexture = createFlareTexture(THREE, 256, 'glow', LENS_FLARE_CONFIG.tertiaryFlare.colorHex)
+  const mainFlareTexture = createFlareTexture(THREE, 512, 'main', lensFlare.mainFlare.colorHex)
+  const ringTexture = createFlareTexture(THREE, 256, 'ring', lensFlare.secondaryFlare.colorHex)
+  const streakTexture = createFlareTexture(THREE, 1024, 'streak', lensFlare.mainFlare.colorHex)
+  const glowTexture = createFlareTexture(THREE, 256, 'glow', lensFlare.tertiaryFlare.colorHex)
 
   // Main central flare - large and prominent
   lensflare.addElement(
     new LensflareElement(
       mainFlareTexture,
-      LENS_FLARE_CONFIG.mainFlare.size,
+      lensFlare.mainFlare.size,
       0.0, // At light source position
-      new THREE.Color(LENS_FLARE_CONFIG.mainFlare.colorHex),
+      new THREE.Color(lensFlare.mainFlare.colorHex),
       THREE.AdditiveBlending,
     ),
   )
@@ -139,7 +137,7 @@ export const addLensFlares = async (
       streakTexture,
       800, // Very wide for dramatic effect
       0.0, // At light source position
-      new THREE.Color(LENS_FLARE_CONFIG.mainFlare.colorHex),
+      new THREE.Color(lensFlare.mainFlare.colorHex),
       THREE.AdditiveBlending,
     ),
   )
@@ -148,9 +146,9 @@ export const addLensFlares = async (
   lensflare.addElement(
     new LensflareElement(
       ringTexture,
-      LENS_FLARE_CONFIG.secondaryFlare.size,
-      LENS_FLARE_CONFIG.secondaryFlare.position,
-      new THREE.Color(LENS_FLARE_CONFIG.secondaryFlare.colorHex),
+      lensFlare.secondaryFlare.size,
+      lensFlare.secondaryFlare.position,
+      new THREE.Color(lensFlare.secondaryFlare.colorHex),
       THREE.AdditiveBlending,
     ),
   )
@@ -159,9 +157,9 @@ export const addLensFlares = async (
   lensflare.addElement(
     new LensflareElement(
       glowTexture,
-      LENS_FLARE_CONFIG.tertiaryFlare.size,
-      LENS_FLARE_CONFIG.tertiaryFlare.position,
-      new THREE.Color(LENS_FLARE_CONFIG.tertiaryFlare.colorHex),
+      lensFlare.tertiaryFlare.size,
+      lensFlare.tertiaryFlare.position,
+      new THREE.Color(lensFlare.tertiaryFlare.colorHex),
       THREE.AdditiveBlending,
     ),
   )
@@ -172,7 +170,7 @@ export const addLensFlares = async (
       glowTexture,
       30,
       0.8,
-      new THREE.Color(LENS_FLARE_CONFIG.tertiaryFlare.colorHex).multiplyScalar(0.7),
+      new THREE.Color(lensFlare.tertiaryFlare.colorHex).multiplyScalar(0.7),
       THREE.AdditiveBlending,
     ),
   )
@@ -182,7 +180,7 @@ export const addLensFlares = async (
       ringTexture,
       40,
       1.2,
-      new THREE.Color(LENS_FLARE_CONFIG.secondaryFlare.colorHex).multiplyScalar(0.5),
+      new THREE.Color(lensFlare.secondaryFlare.colorHex).multiplyScalar(0.5),
       THREE.AdditiveBlending,
     ),
   )
@@ -193,7 +191,7 @@ export const addLensFlares = async (
       glowTexture,
       25,
       1.5,
-      new THREE.Color(LENS_FLARE_CONFIG.mainFlare.colorHex).multiplyScalar(0.3),
+      new THREE.Color(lensFlare.mainFlare.colorHex).multiplyScalar(0.3),
       THREE.AdditiveBlending,
     ),
   )

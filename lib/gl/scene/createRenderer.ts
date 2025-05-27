@@ -1,17 +1,17 @@
-import { RENDERER_CONFIG } from './config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
  * Create and initialize the renderer
  */
 export const createRenderer = (
   THREE: typeof import('three'),
-  width: number,
-  height: number,
   container: HTMLDivElement,
 ): Promise<import('three').WebGLRenderer> => {
+  const { rendererConfig } = sceneConfig
+
   const renderer = new THREE.WebGLRenderer({
-    antialias: RENDERER_CONFIG.antialias,
-    alpha: RENDERER_CONFIG.alpha,
+    antialias: rendererConfig.antialias,
+    alpha: rendererConfig.alpha,
   })
 
   const updateSize = () => {
@@ -20,18 +20,22 @@ export const createRenderer = (
     const h = container.clientHeight || globalThis.innerHeight
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(
-      globalThis.devicePixelRatio * RENDERER_CONFIG.pixelRatioMultiplier,
-      RENDERER_CONFIG.pixelRatioMax,
+      globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
+      rendererConfig.pixelRatioMax,
     ))
   }
+
   updateSize()
   globalThis.addEventListener('resize', updateSize)
+
+  // Set up the GL container
   while (container.firstChild) container.removeChild(container.firstChild)
   container.style.width = '100%'
   container.style.height = '100%'
   container.style.overflow = 'hidden'
   container.style.position = 'relative'
 
+  // Set up the HTML canvas
   const canvas = renderer.domElement
   canvas.style.display = 'block'
   canvas.style.position = 'absolute'

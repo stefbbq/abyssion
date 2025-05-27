@@ -4,6 +4,8 @@
  * TODO: refactor this into a preact component?
  */
 
+import controlsConfig from '../../configControls.json' with { type: 'json' }
+
 /**
  * Configuration options for the debug overlay
  */
@@ -112,7 +114,7 @@ export class DebugOverlay {
    * @param e - The keyboard event
    */
   private handleKey = (e: KeyboardEvent): void => {
-    if (e.key === 'd' || e.key === 'D') {
+    if ((controlsConfig.inputKeys as any).toggleDebug?.includes(e.key)) {
       this.toggleDebug()
     }
   }
@@ -181,9 +183,9 @@ export class DebugOverlay {
           </ul>
           <b>Hotkeys:</b>
           <ul style="margin:4px 0 4px 18px; padding:0;">
-            <li><b>D</b>: Toggle debug panel</li>
-            <li><b>R</b>: Toggle auto-rotation</li>
-            <li><b>G</b>: Regenerate layers</li>
+            <li><b>${(controlsConfig.inputKeys as any).toggleDebug?.[0]?.toUpperCase() || 'D'}</b>: Toggle debug panel</li>
+            <li><b>${controlsConfig.inputKeys.toggleRotation[0].toUpperCase()}</b>: Toggle auto-rotation</li>
+            <li><b>${controlsConfig.inputKeys.regenerateLayers[0].toUpperCase()}</b>: Regenerate layers</li>
           </ul>
         </div>
         <div style="pointer-events:auto;">

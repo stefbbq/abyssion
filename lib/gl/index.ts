@@ -1,6 +1,6 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
-import { DEFAULT_BLOOM_PARAMS, PLANE_HEIGHT, PLANE_WIDTH, RENDERER_CONFIG } from './scene/config.ts'
+import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import { createScene } from './scene/createScene.ts'
 import { createCamera } from './scene/createCamera.ts'
 import { createRenderer } from './scene/createRenderer.ts'
@@ -22,18 +22,17 @@ import { getResponsiveCameraZ } from './scene/utils/getResponsiveCameraZ.ts'
  * Initialize the Logo3D renderer
  */
 export const initGL = async (options: InitOptions) => {
+  const { planeWidth, planeHeight, rendererConfig, postProcessingConfig } = sceneConfig
   const { width, height, outlineTexturePath, stencilTexturePath, container } = options
-
-  // We need to dynamically import three.js since it's a client-side only library
   const THREE = await import('three')
 
   // Debug mobile responsiveness
   debugMobileResponsiveness()
 
   // Set up the core rendering elements
-  const scene = await createScene(THREE, width, height)
-  const camera = await createCamera(THREE, width, height)
-  const renderer = await createRenderer(THREE, width, height, container)
+  const scene = await createScene(THREE)
+  const camera = await createCamera(THREE)
+  const renderer = await createRenderer(THREE, container)
 
   // Apply initial responsive camera positioning
   const initialW = container.clientWidth || globalThis.innerWidth
@@ -59,7 +58,7 @@ export const initGL = async (options: InitOptions) => {
     renderer,
     width,
     height,
-    DEFAULT_BLOOM_PARAMS,
+    postProcessingConfig.bloom,
   )
 
   // Create the 2D UI overlay (scene, camera, resize)
@@ -86,8 +85,8 @@ export const initGL = async (options: InitOptions) => {
     composer.setSize(globalThis.innerWidth, globalThis.innerHeight)
     // Set the same high pixel ratio for the composer
     composer.setPixelRatio(Math.min(
-      globalThis.devicePixelRatio * RENDERER_CONFIG.pixelRatioMultiplier,
-      RENDERER_CONFIG.pixelRatioMax,
+      globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
+      rendererConfig.pixelRatioMax,
     ))
 
     // Update video background scaling with new camera position
@@ -128,7 +127,7 @@ export const initGL = async (options: InitOptions) => {
       opacity: 0.4,
       side: THREE.DoubleSide,
     })
-    const focusPlane = new THREE.Mesh(new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT), focusPlaneMaterial)
+    const focusPlane = new THREE.Mesh(new THREE.PlaneGeometry(planeWidth, planeHeight), focusPlaneMaterial)
     focusPlane.visible = false
     scene.add(focusPlane)
 

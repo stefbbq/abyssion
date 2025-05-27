@@ -1,24 +1,28 @@
 import * as THREE from 'three'
 import { lc, log } from '@lib/logger/index.ts'
-import { VIDEO_CYCLE_CONFIG } from '../config.ts'
+import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import { loadVideo } from './loadVideo.ts'
 
 /**
  * Loads videos from the videos directory using manifest
  *
- * Fetches the manifest.json file and attempts to load each video,
- * returning arrays of successfully loaded videos and their textures
+ * Loads just 2 videos initially to start cycling immediately,
+ * then provides a function to load one more video at a time
  */
 export const loadVideos = async (): Promise<{
   videos: HTMLVideoElement[]
   videoTextures: THREE.VideoTexture[]
+  loadNextVideo: () => Promise<{ video: HTMLVideoElement | null; texture: THREE.VideoTexture | null }>
+  hasMoreVideos: () => boolean
 }> => {
+  const { videos: { path: videosPath } } = videoCycleConfig
   const videos: HTMLVideoElement[] = []
   const videoTextures: THREE.VideoTexture[] = []
+  let loadedCount = 0
 
   try {
     log(lc.GL_TEXTURES, 'Loading video backgrounds...')
-    const manifestPath = `${VIDEO_CYCLE_CONFIG.videos.path}manifest.json`
+    const manifestPath = `${videosPath}manifest.json`
     let videoFiles: string[] = []
 
     try {
@@ -41,30 +45,75 @@ export const loadVideos = async (): Promise<{
 
     if (videoFiles.length === 0) {
       console.warn('No video files found in manifest')
-      return { videos, videoTextures }
+      return {
+        videos,
+        videoTextures,
+        loadNextVideo: async () => ({ video: null, texture: null }),
+        hasMoreVideos: () => false,
+      }
     }
 
     log(lc.GL_TEXTURES, `Found ${videoFiles.length} videos in manifest`)
 
-    // Try to load each video
-    for (const file of videoFiles) {
-      const videoPath = `${VIDEO_CYCLE_CONFIG.videos.path}${file}`
-      log(lc.GL_TEXTURES, `Attempting to load video: ${videoPath}`)
+    // Load exactly 2 videos initially - no more, no less
+    const INITIAL_LOAD_COUNT = Math.min(2, videoFiles.length)
+
+    for (let i = 0; i < INITIAL_LOAD_COUNT; i++) {
+      const file = videoFiles[i]
+      const videoPath = `${videosPath}${file}`
+      log(lc.GL_TEXTURES, `Loading initial video ${i + 1}/${INITIAL_LOAD_COUNT}: ${videoPath}`)
 
       const { video, texture, success } = await loadVideo(videoPath)
 
       if (success && texture) {
         videos.push(video)
         videoTextures.push(texture)
+        loadedCount++
+        log(lc.GL_TEXTURES, `✓ Initial video ${i + 1} loaded successfully`)
+      } else {
+        log.warn(lc.GL_TEXTURES, `✗ Failed to load initial video ${i + 1}: ${file}`)
       }
     }
 
-    log(lc.GL_TEXTURES, `Successfully loaded ${videos.length} of ${videoFiles.length} videos`)
+    log(lc.GL_TEXTURES, `Initial loading complete: ${videos.length} videos loaded`)
+
+    // Function to load one more video at a time
+    const loadNextVideo = async () => {
+      if (loadedCount >= videoFiles.length) {
+        return { video: null, texture: null }
+      }
+
+      const file = videoFiles[loadedCount]
+      const videoPath = `${videosPath}${file}`
+      log(lc.GL_TEXTURES, `Loading next video: ${videoPath}`)
+
+      const { video, texture, success } = await loadVideo(videoPath)
+      loadedCount++
+
+      if (success && texture) {
+        videos.push(video)
+        videoTextures.push(texture)
+        log(lc.GL_TEXTURES, `✓ Next video loaded successfully: ${file}`)
+        return { video, texture }
+      } else {
+        log.warn(lc.GL_TEXTURES, `✗ Failed to load next video: ${file}`)
+        return { video: null, texture: null }
+      }
+    }
+
+    const hasMoreVideos = () => loadedCount < videoFiles.length
 
     if (videos.length === 0) console.error('Failed to load any videos from any paths')
+
+    return { videos, videoTextures, loadNextVideo, hasMoreVideos }
   } catch (error) {
     log.error(lc.GL_TEXTURES, 'Error loading video backgrounds:', error)
   }
 
-  return { videos, videoTextures }
+  return {
+    videos,
+    videoTextures,
+    loadNextVideo: async () => ({ video: null, texture: null }),
+    hasMoreVideos: () => false,
+  }
 }

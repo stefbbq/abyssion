@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "cycling": {
+    "minVideoLength": 1,
+    "maxVideoLength": 3,
+    "playbackSpeed": 1,
+    "antiRepeat": 2
+  },
+  "appearance": {
+    "opacity": 0.5
+  },
+  "position": {
+    "z": -10,
+    "scale": 1.1
+  },
+  "videos": {
+    "path": "/videos/"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "animationConfig": {
+    "timeIncrement": 0.01,
+    "chromaGlitchProbability": 0.002,
+    "chromaGlitchIntensityMin": 2,
+    "chromaGlitchIntensityMax": 5,
+    "chromaGlitchResetDelay": 120,
+    "bloomPulseFrequency": 0.8,
+    "bloomPulseIntensity": 0.15,
+    "bloomStrength": 0.15,
+    "bloomOverrideProbability": 0.002,
+    "bloomOverrideIntensity": 2.0,
+    "bloomOverrideDurationMin": 150,
+    "bloomOverrideDurationMax": 600
+  },
+  "userReactivity": {
+    "mouseCoefficient": 0.02
+  }
+}

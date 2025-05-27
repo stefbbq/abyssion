@@ -5,7 +5,7 @@
  */
 
 import { createShapeLayer } from './utils/createShapeLayer.ts'
-import { SHAPE_LAYER_CONFIG } from './config.ts'
+import { getShapeLayerConfig } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
 import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
 import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
@@ -36,18 +36,19 @@ export const createUILayer = (
   // Create a group to hold all the shapes
   const shapeGroup = new THREE.Group()
 
-  // Get responsive dimensions and mobile state
+  // get responsive dimensions and mobile state
   const { scale } = getBaselineDimensions()
   const isMobile = isMobileDevice()
+  const shapeConfig = getShapeLayerConfig()
 
-  // Adjust shape layer configuration for mobile
+  // adjust shape layer configuration for mobile
   const responsiveConfig = {
-    radius: SHAPE_LAYER_CONFIG.RADIUS * scale,
-    techShapesCount: isMobile ? Math.floor(SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT * 0.8) : SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT,
-    minDistance: SHAPE_LAYER_CONFIG.MIN_DISTANCE * scale,
-    maxDistance: SHAPE_LAYER_CONFIG.MAX_DISTANCE * scale,
-    height: SHAPE_LAYER_CONFIG.HEIGHT * scale,
-    rotationSpeed: isMobile ? SHAPE_LAYER_CONFIG.ROTATION_SPEED * 0.8 : SHAPE_LAYER_CONFIG.ROTATION_SPEED,
+    radius: shapeConfig.radius * scale,
+    techShapesCount: isMobile ? Math.floor(shapeConfig.techShapesCount * 0.8) : shapeConfig.techShapesCount,
+    minDistance: shapeConfig.minDistance * scale,
+    maxDistance: shapeConfig.maxDistance * scale,
+    height: shapeConfig.height * scale,
+    rotationSpeed: isMobile ? shapeConfig.rotationSpeed * 0.8 : shapeConfig.rotationSpeed,
   }
 
   // First create the base shape layer using the existing function

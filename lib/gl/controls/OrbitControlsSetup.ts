@@ -1,5 +1,7 @@
 import type { Camera } from 'three'
-import { INPUT_KEYS } from './constants.ts'
+import controlsConfig from '../../configControls.json' with { type: 'json' }
+
+const INPUT_KEYS = controlsConfig.inputKeys
 
 /**
  * Create and configure orbit controls
@@ -43,12 +45,10 @@ export const setupKeyboardControls = (
 ) => {
   const handleKeyDown = (event: KeyboardEvent) => {
     // Toggle auto-rotation on "R" key press
-    if (INPUT_KEYS.TOGGLE_ROTATION.includes(event.key)) {
-      controls.autoRotate = !controls.autoRotate
-    }
+    if (INPUT_KEYS.toggleRotation.includes(event.key)) controls.autoRotate = !controls.autoRotate
 
     // Regenerate random layers on "G" key press
-    if (INPUT_KEYS.REGENERATE_LAYERS.includes(event.key)) {
+    if (INPUT_KEYS.regenerateLayers.includes(event.key)) {
       onRegenerateRandomLayers()
     }
   }

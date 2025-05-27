@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { lc, log } from '@lib/logger/index.ts'
-import { VIDEO_CYCLE_CONFIG } from '../config.ts'
+import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import { getNewStartTimeAndDuration } from './getNewStartTimeAndDuration.ts'
 import { getNextVideoIndex } from './getNextVideoIndex.ts'
 import type { BufferObject } from '../types.ts'
@@ -20,6 +20,7 @@ export const prepareNextVideo = async (
   hiddenBuffer: BufferObject,
   PREPARE_PREROLL_MS: number,
 ): Promise<number> => {
+  const { cycling: { minVideoLength, maxVideoLength } } = videoCycleConfig
   const maxAttempts = videos.length
   let attempts = 0
   const triedIndices: number[] = []
@@ -62,13 +63,13 @@ export const prepareNextVideo = async (
       // Request the actual visible duration we want (without preroll padding)
       const result = await getNewStartTimeAndDuration(
         video,
-        VIDEO_CYCLE_CONFIG.cycling.minVideoLength,
-        VIDEO_CYCLE_CONFIG.cycling.maxVideoLength,
+        minVideoLength,
+        maxVideoLength,
       )
       startTime = result.startTime
       duration = result.duration
 
-      if (duration < VIDEO_CYCLE_CONFIG.cycling.minVideoLength) {
+      if (duration < minVideoLength) {
         console.warn(`[${new Date().toLocaleTimeString()}] Not enough time left in video ${videoIndex} after seeking. Skipping.`)
         videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
         attempts++
