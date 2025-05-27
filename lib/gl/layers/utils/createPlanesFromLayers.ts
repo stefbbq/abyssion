@@ -5,7 +5,7 @@ import { LogoLayer } from '../LogoLayer.ts'
  * Create meshes for each layer
  */
 export const createPlanesFromLayers = (
-  THREE: any,
+  THREE: typeof import('three'),
   layers: LogoLayer[],
   planeGeometry: any,
   outlineTexture: any,

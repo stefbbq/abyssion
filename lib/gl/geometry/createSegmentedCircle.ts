@@ -4,16 +4,13 @@ import { createCircleOutline } from './createCircleOutline.ts'
  * Create a circular segmented progress indicator
  */
 export const createSegmentedCircle = (
-  THREE: any,
+  THREE: typeof import('three'),
   radius = 0.5,
   segments = 12,
   gapSize = 0.1,
   thickness = 0.03,
-) => {
-  // Create a group to hold all segments
+): import('three').Group => {
   const group = new THREE.Group()
-
-  // Calculate angle for each segment
   const segmentAngle = (Math.PI * 2 - (gapSize * segments)) / segments
 
   // Create each segment

@@ -6,7 +6,7 @@ import { getConcentricRingsConfig } from '../config.ts'
  * Creates concentric rings with configurable properties
  */
 export const createConcentricRings = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = getConcentricRingsConfig(),
 ) => {
   const {

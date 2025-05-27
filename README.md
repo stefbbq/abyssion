@@ -33,6 +33,8 @@ Visit http://localhost:8000/ to see the website.
 - `/islands` - Interactive components that run on the client
 - `/static` - Static assets (images, etc.)
 - `/components` - Reusable UI components
+- `/lib/logger` - Pretty (and basic) Logger library
+- `/lib/gl` - Three.js library code
 
 ## Deployment
 

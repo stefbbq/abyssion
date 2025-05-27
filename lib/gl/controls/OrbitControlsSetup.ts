@@ -1,9 +1,13 @@
+import type { Camera } from 'three'
 import { INPUT_KEYS } from './constants.ts'
 
 /**
  * Create and configure orbit controls
  */
-export const setupOrbitControls = async (THREE: any, camera: any, domElement: HTMLElement) => {
+export const setupOrbitControls = async ( //
+  camera: Camera,
+  domElement: HTMLElement,
+) => {
   const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls.js')
 
   const controls = new OrbitControls(camera, domElement)

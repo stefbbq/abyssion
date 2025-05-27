@@ -1,4 +1,3 @@
-import type { BloomParams } from '../types.ts'
 import { DEFAULT_BLOOM_PARAMS, POST_PROCESSING_CONFIG } from './config.ts'
 import {
   ditheringFragmentShader,
@@ -7,7 +6,19 @@ import {
   finalPassVertexShader,
   sharpeningFragmentShader,
   sharpeningVertexShader,
-} from '../shaders/index.ts'
+} from '@lib/gl/shaders/index.ts'
+
+/** Parameters for controlling the bloom post-processing effect */
+export type BloomParams = {
+  /** Controls the overall brightness of the scene */
+  exposure: number
+  /** Controls the intensity of the bloom glow effect */
+  bloomStrength: number
+  /** Minimum brightness threshold for pixels to bloom */
+  bloomThreshold: number
+  /** Controls how far the bloom effect spreads */
+  bloomRadius: number
+}
 
 /**
  * Create post-processing effects

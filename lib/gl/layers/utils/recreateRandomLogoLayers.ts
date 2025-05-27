@@ -6,7 +6,7 @@ import { LogoLayer } from '../LogoLayer.ts'
  * Regenerate random logo layers and update scene
  */
 export const recreateRandomLogoLayers = (
-  THREE: any,
+  THREE: typeof import('three'),
   scene: any,
   currentPlanes: any[],
   currentLayers: LogoLayer[],

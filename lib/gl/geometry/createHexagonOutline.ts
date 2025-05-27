@@ -2,18 +2,13 @@
  * Create a hexagon outline
  */
 export const createHexagonOutline = (
-  THREE: any,
+  THREE: typeof import('three'),
   radius = 1,
   thickness = 0.02,
-) => {
-  // Create an empty geometry
+): import('three').BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
   const positions = []
-
-  // Number of sides for hexagon
   const numSides = 6
-
-  // Calculate points for both inner and outer hexagon
   const innerRadius = radius - thickness / 2
   const outerRadius = radius + thickness / 2
 

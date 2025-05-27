@@ -18,7 +18,7 @@ import {
  * Creates a cosmic-themed 3D layer that surrounds the logo with orbital rings and celestial elements
  */
 export const createGeometricLayer = (
-  THREE: any,
+  THREE: typeof import('three'),
   radius = SHAPE_LAYER_CONFIG.RADIUS,
   height = SHAPE_LAYER_CONFIG.HEIGHT,
   rotationAngle = 0, // Angle from the main plane in radians

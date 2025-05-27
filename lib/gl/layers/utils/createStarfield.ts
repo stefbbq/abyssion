@@ -5,7 +5,7 @@ import { GeometricOptions } from '../GeometricLayer.ts'
  * Creates a detailed starfield of small particles
  */
 export const createStarfield = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = {},
 ) => {
   const {

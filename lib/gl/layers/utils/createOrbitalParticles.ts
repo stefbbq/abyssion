@@ -6,7 +6,7 @@ import { ORBITAL_PARTICLES_CONFIG } from '../config.ts'
  * Creates particle distributions along orbital paths
  */
 export const createOrbitalParticles = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = ORBITAL_PARTICLES_CONFIG,
 ) => {
   const {

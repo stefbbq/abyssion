@@ -4,17 +4,15 @@ import { createCircleOutline } from './createCircleOutline.ts'
  * Create a technical diagram pattern with connections
  */
 export const createTechDiagram = (
-  THREE: any,
+  THREE: typeof import('three'),
   width = 2,
   height = 1.5,
   nodeCount = 6,
   lineWidth = 0.01,
-) => {
-  // Create a group to hold all elements
+): import('three').Group => {
   const group = new THREE.Group()
-
-  // Create nodes (small circles)
   const nodes = []
+
   for (let i = 0; i < nodeCount; i++) {
     // Calculate random positions with some margin from edges
     const margin = 0.2
@@ -75,10 +73,7 @@ export const createTechDiagram = (
     lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
 
     // Create line
-    const line = new THREE.Line(
-      lineGeo,
-      new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: lineWidth * 100 }),
-    )
+    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: lineWidth * 100 }))
     group.add(line)
   }
 

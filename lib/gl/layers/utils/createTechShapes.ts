@@ -10,7 +10,7 @@ export type TechShapeType = 'hexagon' | 'circle' | 'triangle' | 'grid'
  * @param THREE threejs instance
  * @returns random technical shape mesh
  */
-export const createRandomTechShape = (THREE: any) => {
+export const createRandomTechShape = (THREE: typeof import('three')) => {
   // choose a random shape type from the available shapes
   const shapeTypes: TechShapeType[] = [
     'hexagon',
@@ -83,7 +83,7 @@ export const createRandomTechShape = (THREE: any) => {
  * @returns configured technical shape mesh
  */
 export const createTechShape = (
-  THREE: any,
+  THREE: typeof import('three'),
   type: TechShapeType,
   size: number,
   color: number | string,

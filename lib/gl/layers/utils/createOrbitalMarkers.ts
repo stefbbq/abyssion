@@ -6,7 +6,7 @@ import { getOrbitalMarkersConfig } from '../config.ts'
  * Creates markers and indicators along orbital paths
  */
 export const createOrbitalMarkers = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = getOrbitalMarkersConfig ? getOrbitalMarkersConfig() : {},
 ) => {
   const {

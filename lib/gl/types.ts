@@ -18,12 +18,6 @@ export type VideoBackgroundManager = {
   mesh: Mesh // The mesh containing the video texture
 }
 
-// Shadow layer type
-export type ShadowLayer = {
-  mesh: Mesh // The mesh containing the shadow
-  dispose: () => void
-}
-
 // UI Overlay type
 export type UIOverlay = {
   scene: Scene
@@ -57,16 +51,8 @@ export type RendererState = {
   planeGeometry: any
   outlineTexture: any
   stencilTexture: any
-  THREE: any
+  THREE: typeof import('three')
   uiOverlay: UIOverlay
   shapeLayer: Group
   videoBackground?: VideoBackgroundManager
-}
-
-// Bloom parameters
-export type BloomParams = {
-  exposure: number
-  bloomStrength: number
-  bloomThreshold: number
-  bloomRadius: number
 }

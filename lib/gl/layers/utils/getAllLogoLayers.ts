@@ -5,7 +5,7 @@ import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
 /**
  * Get all logo layers (static + random), sorted by z-position
  */
-export const getAllLogoLayers = (THREE: any): LogoLayer[] => {
+export const getAllLogoLayers = (THREE: typeof import('three')): LogoLayer[] => {
   // Always keep the stencil layer from STATIC_LAYERS
   const stencilLayer = STATIC_LOGO_LAYERS.find((layer) => layer.isStencil)
 

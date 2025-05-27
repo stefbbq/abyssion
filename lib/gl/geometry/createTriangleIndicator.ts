@@ -2,14 +2,11 @@
  * Create a triangular target indicator
  */
 export const createTriangleIndicator = (
-  THREE: any,
+  THREE: typeof import('three'),
   size = 0.3,
   thickness = 0.02,
-) => {
-  // Create an empty geometry
+): import('three').BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
-
-  // Triangle points
   const points = [
     { x: 0, y: size }, // top
     { x: -size * 0.866, y: -size * 0.5 }, // bottom left

@@ -1,10 +1,13 @@
 import * as THREE from 'three'
 import { VIDEO_CYCLE_CONFIG } from '../config.ts'
+import ms from 'ms'
 
 /**
- * Load a single video from the given path
- * @param path Path to the video file
- * @returns Promise with video element, video texture, and success status
+ * Loads a video file and creates a Three.js video texture
+ *
+ * Creates a video element with appropriate settings for WebGL usage,
+ * loads the video file, and generates a Three.js texture from it.
+ * Includes timeout handling and error management.
  */
 export const loadVideo = (path: string): Promise<{
   video: HTMLVideoElement
@@ -31,7 +34,7 @@ export const loadVideo = (path: string): Promise<{
         texture: null,
         success: false,
       })
-    }, 10000) // 10 second timeout
+    }, ms('10s'))
 
     // Event handlers
     const handleCanPlay = () => {

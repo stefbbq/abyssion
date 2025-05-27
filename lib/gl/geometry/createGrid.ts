@@ -2,18 +2,16 @@
  * Create a square grid pattern
  */
 export const createGrid = (
-  THREE: any,
+  THREE: typeof import('three'),
   width = 2,
   height = 2,
   divisionsX = 10,
   divisionsY = 10,
   lineWidth = 0.01,
-) => {
-  // Create an empty geometry for the grid
+): import('three').BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
   const positions = []
   const indices = []
-
   const halfWidth = width / 2
   const halfHeight = height / 2
   const cellWidth = width / divisionsX

@@ -10,7 +10,7 @@ import { getCurrentTheme } from '../../theme.ts'
 export const createLogoLayer = (
   index: number,
   totalRandom: number,
-  THREE: any,
+  THREE: typeof import('three'),
 ): LogoLayer => {
   const {
     CYAN_PROBABILITY,

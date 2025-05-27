@@ -2,13 +2,13 @@
  * Create a circle outline with optional segments and thickness
  */
 export const createCircleOutline = (
-  THREE: any,
+  THREE: typeof import('three'),
   radius = 1,
   segments = 64,
   thickness = 0.02,
   thetaStart = 0,
   thetaLength = Math.PI * 2,
-) => {
+): import('three').BufferGeometry => {
   // Create an empty geometry to hold our segments
   const geometry = new THREE.BufferGeometry()
   const positions = []

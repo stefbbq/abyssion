@@ -5,7 +5,7 @@ import { LogoLayer } from '../LogoLayer.ts'
 /**
  * Generate a set of random layers
  */
-export const createRandomLogoLayers = (THREE: any): LogoLayer[] => {
+export const createRandomLogoLayers = (THREE: typeof import('three')): LogoLayer[] => {
   const { MIN_LAYERS, MAX_ADDITIONAL_LAYERS } = RANDOM_LAYER_CONFIG
   const numRandomLayers = MIN_LAYERS + Math.floor(Math.random() * MAX_ADDITIONAL_LAYERS)
 

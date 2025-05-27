@@ -6,7 +6,7 @@ import { getCelestialBodiesConfig } from '../config.ts'
  * Creates celestial bodies that orbit the logo
  */
 export const createCelestialBodies = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = getCelestialBodiesConfig(),
 ) => {
   const {

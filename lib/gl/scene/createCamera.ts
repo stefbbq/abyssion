@@ -1,15 +1,13 @@
 import { CAMERA_CONFIG } from './config.ts'
-import { getResponsiveDimensions } from './utils/getResponsiveDimensions.ts'
+import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
  * Create and initialize the camera with responsive settings
  */
 export const createCamera = (
   THREE: typeof import('three'),
-  width: number,
-  height: number,
 ): Promise<import('three').PerspectiveCamera> => {
-  const responsiveDimensions = getResponsiveDimensions()
+  const responsiveDimensions = getBaselineDimensions()
 
   const camera = new THREE.PerspectiveCamera(
     responsiveDimensions.fov,

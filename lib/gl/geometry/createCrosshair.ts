@@ -4,15 +4,13 @@ import { createCircleOutline } from './createCircleOutline.ts'
  * Create a crosshair shape
  */
 export const createCrosshair = (
-  THREE: any,
+  THREE: typeof import('three'),
   radius = 0.5,
   thickness = 0.02,
   centerRadius = 0.05,
-) => {
-  // Create a group to hold all parts
+): import('three').Group => {
   const group = new THREE.Group()
 
-  // Create circle at center
   const centerCircle = new THREE.Mesh(
     createCircleOutline(THREE, centerRadius, 32, thickness),
     new THREE.MeshBasicMaterial({ color: 0xffffff }),
@@ -36,21 +34,11 @@ export const createCrosshair = (
 
     // Create line geometry
     const lineGeo = new THREE.BufferGeometry()
-    const positions = [
-      innerX,
-      innerY,
-      0,
-      outerX,
-      outerY,
-      0,
-    ]
+    const positions = [innerX, innerY, 0, outerX, outerY, 0]
     lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
 
     // Create line
-    const line = new THREE.Line(
-      lineGeo,
-      new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: thickness * 100 }),
-    )
+    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: thickness * 100 }))
     group.add(line)
   })
 

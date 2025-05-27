@@ -6,7 +6,7 @@ import { getOrbitalGridsConfig } from '../config.ts'
  * Creates grid patterns along orbital planes
  */
 export const createOrbitalGrids = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = getOrbitalGridsConfig(),
 ) => {
   const {

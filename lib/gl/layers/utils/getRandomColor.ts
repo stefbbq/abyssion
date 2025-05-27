@@ -20,7 +20,7 @@ type HSL = {
 }
 
 export const getRandomColor = (
-  THREE: any,
+  THREE: typeof import('three'),
   baseColor: RGBColor | number = 0,
   maxValue: number = 1,
 ) => {

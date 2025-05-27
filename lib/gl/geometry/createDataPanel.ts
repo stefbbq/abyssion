@@ -2,16 +2,15 @@
  * Create a rectangular data frame/panel
  */
 export const createDataPanel = (
-  THREE: any,
+  THREE: typeof import('three'),
   width = 1,
   height = 0.6,
   borderThickness = 0.02,
   cornerRadius = 0.1,
-) => {
-  // Create group to hold all elements
+  color = 0x00ffff,
+  opacity = 0.3,
+): import('three').Group => {
   const group = new THREE.Group()
-
-  // Create outer border (rounded rectangle)
   const borderPath = new THREE.Shape()
 
   // Start at top left corner
@@ -64,5 +63,17 @@ export const createDataPanel = (
   // Create shape from path
   const borderGeometry = new THREE.ShapeGeometry(borderPath)
 
-  return borderGeometry
+  // Create material for the panel
+  const material = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity,
+    side: THREE.DoubleSide,
+  })
+
+  // Create mesh and add to group
+  const panelMesh = new THREE.Mesh(borderGeometry, material)
+  group.add(panelMesh)
+
+  return group
 }

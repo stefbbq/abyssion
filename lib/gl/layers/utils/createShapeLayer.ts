@@ -7,7 +7,7 @@ import { GeometricOptions } from '../GeometricLayer.ts'
  * These are shapes that exist within the 3D world (not on top as overlay)
  */
 export const createShapeLayer = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = {},
 ) => {
   const {

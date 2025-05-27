@@ -4,7 +4,7 @@
  * Custom shader implementation for the electric logo effect
  */
 
-import type { ShaderParams } from './types.ts'
+import type { ShaderParams } from './index.ts'
 
 // Vertex shader
 export const vertexShader = `
@@ -143,7 +143,7 @@ export const finalPassFragmentShader = `
 
 // Factory function to create the electric shader material
 export const createElectricShaderMaterial = (
-  THREE: any,
+  THREE: typeof import('three'),
   params: ShaderParams,
 ) => {
   const { texture, color, opacity, noiseScale, noiseOffset, isStencil } = params

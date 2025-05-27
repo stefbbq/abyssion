@@ -15,8 +15,9 @@ export const createRenderer = (
   })
 
   const updateSize = () => {
-    const w = Math.max(width, container.clientWidth || globalThis.innerWidth)
-    const h = Math.max(height, container.clientHeight || globalThis.innerHeight)
+    // Use actual viewport dimensions, not the initial width/height parameters
+    const w = container.clientWidth || globalThis.innerWidth
+    const h = container.clientHeight || globalThis.innerHeight
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(
       globalThis.devicePixelRatio * RENDERER_CONFIG.pixelRatioMultiplier,
@@ -34,8 +35,11 @@ export const createRenderer = (
   const canvas = renderer.domElement
   canvas.style.display = 'block'
   canvas.style.position = 'absolute'
-  canvas.style.top = '0'
-  canvas.style.left = '0'
+  canvas.style.top = '50%'
+  canvas.style.left = '50%'
+  canvas.style.transform = 'translate(-50%, -50%)'
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
   container.appendChild(canvas)
 
   return renderer

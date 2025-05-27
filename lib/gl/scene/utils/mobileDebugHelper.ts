@@ -1,15 +1,5 @@
-/**
- * @fileoverview Debug helper for mobile responsiveness troubleshooting
- *
- * This utility provides debugging information for mobile device detection
- * and responsive dimension calculations to help troubleshoot visibility issues.
- *
- * @module MobileDebugHelper
- * @version 1.0.0
- */
-
 import { isMobileDevice } from './isMobileDevice.ts'
-import { getResponsiveDimensions } from './getResponsiveDimensions.ts'
+import { getBaselineDimensions } from './getBaselineDimensions.ts'
 
 /**
  * Logs comprehensive mobile detection and responsive dimension information
@@ -22,20 +12,6 @@ import { getResponsiveDimensions } from './getResponsiveDimensions.ts'
  *
  * Use this function to troubleshoot mobile responsiveness issues,
  * especially when the logo is not visible or improperly sized.
- *
- * @example
- * ```typescript
- * import { debugMobileResponsiveness } from './utils/mobileDebugHelper'
- *
- * // Call during scene initialization
- * debugMobileResponsiveness()
- *
- * // Or on window resize
- * window.addEventListener('resize', debugMobileResponsiveness)
- * ```
- *
- * @since 1.0.0
- * @public
  */
 export const debugMobileResponsiveness = (): void => {
   console.group('🔍 Mobile Responsiveness Debug')
@@ -66,7 +42,7 @@ export const debugMobileResponsiveness = (): void => {
   })
 
   // Responsive dimensions
-  const responsive = getResponsiveDimensions()
+  const responsive = getBaselineDimensions()
   console.log('🎯 Responsive Dimensions:', {
     planeWidth: responsive.planeWidth.toFixed(2),
     planeHeight: responsive.planeHeight.toFixed(2),
@@ -115,30 +91,12 @@ export const debugMobileResponsiveness = (): void => {
  *
  * Sets up automatic logging of responsive dimension changes
  * when the window is resized or orientation changes.
- *
- * @returns {() => void} Cleanup function to stop monitoring
- *
- * @example
- * ```typescript
- * import { startMobileDebugMonitoring } from './utils/mobileDebugHelper'
- *
- * // Start monitoring
- * const stopMonitoring = startMobileDebugMonitoring()
- *
- * // Later, stop monitoring
- * stopMonitoring()
- * ```
- *
- * @since 1.0.0
- * @public
  */
 export const startMobileDebugMonitoring = (): () => void => {
   console.log('🔄 Starting mobile responsiveness monitoring...')
 
-  // Initial debug
   debugMobileResponsiveness()
 
-  // Set up resize listener
   const handleResize = () => {
     console.log('📱 Window resized, checking responsiveness...')
     debugMobileResponsiveness()

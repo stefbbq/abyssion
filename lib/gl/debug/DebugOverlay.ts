@@ -1,21 +1,76 @@
-// DebugOverlay.ts
-// Adds UI instructions and a debug panel for live scene inspection and tuning
+/**
+ * DebugOverlay.ts
+ * Adds UI instructions and a debug panel for live scene inspection and tuning
+ * TODO: refactor this into a preact component?
+ */
 
+/**
+ * Configuration options for the debug overlay
+ */
 export type DebugOverlayOptions = {
+  /** Whether to show instruction text */
   showInstructions?: boolean
+  /** Whether to show the debug panel */
   showDebugPanel?: boolean
+  /** Initial debug state on creation */
   initialDebug?: boolean
+  /** Callback when debug mode is toggled */
   onToggleDebug?: (enabled: boolean) => void
+  /** Callback when depth of field parameters change */
   onChangeDOF?: (params: { focus?: number; aperture?: number; maxblur?: number }) => void
 }
 
-export class DebugOverlay {
-  private container: HTMLElement
-  private instructions: HTMLDivElement
-  private debugPanel: HTMLDivElement
-  private debugEnabled: boolean
-  private options: DebugOverlayOptions
+/**
+ * Parameters for depth of field controls
+ */
+export type DOFParams = {
+  /** Focus distance */
+  focus: number
+  /** Aperture size */
+  aperture: number
+  /** Maximum blur amount */
+  maxblur: number
+}
 
+/**
+ * Metadata for DOF change events
+ */
+export type DOFChangeMeta = {
+  /** Type of event that triggered the change */
+  eventType?: string
+}
+
+/**
+ * Debug overlay for 3D scene inspection and parameter tuning
+ * Provides keyboard shortcuts and UI controls for debugging
+ *
+ * @example
+ * ```typescript
+ * const debugOverlay = new DebugOverlay(containerElement, {
+ *   initialDebug: false,
+ *   onToggleDebug: (enabled) => console.log('Debug:', enabled),
+ *   onChangeDOF: (params) => updateDOF(params)
+ * })
+ * ```
+ */
+export class DebugOverlay {
+  /** The container element for the debug overlay */
+  private readonly container: HTMLElement
+  /** Instructions div element */
+  private readonly instructions: HTMLDivElement
+  /** Debug panel div element */
+  private readonly debugPanel: HTMLDivElement
+  /** Current debug enabled state */
+  private debugEnabled: boolean
+  /** Configuration options */
+  private readonly options: DebugOverlayOptions
+
+  /**
+   * Create a new debug overlay
+   *
+   * @param container - The HTML element to attach the overlay to
+   * @param options - Configuration options for the overlay
+   */
   constructor(container: HTMLElement, options: DebugOverlayOptions = {}) {
     this.container = container
     this.options = options
@@ -27,7 +82,11 @@ export class DebugOverlay {
     window.addEventListener('keydown', this.handleKey)
   }
 
-  private setup() {
+  /**
+   * Set up the debug panel DOM elements and styling
+   * @private
+   */
+  private setup(): void {
     // Debug panel (now includes instructions at the top)
     this.debugPanel.style.position = 'absolute'
     this.debugPanel.style.top = '10px'
@@ -47,29 +106,65 @@ export class DebugOverlay {
     this.container.appendChild(this.debugPanel)
   }
 
-  private handleKey = (e: KeyboardEvent) => {
+  /**
+   * Handle keyboard events for debug shortcuts
+   * @private
+   * @param e - The keyboard event
+   */
+  private handleKey = (e: KeyboardEvent): void => {
     if (e.key === 'd' || e.key === 'D') {
       this.toggleDebug()
     }
   }
 
-  public setDebug(enabled: boolean) {
+  /**
+   * Set the debug panel visibility state
+   *
+   * @param enabled - Whether to show the debug panel
+   * @public
+   */
+  public setDebug(enabled: boolean): void {
     this.debugEnabled = enabled
     this.debugPanel.style.display = enabled ? 'block' : 'none'
     if (this.options.onToggleDebug) this.options.onToggleDebug(enabled)
   }
 
-  public toggleDebug() {
+  /**
+   * Toggle the debug panel visibility
+   * @public
+   */
+  public toggleDebug(): void {
     this.setDebug(!this.debugEnabled)
   }
 
+  /**
+   * Update the depth of field controls in the debug panel
+   * Creates interactive sliders for focus, aperture, and max blur parameters
+   *
+   * @param params - Current DOF parameter values
+   * @param onChange - Callback function when parameters change
+   * @public
+   *
+   * @example
+   * ```typescript
+   * debugOverlay.updateDOFControls(
+   *   { focus: 5.0, aperture: 0.025, maxblur: 0.01 },
+   *   (newParams, meta) => {
+   *     if (meta?.eventType === 'change') {
+   *       // Final value committed
+   *       applyDOFSettings(newParams)
+   *     }
+   *   }
+   * )
+   * ```
+   */
   public updateDOFControls(
-    params: { focus: number; aperture: number; maxblur: number },
+    params: DOFParams,
     onChange: (
-      params: { focus: number; aperture: number; maxblur: number },
-      meta?: { eventType?: string }
+      params: DOFParams,
+      meta?: DOFChangeMeta,
     ) => void,
-  ) {
+  ): void {
     // Build DOF controls with instructions at the top
     this.debugPanel.innerHTML = `
       <div id="debug-panel-content" style="pointer-events:none;">
@@ -157,12 +252,33 @@ export class DebugOverlay {
     closeBtn.onclick = () => this.setDebug(false)
   }
 
-  public setDebugInfo(html: string) {
+  /**
+   * Set additional debug information HTML content
+   * Adds custom content to the debug panel's extra section
+   *
+   * @param html - HTML string to display in the debug info section
+   * @public
+   *
+   * @example
+   * ```typescript
+   * debugOverlay.setDebugInfo(`
+   *   <div>Frame Rate: ${fps} FPS</div>
+   *   <div>Triangles: ${triangleCount}</div>
+   * `)
+   * ```
+   */
+  public setDebugInfo(html: string): void {
     const extra = this.debugPanel.querySelector('#debug-extra')
     if (extra) extra.innerHTML = html
   }
 
-  public destroy() {
+  /**
+   * Clean up the debug overlay and remove event listeners
+   * Call this when the overlay is no longer needed to prevent memory leaks
+   *
+   * @public
+   */
+  public destroy(): void {
     window.removeEventListener('keydown', this.handleKey)
     this.container.removeChild(this.debugPanel)
   }

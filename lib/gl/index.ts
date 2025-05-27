@@ -16,7 +16,7 @@ import { createUILayer } from './layers/UILayer.ts'
 import { createShadowLayer } from './layers/ShadowLayer.ts'
 import { startAnimationLoop } from './animation/AnimationLoop.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
-import { getResponsiveDimensions } from './scene/utils/getResponsiveDimensions.ts'
+import { getResponsiveCameraZ } from './scene/utils/getResponsiveCameraZ.ts'
 
 /**
  * Initialize the Logo3D renderer
@@ -35,12 +35,21 @@ export const initGL = async (options: InitOptions) => {
   const camera = await createCamera(THREE, width, height)
   const renderer = await createRenderer(THREE, width, height, container)
 
+  // Apply initial responsive camera positioning
+  const initialW = container.clientWidth || globalThis.innerWidth
+  const initialH = container.clientHeight || globalThis.innerHeight
+  const initialAspect = initialW / initialH
+
+  camera.position.z = getResponsiveCameraZ(initialAspect)
+  camera.aspect = initialAspect
+  camera.updateProjectionMatrix()
+
   // Debug Overlay
   let debugOverlay: DebugOverlay | undefined
   let controls: any = undefined
 
   // Add video background
-  const videoBackground = await addVideoBackground(THREE, scene, renderer, camera) as any
+  const videoBackground = await addVideoBackground(THREE, scene, camera) as any
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
@@ -58,12 +67,16 @@ export const initGL = async (options: InitOptions) => {
 
   // Add window resize handler to update camera aspect ratio and responsive elements
   const handleResize = () => {
-    // Get new responsive dimensions
-    const newResponsiveDimensions = getResponsiveDimensions()
+    // Use the same dimensions the renderer is using
+    const w = container.clientWidth || globalThis.innerWidth
+    const h = container.clientHeight || globalThis.innerHeight
+    const aspect = w / h
 
-    // Update camera position and aspect ratio
-    camera.aspect = globalThis.innerWidth / globalThis.innerHeight
-    camera.position.z = newResponsiveDimensions.cameraZ
+    // Update camera aspect ratio to match renderer dimensions
+    camera.aspect = aspect
+
+    // Apply responsive camera Z positioning
+    camera.position.z = getResponsiveCameraZ(aspect)
     camera.updateProjectionMatrix()
 
     // Update overlay camera and dimensions
@@ -86,22 +99,15 @@ export const initGL = async (options: InitOptions) => {
     debugMobileResponsiveness()
   }
 
-  // Register resize listener
   globalThis.addEventListener('resize', handleResize)
-
-  // Add lens flares and other scene elements
   await addLensFlares(THREE, scene)
-
-  // Set up orbit controls
-  controls = await setupOrbitControls(THREE, camera, renderer.domElement)
-
-  // Set up post-processing and get BokehPass reference
+  controls = await setupOrbitControls(camera, renderer.domElement)
 
   // Setup DebugOverlay after canvas is in DOM
+  // TODO: this really should be a preact component
   debugOverlay = new DebugOverlay(container, {
     initialDebug: false,
     onToggleDebug: () => {
-      // Always keep controls enabled, even in debug mode
       if (controls) controls.enabled = true
     },
     onChangeDOF: ({ focus, aperture, maxblur }) => {
@@ -113,9 +119,9 @@ export const initGL = async (options: InitOptions) => {
     },
   }) // Attach bokehPass to debugOverlay so controls always update the live pass
   ;(debugOverlay as any).bokehPass = bokehPass
+
   // Initialize DOF controls UI using the bokehPass reference
   if (bokehPass && bokehPass.materialBokeh && bokehPass.materialBokeh.uniforms) {
-    // --- Add pink focus plane for DOF visualization ---
     const focusPlaneMaterial = new THREE.MeshBasicMaterial({
       color: 0xff69b4,
       transparent: true,
@@ -126,8 +132,7 @@ export const initGL = async (options: InitOptions) => {
     focusPlane.visible = false
     scene.add(focusPlane)
 
-    // Helper to update plane position and show/hide
-    function showFocusPlane(focusDistance: number) {
+    const showFocusPlane = (focusDistance: number) => {
       // Place plane at 'focusDistance' in front of the camera
       camera.updateMatrixWorld()
       const camDir = new THREE.Vector3()
@@ -139,18 +144,13 @@ export const initGL = async (options: InitOptions) => {
     }
 
     // Keep the focus plane facing the camera while visible
-    function alignFocusPlane() {
-      if (focusPlane.visible) {
-        focusPlane.quaternion.copy(camera.quaternion)
-      }
-    }
+    const alignFocusPlane = () => focusPlane.visible && focusPlane.quaternion.copy(camera.quaternion)
+
     if (typeof globalThis !== 'undefined') {
       ;(globalThis as any).alignFocusPlane = alignFocusPlane
     }
 
-    function hideFocusPlane() {
-      focusPlane.visible = false
-    }
+    const hideFocusPlane = () => focusPlane.visible = false
 
     debugOverlay.updateDOFControls({
       focus: bokehPass.materialBokeh.uniforms.focus.value,
@@ -176,8 +176,8 @@ export const initGL = async (options: InitOptions) => {
   }
 
   // Show camera and plane Zs in debug panel
-  function updateDebugInfo() {
-    let planesZ = state.planes ? state.planes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>') : ''
+  const updateDebugInfo = () => {
+    const planesZ = state.planes ? state.planes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>') : ''
     debugOverlay?.setDebugInfo(
       `<b>Camera Z:</b> ${camera.position.z.toFixed(3)}<br>${planesZ}`,
     )

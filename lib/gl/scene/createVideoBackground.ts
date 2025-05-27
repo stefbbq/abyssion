@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { VIDEO_BACKGROUND_CONFIG } from './config.ts'
-import { getResponsiveDimensions } from './utils/getResponsiveDimensions.ts'
+import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
+import { calculatePlaneSize } from './utils/calculatePlaneSize.ts'
 import { createVideoCycle } from '../textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '../types.ts'
 
@@ -15,8 +16,8 @@ export const createVideoBackground = async (
 ): Promise<VideoBackgroundManager | undefined> => {
   if (!VIDEO_BACKGROUND_CONFIG.enabled) return undefined
 
-  // Get responsive dimensions including video plane sizing
-  const { videoPlaneWidth, videoPlaneHeight } = getResponsiveDimensions()
+  // Get baseline dimensions including video plane sizing
+  const { videoPlaneWidth, videoPlaneHeight } = getBaselineDimensions()
 
   // Create two video planes - one for active display, one for buffering
   const createPlane = () => {
@@ -38,15 +39,17 @@ export const createVideoBackground = async (
 
   // Handle resize to update plane scales
   const handleResize = () => {
-    const { cameraZ, fov } = getResponsiveDimensions()
+    const { cameraZ, fov } = getBaselineDimensions()
 
-    // Calculate the scale needed for the video planes
-    const distance = Math.abs(cameraZ - VIDEO_BACKGROUND_CONFIG.position.z)
-    const fovRad = (fov * Math.PI) / 180
-    const visibleHeight = 2 * Math.tan(fovRad / 2) * distance
+    // Calculate the size needed to cover the current viewport
+    const requiredSize = calculatePlaneSize(fov, cameraZ, VIDEO_BACKGROUND_CONFIG.position.z)
 
-    // Scale to cover visible height with overflow
-    const scale = (visibleHeight * 1.1) / videoPlaneHeight
+    // Calculate scale factors based on current plane size vs required size
+    const scaleX = (requiredSize.width * 1.1) / videoPlaneWidth // 10% overflow
+    const scaleY = (requiredSize.height * 1.1) / videoPlaneHeight // 10% overflow
+
+    // Use the larger scale to ensure full coverage
+    const scale = Math.max(scaleX, scaleY)
     const configScale = VIDEO_BACKGROUND_CONFIG.position.scale || 1
     const finalScale = scale * configScale
 

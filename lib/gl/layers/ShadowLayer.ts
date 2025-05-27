@@ -4,15 +4,23 @@
  * Creates an elliptical gradient shadow behind the logo
  */
 
-import type { ShadowLayer } from '../types.ts'
-import { getResponsiveDimensions } from '../scene/utils/getResponsiveDimensions.ts'
+import type { Mesh } from 'three'
+import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
+
+// Shadow layer type
+export type ShadowLayer = {
+  // The mesh containing the shadow
+  mesh: Mesh
+  // Dispose of the shadow layer
+  dispose: () => void
+}
 
 /**
  * create a gradient shadow layer behind the logo with responsive sizing
  */
-export const createShadowLayer = (THREE: any, logoWidth?: number, logoHeight?: number): ShadowLayer | null => {
+export const createShadowLayer = (THREE: typeof import('three'), logoWidth?: number, logoHeight?: number): ShadowLayer | null => {
   // Use responsive dimensions if not provided
-  const { planeWidth, planeHeight } = getResponsiveDimensions()
+  const { planeWidth, planeHeight } = getBaselineDimensions()
   const actualLogoWidth = logoWidth || planeWidth
   const actualLogoHeight = logoHeight || planeHeight
 

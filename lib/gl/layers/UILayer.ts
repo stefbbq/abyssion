@@ -4,18 +4,17 @@
  * Manages the 3D shape layer around the logo
  */
 
-import { createCircleOutline, createGrid, createHexagonOutline, createTriangleIndicator } from '../geometry/index.ts'
 import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { SHAPE_LAYER_CONFIG } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
-import { getResponsiveDimensions } from '../scene/utils/getResponsiveDimensions.ts'
-import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
+import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
+import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
 
 /**
  * Creates a responsive 3D shape layer that surrounds the logo
  */
 export const createUILayer = (
-  THREE: any,
+  THREE: typeof import('three'),
   width: number,
   height: number,
 ) => {
@@ -38,9 +37,8 @@ export const createUILayer = (
   const shapeGroup = new THREE.Group()
 
   // Get responsive dimensions and mobile state
-  const { scale } = getResponsiveDimensions()
+  const { scale } = getBaselineDimensions()
   const isMobile = isMobileDevice()
-  const isPortrait = height > width
 
   // Adjust shape layer configuration for mobile
   const responsiveConfig = {
@@ -100,7 +98,7 @@ export const createUILayer = (
     overlayCamera.updateProjectionMatrix()
 
     // Update shape scaling on resize
-    const newResponsiveDimensions = getResponsiveDimensions()
+    const newResponsiveDimensions = getBaselineDimensions()
     const newScale = newResponsiveDimensions.scale
 
     // Update base layer scale

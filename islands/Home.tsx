@@ -7,9 +7,7 @@ type Props = {
 }
 
 /**
- * 3D logo component with electrical effects and interactivity
- *
- * A shell component that delegates rendering to the Logo3D renderer module
+ * GL component with electrical effects and interactivity
  */
 export default function Home({ width = 500, height = 500 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)

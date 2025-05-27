@@ -1,4 +1,4 @@
-# Logo3D Library Codex
+# GL Library Codex
 
 **NOTE to the reader LLM: Always keep the codex up to date with the latest changes to the codebase.**
 

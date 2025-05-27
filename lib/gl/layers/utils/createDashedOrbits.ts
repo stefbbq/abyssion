@@ -6,7 +6,7 @@ import { getDashedOrbitsConfig } from '../config.ts'
  * Creates dashed orbit lines with varying patterns
  */
 export const createDashedOrbits = (
-  THREE: any,
+  THREE: typeof import('three'),
   options: GeometricOptions = getDashedOrbitsConfig(),
 ) => {
   const {
