@@ -5,14 +5,20 @@
  */
 
 import type { ShadowLayer } from '../types.ts'
+import { getResponsiveDimensions } from '../scene/utils/getResponsiveDimensions.ts'
 
 /**
- * create a gradient shadow layer behind the logo
+ * create a gradient shadow layer behind the logo with responsive sizing
  */
-export const createShadowLayer = (THREE: any, logoWidth: number, logoHeight: number): ShadowLayer | null => {
+export const createShadowLayer = (THREE: any, logoWidth?: number, logoHeight?: number): ShadowLayer | null => {
+  // Use responsive dimensions if not provided
+  const { planeWidth, planeHeight } = getResponsiveDimensions()
+  const actualLogoWidth = logoWidth || planeWidth
+  const actualLogoHeight = logoHeight || planeHeight
+
   // Shadow should be slightly wider than the logo
-  const shadowWidth = logoWidth * 2.4
-  const shadowHeight = logoHeight * .8
+  const shadowWidth = actualLogoWidth * 2.4
+  const shadowHeight = actualLogoHeight * .8
 
   // Create a simple plane geometry for the shadow
   const geometry = new THREE.PlaneGeometry(shadowWidth, shadowHeight)

@@ -8,9 +8,11 @@ import { createCircleOutline, createGrid, createHexagonOutline, createTriangleIn
 import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { SHAPE_LAYER_CONFIG } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
+import { getResponsiveDimensions } from '../scene/utils/getResponsiveDimensions.ts'
+import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
 
 /**
- * Creates a 3D shape layer that surrounds the logo
+ * Creates a responsive 3D shape layer that surrounds the logo
  */
 export const createUILayer = (
   THREE: any,
@@ -35,19 +37,34 @@ export const createUILayer = (
   // Create a group to hold all the shapes
   const shapeGroup = new THREE.Group()
 
+  // Get responsive dimensions and mobile state
+  const { scale } = getResponsiveDimensions()
+  const isMobile = isMobileDevice()
+  const isPortrait = height > width
+
+  // Adjust shape layer configuration for mobile
+  const responsiveConfig = {
+    radius: SHAPE_LAYER_CONFIG.RADIUS * scale,
+    techShapesCount: isMobile ? Math.floor(SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT * 0.8) : SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT,
+    minDistance: SHAPE_LAYER_CONFIG.MIN_DISTANCE * scale,
+    maxDistance: SHAPE_LAYER_CONFIG.MAX_DISTANCE * scale,
+    height: SHAPE_LAYER_CONFIG.HEIGHT * scale,
+    rotationSpeed: isMobile ? SHAPE_LAYER_CONFIG.ROTATION_SPEED * 0.8 : SHAPE_LAYER_CONFIG.ROTATION_SPEED,
+  }
+
   // First create the base shape layer using the existing function
-  const baseLayer = createShapeLayer(THREE, { radius: SHAPE_LAYER_CONFIG.RADIUS, variationFactor: 1.0 })
+  const baseLayer = createShapeLayer(THREE, { radius: responsiveConfig.radius, variationFactor: 1.0 })
   shapeGroup.add(baseLayer)
 
   // Add additional tech shapes around the logo
-  for (let i = 0; i < SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT; i++) {
-    const angle = (i / SHAPE_LAYER_CONFIG.TECH_SHAPES_COUNT) * Math.PI * 2
-    const distance = SHAPE_LAYER_CONFIG.MIN_DISTANCE +
-      Math.random() * (SHAPE_LAYER_CONFIG.MAX_DISTANCE - SHAPE_LAYER_CONFIG.MIN_DISTANCE)
+  for (let i = 0; i < responsiveConfig.techShapesCount; i++) {
+    const angle = (i / responsiveConfig.techShapesCount) * Math.PI * 2
+    const distance = responsiveConfig.minDistance +
+      Math.random() * (responsiveConfig.maxDistance - responsiveConfig.minDistance)
 
     const x = Math.cos(angle) * distance
     const y = Math.sin(angle) * distance
-    const z = (Math.random() - 0.5) * SHAPE_LAYER_CONFIG.HEIGHT
+    const z = (Math.random() - 0.5) * responsiveConfig.height
 
     // Create a random tech shape
     const shape = createRandomTechShape(THREE)
@@ -55,13 +72,18 @@ export const createUILayer = (
     // Position and scale the shape
     shape.position.set(x, y, z)
 
+    // Keep shapes visible on mobile
+    if (isMobile) {
+      shape.scale.multiplyScalar(0.9)
+    }
+
     // Random rotation
     shape.rotation.x = Math.random() * Math.PI * 2
     shape.rotation.y = Math.random() * Math.PI * 2
     shape.rotation.z = Math.random() * Math.PI * 2
 
     // Add rotation animation
-    const rotSpeed = (Math.random() - 0.5) * SHAPE_LAYER_CONFIG.ROTATION_SPEED
+    const rotSpeed = (Math.random() - 0.5) * responsiveConfig.rotationSpeed
     shape.userData = { rotSpeed }
 
     // Add to the group
@@ -76,6 +98,22 @@ export const createUILayer = (
     overlayCamera.left = -newAspect
     overlayCamera.right = newAspect
     overlayCamera.updateProjectionMatrix()
+
+    // Update shape scaling on resize
+    const newResponsiveDimensions = getResponsiveDimensions()
+    const newScale = newResponsiveDimensions.scale
+
+    // Update base layer scale
+    baseLayer.scale.setScalar(newScale)
+
+    // Update tech shapes
+    shapeGroup.children.forEach((child: any, index: number) => {
+      if (index === 0) return // Skip base layer
+
+      const shape = child as any
+      const baseScale = isMobileDevice() ? 0.8 : 1.0
+      shape.scale.setScalar(baseScale * newScale)
+    })
   }
 
   return {

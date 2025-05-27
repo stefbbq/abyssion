@@ -1,5 +1,4 @@
-import { VIDEO_BACKGROUND_CONFIG } from './config.ts'
-import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
+import { createVideoBackground } from './createVideoBackground.ts'
 
 /**
  * Create video background for the scene
@@ -7,10 +6,7 @@ import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
 export const addVideoBackground = async (
   THREE: typeof import('three'),
   scene: import('three').Scene,
-  renderer: import('three').WebGLRenderer,
   camera: import('three').Camera,
 ): Promise<unknown> => {
-  if (!VIDEO_BACKGROUND_CONFIG.enabled) return undefined
-
-  return await createVideoCycle(THREE, scene, renderer, camera)
+  return await createVideoBackground(THREE, scene, camera as import('three').PerspectiveCamera)
 }

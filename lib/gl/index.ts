@@ -1,12 +1,12 @@
 import type { InitOptions, RendererState } from './types.ts'
-import { log, lc } from '../logger/index.ts'
+import { lc, log } from '../logger/index.ts'
 import { DEFAULT_BLOOM_PARAMS, PLANE_HEIGHT, PLANE_WIDTH, RENDERER_CONFIG } from './scene/config.ts'
 import { createScene } from './scene/createScene.ts'
 import { createCamera } from './scene/createCamera.ts'
 import { createRenderer } from './scene/createRenderer.ts'
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addLensFlares } from './scene/addLensFlares.ts'
-import { createPlaneGeometry } from './scene/createPlaneGeometry.ts'
+import { createLogoPlaneGeometry } from './scene/createLogoPlaneGeometry.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
 import { DebugOverlay } from './debug/DebugOverlay.ts'
 import { setupKeyboardControls, setupOrbitControls } from './controls/OrbitControlsSetup.ts'
@@ -15,6 +15,8 @@ import { createGeometricLayer } from './layers/GeometricLayer.ts'
 import { createUILayer } from './layers/UILayer.ts'
 import { createShadowLayer } from './layers/ShadowLayer.ts'
 import { startAnimationLoop } from './animation/AnimationLoop.ts'
+import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
+import { getResponsiveDimensions } from './scene/utils/getResponsiveDimensions.ts'
 
 /**
  * Initialize the Logo3D renderer
@@ -24,6 +26,9 @@ export const initGL = async (options: InitOptions) => {
 
   // We need to dynamically import three.js since it's a client-side only library
   const THREE = await import('three')
+
+  // Debug mobile responsiveness
+  debugMobileResponsiveness()
 
   // Set up the core rendering elements
   const scene = await createScene(THREE, width, height)
@@ -35,7 +40,7 @@ export const initGL = async (options: InitOptions) => {
   let controls: any = undefined
 
   // Add video background
-  const videoBackground = await addVideoBackground(THREE, scene, renderer, camera)
+  const videoBackground = await addVideoBackground(THREE, scene, renderer, camera) as any
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
@@ -51,10 +56,14 @@ export const initGL = async (options: InitOptions) => {
   // Create the 2D UI overlay (scene, camera, resize)
   const uiLayer = createUILayer(THREE, width, height)
 
-  // Add window resize handler to update camera aspect ratio
+  // Add window resize handler to update camera aspect ratio and responsive elements
   const handleResize = () => {
-    // Update camera aspect ratio
+    // Get new responsive dimensions
+    const newResponsiveDimensions = getResponsiveDimensions()
+
+    // Update camera position and aspect ratio
     camera.aspect = globalThis.innerWidth / globalThis.innerHeight
+    camera.position.z = newResponsiveDimensions.cameraZ
     camera.updateProjectionMatrix()
 
     // Update overlay camera and dimensions
@@ -67,6 +76,14 @@ export const initGL = async (options: InitOptions) => {
       globalThis.devicePixelRatio * RENDERER_CONFIG.pixelRatioMultiplier,
       RENDERER_CONFIG.pixelRatioMax,
     ))
+
+    // Update video background scaling with new camera position
+    if (videoBackground && typeof videoBackground === 'object' && 'handleResize' in videoBackground) {
+      ;(videoBackground as any).handleResize()
+    }
+
+    // Debug the new responsive settings
+    debugMobileResponsiveness()
   }
 
   // Register resize listener
@@ -202,8 +219,8 @@ export const initGL = async (options: InitOptions) => {
   outlineTexture.wrapS = THREE.ClampToEdgeWrapping
   outlineTexture.wrapT = THREE.ClampToEdgeWrapping
 
-  // Create plane geometry for our layers
-  const planeGeometry = createPlaneGeometry(THREE)
+  // Create plane geometry for our logo layers
+  const planeGeometry = createLogoPlaneGeometry(THREE)
 
   // Initialize the logo layer manager
   const logoLayer = createLogoLayer(THREE)
@@ -225,7 +242,7 @@ export const initGL = async (options: InitOptions) => {
   scene.add(shapeLayer)
 
   // Add the shadow layer behind the logo
-  const shadowLayer = createShadowLayer(THREE, PLANE_WIDTH, PLANE_HEIGHT)
+  const shadowLayer = createShadowLayer(THREE)
   if (shadowLayer) {
     scene.add(shadowLayer.mesh)
   }

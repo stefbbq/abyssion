@@ -37,12 +37,16 @@ export const getNewStartTimeAndDuration = (
 
     const onSeeked = () => {
       video.removeEventListener('seeked', onSeeked)
+      console.log(`✅ Video seeked successfully to ${video.currentTime.toFixed(2)}s (requested ${startTime.toFixed(2)}s)`)
       resolve({ startTime, duration })
     }
 
     video.addEventListener('seeked', onSeeked)
 
     try {
+      // Pause the video before seeking to ensure clean state
+      video.pause()
+      console.log(`🎯 Seeking video to ${startTime.toFixed(2)}s (duration: ${video.duration.toFixed(2)}s, readyState: ${video.readyState})`)
       video.currentTime = startTime
     } catch (error) {
       console.error('Error seeking to random position:', error)

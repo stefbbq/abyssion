@@ -2,8 +2,6 @@ import * as THREE from 'three'
 import { lc, log } from '@lib/logger/index.ts'
 import { VIDEO_CYCLE_CONFIG } from './config.ts'
 import { debugVideoAccess } from './utils/debugVideoAccess.ts'
-import { createVideoPlane } from './utils/createVideoPlane.ts'
-import { calculateScale } from './utils/calculateScale.ts'
 import { loadVideo } from './utils/loadVideo.ts'
 import { isVideoReady as _isVideoReady } from './utils/isVideoReady.ts'
 import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
@@ -22,7 +20,9 @@ type BufferObject = {
 
 export const createVideoCycle = async (
   THREE: typeof import('three'),
-  scene: THREE.Scene,
+  frontBuffer: BufferObject,
+  backBuffer: BufferObject,
+  camera: THREE.PerspectiveCamera,
 ): Promise<VideoBackgroundManager> => {
   // Try to debug server access first
   const workingPath = await debugVideoAccess()
@@ -43,31 +43,12 @@ export const createVideoCycle = async (
   let timeSinceLastSwitch = 0
   const currentOpacity = VIDEO_CYCLE_CONFIG.appearance.opacity
   const VIDEO_SWAP_TIMEOUT_MS = 1000
-  const PREPARE_PREROLL_MS = 500 // allow hidden video to decode more frames before considering ready
-  const PREROLL_SECONDS = 2 // ensure the next video has played for at least this long hidden
-  const PREROLL_MIN_PROGRESS = 0.15 // relax: require ~3 frames of progress at 24fps
+  const PREPARE_PREROLL_MS = 500
   let switchDuration = 10
-
-  // Create two layers - one visible, one hidden for buffering
-  const frontBuffer = createVideoPlane(THREE, scene)
-  const backBuffer = createVideoPlane(THREE, scene)
 
   // Track which buffer is currently visible
   let activeBuffer: BufferObject = frontBuffer
   let hiddenBuffer: BufferObject = backBuffer
-
-  // Update scale on window resize
-  const handleResize = () => {
-    calculateScale(frontBuffer)
-    calculateScale(backBuffer)
-  }
-
-  // Add resize event listener
-  globalThis.addEventListener('resize', handleResize)
-
-  // Initialize both buffers
-  calculateScale(frontBuffer)
-  calculateScale(backBuffer)
 
   // Ensure the active buffer is visible from the start
   activeBuffer.material.opacity = currentOpacity
@@ -118,10 +99,11 @@ export const createVideoCycle = async (
       let duration = 0
 
       try {
+        // Request the actual visible duration we want (without preroll padding)
         const result = await getNewStartTimeAndDuration(
           video,
-          VIDEO_CYCLE_CONFIG.cycling.minVideoLength + PREROLL_SECONDS,
-          VIDEO_CYCLE_CONFIG.cycling.maxVideoLength + PREROLL_SECONDS,
+          VIDEO_CYCLE_CONFIG.cycling.minVideoLength,
+          VIDEO_CYCLE_CONFIG.cycling.maxVideoLength,
         )
         startTime = result.startTime
         duration = result.duration
@@ -133,11 +115,13 @@ export const createVideoCycle = async (
           continue
         }
 
-        // Visible duration excludes preroll period
-        const visibleDuration = duration - PREROLL_SECONDS
-        switchDuration = visibleDuration
-        video.currentTime = startTime
+        // The visible duration is the full requested duration
+        // We'll handle preroll timing separately
+        switchDuration = duration
+        // Don't seek again - getNewStartTimeAndDuration already positioned the video
+        console.log(`🎬 About to play video ${videoIndex} from ${video.currentTime.toFixed(2)}s (should be ${startTime.toFixed(2)}s)`)
         await video.play().catch(() => {})
+        console.log(`▶️ Video ${videoIndex} playing from ${video.currentTime.toFixed(2)}s`)
         // Give the video a bit more time to decode frames before we mark the buffer ready
         await new Promise((resolve) => setTimeout(resolve, PREPARE_PREROLL_MS))
 
@@ -193,13 +177,14 @@ export const createVideoCycle = async (
     const plannedVideoIndex = hiddenBuffer._plannedVideoIndex
     const plannedStartTime = hiddenBuffer._plannedStartTime
     const plannedDuration = hiddenBuffer._plannedDuration
-    const newVideoElement = videos[plannedVideoIndex]
 
     if (plannedVideoIndex === undefined || plannedStartTime === undefined || plannedDuration === undefined) {
       console.error(`[${new Date().toLocaleTimeString()}] Critical error: Planned video state not found on hiddenBuffer. Cannot swap.`)
       nextVideoIndex = -1 // Force re-preparation
       return
     }
+
+    const newVideoElement = videos[plannedVideoIndex]
 
     if (!newVideoElement) {
       console.error(`[${new Date().toLocaleTimeString()}] Video at index ${plannedVideoIndex} not found for new buffer. Cannot swap.`)
@@ -238,6 +223,8 @@ export const createVideoCycle = async (
       activeBuffer.material.needsUpdate = true
       hiddenBuffer.material.needsUpdate = true
 
+      // Scaling is maintained by createVideoBackground
+
       // Delay pausing the video that is now hidden to avoid a hitch caused by immediate pause()
       if (oldActiveVideoElement && !oldActiveVideoElement.paused) {
         setTimeout(() => {
@@ -255,8 +242,8 @@ export const createVideoCycle = async (
 
       // Update current video state
       currentVideoIndex = plannedVideoIndex
-      // visible play time excludes the preroll seconds already consumed while hidden
-      switchDuration = plannedDuration - PREROLL_SECONDS
+      // Use the full planned duration since we're now starting the visible timer
+      switchDuration = plannedDuration
       timeSinceLastSwitch = 0 // Reset timer for the new video
 
       log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Swapped to video ${currentVideoIndex}.`)
@@ -350,10 +337,20 @@ export const createVideoCycle = async (
         // Ensure we have a video and texture to play
         if (initialVideo && initialTexture) {
           try {
-            const startTime = await seekToRandomPosition(initialVideo, VIDEO_CYCLE_CONFIG.cycling.minVideoLength)
-            initialVideo.currentTime = startTime
+            const result = await getNewStartTimeAndDuration(
+              initialVideo,
+              VIDEO_CYCLE_CONFIG.cycling.minVideoLength,
+              VIDEO_CYCLE_CONFIG.cycling.maxVideoLength,
+            )
+            // Don't seek again - getNewStartTimeAndDuration already positioned the video
+            switchDuration = result.duration
             await initialVideo.play()
-            log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Initial video ${currentVideoIndex} began at ${startTime.toFixed(2)}s`)
+            log(
+              lc.GL_TEXTURES,
+              `[${new Date().toLocaleTimeString()}] Initial video ${currentVideoIndex} began at ${result.startTime.toFixed(2)}s for ${
+                result.duration.toFixed(2)
+              }s`,
+            )
           } catch (e) {
             log.error(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Error starting initial video ${currentVideoIndex}:`, e)
           }
@@ -390,35 +387,10 @@ export const createVideoCycle = async (
     // Check if it's time to switch videos
     timeSinceLastSwitch += delta
 
-    // Ensure preroll requirement met
-    const prerollTimeMet = hiddenBuffer._playStartTime !== undefined && Date.now() - hiddenBuffer._playStartTime >= PREROLL_SECONDS * 1000
+    // Simplified: just check if we have a prepared video ready
+    const hasNextVideoReady = nextVideoIndex !== -1 && hiddenBuffer._plannedVideoIndex !== undefined
 
-    // Make sure the hidden video has actually advanced in playback (decoded frames)
-    let prerollProgressMet = false
-    const hiddenVideoTex = hiddenBuffer.material.map as THREE.VideoTexture | null
-    if (hiddenVideoTex) {
-      const hv = hiddenVideoTex.image as HTMLVideoElement
-      if (!isNaN(hv.currentTime) && hiddenBuffer._plannedStartTime !== undefined) {
-        prerollProgressMet = hv.currentTime - hiddenBuffer._plannedStartTime >= PREROLL_MIN_PROGRESS
-      }
-    }
-
-    const prerollMet = prerollTimeMet && prerollProgressMet
-
-    // Debug
-    if (!prerollMet && prerollTimeMet && !prerollProgressMet) {
-      log(
-        lc.GL_TEXTURES,
-        '⏳ preroll: time met but video progress insufficient',
-        ((hiddenVideoTex?.image as HTMLVideoElement | undefined)?.currentTime ?? 0).toFixed(2),
-        'planned',
-        hiddenBuffer._plannedStartTime?.toFixed(2),
-      )
-    }
-
-    if (!prerollMet) return
-
-    if (timeSinceLastSwitch >= switchDuration) {
+    if (timeSinceLastSwitch >= switchDuration && hasNextVideoReady) {
       if (nextVideoIndex !== -1 && nextVideoIndex !== currentVideoIndex) {
         // Swap buffers to show the already-prepared video
         await swapBuffers() // Await the swap, as it now involves async play()
@@ -481,16 +453,9 @@ export const createVideoCycle = async (
    * Dispose function to clean up resources
    */
   const dispose = () => {
-    // Remove event listeners
-    globalThis.removeEventListener('resize', handleResize)
+    // Event listeners are handled by createVideoBackground
 
-    // Remove buffer meshes
-    scene.remove(frontBuffer.mesh)
-    scene.remove(backBuffer.mesh)
-    frontBuffer.geometry.dispose()
-    frontBuffer.material.dispose()
-    backBuffer.geometry.dispose()
-    backBuffer.material.dispose()
+    // Buffer cleanup is handled by createVideoBackground
 
     // Dispose textures and stop videos
     videoTextures.forEach((texture) => texture.dispose())

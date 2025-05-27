@@ -43,7 +43,7 @@ export const VIDEO_BACKGROUND_CONFIG = {
     randomStart: true, // Start videos at random positions
   },
   appearance: {
-    opacity: 0.4, // Opacity of the video (0-1)
+    opacity: 0.25, // Reduced opacity for better logo visibility
   },
   videos: {
     path: 'static/videos/', // Path to videos directory (without leading slash)
