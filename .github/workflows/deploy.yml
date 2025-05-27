@@ -29,7 +29,7 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "abyssion-staging"
+          project: "abyssion"
           entrypoint: "main.ts"
           root: "."
           
