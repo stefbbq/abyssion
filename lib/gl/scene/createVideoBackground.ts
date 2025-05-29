@@ -65,7 +65,7 @@ export const createVideoBackground = async (
   globalThis.addEventListener('resize', handleResize)
 
   // Now pass the planes to VideoCycle for texture management
-  const videoCycle = await createVideoCycle(THREE, frontBuffer, backBuffer, camera)
+  const videoCycle = await createVideoCycle(frontBuffer, backBuffer)
 
   // Return manager with dispose that includes our cleanup
   return {

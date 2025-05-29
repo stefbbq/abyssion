@@ -9,7 +9,6 @@ import type { BufferObject } from './types.ts'
 import ms from 'ms'
 
 export const createVideoCycle = async (
-  THREE: typeof import('three'),
   frontBuffer: BufferObject,
   backBuffer: BufferObject,
 ): Promise<VideoBackgroundManager> => {
@@ -47,7 +46,13 @@ export const createVideoCycle = async (
   activeBuffer.material.opacity = opacity
   activeBuffer.material.needsUpdate = true
 
-  // LOADING LOGIC - just adds to array, nothing else
+  /**
+   * Initializes video loading and background loading process
+   *
+   * Loads initial videos and starts playback if enough are available.
+   * Continues loading additional videos in the background with a delay
+   * between loads to prevent overwhelming the system.
+   */
   const startLoading = async () => {
     const loader = await loadVideos()
 
@@ -58,9 +63,7 @@ export const createVideoCycle = async (
     })
 
     // Start playback if we have enough
-    if (readyVideos.length >= 2 && !isPlaying) {
-      startPlayback()
-    }
+    if (readyVideos.length >= 2 && !isPlaying) startPlayback()
 
     // Load more in background
     setTimeout(async () => {
@@ -71,16 +74,16 @@ export const createVideoCycle = async (
           log(lc.GL_TEXTURES, `Background video ready. Total: ${readyVideos.length}`)
 
           // Start if this gives us enough videos
-          if (readyVideos.length === 2 && !isPlaying) {
-            startPlayback()
-          }
+          if (readyVideos.length === 2 && !isPlaying) startPlayback()
         }
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, ms('500ms')))
       }
-    }, 2000)
+    }, ms('2s'))
   }
 
-  // PLAYBACK LOGIC - just uses the array
+  /**
+   * Initiates video playback by selecting a random starting video and configuring the active buffer
+   */
   const startPlayback = async () => {
     if (isPlaying || readyVideos.length < 2) return
 
@@ -103,11 +106,15 @@ export const createVideoCycle = async (
     log(lc.GL_TEXTURES, `Started with video ${currentIndex}`)
   }
 
-  // Start loading
   startLoading()
 
   // UPDATE - cycles through array with randomness
-  const update = async (delta: number) => {
+  /**
+   * Updates the video cycle state and handles video transitions
+   * @param delta - Time elapsed since last update in seconds
+   * @returns Promise that resolves when video transition is complete
+   */
+  const update = async (delta: number): Promise<void> => {
     if (!enabled || !isPlaying || readyVideos.length < 2) return
 
     timeSinceSwitch += delta
@@ -123,9 +130,7 @@ export const createVideoCycle = async (
       }
 
       // Fallback to sequential if random fails
-      if (nextIndex === currentIndex) {
-        nextIndex = (currentIndex + 1) % readyVideos.length
-      }
+      if (nextIndex === currentIndex) nextIndex = (currentIndex + 1) % readyVideos.length
 
       // Update state
       currentIndex = nextIndex
