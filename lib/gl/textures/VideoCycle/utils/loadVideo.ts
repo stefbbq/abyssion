@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import ms from 'ms'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Loads a video file and creates a Three.js video texture
@@ -54,7 +55,7 @@ export const loadVideo = (path: string): Promise<{
 
       // video.currentTime is set to 0 by default on load or if not specified.
       // The video will be played explicitly by the cycling logic when it becomes active.
-      console.log(`Video loaded and ready (but not playing): ${path}, readyState=${video.readyState}`)
+      log.trace(lc.GL_TEXTURES, `Video loaded and ready (but not playing): ${path}, readyState=${video.readyState}`)
       resolve({
         video,
         texture,

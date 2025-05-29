@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
-import { calculatePlaneSize } from './utils/calculatePlaneSize.ts'
+import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
 import { createVideoCycle } from '../textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '../types.ts'
 
@@ -42,7 +42,7 @@ export const createVideoBackground = async (
     const { cameraZ, fov } = getBaselineDimensions()
 
     // Calculate the size needed to cover the current viewport
-    const requiredSize = calculatePlaneSize(fov, cameraZ, videoCycleConfig.position.z)
+    const requiredSize = calculateFarPlaneSize(fov, cameraZ, videoCycleConfig.position.z)
 
     // Calculate scale factors based on current plane size vs required size
     const scaleX = (requiredSize.width * 1.1) / videoPlaneWidth // 10% overflow

@@ -1,8 +1,12 @@
 import { Head } from '$fresh/runtime.ts'
 import Logo3D from '@islands/Home.tsx'
 import { IconBrandSoundcloud } from 'https://esm.sh/@tabler/icons-preact@2.30.0'
+import { getMinLogLevel } from '@lib/logger/utils/getMinLogLevel.ts'
 
 export default function Home() {
+  // Get log level on server side where env vars are available
+  const logLevel = getMinLogLevel()
+
   return (
     <>
       <Head>
@@ -13,7 +17,7 @@ export default function Home() {
         {/* Logo Container with Social Links Overlay */}
         <div class='flex-1 flex items-center justify-center'>
           <div class='w-full h-full relative flex items-center justify-center'>
-            <Logo3D width={1400} height={896} />
+            <Logo3D width={1400} height={896} logLevel={logLevel} />
 
             {/* Social Links - positioned absolutely over the logo */}
             <div class='absolute bottom-8 left-0 right-0'>

@@ -46,7 +46,10 @@ export const prepareNextVideo = async (
       continue
     }
 
-    log(lc.GL_TEXTURES, `Preparing video ${videoIndex}, readyState: ${video.readyState}, rez: ${video.videoWidth}x${video.videoHeight}`)
+    log.trace(
+      lc.GL_TEXTURES,
+      `Preparing video ${videoIndex}, readyState: ${video.readyState}, rez: ${video.videoWidth}x${video.videoHeight}`,
+    )
 
     // Check readiness
     if (video.readyState < 3 || isNaN(video.duration) || video.videoWidth <= 0) {
@@ -76,9 +79,9 @@ export const prepareNextVideo = async (
         continue
       }
 
-      console.log(`🎬 About to play video ${videoIndex} from ${video.currentTime.toFixed(2)}s (should be ${startTime.toFixed(2)}s)`)
+      log.trace(lc.GL_TEXTURES, `To play video ${videoIndex} from ${video.currentTime.toFixed(2)}s (should be ${startTime.toFixed(2)}s)`)
       await video.play().catch(() => {})
-      console.log(`▶️ Video ${videoIndex} playing from ${video.currentTime.toFixed(2)}s`)
+      log.trace(lc.GL_TEXTURES, `Video ${videoIndex} playing from ${video.currentTime.toFixed(2)}s`)
 
       // Give the video a bit more time to decode frames before we mark the buffer ready
       await new Promise((resolve) => setTimeout(resolve, PREPARE_PREROLL_MS))
@@ -97,16 +100,11 @@ export const prepareNextVideo = async (
         const prevVideoIdx = videoTextures.indexOf(previousTexture)
         if (prevVideoIdx !== -1 && videos[prevVideoIdx]) {
           videos[prevVideoIdx].pause()
-          log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Paused previous hidden video at index ${prevVideoIdx}`)
+          log.trace(lc.GL_TEXTURES, `Paused previous hidden video at index ${prevVideoIdx}`)
         }
       }
 
-      log(
-        lc.GL_TEXTURES,
-        `[${new Date().toLocaleTimeString()}] Prepared next video index ${videoIndex}: will start at ${startTime.toFixed(2)}s, play for ${
-          duration.toFixed(2)
-        }s`,
-      )
+      log.trace(lc.GL_TEXTURES, `Prepared video ${videoIndex}; will start at ${startTime.toFixed(2)}s, play for ${duration.toFixed(2)}s`)
       hiddenBuffer._plannedStartTime = startTime
       hiddenBuffer._plannedDuration = duration
       hiddenBuffer._plannedVideoIndex = videoIndex

@@ -16,6 +16,7 @@ import { LOG_LEVELS, LogContext, type LogLevel } from './constants.ts'
 import { CONTEXT_COLORS, LOG_LEVEL_STYLES } from './colors.ts'
 import { getMinLogLevel } from './utils/getMinLogLevel.ts'
 import { shouldLog } from './utils/shouldLog.ts'
+import { initializeLogger } from './utils/initializeLogger.ts'
 
 let minLogLevel: LogLevel = getMinLogLevel()
 
@@ -119,4 +120,4 @@ const logDeno = (ctx: LogContext, ...args: any[]): void => {
 /**
  * Exported log function and log context enum (aliased as lc for brevity).
  */
-export { log, LogContext as lc, logDeno }
+export { initializeLogger, log, LogContext as lc, logDeno }

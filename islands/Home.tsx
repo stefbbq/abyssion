@@ -1,18 +1,24 @@
 import { useEffect, useRef } from 'preact/hooks'
 import { initGL, type InitOptions } from '@libgl/index.ts'
+import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient.ts'
+import { LogLevel } from '@lib/logger/constants.ts'
 
 type Props = {
   width?: number
   height?: number
+  logLevel?: LogLevel
 }
 
 /**
  * GL component with electrical effects and interactivity
  */
-export default function Home({ width = 500, height = 500 }: Props) {
+export default function Home({ width = 500, height = 500, logLevel }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Initialize client-side logger (theme colors)
+    initializeLoggerClient(logLevel)
+
     if (!containerRef.current) return
 
     // Initialize GL environment
@@ -36,7 +42,7 @@ export default function Home({ width = 500, height = 500 }: Props) {
     return () => {
       if (cleanupFunction) cleanupFunction()
     }
-  }, [width, height])
+  }, [width, height, logLevel])
 
   return (
     <div

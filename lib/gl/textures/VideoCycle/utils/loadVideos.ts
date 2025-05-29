@@ -61,7 +61,7 @@ export const loadVideos = async (): Promise<{
     for (let i = 0; i < INITIAL_LOAD_COUNT; i++) {
       const file = videoFiles[i]
       const videoPath = `${videosPath}${file}`
-      log(lc.GL_TEXTURES, `Loading initial video ${i + 1}/${INITIAL_LOAD_COUNT}: ${videoPath}`)
+      log.trace(lc.GL_TEXTURES, `Loading initial video ${i + 1}/${INITIAL_LOAD_COUNT}: ${videoPath}`)
 
       const { video, texture, success } = await loadVideo(videoPath)
 
@@ -69,13 +69,13 @@ export const loadVideos = async (): Promise<{
         videos.push(video)
         videoTextures.push(texture)
         loadedCount++
-        log(lc.GL_TEXTURES, `✓ Initial video ${i + 1} loaded successfully`)
+        log.trace(lc.GL_TEXTURES, `✓ Initial video ${i + 1} loaded successfully`)
       } else {
         log.warn(lc.GL_TEXTURES, `✗ Failed to load initial video ${i + 1}: ${file}`)
       }
     }
 
-    log(lc.GL_TEXTURES, `Initial loading complete: ${videos.length} videos loaded`)
+    log.trace(lc.GL_TEXTURES, `Initial loading complete: ${videos.length} videos loaded`)
 
     // Function to load one more video at a time
     const loadNextVideo = async () => {
@@ -85,7 +85,7 @@ export const loadVideos = async (): Promise<{
 
       const file = videoFiles[loadedCount]
       const videoPath = `${videosPath}${file}`
-      log(lc.GL_TEXTURES, `Loading next video: ${videoPath}`)
+      log.trace(lc.GL_TEXTURES, `Loading next video: ${videoPath}`)
 
       const { video, texture, success } = await loadVideo(videoPath)
       loadedCount++
@@ -93,7 +93,7 @@ export const loadVideos = async (): Promise<{
       if (success && texture) {
         videos.push(video)
         videoTextures.push(texture)
-        log(lc.GL_TEXTURES, `✓ Next video loaded successfully: ${file}`)
+        log.trace(lc.GL_TEXTURES, `✓ Next video loaded successfully: ${file}`)
         return { video, texture }
       } else {
         log.warn(lc.GL_TEXTURES, `✗ Failed to load next video: ${file}`)

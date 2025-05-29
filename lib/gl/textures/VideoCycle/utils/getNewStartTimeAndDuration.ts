@@ -35,22 +35,31 @@ export const getNewStartTimeAndDuration = (
     const latestStartTime = video.duration - duration - marginSeconds
     const startTime = earliestStartTime + Math.random() * (latestStartTime - earliestStartTime)
 
+    let timeoutId: number
+
     const onSeeked = () => {
       video.removeEventListener('seeked', onSeeked)
-      console.log(`✅ Video seeked successfully to ${video.currentTime.toFixed(2)}s (requested ${startTime.toFixed(2)}s)`)
+      clearTimeout(timeoutId)
       resolve({ startTime, duration })
     }
+
+    // Add timeout to prevent hanging
+    timeoutId = setTimeout(() => {
+      video.removeEventListener('seeked', onSeeked)
+      console.warn(`Video seek timeout after 3s, resolving anyway`)
+      resolve({ startTime, duration })
+    }, 3000)
 
     video.addEventListener('seeked', onSeeked)
 
     try {
       // Pause the video before seeking to ensure clean state
       video.pause()
-      console.log(`🎯 Seeking video to ${startTime.toFixed(2)}s (duration: ${video.duration.toFixed(2)}s, readyState: ${video.readyState})`)
       video.currentTime = startTime
     } catch (error) {
       console.error('Error seeking to random position:', error)
       video.removeEventListener('seeked', onSeeked)
+      clearTimeout(timeoutId)
       reject(error)
     }
   })

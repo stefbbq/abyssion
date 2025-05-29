@@ -1,4 +1,6 @@
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import { calculateFarPlaneSize } from './calculateFarPlaneSize.ts'
+import { getResponsiveCameraZ } from './getResponsiveCameraZ.ts'
 
 /**
  * Responsive dimension configuration for 3D scene elements
@@ -21,45 +23,41 @@ export interface ResponsiveDimensions {
 }
 
 /**
- * Returns baseline dimensions for a typical 16:9 desktop setup
+ * Returns responsive dimensions based on current viewport and configuration
  *
- * This function provides the foundational dimensions that work well for
- * a standard desktop viewing experience. These dimensions are used as
- * the base for all responsive calculations.
+ * This function provides responsive dimensions that adapt to different screen
+ * aspect ratios and orientations. It uses the configured baseline values as
+ * defaults but calculates optimal camera positioning and plane sizing for
+ * the current viewport.
  *
- * The baseline assumes:
- * - 16:9 aspect ratio screen
- * - Desktop viewing distance
- * - Standard FOV and camera positioning
- * - Logo sized appropriately for the viewport
+ * The function:
+ * - Uses responsive camera Z positioning based on aspect ratio
+ * - Calculates video plane size to cover the current viewport
+ * - Maintains logo dimensions from configuration
+ * - Provides overflow for video backgrounds to ensure full coverage
  */
 export const getBaselineDimensions = (): ResponsiveDimensions => {
-  const { planeWidth, planeHeight, cameraConfig } = sceneConfig
+  const { planeWidth, planeHeight } = sceneConfig
 
-  // Use the configured baseline dimensions
-  const logoWidth = planeWidth // 8 units
-  const logoHeight = planeHeight // ~5.12 units (8 / 1.5625 aspect ratio)
+  // Use defaults as specified
+  const fov = 60
 
-  // Use configured camera settings as baseline
-  const fov = cameraConfig.fov // 60 degrees
-  const cameraZ = cameraConfig.position.z // 5 units
+  // Get current screen aspect ratio
+  const screenAspect = globalThis.innerWidth / globalThis.innerHeight
 
-  // Calculate video plane size to cover the viewport at baseline camera distance
-  // For a 16:9 screen at 60° FOV and camera distance of 5 units
-  const fovRad = (fov * Math.PI) / 180
-  const baselineAspect = 16 / 9 // Standard desktop aspect ratio
+  // Calculate responsive camera Z position based on aspect ratio
+  const cameraZ = getResponsiveCameraZ(screenAspect)
 
-  // Calculate visible area at camera distance
-  const visibleHeight = 2 * Math.tan(fovRad / 2) * cameraZ
-  const visibleWidth = visibleHeight * baselineAspect
+  // Calculate plane size needed to cover the current viewport
+  const farPlaneSize = calculateFarPlaneSize(fov, cameraZ, 0)
 
-  // Size video plane to cover visible area with some overflow
-  const videoPlaneWidth = visibleWidth * 1.2 // 20% overflow
-  const videoPlaneHeight = visibleHeight * 1.2 // 20% overflow
+  // Size video plane to cover visible area with overflow for seamless coverage
+  const videoPlaneWidth = farPlaneSize.width
+  const videoPlaneHeight = farPlaneSize.height
 
   return {
-    planeWidth: logoWidth,
-    planeHeight: logoHeight,
+    planeWidth, // Logo width from config
+    planeHeight, // Logo height from config
     videoPlaneWidth,
     videoPlaneHeight,
     cameraZ,

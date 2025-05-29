@@ -11,7 +11,7 @@
  * @param planeZ - Plane Z position (default: 0)
  * @returns Object with width and height needed to cover the FOV
  */
-export const calculatePlaneSize = (
+export const calculateFarPlaneSize = (
   fov: number,
   cameraZ: number,
   planeZ: number = 0,
