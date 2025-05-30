@@ -138,17 +138,57 @@ This codex summarizes the lib/gl codebase, organized by file path, for quick ref
 -   **Purpose**: Provides theme-aware configurations for layers and geometric elements.
 -   **Exports**: Various `getXConfig()` functions (e.g., `getDashedOrbitsConfig`, `getStaticLogoLayers`) that merge JSON config with current theme colors. `randomLayerConfig`.
 
-### ` ./animation/AnimationLoop.ts `
--   **Purpose**: Manages the main animation loop, updating layers, shaders, post-processing effects, and handling mouse interaction and layer regeneration.
--   **Exports**: `setupMouseTracking()`, `animateStaticLayer()`, `animateRandomLayer()`, `updateLayerShaderTime()`, `updateFinalPassEffects()`, `updateBloomEffect()`, `updateDitheringPass()`, `updateSharpeningPass()`, `startAnimationLoop()`.
+### ` ./animation/core/createAnimationEngine.ts `
+-   **Purpose**: Core generic animation engine that applies behaviors to state each frame.
+-   **Exports**: `createAnimationEngine()`: Creates an animation engine with pure functional approach - immutable state, composable behaviors.
+
+### ` ./animation/core/updateAnimationEngine.ts `
+-   **Purpose**: Pure function that updates animation engine state by applying behaviors.
+-   **Exports**: `updateAnimationEngine()`: Immutably applies all behaviors to engine state.
+
+### ` ./animation/core/addBehavior.ts `
+-   **Purpose**: Pure function that adds a behavior to animation engine.
+-   **Exports**: `addBehavior()`: Returns new engine state with added behavior.
+
+### ` ./animation/core/removeBehavior.ts `
+-   **Purpose**: Pure function that removes a behavior from animation engine.
+-   **Exports**: `removeBehavior()`: Returns new engine state with behavior removed.
+
+### ` ./animation/calculations/calculateMouseRotation.ts `
+-   **Purpose**: Pure calculation function for mouse position to rotation conversion.
+-   **Exports**: `calculateMouseRotation()`: Deterministic mouse rotation calculation.
+
+### ` ./animation/calculations/calculateStaticLayerPosition.ts `
+-   **Purpose**: Pure calculation function for static layer breathing animation.
+-   **Exports**: `calculateStaticLayerPosition()`: Deterministic static layer position calculation.
+
+### ` ./animation/calculations/calculateRandomLayerPosition.ts `
+-   **Purpose**: Pure calculation function for random layer chaotic movement.
+-   **Exports**: `calculateRandomLayerPosition()`: Deterministic random layer position calculation.
+
+### ` ./animation/utils/smoothRotationInterpolation.ts `
+-   **Purpose**: Pure interpolation function for smooth rotation transitions.
+-   **Exports**: `smoothRotationInterpolation()`: Linear interpolation for rotations.
+
+### ` ./animation/utils/getRandomInterval.ts `
+-   **Purpose**: Pure function for generating random time intervals.
+-   **Exports**: `getRandomInterval()`: Random interval generation with configurable bounds.
+
+### ` ./animation/createLogoAnimator.ts `
+-   **Purpose**: Main orchestrator that combines pure calculations with necessary side effects.
+-   **Exports**: `createLogoAnimator()`: Logo animation orchestrator using pure functions.
+
+### ` ./animation/AnimationLoop.ts ` (legacy)
+-   **Purpose**: Original monolithic animation loop - kept for backward compatibility.
+-   **Exports**: All original animation functions: Legacy animation system (deprecated in favor of pure functional system).
 
 ### ` ./animation/types.ts `
--   **Purpose**: Defines types for the animation system.
--   **Exports**: `AnimationFrameCallback` (type).
+-   **Purpose**: Defines types for both new pure functional and legacy animation systems.
+-   **Exports**: `AnimationEngineState`, `AnimationBehavior`, `LogoAnimationState`, etc.: Complete type system for animation.
 
 ### ` ./animation/index.ts `
--   **Purpose**: Barrel file for the animation module.
--   **Exports**: All from `./animation/types.ts` and `./animation/AnimationLoop.ts`.
+-   **Purpose**: Main entry point for animation module with pure functional and legacy exports.
+-   **Exports**: All animation system components: Unified animation system exports.
 
 ### ` ./controls/OrbitControlsSetup.ts `
 -   **Purpose**: Sets up Three.js `OrbitControls` and keyboard controls.

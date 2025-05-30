@@ -14,7 +14,7 @@ import { createLogoLayer } from './layers/index.ts'
 import { createGeometricLayer } from './layers/GeometricLayer.ts'
 import { createUILayer } from './layers/UILayer.ts'
 import { createShadowLayer } from './layers/ShadowLayer.ts'
-import { startAnimationLoop } from './animation/AnimationLoop.ts'
+import { startAnimationLoop } from './animation/index.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
 import { getResponsiveCameraZ } from './scene/utils/getResponsiveCameraZ.ts'
 
@@ -269,8 +269,11 @@ export const initGL = async (options: InitOptions) => {
     videoBackground,
   }
 
-  // Set up layer regeneration function
+  // Set up layer regeneration function (for keyboard controls)
   const handleRegenerateRandomLayers = () => {
+    // Note: In the new system, regeneration happens automatically in the logo page orchestrator
+    // This function is kept for keyboard control compatibility
+    // TODO: Consider exposing regeneration trigger from scene orchestrator
     const { planes: newPlanes, layers: newLayers } = logoLayer.regenerate(
       scene,
       state.planes,
@@ -280,7 +283,6 @@ export const initGL = async (options: InitOptions) => {
       stencilTexture,
     )
 
-    // Update state
     state.planes = newPlanes
     state.layers = newLayers
   }
@@ -317,7 +319,7 @@ export const initGL = async (options: InitOptions) => {
     renderer.autoClear = true // Restore default
   }
 
-  // Start animation loop
+  // Start animation loop - use new composable system
   const animationCleanup = startAnimationLoop(state)
 
   // Return cleanup function
