@@ -9,11 +9,19 @@
     "alpha": true
   },
   "postProcessingConfig": {
+    "bokeh": {
+      "focus": 4.0,
+      "aperture": 0.025,
+      "maxblur": 1
+    },
     "bloom": {
       "exposure": 1,
       "bloomStrength": 0.3,
       "bloomThreshold": 0.2,
-      "bloomRadius": 0.8
+      "bloomRadius": 0.8,
+      "bloomStrengthMultiplier": 3,
+      "bloomThresholdMultiplier": 0.3,
+      "thresholdOverride": 0
     },
     "film": {
       "noiseIntensity": 0.05,

@@ -1,5 +1,6 @@
-import { Fragment, h } from 'preact'
 import { Head } from '$fresh/runtime.ts'
+import { Header } from '../components/Header.tsx'
+import { BottomNav } from '../components/BottomNav.tsx'
 
 // Sample band member data
 const bandMembers = [
@@ -34,78 +35,80 @@ export default function Bio() {
         <meta name='description' content='About abyssion - band history and members' />
       </Head>
 
-      <div class='min-h-screen bg-gray-100'>
-        <header class='bg-black text-white p-6'>
-          <div class='max-w-6xl mx-auto'>
-            <nav class='flex justify-between items-center'>
-              <a href='/' class='text-2xl font-bold'>abyssion</a>
-              <div class='space-x-6'>
-                <a href='/shows' class='hover:underline'>Shows</a>
-                <a href='/bio' class='hover:underline font-medium'>Bio</a>
-              </div>
-            </nav>
-          </div>
-        </header>
+      <div class='min-h-screen bg-gray-50 pb-20 md:pb-0'>
+        <Header currentPath='/bio' />
 
-        <main class='max-w-6xl mx-auto p-6'>
-          <h1 class='text-4xl font-bold mb-8'>Lorem Ipsum Dolor</h1>
-
-          <section class='mb-12 bg-white p-8 rounded-lg shadow-md'>
-            <h2 class='text-2xl font-bold mb-4'>Lorem Ipsum</h2>
-            <div class='prose max-w-none'>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        <main class='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+          <div class='space-y-16'>
+            <section class='text-center'>
+              <h1 class='text-5xl font-bold text-gray-900 mb-6'>Lorem Ipsum Dolor</h1>
+              <p class='text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed'>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
               </p>
-              <p class='mt-4'>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-                occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde
-                omnis iste natus error sit voluptatem accusantium doloremque laudantium.
-              </p>
-              <p class='mt-4'>
-                Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
-                enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos.
-              </p>
-            </div>
-          </section>
+            </section>
 
-          <section>
-            <h2 class='text-2xl font-bold mb-6'>Consectetur Adipiscing</h2>
-            <div class='grid gap-8 md:grid-cols-2 lg:grid-cols-3'>
-              {bandMembers.map((member) => (
-                <div key={member.id} class='bg-white rounded-lg shadow-md overflow-hidden'>
-                  <div class='aspect-w-4 aspect-h-3 bg-gray-200'>
-                    {/* Placeholder for member image */}
-                    <div class='w-full h-48 flex items-center justify-center bg-gray-300'>
-                      <span class='text-gray-500'>Photo</span>
+            <section class='grid gap-8 lg:grid-cols-2 items-center'>
+              <div class='space-y-6'>
+                <h2 class='text-3xl font-bold text-gray-900'>Duis Aute Irure</h2>
+                <div class='space-y-4 text-gray-600 leading-relaxed'>
+                  <p>
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+                    occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                  </p>
+                  <p>
+                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam,
+                    eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+                  </p>
+                </div>
+              </div>
+              <div class='bg-white rounded-2xl shadow-sm border border-gray-200 p-8'>
+                <div class='aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center'>
+                  <span class='text-gray-500 text-lg font-medium'>Band Photo</span>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 class='text-3xl font-bold text-gray-900 mb-8 text-center'>Consectetur Adipiscing</h2>
+              <div class='grid gap-8 md:grid-cols-2 lg:grid-cols-3'>
+                {bandMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    class='bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow'
+                  >
+                    <div class='aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center'>
+                      <span class='text-gray-500 font-medium'>Photo</span>
+                    </div>
+                    <div class='p-6'>
+                      <h3 class='text-xl font-semibold text-gray-900 mb-1'>{member.name}</h3>
+                      <p class='text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide'>{member.role}</p>
+                      <p class='text-gray-600 leading-relaxed'>{member.bio}</p>
                     </div>
                   </div>
-                  <div class='p-6'>
-                    <h3 class='text-xl font-bold'>{member.name}</h3>
-                    <p class='text-gray-600 mb-3'>{member.role}</p>
-                    <p>{member.bio}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
 
-          <section class='mt-12 bg-white p-8 rounded-lg shadow-md'>
-            <h2 class='text-2xl font-bold mb-4'>Ipsum Consectetur</h2>
-            <ul class='space-y-4'>
-              <li class='flex flex-col md:flex-row md:items-center'>
-                <span class='font-medium md:w-1/4'>2021</span>
-                <span class='md:w-1/2 font-bold'>"Dolor Sit Amet" (Album)</span>
-                <span class='text-gray-600'>12 tracks</span>
-              </li>
-              <li class='flex flex-col md:flex-row md:items-center'>
-                <span class='font-medium md:w-1/4'>2019</span>
-                <span class='md:w-1/2 font-bold'>"Lorem Ipsum Dolor" (EP)</span>
-                <span class='text-gray-600'>5 tracks</span>
-              </li>
-            </ul>
-          </section>
+            <section class='bg-white rounded-2xl shadow-sm border border-gray-200 p-8'>
+              <h2 class='text-3xl font-bold text-gray-900 mb-8'>Ipsum Consectetur</h2>
+              <div class='space-y-6'>
+                <div class='flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors'>
+                  <span class='font-semibold text-gray-900 md:w-24 flex-shrink-0'>2021</span>
+                  <span class='flex-1 text-lg font-semibold text-gray-900'>"Dolor Sit Amet"</span>
+                  <span class='text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>Album • 12 tracks</span>
+                </div>
+                <div class='flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors'>
+                  <span class='font-semibold text-gray-900 md:w-24 flex-shrink-0'>2019</span>
+                  <span class='flex-1 text-lg font-semibold text-gray-900'>"Lorem Ipsum Dolor"</span>
+                  <span class='text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>EP • 5 tracks</span>
+                </div>
+              </div>
+            </section>
+          </div>
         </main>
+
+        <BottomNav currentPath='/bio' />
       </div>
     </>
   )

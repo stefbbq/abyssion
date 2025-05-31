@@ -1,4 +1,3 @@
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import {
   ditheringFragmentShader,
   ditheringVertexShader,
@@ -7,21 +6,15 @@ import {
   sharpeningFragmentShader,
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
-
-/** Parameters for controlling the bloom post-processing effect */
-export type BloomParams = {
-  /** Controls the overall brightness of the scene */
-  exposure: number
-  /** Controls the intensity of the bloom glow effect */
-  bloomStrength: number
-  /** Minimum brightness threshold for pixels to bloom */
-  bloomThreshold: number
-  /** Controls how far the bloom effect spreads */
-  bloomRadius: number
-}
+import type { PostProcessingConfig } from '../../sceneConfig.json.d.ts'
 
 /**
- * Create post-processing effects
+ * Creates a comprehensive post-processing pipeline with cinematic effects.
+ *
+ * Sets up an EffectComposer with a complete chain of visual effects. Each effect is configured based on
+ * the provided postProcessingConfig and can be individually enabled/disabled.
+ * The pipeline transforms the raw 3D render into a polished, cinematic final image
+ * with analog film characteristics and professional color grading.
  */
 export const createPostProcessing = async (
   THREE: typeof import('three'),
@@ -30,15 +23,36 @@ export const createPostProcessing = async (
   renderer: import('three').WebGLRenderer,
   width: number,
   height: number,
-  bloomParams: BloomParams = sceneConfig.postProcessingConfig.bloom,
+  postProcessingConfig: PostProcessingConfig,
 ) => {
-  const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js')
-  const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js')
-  const { UnrealBloomPass } = await import('three/examples/jsm/postprocessing/UnrealBloomPass.js')
-  const { ShaderPass } = await import('three/examples/jsm/postprocessing/ShaderPass.js')
-  const { FilmPass } = await import('three/examples/jsm/postprocessing/FilmPass.js')
+  const [
+    { EffectComposer },
+    { RenderPass },
+    { UnrealBloomPass },
+    { ShaderPass },
+    { FilmPass },
+    { BokehPass },
+  ] = await Promise.all([
+    import('three/examples/jsm/postprocessing/EffectComposer.js'),
+    import('three/examples/jsm/postprocessing/RenderPass.js'),
+    import('three/examples/jsm/postprocessing/UnrealBloomPass.js'),
+    import('three/examples/jsm/postprocessing/ShaderPass.js'),
+    import('three/examples/jsm/postprocessing/FilmPass.js'),
+    import('three/examples/jsm/postprocessing/BokehPass.js'),
+  ])
 
+  /**
+   * EffectComposer
+   * Manages the composition of multiple post-processing effects.
+   * It combines all the passes into a single render target.
+   */
   const composer = new EffectComposer(renderer)
+
+  /**
+   * RenderPass
+   * Renders the scene to a texture.
+   * This is the first pass in the chain.
+   */
   const renderPass = new RenderPass(scene, camera)
   composer.addPass(renderPass)
 
@@ -47,11 +61,11 @@ export const createPostProcessing = async (
    * Applies a depth-of-field effect, blurring objects outside the focal plane for a more photographic, cinematic look.
    * Useful for drawing attention to the subject and adding realism by simulating camera lens focus.
    */
-  const { BokehPass } = await import('three/examples/jsm/postprocessing/BokehPass.js')
+  const { bokeh } = postProcessingConfig
   const bokehPass = new BokehPass(scene, camera, {
-    focus: 4.0, // Focus distance (adjust as needed)
-    aperture: 0.025, // Smaller = more blur
-    maxblur: 1,
+    focus: bokeh.focus,
+    aperture: bokeh.aperture,
+    maxblur: bokeh.maxblur,
     width,
     height,
   })
@@ -62,7 +76,7 @@ export const createPostProcessing = async (
    * Adds film grain and scanlines to the rendered image, simulating the look of analog film and adding subtle movement and texture.
    * This enhances depth perception and reduces the digital "cleanliness" of the render.
    */
-  const { film } = sceneConfig.postProcessingConfig
+  const { film } = postProcessingConfig
   const filmPass = new FilmPass(
     film.noiseIntensity,
     film.scanlineIntensity,
@@ -76,21 +90,22 @@ export const createPostProcessing = async (
    * Creates a glowing effect around bright areas of the image, simulating how real cameras and eyes perceive intense light.
    * This makes highlights pop and gives the scene a more atmospheric, dreamy quality.
    */
+  const { bloom } = postProcessingConfig
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(width, height),
-    bloomParams.bloomStrength * 3, // Increase bloom strength multiplier
-    bloomParams.bloomRadius,
-    bloomParams.bloomThreshold * 0.3, // Lower threshold for more effect
+    bloom.bloomStrength * bloom.bloomStrengthMultiplier,
+    bloom.bloomRadius,
+    bloom.bloomThreshold * bloom.bloomThresholdMultiplier,
   )
   composer.addPass(bloomPass)
-  bloomPass.threshold = 0 // Make bloom visible even on dark colors
+  bloomPass.threshold = bloom.thresholdOverride
 
   /**
    * SharpeningPass
    * Enhances fine details and edges in the image, counteracting any softness introduced by previous effects (like bloom or bokeh).
    * Helps keep the final result crisp and visually striking.
    */
-  const { sharpening } = sceneConfig.postProcessingConfig
+  const { sharpening } = postProcessingConfig
   const sharpeningPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
@@ -107,7 +122,7 @@ export const createPostProcessing = async (
    * Applies final color grading and chromatic aberration (subtle color fringing on edges) to give the render a unique visual signature.
    * This is the last "creative" pass before output.
    */
-  const { finalPass: finalPassConfig } = sceneConfig.postProcessingConfig
+  const { finalPass: finalPassConfig } = postProcessingConfig
   const finalPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },

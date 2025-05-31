@@ -1,9 +1,3 @@
-/**
- * Logo3D main types
- *
- * Core type definitions used across multiple modules
- */
-
 import type { Camera, Group, Mesh, Scene, WebGLRenderer } from 'three'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'

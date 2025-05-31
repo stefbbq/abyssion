@@ -1,8 +1,13 @@
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
- * Create and initialize the camera with responsive settings
+ * Creates and configures a perspective camera optimized for logo visualization.
+ *
+ * Sets up a THREE.PerspectiveCamera with responsive field of view and positioning
+ * calculated to ensure consistent logo framing across different screen aspect ratios.
+ * The camera is positioned along the Z-axis at a distance that maintains proper
+ * logo scale regardless of viewport dimensions, with FOV and position automatically
+ * adjusted based on the baseline dimensions system for optimal viewing.
  */
 export const createCamera = (
   THREE: typeof import('three'),
@@ -11,7 +16,7 @@ export const createCamera = (
 
   const camera = new THREE.PerspectiveCamera(
     responsiveDimensions.fov,
-    globalThis.innerWidth / globalThis.innerHeight, // Use actual screen dimensions
+    globalThis.innerWidth / globalThis.innerHeight,
     0.1,
     6000,
   )

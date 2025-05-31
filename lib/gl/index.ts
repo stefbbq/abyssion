@@ -48,7 +48,7 @@ export const initGL = async (options: InitOptions) => {
   let controls: any = undefined
 
   // Add video background
-  const videoBackground = await addVideoBackground(THREE, scene, camera) as any
+  const videoBackground = await addVideoBackground(THREE, scene) as any
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
@@ -58,7 +58,7 @@ export const initGL = async (options: InitOptions) => {
     renderer,
     width,
     height,
-    postProcessingConfig.bloom,
+    postProcessingConfig,
   )
 
   // Create the 2D UI overlay (scene, camera, resize)
@@ -83,6 +83,7 @@ export const initGL = async (options: InitOptions) => {
 
     // Composer needs to be resized as well
     composer.setSize(globalThis.innerWidth, globalThis.innerHeight)
+
     // Set the same high pixel ratio for the composer
     composer.setPixelRatio(Math.min(
       globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,

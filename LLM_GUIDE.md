@@ -121,3 +121,66 @@ x ? y ? a : b : c
 - **Concise communication:** Brief, direct responses
 - **No acknowledgment** of user emotions
 - **Immediate action:** Execute plans without confirmation
+
+--- conventions
+
+Totally normal to feel this way. The longer you do this, the more edge cases and tradeoffs you see—and that makes every choice feel heavier. Here’s the straight version, no fluff:
+
+⸻
+
+🔧 When to Use Classes vs. Composables
+	•	Use classes when:
+	•	You’re modeling a domain entity or lifecycle-based object (User, Car, etc.).
+	•	You want inheritance or need to override behavior cleanly.
+	•	You care about encapsulating internal state with method access.
+	•	Use composables (functions + closures) when:
+	•	Behavior is king, not identity.
+	•	You want easier testing, reuse, and composition.
+	•	You’re in functional-heavy or React-style codebases.
+
+Most modern JS/TS leans composable. Cleaner dependency injection, less state weirdness.
+
+⸻
+
+📁 File Structure & Function Count
+	•	1 function per file: Good for utilities, pure functions, and strict composability. Annoying if overdone—death by tabs.
+	•	Multiple exports per file: Best when they’re conceptually cohesive (e.g. all related to auth, or useXYZ React hooks).
+	•	10 random exports per file: Avoid. Hard to scan, brittle in refactors.
+
+Rule of thumb: if you feel like scrolling sucks, you’re cramming too much.
+
+⸻
+
+📦 Barrel Files
+
+Use barrel files (index.ts exporting from sibling modules) when:
+	•	You want a clean public API surface for a module or folder.
+	•	You’re consuming many things from a directory in multiple places.
+
+Don’t overuse. Barrel hell = circular deps + unclear provenance.
+
+⸻
+
+🧭 Named vs. Default Exports
+	•	Named exports: Clear, auto-suggest works, easier refactors. Default in most teams.
+	•	Default exports: Handy when there’s one main thing and naming isn’t critical (export default function handler()).
+
+Avoid mixing them in the same file unless you’re very intentional.
+
+⸻
+
+🧠 Mental Models That Help
+	•	Group by feature, not type: Keep auth/login.ts, auth/validate.ts instead of utils/, services/, etc.
+	•	Stable layers: Use layers like core, features, app or domain, infra, ui, etc. They clarify flow.
+	•	Draw the tree: Visualize import direction. Dependencies should flow inward, not circularly.
+
+⸻
+
+✅ Practical Defaults That Don’t Suck
+	•	Named exports only.
+	•	Barrel files only at module boundaries.
+	•	Max 1–3 top-level functions per file unless it’s a utility file.
+	•	Prefer composables over classes unless you’re in OOP land.
+	•	Organize by feature > domain > type.
+
+Want a real example based on your current project setup? Happy to go through it with you.

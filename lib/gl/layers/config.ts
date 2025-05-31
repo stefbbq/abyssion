@@ -1,5 +1,5 @@
 import type { LogoLayer } from '../layers/LogoLayer.ts'
-import { getCurrentTheme } from '../theme.ts'
+import { getCurrentTheme } from '../theme/theme.ts'
 import type { GeometricOptions } from './GeometricLayer.ts'
 import layersConfig from '@lib/configLayers.json' with { type: 'json' }
 

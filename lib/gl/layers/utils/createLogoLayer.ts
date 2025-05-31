@@ -1,15 +1,13 @@
-import { LogoLayer } from '../LogoLayer.ts'
+import type { LogoLayer } from '../LogoLayer.ts'
 import { randomLayerConfig } from '../config.ts'
 import { FPS_OPTIONS } from '../constants.ts'
 import { getRandomColor } from './getRandomColor.ts'
-import { getCurrentTheme } from '../../theme.ts'
+import { getCurrentTheme } from '../../theme/theme.ts'
 
 /**
  * Generate a random layer with position based on index
  */
 export const createLogoLayer = (
-  index: number,
-  totalRandom: number,
   THREE: typeof import('three'),
 ): LogoLayer => {
   const {
@@ -60,8 +58,7 @@ export const createLogoLayer = (
   const maxOpacity = 0.5 * Math.max(0.05, 1 - distanceFactor)
   const opacity = opacityBase + Math.random() * maxOpacity
 
-  // noise parameters
-  // scale increases with distance (more chaotic in background)
+  // noise: scale increases with distance (more chaotic in background)
   const noiseScale = noiseScaleBase + Math.random() * 9 + Math.abs(zPos) * 10
 
   // Random fps from predefined options

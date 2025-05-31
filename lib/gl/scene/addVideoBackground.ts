@@ -6,7 +6,6 @@ import { createVideoBackground } from './createVideoBackground.ts'
 export const addVideoBackground = async (
   THREE: typeof import('three'),
   scene: import('three').Scene,
-  camera: import('three').Camera,
 ): Promise<unknown> => {
-  return await createVideoBackground(THREE, scene, camera as import('three').PerspectiveCamera)
+  return await createVideoBackground(THREE, scene)
 }

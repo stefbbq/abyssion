@@ -23,8 +23,7 @@ export const calculateFarPlaneSize = (
   const height = 2 * distance * Math.tan(fovRad / 2)
 
   // Get current screen aspect ratio
-  const screenAspect = globalThis.innerWidth / globalThis.innerHeight
-  const width = height * screenAspect
+  const width = height * 1.7777777777777777
 
   return { width, height }
 }

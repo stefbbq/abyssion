@@ -6,13 +6,18 @@ import { createVideoCycle } from '../textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '../types.ts'
 
 /**
- * Create video background planes and set up video cycling
- * This handles all the scene-related setup, then passes the planes to VideoCycle for texture management
+ * Creates a dual-buffer video background system with seamless cycling and responsive scaling.
+ *
+ * Sets up two video planes (front and back buffers) for smooth video transitions without
+ * interruption. Handles responsive scaling to ensure video coverage across all viewport sizes
+ * with 10% overflow to prevent edge artifacts. Integrates with the VideoCycle system for
+ * automatic video loading, cycling, and texture management. Returns a manager that provides
+ * update and disposal methods for the complete video background lifecycle.
+ * Returns undefined if video backgrounds are disabled in configuration.
  */
 export const createVideoBackground = async (
   THREE: typeof import('three'),
   scene: THREE.Scene,
-  camera: THREE.PerspectiveCamera,
 ): Promise<VideoBackgroundManager | undefined> => {
   if (!videoCycleConfig.enabled) return undefined
 
@@ -86,6 +91,6 @@ export const createVideoBackground = async (
       // Dispose video cycle
       videoCycle.dispose()
     },
-    mesh: frontBuffer.mesh, // For compatibility
+    mesh: frontBuffer.mesh,
   }
 }

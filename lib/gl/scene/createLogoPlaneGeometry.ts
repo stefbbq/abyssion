@@ -1,7 +1,12 @@
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
- * Create plane geometry for logo layers with responsive dimensions
+ * Creates standardized plane geometry for logo layer rendering with responsive dimensions.
+ *
+ * Generates a THREE.PlaneGeometry sized according to the baseline dimensions system,
+ * which ensures consistent logo scaling across different screen sizes and aspect ratios.
+ * This geometry serves as the foundation for all logo layer meshes in the 3D scene,
+ * providing a uniform canvas for shader-based logo rendering effects.
  */
 export const createLogoPlaneGeometry = (THREE: typeof import('three')): import('three').PlaneGeometry => {
   const { planeWidth, planeHeight } = getBaselineDimensions()

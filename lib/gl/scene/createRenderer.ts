@@ -1,7 +1,13 @@
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
- * Create and initialize the renderer
+ * Creates and configures a WebGL renderer with responsive sizing and DOM integration.
+ *
+ * Sets up a Three.js WebGLRenderer with antialiasing and alpha blending enabled,
+ * automatically handles viewport resizing, and integrates the canvas into the provided
+ * DOM container with proper styling for full-screen coverage. Clears any existing
+ * content from the container and applies CSS positioning to center the canvas.
+ * Pixel ratio is capped based on sceneConfig to prevent performance issues on high-DPI displays.
  */
 export const createRenderer = (
   THREE: typeof import('three'),

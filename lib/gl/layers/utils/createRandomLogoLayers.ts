@@ -9,5 +9,5 @@ export const createRandomLogoLayers = (THREE: typeof import('three')): LogoLayer
   const { minLayers, maxAdditionalLayers } = randomLayerConfig
   const numRandomLayers = minLayers + Math.floor(Math.random() * maxAdditionalLayers)
 
-  return Array.from({ length: numRandomLayers }, (_, i) => createLogoLayer(i, numRandomLayers, THREE))
+  return Array.from({ length: numRandomLayers }, (_, i) => createLogoLayer(THREE))
 }
