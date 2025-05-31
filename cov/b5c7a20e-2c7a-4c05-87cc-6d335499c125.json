@@ -1,0 +1,69 @@
+{
+  "scriptId": "319",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/calculations/__test__/calculateRegenerationTiming.test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3612, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 237, "endOffset": 1111, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 323, "endOffset": 709, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 773, "endOffset": 1107, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1175, "endOffset": 2488, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1253, "endOffset": 1713, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [
+        { "startOffset": 1791, "endOffset": 2484, "count": 1 },
+        { "startOffset": 2008, "endOffset": 2162, "count": 10 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2219, "endOffset": 2302, "count": 10 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2545, "endOffset": 3609, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2613, "endOffset": 2776, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2842, "endOffset": 3193, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 3257, "endOffset": 3605, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

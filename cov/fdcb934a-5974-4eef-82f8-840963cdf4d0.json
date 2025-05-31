@@ -1,0 +1,76 @@
+{
+  "scriptId": "319",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/core/__test__/createAnimationEngine.test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 3014, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 204, "endOffset": 1308, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 281, "endOffset": 632, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 692, "endOffset": 1304, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "behavior1",
+      "ranges": [{ "startOffset": 785, "endOffset": 854, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "behavior2",
+      "ranges": [{ "startOffset": 878, "endOffset": 947, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1361, "endOffset": 2043, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1430, "endOffset": 1650, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1708, "endOffset": 2039, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "behavior",
+      "ranges": [{ "startOffset": 1735, "endOffset": 1804, "count": 0 }],
+      "isBlockCoverage": false
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2095, "endOffset": 3011, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2171, "endOffset": 2651, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2721, "endOffset": 3007, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "behavior",
+      "ranges": [{ "startOffset": 2748, "endOffset": 2766, "count": 0 }],
+      "isBlockCoverage": false
+    }
+  ]
+}

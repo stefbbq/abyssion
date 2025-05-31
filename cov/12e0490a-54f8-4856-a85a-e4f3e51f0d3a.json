@@ -1,0 +1,16 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/calculations/calculateRandomLayerPosition.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 657, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "calculateRandomLayerPosition",
+      "ranges": [{ "startOffset": 116, "endOffset": 655, "count": 33 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

@@ -11,7 +11,7 @@ export const createPortfolioPageOrchestrator = (): AnimationOrchestrator => {
   let isInitialized = false
 
   const update = (context: AnimationContext) => {
-    const { state, time } = context
+    const { time } = context
 
     // Initialize portfolio elements if needed
     if (!isInitialized) {

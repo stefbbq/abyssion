@@ -1,5 +1,6 @@
-import { createMouseTracking } from '../../controls/MouseControls.ts'
+import { createMouseTracking } from '../../controls/index.ts'
 import { calculateRotationInterpolation } from '../calculations/calculateRotationInterpolation.ts'
+import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
 
 /**
  * Shared behaviors available to all animation orchestrators
@@ -14,7 +15,7 @@ export type SharedBehaviors = {
  * Create shared behaviors that persist across page changes
  */
 export const createSharedBehaviors = (): SharedBehaviors => {
-  const mouseTracking = createMouseTracking()
+  const mouseTracking = createMouseTracking(animationConfig.userReactivity.mouseCoefficient)
 
   const applyMouseRotation = (scene: any) => {
     const mouseTarget = mouseTracking.getCurrentTarget()

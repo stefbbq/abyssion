@@ -1,0 +1,16 @@
+{
+  "scriptId": "322",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/core/createAnimationEngine.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 298, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "createAnimationEngine",
+      "ranges": [{ "startOffset": 153, "endOffset": 296, "count": 12 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

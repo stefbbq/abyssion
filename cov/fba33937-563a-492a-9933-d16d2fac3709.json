@@ -1,0 +1,16 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/core/addBehavior.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 247, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "addBehavior",
+      "ranges": [{ "startOffset": 138, "endOffset": 245, "count": 17 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

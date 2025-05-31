@@ -1,6 +1,8 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
+import controlsConfig from '../configControls.json' with { type: 'json' }
 import { createScene } from './scene/createScene.ts'
 import { createCamera } from './scene/createCamera.ts'
 import { createRenderer } from './scene/createRenderer.ts'
@@ -9,7 +11,7 @@ import { addLensFlares } from './scene/addLensFlares.ts'
 import { createLogoPlaneGeometry } from './scene/createLogoPlaneGeometry.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
 import { DebugOverlay } from './debug/DebugOverlay.ts'
-import { setupKeyboardControls, setupOrbitControls } from './controls/OrbitControlsSetup.ts'
+import { createControlsSystem } from './controls/index.ts'
 import { createLogoLayer } from './layers/index.ts'
 import { createGeometricLayer } from './layers/GeometricLayer.ts'
 import { createUILayer } from './layers/UILayer.ts'
@@ -19,7 +21,7 @@ import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
 import { getResponsiveCameraZ } from './scene/utils/getResponsiveCameraZ.ts'
 
 /**
- * Initialize the Logo3D renderer
+ * Initialize the GL scene
  */
 export const initGL = async (options: InitOptions) => {
   const { planeWidth, planeHeight, rendererConfig, postProcessingConfig } = sceneConfig
@@ -101,7 +103,20 @@ export const initGL = async (options: InitOptions) => {
 
   globalThis.addEventListener('resize', handleResize)
   await addLensFlares(THREE, scene)
-  controls = await setupOrbitControls(camera, renderer.domElement)
+
+  // Create the controls system with proper configuration
+  const controlsSystem = await createControlsSystem(camera, renderer.domElement, {
+    keyboardConfig: controlsConfig.inputKeys,
+    mouseCoefficient: animationConfig.userReactivity.mouseCoefficient,
+    onToggleRotation: () => {
+      log(lc.GL, 'Rotation toggled via keyboard')
+    },
+    onRegenerateLayers: () => {
+      handleRegenerateRandomLayers()
+    },
+  })
+
+  controls = controlsSystem.orbitControls
 
   // Setup DebugOverlay after canvas is in DOM
   // TODO: this really should be a preact component
@@ -288,12 +303,6 @@ export const initGL = async (options: InitOptions) => {
     state.layers = newLayers
   }
 
-  // Set up keyboard controls
-  const keyboardCleanup = setupKeyboardControls(
-    controls,
-    handleRegenerateRandomLayers,
-  )
-
   // Override the render method to include our overlay
   const origRender = composer.render
   composer.render = function () {
@@ -329,8 +338,10 @@ export const initGL = async (options: InitOptions) => {
     animationCleanup()
 
     // Remove event listeners
-    keyboardCleanup()
     globalThis.removeEventListener('resize', handleResize)
+
+    // Clean up controls system
+    controlsSystem.cleanup()
 
     // Clean up video background
     if (videoBackground) {

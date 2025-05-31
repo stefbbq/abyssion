@@ -1,0 +1,16 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/utils/getRandomInterval.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 303, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getRandomInterval",
+      "ranges": [{ "startOffset": 190, "endOffset": 301, "count": 1223 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

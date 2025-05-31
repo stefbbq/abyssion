@@ -1,0 +1,21 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/core/removeBehavior.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 252, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "removeBehavior",
+      "ranges": [{ "startOffset": 148, "endOffset": 250, "count": 17 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 225, "endOffset": 244, "count": 30 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

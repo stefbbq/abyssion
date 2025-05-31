@@ -1,0 +1,24 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/calculations/calculateChromaGlitchEffect.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 1430, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "calculateChromaGlitchEffect",
+      "ranges": [
+        { "startOffset": 175, "endOffset": 1428, "count": 31007 },
+        { "startOffset": 429, "endOffset": 559, "count": 30001 },
+        { "startOffset": 559, "endOffset": 654, "count": 1006 },
+        { "startOffset": 654, "endOffset": 1089, "count": 5 },
+        { "startOffset": 1089, "endOffset": 1182, "count": 1001 },
+        { "startOffset": 1182, "endOffset": 1311, "count": 0 },
+        { "startOffset": 1311, "endOffset": 1427, "count": 1001 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}

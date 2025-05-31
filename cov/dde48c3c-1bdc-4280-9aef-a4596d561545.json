@@ -1,0 +1,16 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/utils/smoothRotationInterpolation.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 246, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "smoothRotationInterpolation",
+      "ranges": [{ "startOffset": 155, "endOffset": 244, "count": 51 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

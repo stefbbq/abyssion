@@ -1,0 +1,16 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/calculations/calculateMouseRotation.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 304, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "calculateMouseRotation",
+      "ranges": [{ "startOffset": 164, "endOffset": 302, "count": 9 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

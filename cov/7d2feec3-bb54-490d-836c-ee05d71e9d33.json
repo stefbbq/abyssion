@@ -1,0 +1,25 @@
+{
+  "scriptId": "321",
+  "url": "file:///Users/stefansoc/Development/abyssion/lib/gl/animation/calculations/calculateRegenerationTiming.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 539, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "getRandomInterval",
+      "ranges": [{ "startOffset": 115, "endOffset": 154, "count": 13 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "calculateRegenerationTiming",
+      "ranges": [
+        { "startOffset": 270, "endOffset": 537, "count": 16 },
+        { "startOffset": 484, "endOffset": 505, "count": 13 },
+        { "startOffset": 506, "endOffset": 530, "count": 3 }
+      ],
+      "isBlockCoverage": true
+    }
+  ]
+}
