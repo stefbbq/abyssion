@@ -75,7 +75,7 @@ export const createSceneOrchestrator = (state: RendererState) => {
     time += animation.timeIncrement
 
     // Update orbit controls
-    state.controls.update()
+    state.controls?.update()
 
     // Apply shared behaviors
     shared.applyMouseRotation(state.scene)

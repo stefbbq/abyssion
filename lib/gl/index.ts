@@ -10,6 +10,7 @@ import { createControlsSystem } from './controls/index.ts'
 import { createUILayer } from './layers/UILayer.ts'
 import { startAnimationLoop } from './animation/index.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
+import { isDebugModeEnabled } from './debug/index.ts'
 import {
   createCleanupFunction,
   setupCoreRendering,
@@ -23,7 +24,7 @@ import {
  * Initialize the GL scene using composable setup functions
  */
 export const initGL = async (options: InitOptions) => {
-  const { planeWidth, planeHeight, rendererConfig, postProcessingConfig } = sceneConfig
+  const { rendererConfig, postProcessingConfig } = sceneConfig
   const { width, height, outlineTexturePath, stencilTexturePath, container } = options
   const THREE = await import('three')
 
@@ -112,18 +113,20 @@ export const initGL = async (options: InitOptions) => {
     THREE,
   })
 
-  // Create the controls system with the regeneration handler
-  const controlsSystem = await createControlsSystem(camera, renderer.domElement, {
-    keyboardConfig: controlsConfig.inputKeys,
-    mouseCoefficient: animationConfig.userReactivity.mouseCoefficient,
-    onToggleRotation: () => {
-      log(lc.GL, 'Rotation toggled via keyboard')
-    },
-    onRegenerateLayers: handleRegenerateRandomLayers,
-  })
+  // Create the controls system only if debug mode is enabled
+  const controlsSystem = isDebugModeEnabled()
+    ? await createControlsSystem(camera, renderer.domElement, {
+      keyboardConfig: controlsConfig.inputKeys,
+      mouseCoefficient: animationConfig.userReactivity.mouseCoefficient,
+      onToggleRotation: () => {
+        log(lc.GL, 'Rotation toggled via keyboard')
+      },
+      onRegenerateLayers: handleRegenerateRandomLayers,
+    })
+    : null
 
-  // Update state with the controls
-  state.controls = controlsSystem.orbitControls
+  // Update state with the controls (null if debug mode disabled)
+  state.controls = controlsSystem?.orbitControls || null
 
   // Override the render method to include our overlay
   const origRender = composer.render
@@ -166,7 +169,7 @@ export const initGL = async (options: InitOptions) => {
     shapeLayer,
     shadowLayer,
     uiLayer,
-    controls: controlsSystem.orbitControls,
+    controls: controlsSystem?.orbitControls || null,
     renderer,
     composer,
   })

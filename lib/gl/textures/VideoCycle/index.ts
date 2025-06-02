@@ -7,13 +7,13 @@ import { shouldStartPlayback } from './utils/shouldStartPlayback.ts'
 import { selectNextVideoIndex } from './utils/selectNextVideoIndex.ts'
 import { updateRecentIndices } from './utils/updateRecentIndices.ts'
 import type { VideoBackgroundManager } from '../../types.ts'
-import type { BufferObject, PlaybackState, VideoTexture } from './VideoCycle.d.ts'
+import type { BufferObject, PlaybackState, VideoTexture } from './types.ts'
 import ms from 'ms'
 
 export const createVideoCycle = (
   frontBuffer: BufferObject,
   backBuffer: BufferObject,
-): Promise<VideoBackgroundManager> => {
+): VideoBackgroundManager => {
   const {
     enabled,
     cycling: { minVideoLength, maxVideoLength, antiRepeat },
@@ -307,5 +307,5 @@ export const createVideoCycle = (
     update,
     dispose,
     mesh: activeBuffer.mesh,
-  } as VideoBackgroundManager
+  }
 }

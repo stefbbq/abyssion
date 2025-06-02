@@ -1,33 +1,23 @@
 /**
- * theme.ts - Color theming system for logo3d
- *
- * Provides a centralized theme system to manage all colors across the visualization
+ * GL theme system for 3D logo visualization
+ * Uses shared base themes with GL-specific extensions
  */
 
-import type { Logo3DTheme } from './theme.d.ts'
-import { TECHSCAPE_THEME } from './themes/techscape.ts'
+import type { GLTheme } from './types.ts'
+import { techscapeTheme } from '@libtheme/themes/index.ts'
+import { createGLTheme } from './createGLTheme.ts'
 
 // current active theme
-let currentTheme = TECHSCAPE_THEME
+let currentTheme = createGLTheme(techscapeTheme)
 
 /**
- * Get the current active theme
+ * Get the current active GL theme
  */
-export const getCurrentTheme = (): Logo3DTheme => currentTheme
+export const getCurrentTheme = (): GLTheme => currentTheme
 
 /**
- * Set the active theme
+ * Set the active GL theme from base theme
  */
-export const setTheme = (theme: Logo3DTheme): void => {
+export const setTheme = (theme: GLTheme): void => {
   currentTheme = theme
 }
-
-export { rgbToHex } from './utils/rgbToHex.ts'
-export { hexToRGB } from './utils/hexToRGB.ts'
-export { colorToRGB } from './utils/colorToRGB.ts'
-export { darkenHex } from './utils/darkenHex.ts'
-export { lightenHex } from './utils/lightenHex.ts'
-export { createRGB } from './utils/createRGB.ts'
-export { mixRGB } from './utils/mixRGB.ts'
-export { mergeTheme } from './utils/mergeTheme.ts'
-export { createTheme } from './utils/createTheme.ts'

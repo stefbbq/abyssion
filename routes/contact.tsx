@@ -1,6 +1,6 @@
 import { Head } from '$fresh/runtime.ts'
 import { Header } from '../components/Header.tsx'
-import { BottomNav } from '../components/BottomNav.tsx'
+import BottomNav from '../islands/BottomNav.tsx'
 import { Button } from '../components/Button.tsx'
 
 export default function Contact() {

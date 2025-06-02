@@ -211,10 +211,8 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
     }
 
     // Update controls and render
-    dependencies.controls.update()
-    if (dependencies.videoBackground) {
-      dependencies.videoBackground.update(animation.timeIncrement)
-    }
+    dependencies.controls?.update()
+    if (dependencies.videoBackground) dependencies.videoBackground.update(animation.timeIncrement)
     dependencies.composer.render()
 
     animationId = requestAnimationFrame(tick)

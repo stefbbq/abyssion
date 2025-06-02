@@ -1,10 +1,11 @@
 /**
  * DebugOverlay.ts
  * Adds UI instructions and a debug panel for live scene inspection and tuning
- * TODO: refactor this into a preact component?
+ * Only visible when debug mode is enabled via query parameter or cookie
  */
 
 import controlsConfig from '../../configControls.json' with { type: 'json' }
+import { isDebugModeEnabled, setDebugMode } from './utils/index.ts'
 
 /**
  * Configuration options for the debug overlay
@@ -14,8 +15,8 @@ export type DebugOverlayOptions = {
   showInstructions?: boolean
   /** Whether to show the debug panel */
   showDebugPanel?: boolean
-  /** Initial debug state on creation */
-  initialDebug?: boolean
+  /** Force debug state (overrides query param/cookie check) */
+  forceDebug?: boolean
   /** Callback when debug mode is toggled */
   onToggleDebug?: (enabled: boolean) => void
   /** Callback when depth of field parameters change */
@@ -69,6 +70,7 @@ export class DebugOverlay {
 
   /**
    * Create a new debug overlay
+   * Only creates visible overlay if debug mode is enabled
    *
    * @param container - The HTML element to attach the overlay to
    * @param options - Configuration options for the overlay
@@ -76,12 +78,16 @@ export class DebugOverlay {
   constructor(container: HTMLElement, options: DebugOverlayOptions = {}) {
     this.container = container
     this.options = options
-    this.debugEnabled = options.initialDebug ?? false
+    this.debugEnabled = options.forceDebug ?? isDebugModeEnabled()
     this.instructions = document.createElement('div')
     this.debugPanel = document.createElement('div')
-    this.setup()
-    this.setDebug(this.debugEnabled)
-    window.addEventListener('keydown', this.handleKey)
+
+    // Only set up the overlay if debug mode is enabled
+    if (this.debugEnabled || options.forceDebug !== undefined) {
+      this.setup()
+      this.setDebug(this.debugEnabled)
+      window.addEventListener('keydown', this.handleKey)
+    }
   }
 
   /**
@@ -115,27 +121,38 @@ export class DebugOverlay {
    */
   private handleKey = (e: KeyboardEvent): void => {
     if ((controlsConfig.inputKeys as any).toggleDebug?.includes(e.key)) {
+      // If debug overlay wasn't initialized, check if we should enable it now
+      if (!this.isAvailable() && isDebugModeEnabled()) {
+        this.setup()
+        window.addEventListener('keydown', this.handleKey)
+      }
       this.toggleDebug()
     }
   }
 
   /**
    * Set the debug panel visibility state
+   * Only works if debug overlay is available
    *
    * @param enabled - Whether to show the debug panel
    * @public
    */
   public setDebug(enabled: boolean): void {
+    if (!this.isAvailable()) return
+
     this.debugEnabled = enabled
     this.debugPanel.style.display = enabled ? 'block' : 'none'
     if (this.options.onToggleDebug) this.options.onToggleDebug(enabled)
+    setDebugMode(enabled)
   }
 
   /**
    * Toggle the debug panel visibility
+   * Only works if debug overlay is available
    * @public
    */
   public toggleDebug(): void {
+    if (!this.isAvailable()) return
     this.setDebug(!this.debugEnabled)
   }
 
@@ -283,5 +300,13 @@ export class DebugOverlay {
   public destroy(): void {
     window.removeEventListener('keydown', this.handleKey)
     this.container.removeChild(this.debugPanel)
+  }
+
+  /**
+   * Check if debug overlay is available (was initialized)
+   * @public
+   */
+  public isAvailable(): boolean {
+    return this.debugEnabled || this.options.forceDebug !== undefined
   }
 }

@@ -6,7 +6,7 @@
  * @param randomness - How much to randomize (0.0 = no change, 1.0 = full random)
  * @returns Three.js Color object
  */
-import type { RGBColor } from '../../theme/theme.d.ts'
+import type { RGBColor } from '@libtheme/types.ts'
 
 export const getRandomColor = (
   THREE: typeof import('three'),

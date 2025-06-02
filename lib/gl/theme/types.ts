@@ -1,36 +1,15 @@
 /**
- * RGB color with normalized values (0-1)
- * Used for precise color calculations and Three.js compatibility
+ * GL theme type definitions
+ * Re-exports shared types and GL-specific extensions
  */
-export type RGBColor = {
-  /** Red component (0.0 - 1.0) */
-  r: number
-  /** Green component (0.0 - 1.0) */
-  g: number
-  /** Blue component (0.0 - 1.0) */
-  b: number
-}
+
+import type { BaseTheme, HexColor, RGBColor } from '@libtheme/types.ts'
 
 /**
- * Hex color as a number (e.g., 0xff0000 for red)
- * Efficient format for shader uniforms and CSS conversions
+ * GL-specific theme extension for GL visualization
+ * Extends base theme with rendering layer specific colors
  */
-export type HexColor = number
-
-/**
- * Complete theme definition for the 3D logo visualization system
- * Provides all color values needed across different rendering layers
- */
-export type Logo3DTheme = {
-  /** Primary brand color - main logo identity */
-  primary: RGBColor
-  /** Secondary accent color - used for highlights and effects */
-  secondary: RGBColor
-  /** Tertiary accent color - used for complementary effects */
-  accent: RGBColor
-  /** Scene background color */
-  background: HexColor
-
+export type GLTheme = BaseTheme & {
   /** Base stencil mask color for logo rendering */
   stencilColor: RGBColor
   /** Solid base layer underneath logo outlines */

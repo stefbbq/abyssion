@@ -1,8 +1,8 @@
-import type { LogoLayer } from '../LogoLayer.ts'
-import { randomLayerConfig } from '../config.ts'
-import { FPS_OPTIONS } from '../constants.ts'
+import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
+import { randomLayerConfig } from '@libgl/layers/config.ts'
+import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
 import { getRandomColor } from './getRandomColor.ts'
-import { getCurrentTheme } from '../../theme/theme.ts'
+import { getCurrentTheme } from '@libgl/theme/theme.ts'
 
 /**
  * Generate a random layer with position based on index

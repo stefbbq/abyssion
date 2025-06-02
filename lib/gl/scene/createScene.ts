@@ -1,4 +1,4 @@
-import { getCurrentTheme } from '../theme/theme.ts'
+import { getCurrentTheme } from '@libgl/theme/theme.ts'
 
 /**
  * Create and initialize the basic 3D scene

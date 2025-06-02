@@ -34,7 +34,7 @@ export type RendererState = {
   camera: Camera
   renderer: WebGLRenderer
   composer: EffectComposer
-  controls: OrbitControls
+  controls: OrbitControls | null
   bloomPass: UnrealBloomPass
   finalPass: ShaderPass
   ditheringPass: ShaderPass
