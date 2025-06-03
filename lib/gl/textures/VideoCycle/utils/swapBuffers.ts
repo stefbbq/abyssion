@@ -30,8 +30,8 @@ export const swapBuffers = async (params: SwapBuffersParams): Promise<{
   const plannedStartTime = hiddenBuffer._plannedStartTime
   const plannedDuration = hiddenBuffer._plannedDuration
 
-  if (plannedVideoIndex === undefined || plannedStartTime === undefined || plannedDuration === undefined) {
-    console.error(`[${new Date().toLocaleTimeString()}] Critical error: Planned video state not found on hiddenBuffer. Cannot swap.`)
+  if (!plannedVideoIndex || !plannedStartTime || !plannedDuration) {
+    log.error(lc.GL_VIDEO, 'Critical error: Planned video state not found on hiddenBuffer. Cannot swap.')
     return {
       newActiveBuffer: activeBuffer,
       newHiddenBuffer: hiddenBuffer,
@@ -44,7 +44,7 @@ export const swapBuffers = async (params: SwapBuffersParams): Promise<{
   const newVideoElement = videos[plannedVideoIndex]
 
   if (!newVideoElement) {
-    console.error(`[${new Date().toLocaleTimeString()}] Video at index ${plannedVideoIndex} not found for new buffer. Cannot swap.`)
+    log.error(lc.GL_VIDEO, `Video at index ${plannedVideoIndex} not found for new buffer. Cannot swap.`)
     return {
       newActiveBuffer: activeBuffer,
       newHiddenBuffer: hiddenBuffer,

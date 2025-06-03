@@ -23,5 +23,8 @@ export const initializeLogger = (): void => {
     globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => refreshColors())
   }
 
-  console.log(`Logger initialized with level: ${envLogLevel}`)
+  // Use globalThis.console directly since logger isn't ready yet
+  if (envLogLevel !== 'off') {
+    globalThis.console.log(`Logger initialized with level: ${envLogLevel}`)
+  }
 }

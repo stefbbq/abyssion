@@ -1,10 +1,43 @@
 ## Codex
 
-Quick reference for lib/gl codebase structure and exports.
+Quick reference for codebase structure and exports.
 
 ### Main Entry
 - `index.ts` - `initGL()`, `InitOptions`, `RendererState`
 - `types.ts` - Core GL types
+
+### Theme System (New Architecture)
+
+#### Core Theme System (`lib/theme/`)
+- `index.ts` - `getUITheme()`, `toggleThemeMode()`, `setThemeMode()`, `getCurrentBaseTheme()`
+- `types.ts` - `BaseTheme`, `UITheme`, theme type definitions
+- `themes/index.ts` - Theme exports barrel
+- `themes/deepSpaceHUD.ts` - `deepSpaceHUDTheme`, `deepSpaceHUDLightTheme`
+- `utils/createBaseTheme.ts` - `createBaseTheme()`
+- `utils/hexToCSS.ts` - `hexToCSS()`
+- `utils/rgbToCSS.ts` - `rgbToCSS()`
+
+#### GL Theme System (`lib/gl/theme/`)
+- `index.ts` - `getGLTheme()`, `createGLTheme()`
+- `createGLTheme.ts` - GL theme generation from base themes
+- `types.ts` - `GLTheme` type definitions
+
+### Islands (Interactive Components)
+- `islands/Header.tsx` - Main navigation header with theme integration
+- `islands/BottomNav.tsx` - Mobile bottom navigation with drag functionality
+- `islands/Home.tsx` - 3D logo component (Logo3D)
+
+### Components (Static UI)
+- `components/ThemeToggle.tsx` - Light/dark mode toggle button
+- `components/ThemeDemo.tsx` - Theme system demonstration
+- `components/Button.tsx` - Reusable button component
+- `components/icons/index.ts` - Icon components
+
+### Routes (Pages)
+- `routes/index.tsx` - Homepage with 3D logo
+- `routes/bio.tsx` - Band biography page
+- `routes/shows.tsx` - Shows/concerts page
+- `routes/contact.tsx` - Contact information page
 
 ### Setup (Composable Utilities)
 - `setup/index.ts` - Barrel exports
@@ -78,6 +111,12 @@ Quick reference for lib/gl codebase structure and exports.
 ### Debug
 - `debug/DebugOverlay.ts` - `DebugOverlay` class
 
-### Theme
-- `theme.ts` - Theme management
-- `themes/` - Color theme definitions
+### Logger System (`lib/logger/`)
+- `index.ts` - Main logger functionality
+- `constants.ts` - Log level constants
+- `colors.ts` - Terminal color utilities
+- `utils/getMinLogLevel.ts` - Environment-based log levels
+
+### Documentation
+- `THEME_SYSTEM.md` - Complete theme system architecture guide
+- `CODEX.md` - This file - codebase reference

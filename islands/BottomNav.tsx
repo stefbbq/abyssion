@@ -16,9 +16,9 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
   const [dragY, setDragY] = useState(0)
   const [startY, setStartY] = useState(0)
   const navRef = useRef<HTMLElement>(null)
-
   const theme = getUITheme()
   const isActive = (path: string) => currentPath === path
+  const isHomepage = currentPath === '/'
 
   const menuItems = [
     { label: 'Home', path: '/' },
@@ -29,16 +29,24 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
     { label: 'Listen', path: '#listen' },
   ]
 
-  const EXPANDED_HEIGHT = 400 // Fixed height for consistency
+  const EXPANDED_HEIGHT = 400
   const COLLAPSED_HEIGHT = 64
+  const DRAG_THRESHOLD = 80
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
     setDragY(0)
   }
 
-  // Simple touch handlers with corrected direction
+  // Touch handlers with preventDefault to stop window dragging
   const handleTouchStart = (e: TouchEvent) => {
+    // Don't start dragging if touching an interactive element
+    const target = e.target as HTMLElement
+    if (target.closest('button') || target.closest('a')) {
+      return
+    }
+
+    e.preventDefault()
     setIsDragging(true)
     setStartY(e.touches[0].clientY)
     setDragY(0)
@@ -46,34 +54,34 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
 
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging) return
+    e.preventDefault()
 
     const currentY = e.touches[0].clientY
-    const deltaY = currentY - startY // Fixed: currentY - startY (not startY - currentY)
+    const deltaY = currentY - startY
 
     if (isMenuOpen) {
-      // Dragging down to close (positive deltaY closes)
-      const newDragY = Math.max(-EXPANDED_HEIGHT + COLLAPSED_HEIGHT, deltaY)
+      // When open, only allow dragging down (positive deltaY)
+      const newDragY = Math.max(0, Math.min(EXPANDED_HEIGHT - COLLAPSED_HEIGHT, deltaY))
       setDragY(newDragY)
     } else {
-      // Dragging up to open (negative deltaY opens)
-      const newDragY = Math.min(0, deltaY)
+      // When closed, only allow dragging up (negative deltaY)
+      const newDragY = Math.min(0, Math.max(-(EXPANDED_HEIGHT - COLLAPSED_HEIGHT), deltaY))
       setDragY(newDragY)
     }
   }
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: TouchEvent) => {
     if (!isDragging) return
-
-    const threshold = (EXPANDED_HEIGHT - COLLAPSED_HEIGHT) / 3
+    e.preventDefault()
 
     if (isMenuOpen) {
       // If dragged down more than threshold, close it
-      if (dragY > threshold) {
+      if (dragY > DRAG_THRESHOLD) {
         setIsMenuOpen(false)
       }
     } else {
       // If dragged up more than threshold, open it
-      if (dragY < -threshold) {
+      if (dragY < -DRAG_THRESHOLD) {
         setIsMenuOpen(true)
       }
     }
@@ -82,8 +90,15 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
     setDragY(0)
   }
 
-  // Mouse handlers for desktop testing with corrected direction
+  // Mouse handlers for desktop testing
   const handleMouseDown = (e: MouseEvent) => {
+    // Don't start dragging if clicking an interactive element
+    const target = e.target as HTMLElement
+    if (target.closest('button') || target.closest('a')) {
+      return
+    }
+
+    e.preventDefault()
     setIsDragging(true)
     setStartY(e.clientY)
     setDragY(0)
@@ -91,30 +106,30 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return
+    e.preventDefault()
 
     const currentY = e.clientY
-    const deltaY = currentY - startY // Fixed: currentY - startY
+    const deltaY = currentY - startY
 
     if (isMenuOpen) {
-      const newDragY = Math.max(-EXPANDED_HEIGHT + COLLAPSED_HEIGHT, deltaY)
+      const newDragY = Math.max(0, Math.min(EXPANDED_HEIGHT - COLLAPSED_HEIGHT, deltaY))
       setDragY(newDragY)
     } else {
-      const newDragY = Math.min(0, deltaY)
+      const newDragY = Math.min(0, Math.max(-(EXPANDED_HEIGHT - COLLAPSED_HEIGHT), deltaY))
       setDragY(newDragY)
     }
   }
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: MouseEvent) => {
     if (!isDragging) return
-
-    const threshold = (EXPANDED_HEIGHT - COLLAPSED_HEIGHT) / 3
+    e.preventDefault()
 
     if (isMenuOpen) {
-      if (dragY > threshold) {
+      if (dragY > DRAG_THRESHOLD) {
         setIsMenuOpen(false)
       }
     } else {
-      if (dragY < -threshold) {
+      if (dragY < -DRAG_THRESHOLD) {
         setIsMenuOpen(true)
       }
     }
@@ -125,8 +140,8 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('touchmove', handleTouchMove)
-      document.addEventListener('touchend', handleTouchEnd)
+      document.addEventListener('touchmove', handleTouchMove, { passive: false })
+      document.addEventListener('touchend', handleTouchEnd, { passive: false })
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
 
@@ -142,24 +157,58 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
   const getCurrentHeight = () => {
     if (isDragging) {
       if (isMenuOpen) {
-        // When open: dragging down (positive dragY) should decrease height
-        return Math.max(COLLAPSED_HEIGHT, EXPANDED_HEIGHT - dragY)
+        // When open and dragging: base height minus drag distance
+        return EXPANDED_HEIGHT - dragY
       } else {
-        // When closed: dragging up (negative dragY) should increase height
-        return Math.min(EXPANDED_HEIGHT, COLLAPSED_HEIGHT - dragY)
+        // When closed and dragging: base height plus absolute drag distance
+        return COLLAPSED_HEIGHT + Math.abs(dragY)
       }
     }
     return isMenuOpen ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT
   }
 
-  const showExpandedContent = isMenuOpen || (isDragging && dragY < -50)
+  const showExpandedContent = isMenuOpen || (isDragging && Math.abs(dragY) > 30)
 
-  // Create transparent background style
-  const backgroundStyle = {
-    background: theme.glass.background,
-    backdropFilter: theme.glass.backdrop,
-    WebkitBackdropFilter: theme.glass.backdrop,
-    borderTop: `1px solid ${theme.glass.border}`,
+  // Determine if background should be visible
+  const shouldShowBackground = !isHomepage || showExpandedContent
+
+  // Create background style - transparent on homepage when collapsed, visible otherwise
+  const getBackgroundStyle = () => {
+    if (shouldShowBackground) {
+      return {
+        background: theme.glass.background,
+        backdropFilter: theme.glass.backdrop,
+        WebkitBackdropFilter: theme.glass.backdrop,
+        borderTop: `1px solid ${theme.glass.border}`,
+      }
+    }
+    return {
+      background: 'transparent',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
+      borderTop: '1px solid transparent',
+    }
+  }
+
+  // Get button style for collapsed nav - semi-transparent on homepage, normal on other pages
+  const getCollapsedButtonStyle = (isActiveButton: boolean) => {
+    const baseStyle = {
+      backgroundColor: isActiveButton ? theme.colors.text.primary : 'transparent',
+      color: isActiveButton ? theme.colors.background.primary : theme.colors.text.secondary,
+      borderColor: isActiveButton ? theme.colors.text.primary : theme.colors.border.primary,
+    }
+
+    // On homepage, add semi-transparent background for visibility
+    if (isHomepage && !isActiveButton) {
+      return {
+        ...baseStyle,
+        backgroundColor: theme.colors.background.primary + '80', // 50% opacity
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }
+    }
+
+    return baseStyle
   }
 
   return (
@@ -180,7 +229,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
         }`}
         style={{
           height: `${getCurrentHeight()}px`,
-          ...backgroundStyle,
+          ...getBackgroundStyle(),
         }}
         onTouchStart={handleTouchStart}
         onMouseDown={handleMouseDown}
@@ -288,11 +337,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
                   <button
                     onClick={() => window.location.href = '/shows'}
                     class='flex-1 h-10 px-4 rounded-lg font-medium text-sm transition-all duration-200 border'
-                    style={{
-                      backgroundColor: isActive('/shows') ? theme.colors.text.primary : 'transparent',
-                      color: isActive('/shows') ? theme.colors.background.primary : theme.colors.text.secondary,
-                      borderColor: isActive('/shows') ? theme.colors.text.primary : theme.colors.border.primary,
-                    }}
+                    style={getCollapsedButtonStyle(isActive('/shows'))}
                   >
                     Shows
                   </button>
@@ -301,11 +346,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
                   <button
                     onClick={() => window.location.href = '/bio'}
                     class='flex-1 h-10 px-4 rounded-lg font-medium text-sm transition-all duration-200 border'
-                    style={{
-                      backgroundColor: isActive('/bio') ? theme.colors.text.primary : 'transparent',
-                      color: isActive('/bio') ? theme.colors.background.primary : theme.colors.text.secondary,
-                      borderColor: isActive('/bio') ? theme.colors.text.primary : theme.colors.border.primary,
-                    }}
+                    style={getCollapsedButtonStyle(isActive('/bio'))}
                   >
                     Bio
                   </button>
@@ -314,11 +355,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
                   <button
                     onClick={() => window.location.href = '/contact'}
                     class='w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 border'
-                    style={{
-                      backgroundColor: isActive('/contact') ? theme.colors.text.primary : 'transparent',
-                      color: isActive('/contact') ? theme.colors.background.primary : theme.colors.text.secondary,
-                      borderColor: isActive('/contact') ? theme.colors.text.primary : theme.colors.border.primary,
-                    }}
+                    style={getCollapsedButtonStyle(isActive('/contact'))}
                   >
                     <svg
                       class='w-5 h-5'
@@ -339,11 +376,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
                   <button
                     onClick={toggleMenu}
                     class='w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 border'
-                    style={{
-                      backgroundColor: isMenuOpen ? theme.colors.text.primary : 'transparent',
-                      color: isMenuOpen ? theme.colors.background.primary : theme.colors.text.secondary,
-                      borderColor: isMenuOpen ? theme.colors.text.primary : theme.colors.border.primary,
-                    }}
+                    style={getCollapsedButtonStyle(isMenuOpen)}
                   >
                     <HamburgerIcon className='w-5 h-5' />
                   </button>

@@ -36,6 +36,7 @@ export type UITheme = {
       secondaryHover: string
       ghost: string
       ghostHover: string
+      ghostActive: string
     }
   }
   // Glass morphism effects
@@ -127,6 +128,7 @@ export type ForegroundColors = {
  */
 export type BaseTheme = {
   name: string
+  mode: 'light' | 'dark'
   primary: RGBColor
   primaryAlt: RGBColor
   primaryDark: RGBColor

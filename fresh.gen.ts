@@ -9,6 +9,7 @@ import * as $contact from './routes/contact.tsx'
 import * as $index from './routes/index.tsx'
 import * as $shows from './routes/shows.tsx'
 import * as $BottomNav from './islands/BottomNav.tsx'
+import * as $Header from './islands/Header.tsx'
 import * as $Home from './islands/Home.tsx'
 import * as $MusicPlayer from './islands/MusicPlayer.tsx'
 import type { Manifest } from '$fresh/server.ts'
@@ -24,6 +25,7 @@ const manifest = {
   },
   islands: {
     './islands/BottomNav.tsx': $BottomNav,
+    './islands/Header.tsx': $Header,
     './islands/Home.tsx': $Home,
     './islands/MusicPlayer.tsx': $MusicPlayer,
   },

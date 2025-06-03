@@ -53,7 +53,7 @@ export const prepareNextVideo = async (
 
     // Check readiness
     if (video.readyState < 3 || isNaN(video.duration) || video.videoWidth <= 0) {
-      console.warn(`Video ${videoIndex} is not ready or has invalid duration/size`)
+      log.warn(lc.GL_VIDEO, `Video ${videoIndex} is not ready or has invalid duration/size`)
       videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
       attempts++
       continue
@@ -73,7 +73,7 @@ export const prepareNextVideo = async (
       duration = result.duration
 
       if (duration < minVideoLength) {
-        console.warn(`[${new Date().toLocaleTimeString()}] Not enough time left in video ${videoIndex} after seeking. Skipping.`)
+        log.warn(lc.GL_VIDEO, `Not enough time left in video ${videoIndex} after seeking. Skipping.`)
         videoIndex = getNextVideoIndex(currentVideoIndex, [...recentVideoIndices, ...triedIndices], videos.length)
         attempts++
         continue

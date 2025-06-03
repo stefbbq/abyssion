@@ -30,7 +30,7 @@ export const loadVideo = (path: string): Promise<{
 
     // Create a timeout for loading
     const timeout = setTimeout(() => {
-      console.warn(`Video load timed out: ${path}`)
+      log.warn(lc.GL_VIDEO, `Video load timed out: ${path}`)
       resolve({
         video,
         texture: null,
@@ -68,7 +68,7 @@ export const loadVideo = (path: string): Promise<{
       video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('error', handleError)
 
-      console.error(`Error loading video: ${path}`, error)
+      log.error(lc.GL_VIDEO, `Error loading video: ${path}`, error)
       resolve({
         video,
         texture: null,

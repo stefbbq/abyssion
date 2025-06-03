@@ -40,11 +40,17 @@ export const loadVideos = async (): Promise<{
         }).filter(Boolean)
       }
     } catch (error) {
-      console.error('Error loading video manifest:', error)
+      log.error(lc.GL_VIDEO, 'Error loading video manifest:', error)
+      return {
+        videos,
+        videoTextures,
+        loadNextVideo: async () => ({ video: null, texture: null }),
+        hasMoreVideos: () => false,
+      }
     }
 
     if (videoFiles.length === 0) {
-      console.warn('No video files found in manifest')
+      log.warn(lc.GL_VIDEO, 'No video files found in manifest')
       return {
         videos,
         videoTextures,
@@ -103,7 +109,9 @@ export const loadVideos = async (): Promise<{
 
     const hasMoreVideos = () => loadedCount < videoFiles.length
 
-    if (videos.length === 0) console.error('Failed to load any videos from any paths')
+    if (videos.length === 0) {
+      log.error(lc.GL_VIDEO, 'Failed to load any videos from any paths')
+    }
 
     return { videos, videoTextures, loadNextVideo, hasMoreVideos }
   } catch (error) {

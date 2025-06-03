@@ -1,5 +1,8 @@
 import { isMobileDevice } from './isMobileDevice.ts'
 import { getBaselineDimensions } from './getBaselineDimensions.ts'
+import { lc, log } from '../../../logger/index.ts'
+
+let resizeTimeout: number | null = null
 
 /**
  * Logs comprehensive mobile detection and responsive dimension information
@@ -25,7 +28,7 @@ export const debugMobileResponsiveness = (): void => {
   const isPortrait = screenHeight > screenWidth
   const devicePixelRatio = globalThis.devicePixelRatio || 1
 
-  console.log('📱 Device Detection:', {
+  log.debug(lc.GL, '📱 Device Detection:', {
     isMobile,
     isPortrait,
     userAgent: userAgent.substring(0, 100) + '...',
@@ -33,7 +36,7 @@ export const debugMobileResponsiveness = (): void => {
     maxTouchPoints: globalThis.navigator?.maxTouchPoints || 0,
   })
 
-  console.log('📐 Screen Info:', {
+  log.debug(lc.GL, '📐 Screen Info:', {
     width: screenWidth,
     height: screenHeight,
     aspect: screenAspect.toFixed(2),
@@ -43,7 +46,7 @@ export const debugMobileResponsiveness = (): void => {
 
   // Responsive dimensions
   const responsive = getBaselineDimensions()
-  console.log('🎯 Responsive Dimensions:', {
+  log.debug(lc.GL, '🎯 Responsive Dimensions:', {
     planeWidth: responsive.planeWidth.toFixed(2),
     planeHeight: responsive.planeHeight.toFixed(2),
     cameraZ: responsive.cameraZ.toFixed(2),
@@ -56,7 +59,7 @@ export const debugMobileResponsiveness = (): void => {
   const visibleHeight = 2 * Math.tan(fovRad / 2) * responsive.cameraZ
   const visibleWidth = visibleHeight * screenAspect
 
-  console.log('📏 Visible Area Check:', {
+  log.debug(lc.GL, '📏 Visible Area Check:', {
     visibleWidth: visibleWidth.toFixed(2),
     visibleHeight: visibleHeight.toFixed(2),
     logoFitsWidth: visibleWidth > responsive.planeWidth * 1.1,
@@ -78,9 +81,9 @@ export const debugMobileResponsiveness = (): void => {
   }
 
   if (recommendations.length > 0) {
-    console.warn('🚨 Potential Issues:', recommendations)
+    log.warn(lc.GL, '🚨 Potential Issues:', recommendations)
   } else {
-    console.log('✅ Configuration looks good')
+    log.debug(lc.GL, '✅ Configuration looks good')
   }
 
   console.groupEnd()
@@ -93,22 +96,25 @@ export const debugMobileResponsiveness = (): void => {
  * when the window is resized or orientation changes.
  */
 export const startMobileDebugMonitoring = (): () => void => {
-  console.log('🔄 Starting mobile responsiveness monitoring...')
+  log.debug(lc.GL, '🔄 Starting mobile responsiveness monitoring...')
 
   debugMobileResponsiveness()
 
   const handleResize = () => {
-    console.log('📱 Window resized, checking responsiveness...')
-    debugMobileResponsiveness()
+    if (resizeTimeout) clearTimeout(resizeTimeout)
+    resizeTimeout = setTimeout(() => {
+      log.debug(lc.GL, '📱 Window resized, checking responsiveness...')
+      debugMobileResponsiveness()
+    }, 250)
   }
 
   globalThis.addEventListener('resize', handleResize)
   globalThis.addEventListener('orientationchange', handleResize)
 
-  // Return cleanup function
   return () => {
     globalThis.removeEventListener('resize', handleResize)
     globalThis.removeEventListener('orientationchange', handleResize)
-    console.log('🛑 Stopped mobile responsiveness monitoring')
+    if (resizeTimeout) clearTimeout(resizeTimeout)
+    log.debug(lc.GL, '🛑 Stopped mobile responsiveness monitoring')
   }
 }

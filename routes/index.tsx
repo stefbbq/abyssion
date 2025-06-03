@@ -1,11 +1,10 @@
 import { Head } from '$fresh/runtime.ts'
 import Logo3D from '@islands/Home.tsx'
 import BottomNav from '../islands/BottomNav.tsx'
-import { Header } from '../components/Header.tsx'
+import Header from '../islands/Header.tsx'
 import { getMinLogLevel } from '@lib/logger/utils/getMinLogLevel.ts'
 
 export default function Home() {
-  // Get log level on server side where env vars are available
   const logLevel = getMinLogLevel()
 
   return (
@@ -17,7 +16,7 @@ export default function Home() {
       <div class='h-screen w-full relative flex flex-col justify-between overflow-hidden bg-black'>
         {/* Dark Header for Homepage */}
         <div class='absolute top-0 left-0 right-0 z-50'>
-          <Header currentPath='/' theme='dark' />
+          <Header currentPath='/' />
         </div>
 
         {/* Logo Container */}

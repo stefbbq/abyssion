@@ -26,7 +26,16 @@ let minLogLevel: LogLevel = getMinLogLevel()
  */
 export function setMinLogLevel(level: LogLevel) {
   if (LOG_LEVELS.includes(level)) minLogLevel = level
-  else console.warn(`[logger] Invalid log level: ${level}`)
+  else globalThis.console.warn(`[logger] Invalid log level: ${level}`)
+}
+
+/**
+ * Enhanced shouldLog function that respects debug mode based on log level
+ */
+function shouldLogWithDebugMode(level: LogLevel): boolean {
+  // Use the standard shouldLog check - if minLogLevel is 'debug' or 'trace',
+  // then debug mode is enabled and all logs at that level and above will show
+  return shouldLog(level, minLogLevel)
 }
 
 /**
@@ -85,8 +94,8 @@ log.critical = (ctx: LogContext, ...args: unknown[]): void => _log('critical', c
  * @param args Arguments to log.
  */
 function _log(level: LogLevel, ctx: LogContext, ...args: unknown[]): void {
-  // Filter by env-configured log level
-  if (!shouldLog(level, minLogLevel)) return
+  // Filter by env-configured log level and debug mode
+  if (!shouldLogWithDebugMode(level)) return
 
   const con = globalThis.console
 
@@ -101,9 +110,13 @@ function _log(level: LogLevel, ctx: LogContext, ...args: unknown[]): void {
   const lStyle = LOG_LEVEL_STYLES[level] || 'color: inherit;'
   const prefix = `%c[${ctx}]%c`
 
-  // Output to console
-  if (args[0] && typeof args[0] === 'string') con[method](`${prefix} ${args[0]}`, cStyle, lStyle, ...args.slice(1))
-  else con[method](prefix, cStyle, 'color: inherit;', ...args)
+  // Output to console with proper typing
+  const consoleMethod = con[method] as (...args: any[]) => void
+  if (args[0] && typeof args[0] === 'string') {
+    consoleMethod(`${prefix} ${args[0]}`, cStyle, lStyle, ...args.slice(1))
+  } else {
+    consoleMethod(prefix, cStyle, 'color: inherit;', ...args)
+  }
 }
 
 /**

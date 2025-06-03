@@ -14,5 +14,8 @@ export const initializeLoggerServer = (): void => {
   const envLogLevel = getMinLogLevel()
   setMinLogLevel(envLogLevel)
 
-  console.log(`🖥️  Server logger initialized with level: ${envLogLevel}`)
+  // Use globalThis.console directly since logger isn't ready yet
+  if (envLogLevel !== 'off') {
+    globalThis.console.log(`🖥️  Server logger initialized with level: ${envLogLevel}`)
+  }
 }

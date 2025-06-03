@@ -5,40 +5,47 @@ import { darkenHex } from '@libtheme/utils/darkenHex.ts'
 
 /**
  * Create GL theme from base theme with 3D rendering extensions
+ * GL themes use vibrant colors optimized for 3D rendering regardless of UI mode
  * Pure function that builds a complete GL theme object
  */
-export const createGLTheme = (baseTheme: BaseTheme): GLTheme => ({
-  ...baseTheme,
+export const createGLTheme = (baseTheme: BaseTheme): GLTheme => {
+  const isDarkMode = baseTheme.mode === 'dark'
 
-  // logo layers default to white stencil system
-  stencilColor: { r: 1, g: 1, b: 1 },
-  baseLayerColor: { r: 1, g: 1, b: 1 },
-  outlineColor: { r: 1, g: 1, b: 1 },
-  ghostingColors: {
-    cyan: baseTheme.secondary,
-    magenta: baseTheme.accent,
-  },
+  return {
+    ...baseTheme,
 
-  // ui defaults derived from core colors
-  ui: {
-    accentColor1: rgbToHex(baseTheme.secondary),
-    accentColor2: rgbToHex(baseTheme.accent),
-    hexagonColor: 0xffffff,
-    centralCircleColor: rgbToHex(baseTheme.secondary),
-    centerCrosshairColor: 0xffffff,
-    gridColor: 0x999999,
-  },
+    // Logo layers - always use high contrast for 3D visibility
+    stencilColor: { r: 1, g: 1, b: 1 },
+    baseLayerColor: isDarkMode
+      ? { r: 0.1, g: 0.1, b: 0.1 } // Dark base for dark mode
+      : { r: 0.9, g: 0.9, b: 0.9 }, // Light base for light mode
+    outlineColor: { r: 1, g: 1, b: 1 },
+    ghostingColors: {
+      cyan: baseTheme.accent, // Use theme accent for consistency
+      magenta: baseTheme.secondary, // Use theme secondary
+    },
 
-  // geometric defaults
-  geometric: {
-    primaryColor: rgbToHex(baseTheme.secondary),
-    secondaryColor: rgbToHex(baseTheme.accent),
-  },
+    // UI overlays - adapt to mode but keep visibility
+    ui: {
+      accentColor1: rgbToHex(baseTheme.secondary),
+      accentColor2: rgbToHex(baseTheme.accent),
+      hexagonColor: isDarkMode ? 0xffffff : 0x333333,
+      centralCircleColor: rgbToHex(baseTheme.primary),
+      centerCrosshairColor: isDarkMode ? 0xffffff : 0x000000,
+      gridColor: isDarkMode ? 0x999999 : 0x666666,
+    },
 
-  // lens flare defaults
-  lensFlare: {
-    mainFlareColor: rgbToHex(baseTheme.secondary),
-    secondaryFlareColor: darkenHex(rgbToHex(baseTheme.secondary))(0.8),
-    tertiaryFlareColor: rgbToHex(baseTheme.accent),
-  },
-})
+    // Geometric elements - always vibrant for 3D depth
+    geometric: {
+      primaryColor: rgbToHex(baseTheme.primary),
+      secondaryColor: rgbToHex(baseTheme.accent),
+    },
+
+    // Lens flare - always bright and atmospheric
+    lensFlare: {
+      mainFlareColor: rgbToHex(baseTheme.primary),
+      secondaryFlareColor: darkenHex(rgbToHex(baseTheme.primary))(0.8),
+      tertiaryFlareColor: rgbToHex(baseTheme.accent),
+    },
+  }
+}

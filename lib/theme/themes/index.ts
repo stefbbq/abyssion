@@ -4,7 +4,7 @@
  */
 
 export { neonGridOSTheme } from './neonGridOS.ts'
-export { deepSpaceHUDTheme } from './deepSpaceHUD.ts'
+export { deepSpaceHUDLightTheme, deepSpaceHUDTheme } from './deepSpaceHUD.ts'
 export { glitchCoreTheme } from './glitchCore.ts'
 export { geomodAtlasTheme } from './geomodAtlas.ts'
 export { hypertagTheme } from './hypertag.ts'
@@ -15,4 +15,4 @@ export { monochromeTheme } from './monochrome.ts'
 export { cyberpunkTheme } from './cyberpunk.ts'
 
 // type exports
-export type { BackgroundColors, BaseTheme, ColorVariant, ForegroundColors } from './types.ts'
+export type { BackgroundColors, BaseTheme, ColorVariant, ForegroundColors } from '../types.ts'

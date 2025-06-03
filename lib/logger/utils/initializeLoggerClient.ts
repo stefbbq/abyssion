@@ -31,5 +31,8 @@ export const initializeLoggerClient = (logLevel?: LogLevel): void => {
     refreshColors()
   })
 
-  console.log(`🌐 Client logger initialized with level: ${effectiveLogLevel}`)
+  // Use globalThis.console directly since logger isn't ready yet
+  if (effectiveLogLevel !== 'off') {
+    globalThis.console.log(`🌐 Client logger initialized with level: ${effectiveLogLevel}`)
+  }
 }

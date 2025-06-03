@@ -1,3 +1,5 @@
+import { lc, log } from '../../../../logger/index.ts'
+
 /**
  * Calculates a new start time and duration for a video segment, ensuring it fits within specified length constraints.
  *
@@ -14,9 +16,9 @@ export const getNewStartTimeAndDuration = (
   marginSeconds = 0.1,
 ): Promise<{ startTime: number; duration: number }> => {
   return new Promise<{ startTime: number; duration: number }>((resolve, reject) => {
-    if (!video.duration || isNaN(video.duration) || video.duration === Infinity) {
-      console.warn('Cannot seek: video duration is not available')
-      resolve({ startTime: 0, duration: 0 })
+    if (isNaN(video.duration) || video.duration <= 0) {
+      log.warn(lc.GL_VIDEO, 'Cannot seek: video duration is not available')
+      resolve({ startTime: 0, duration: video.duration || 0 })
       return
     }
 
@@ -46,7 +48,7 @@ export const getNewStartTimeAndDuration = (
     // Add timeout to prevent hanging
     timeoutId = setTimeout(() => {
       video.removeEventListener('seeked', onSeeked)
-      console.warn(`Video seek timeout after 3s, resolving anyway`)
+      log.warn(lc.GL_VIDEO, 'Video seek timeout after 3s, resolving anyway')
       resolve({ startTime, duration })
     }, 3000)
 
@@ -57,7 +59,7 @@ export const getNewStartTimeAndDuration = (
       video.pause()
       video.currentTime = startTime
     } catch (error) {
-      console.error('Error seeking to random position:', error)
+      log.error(lc.GL_VIDEO, 'Error seeking to random position:', error)
       video.removeEventListener('seeked', onSeeked)
       clearTimeout(timeoutId)
       reject(error)
