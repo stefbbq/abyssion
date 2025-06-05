@@ -12,12 +12,12 @@ type Props = {
 /**
  * GL component with electrical effects and interactivity
  */
-export default function Home({ width = 500, height = 500, logLevel }: Props) {
+export default function GL({ width = 500, height = 500 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Initialize client-side logger (theme colors)
-    initializeLoggerClient(logLevel)
+    initializeLoggerClient()
 
     if (!containerRef.current) return
 
@@ -42,7 +42,7 @@ export default function Home({ width = 500, height = 500, logLevel }: Props) {
     return () => {
       if (cleanupFunction) cleanupFunction()
     }
-  }, [width, height, logLevel])
+  }, [width, height])
 
   return (
     <div

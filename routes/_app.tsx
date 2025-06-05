@@ -1,4 +1,6 @@
 import { type PageProps } from '$fresh/server.ts'
+import { Partial } from '$fresh/runtime.ts'
+import BottomNav from '../islands/BottomNav.tsx'
 import MusicPlayer from '../islands/MusicPlayer.tsx'
 
 // Sample track data - would be replaced with actual tracks
@@ -27,7 +29,7 @@ const sampleTracks = [
   },
 ]
 
-export default function App({ Component }: PageProps) {
+export default function App({ Component, url }: PageProps) {
   return (
     <html>
       <head>
@@ -36,8 +38,14 @@ export default function App({ Component }: PageProps) {
         <title>abyssion</title>
         <link rel='stylesheet' href='/styles.css' />
       </head>
-      <body>
-        <Component />
+      <body f-client-nav>
+        <Partial name='page-content'>
+          <Component />
+        </Partial>
+
+        {/* Keep BottomNav outside partials so it can animate between states */}
+        <BottomNav currentPath={url.pathname} />
+
         {/* <MusicPlayer tracks={sampleTracks} /> */}
       </body>
     </html>

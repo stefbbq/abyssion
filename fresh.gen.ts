@@ -7,6 +7,10 @@ import * as $_app from './routes/_app.tsx'
 import * as $bio from './routes/bio.tsx'
 import * as $contact from './routes/contact.tsx'
 import * as $index from './routes/index.tsx'
+import * as $partials_bio from './routes/partials/bio.tsx'
+import * as $partials_contact from './routes/partials/contact.tsx'
+import * as $partials_home from './routes/partials/home.tsx'
+import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $shows from './routes/shows.tsx'
 import * as $BottomNav from './islands/BottomNav.tsx'
 import * as $Header from './islands/Header.tsx'
@@ -21,6 +25,10 @@ const manifest = {
     './routes/bio.tsx': $bio,
     './routes/contact.tsx': $contact,
     './routes/index.tsx': $index,
+    './routes/partials/bio.tsx': $partials_bio,
+    './routes/partials/contact.tsx': $partials_contact,
+    './routes/partials/home.tsx': $partials_home,
+    './routes/partials/shows.tsx': $partials_shows,
     './routes/shows.tsx': $shows,
   },
   islands: {

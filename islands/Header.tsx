@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '../components/icons/index.ts'
+import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '../atoms/index.ts'
 import { getUITheme } from '../lib/theme/index.ts'
 
 export interface HeaderProps {

@@ -23,6 +23,9 @@ Thumbs.db
 
 # Coverage reports
 coverage/
+cov/
+coverage.lcov
+cov.lcov
 
 # Misc
 *.bak

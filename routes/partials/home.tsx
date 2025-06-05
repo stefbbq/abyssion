@@ -1,11 +1,18 @@
+import { defineRoute, RouteConfig } from '$fresh/server.ts'
+import { Partial } from '$fresh/runtime.ts'
 import { Head } from '$fresh/runtime.ts'
-import GL from '@islands/Home.tsx'
-import BottomNav from '../islands/BottomNav.tsx'
-import Header from '../islands/Header.tsx'
+import GL from '../../islands/Home.tsx'
+import Header from '../../islands/Header.tsx'
 
-export default function Home() {
+// disable app wrapper and layouts for partial routes
+export const config: RouteConfig = {
+  skipAppWrapper: true,
+  skipInheritedLayouts: true,
+}
+
+export default defineRoute(() => {
   return (
-    <>
+    <Partial name='page-content'>
       <Head>
         <title>abyssion</title>
         <meta name='description' content='Official website for abyssion' />
@@ -22,9 +29,7 @@ export default function Home() {
             <GL width={1400} height={896} />
           </div>
         </div>
-
-        <BottomNav currentPath='/' />
       </div>
-    </>
+    </Partial>
   )
-}
+})

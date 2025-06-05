@@ -1,7 +1,7 @@
 import { Head } from '$fresh/runtime.ts'
 import Header from '../islands/Header.tsx'
 import BottomNav from '../islands/BottomNav.tsx'
-import { Button } from '../components/Button.tsx'
+import { Button } from '../atoms/index.ts'
 
 interface Show {
   id: string

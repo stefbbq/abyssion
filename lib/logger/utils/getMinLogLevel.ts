@@ -1,35 +1,25 @@
-/// <reference lib="deno.ns" />
-
 import { LOG_LEVELS, LogLevel } from '../constants.ts'
+import { isDebugModeEnabled } from '../../debug/index.ts'
 
 export const getMinLogLevel = (): LogLevel => {
   let env: Record<string, string> | undefined
 
-  // Server-side (Deno) environment
   if (typeof Deno !== 'undefined' && Deno.env?.toObject) {
+    // Server-side (Deno) environment
+    console.log('Deno.env.toObject', Deno.env.toObject())
     env = Deno.env.toObject()
-  } // Browser environment - check for injected env
-  else if (typeof globalThis !== 'undefined' && (globalThis as any).ENV) {
+  } else if (typeof globalThis !== 'undefined' && (globalThis as any).ENV) {
+    console.log('globalThis.ENV', (globalThis as any).ENV)
+    // Browser environment - check for injected env
     env = (globalThis as any).ENV as Record<string, string>
   }
 
-  // Check debug mode via existing debug system (browser only)
+  // Check debug mode via centralized debug system (browser only)
   if (typeof window !== 'undefined') {
     try {
-      // Check for ?debug query parameter (using existing debug constants)
-      const urlParams = new URLSearchParams(window.location.search)
-      if (urlParams.has('debug')) {
-        return 'trace' // Enable maximum debugging when ?debug is present
-      }
-
-      // Check debug cookie if available
-      const debugCookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('gl_debug_mode='))
-        ?.split('=')[1]
-
-      if (debugCookie === 'true') {
-        return 'trace' // Enable maximum debugging when debug cookie is set
+      if (isDebugModeEnabled()) {
+        console.log('Debug mode enabled via centralized debug system')
+        return 'trace' // Enable maximum debugging when debug mode is on
       }
     } catch {
       // Continue without debug system if it fails
@@ -38,9 +28,7 @@ export const getMinLogLevel = (): LogLevel => {
 
   // Check for explicit DEBUG environment variable
   const debugEnv = env?.DEBUG
-  if (debugEnv && (debugEnv === 'true' || debugEnv === '1')) {
-    return 'debug' // Enable debug mode
-  }
+  if (debugEnv && (debugEnv === 'true' || debugEnv === '1')) return 'debug'
 
   // Check for explicit log level setting
   const loggerLevel = env?.LOGGER_LEVEL

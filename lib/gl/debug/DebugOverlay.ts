@@ -5,7 +5,7 @@
  */
 
 import controlsConfig from '../../configControls.json' with { type: 'json' }
-import { isDebugModeEnabled, setDebugMode } from './utils/index.ts'
+import { isDebugModeEnabled, setDebugMode } from '@lib/debug/index.ts'
 
 /**
  * Configuration options for the debug overlay

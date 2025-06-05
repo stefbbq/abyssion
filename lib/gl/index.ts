@@ -10,7 +10,7 @@ import { createControlsSystem } from './controls/index.ts'
 import { createUILayer } from './layers/UILayer.ts'
 import { startAnimationLoop } from './animation/index.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
-import { isDebugModeEnabled } from './debug/index.ts'
+import { isDebugModeEnabled } from '@lib/debug/index.ts'
 import {
   createCleanupFunction,
   setupCoreRendering,

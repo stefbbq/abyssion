@@ -1,7 +1,6 @@
 import { refreshColors } from '../colors.ts'
 import { setMinLogLevel } from '../index.ts'
 import { getMinLogLevel } from './getMinLogLevel.ts'
-import { LogLevel } from '../constants.ts'
 
 /**
  * Client-side logger initialization (for browser)
@@ -11,17 +10,16 @@ import { LogLevel } from '../constants.ts'
  * - Theme-adaptive colors and listeners.
  * Call this from a client-side component/island.
  *
- * @param logLevel - Optional log level to use (overrides environment detection)
  * @example
  * initializeLoggerClient() // Call this in an island
  * initializeLoggerClient('debug') // Override with specific level
  */
-export const initializeLoggerClient = (logLevel?: LogLevel): void => {
+export const initializeLoggerClient = (): void => {
   if (typeof globalThis.window === 'undefined') return
 
   // Use provided log level or fallback to environment detection
-  const effectiveLogLevel = logLevel || getMinLogLevel()
-  setMinLogLevel(effectiveLogLevel)
+  const logLevel = getMinLogLevel()
+  setMinLogLevel(logLevel)
 
   // Initial color setup
   refreshColors()
@@ -32,7 +30,7 @@ export const initializeLoggerClient = (logLevel?: LogLevel): void => {
   })
 
   // Use globalThis.console directly since logger isn't ready yet
-  if (effectiveLogLevel !== 'off') {
-    globalThis.console.log(`🌐 Client logger initialized with level: ${effectiveLogLevel}`)
+  if (logLevel !== 'off') {
+    globalThis.console.log(`🌐 Client logger initialized with level: ${logLevel}`)
   }
 }
