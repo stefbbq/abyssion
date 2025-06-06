@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Lorem Ipsum",
+    "role": "Consectetur / Adipiscing",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "/images/member1.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Dolor Amet",
+    "role": "Eiusmod / Tempor",
+    "bio": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "image": "/images/member2.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Magna Aliqua",
+    "role": "Labore / Dolore",
+    "bio": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    "image": "/images/member3.jpg"
+  }
+]

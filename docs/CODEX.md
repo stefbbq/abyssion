@@ -24,48 +24,45 @@ Quick reference for codebase structure and exports.
 
 ### Islands (Interactive Components)
 - `islands/Header.tsx` - Main navigation header with theme integration
-- `islands/BottomNav.tsx` - Main navigation coordinator organism
-  - Orchestrates collapsed and expanded states
-  - Delegates to specialized molecules (ExpandedMenu, CollapsedNav)
-  - Uses navigation utilities for state calculation
-  - Inlined navigation tracking and drag gesture handling
+- `islands/BottomNav.tsx` - Main navigation coordinator
 - `islands/Home.tsx` - 3D logo component (Logo3D)
 - `islands/MusicPlayer.tsx` - Audio player component
 
 ### Atomic Design System
 
 #### Atoms (Basic UI Building Blocks)
-- `atoms/Icon.tsx` - SVG icon component (back arrow, menu hamburger)
+- `atoms/Icon.tsx` - SVG icon component (back arrow, menu hamburger, etc.)
 - `atoms/BaseButton.tsx` - Base button/link with Fresh Partials support
 - `atoms/Button.tsx` - Reusable styled button component
 - `atoms/ThemeToggle.tsx` - Light/dark mode toggle button
 - `atoms/ThemeDemo.tsx` - Theme system demonstration
-- `atoms/icons/index.ts` - Icon component exports
+- `atoms/icons/` - Icon components (Facebook, Instagram, Discord, SoundCloud, Hamburger)
 - `atoms/index.ts` - Atomic component barrel exports
 
 #### Molecules (Component Combinations)
 - `molecules/NavButton.tsx` - Smart navigation button (Icon + BaseButton + state)
-  - Handles smooth morphing between navigation roles
-  - Position-based animation with absolute positioning
-  - Action handling and hover effects
 - `molecules/ExpandedMenu.tsx` - Expanded menu with social links and navigation items
 - `molecules/CollapsedNav.tsx` - Collapsed navigation with morphing buttons
 - `molecules/index.ts` - Molecule component barrel exports
 
-#### Organisms (Complex UI Sections)
-- `organisms/index.ts` - Organism component barrel exports (currently empty)
-
-
+### Data Content System
+- `data/` - All static content for pages in JSON files
+  - `bandMembers.json` - Band member data for bio page
+  - `shows.json` - Shows (upcoming and past) for shows page
+  - `bioAbout.json` - About section paragraphs for bio page
+  - `bioAlbums.json` - Albums/releases for bio page
+  - `bioSections.json` - Section titles/descriptions for bio page
+  - *(add more as needed for other pages)*
 
 ### Routes (Pages)
-- `routes/index.tsx` - Homepage with 3D logo
-- `routes/bio.tsx` - Band biography page
-- `routes/shows.tsx` - Shows/concerts page
-- `routes/contact.tsx` - Contact information page
-- `routes/_app.tsx` - App wrapper with Fresh Partials support and persistent BottomNav
-- `routes/partials/home.tsx` - Partial route for homepage content
-- `routes/partials/bio.tsx` - Partial route for bio page content
-- `routes/partials/shows.tsx` - Partial route for shows page content
+- `routes/index.tsx` - Homepage (re-exports partial)
+- `routes/bio.tsx` - Band biography page (re-exports partial)
+- `routes/shows.tsx` - Shows/concerts page (re-exports partial)
+- `routes/contact.tsx` - Contact information page (re-exports partial)
+- `routes/_app.tsx` - App wrapper with Fresh Partials support and persistent BottomNav/Header overlay
+- `routes/partials/home.tsx` - Partial route for homepage content (loads from JSON as needed)
+- `routes/partials/bio.tsx` - Partial route for bio page content (loads all content from JSON)
+- `routes/partials/shows.tsx` - Partial route for shows page content (loads all content from JSON)
 - `routes/partials/contact.tsx` - Partial route for contact page content
 
 ### Setup (Composable Utilities)
@@ -167,7 +164,8 @@ Quick reference for codebase structure and exports.
 - `CODEX.md` - This file - codebase reference
 
 ### Navigation System (Fresh Partials)
-- **Client-side routing**: Seamless page transitions without full reloads
+- **Partial-first SPA routing**: All page content lives in partials, top-level routes re-export partials for SSR and direct navigation
+- **Client-side routing**: Seamless page transitions without full reloads using Fresh Partials
 - **GL world persistence**: 3D environment stays active during navigation
 - **Adaptive navigation states**: BottomNav morphs between homepage/subpage layouts
 - **Smooth animations**: CSS transforms with 500ms ease-out transitions

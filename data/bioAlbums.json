@@ -1,0 +1,14 @@
+[
+  {
+    "year": "2021",
+    "title": "Dolor Sit Amet",
+    "type": "Album",
+    "tracks": 12
+  },
+  {
+    "year": "2019",
+    "title": "Lorem Ipsum Dolor",
+    "type": "EP",
+    "tracks": 5
+  }
+]

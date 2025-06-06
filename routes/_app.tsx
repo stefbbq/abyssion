@@ -1,5 +1,6 @@
 import { type PageProps } from '$fresh/server.ts'
 import { Partial } from '$fresh/runtime.ts'
+import Header from '../islands/Header.tsx'
 import BottomNav from '../islands/BottomNav.tsx'
 import MusicPlayer from '../islands/MusicPlayer.tsx'
 
@@ -38,14 +39,16 @@ export default function App({ Component, url }: PageProps) {
         <title>abyssion</title>
         <link rel='stylesheet' href='/styles.css' />
       </head>
-      <body f-client-nav>
-        <Partial name='page-content'>
-          <Component />
-        </Partial>
-
-        {/* Keep BottomNav outside partials so it can animate between states */}
+      <body f-client-nav class='min-h-screen relative'>
+        <div class='absolute top-0 left-0 right-0 z-50'>
+          <Header currentPath={url.pathname} />
+        </div>
+        <main class='min-h-screen'>
+          <Partial name='page-content'>
+            <Component />
+          </Partial>
+        </main>
         <BottomNav currentPath={url.pathname} />
-
         {/* <MusicPlayer tracks={sampleTracks} /> */}
       </body>
     </html>

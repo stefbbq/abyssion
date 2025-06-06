@@ -1,8 +1,8 @@
 import { defineRoute, RouteConfig } from '$fresh/server.ts'
-import { Partial } from '$fresh/runtime.ts'
 import { Head } from '$fresh/runtime.ts'
 import Header from '../../islands/Header.tsx'
 import { Button } from '../../atoms/index.ts'
+import shows from '../../data/shows.json' with { type: 'json' }
 
 // disable app wrapper and layouts for partial routes
 export const config: RouteConfig = {
@@ -20,50 +20,18 @@ interface Show {
   isPast: boolean
 }
 
-const upcomingShows: Show[] = [
-  {
-    id: '1',
-    title: 'Abyssion Live',
-    date: '2024-02-15',
-    venue: 'The Underground',
-    location: 'Berlin, Germany',
-    ticketLink: 'https://tickets.example.com/show1',
-    isPast: false,
-  },
-  {
-    id: '2',
-    title: 'Dark Frequencies Tour',
-    date: '2024-02-28',
-    venue: 'Warehouse 23',
-    location: 'Amsterdam, Netherlands',
-    ticketLink: 'https://tickets.example.com/show2',
-    isPast: false,
-  },
-]
-
-const pastShows: Show[] = [
-  {
-    id: '3',
-    title: 'Echoes in the Void',
-    date: '2023-12-10',
-    venue: 'Club Vertex',
-    location: 'Prague, Czech Republic',
-    ticketLink: '',
-    isPast: true,
-  },
-]
-
 export default defineRoute(() => {
+  const upcomingShows = shows.filter((show: Show) => !show.isPast)
+  const pastShows = shows.filter((show: Show) => show.isPast)
+
   return (
-    <Partial name='page-content'>
+    <>
       <Head>
         <title>Shows | abyssion</title>
         <meta name='description' content='Upcoming and past shows by abyssion' />
       </Head>
 
       <div class='min-h-screen bg-gray-50 pb-20 md:pb-0'>
-        <Header currentPath='/shows' />
-
         <main class='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
           <div class='space-y-16'>
             <section class='text-center'>
@@ -77,7 +45,7 @@ export default defineRoute(() => {
             <section>
               <h2 class='text-3xl font-bold text-gray-900 mb-8'>Upcoming Shows</h2>
               <div class='space-y-6'>
-                {upcomingShows.map((show) => (
+                {upcomingShows.map((show: Show) => (
                   <div
                     key={show.id}
                     class='bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow'
@@ -101,7 +69,7 @@ export default defineRoute(() => {
             <section>
               <h2 class='text-3xl font-bold text-gray-900 mb-8'>Past Shows</h2>
               <div class='space-y-4'>
-                {pastShows.map((show) => (
+                {pastShows.map((show: Show) => (
                   <div
                     key={show.id}
                     class='bg-gray-50 rounded-xl border border-gray-200 p-6'
@@ -121,6 +89,6 @@ export default defineRoute(() => {
           </div>
         </main>
       </div>
-    </Partial>
+    </>
   )
 })

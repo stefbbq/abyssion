@@ -1,5 +1,4 @@
 import { defineRoute, RouteConfig } from '$fresh/server.ts'
-import { Partial } from '$fresh/runtime.ts'
 import { Head } from '$fresh/runtime.ts'
 import Header from '../../islands/Header.tsx'
 import { Button } from '../../atoms/index.ts'
@@ -12,15 +11,13 @@ export const config: RouteConfig = {
 
 export default defineRoute(() => {
   return (
-    <Partial name='page-content'>
+    <>
       <Head>
         <title>Contact | abyssion</title>
         <meta name='description' content='Get in touch with abyssion' />
       </Head>
 
       <div class='min-h-screen bg-gray-50 pb-20 md:pb-0'>
-        <Header currentPath='/contact' />
-
         <main class='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
           <div class='space-y-16'>
             <section class='text-center'>
@@ -178,6 +175,6 @@ export default defineRoute(() => {
           </div>
         </main>
       </div>
-    </Partial>
+    </>
   )
 })
