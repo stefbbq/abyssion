@@ -1,7 +1,6 @@
 import { defineRoute, RouteConfig } from '$fresh/server.ts'
 import { Head } from '$fresh/runtime.ts'
-import Header from '../../islands/Header.tsx'
-import { Button } from '../../atoms/index.ts'
+import { Button } from '@components/ui/Button.tsx'
 
 // disable app wrapper and layouts for partial routes
 export const config: RouteConfig = {

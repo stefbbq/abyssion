@@ -1,5 +1,5 @@
 import { useSignal } from '@preact/signals'
-import type { MenuItem, SocialLink } from '../utils/navigation/index.ts'
+import type { MenuItem, SocialLink } from '../../utils/navigation/index.ts'
 
 interface ExpandedMenuProps {
   currentPath: string

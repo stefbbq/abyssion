@@ -23,36 +23,43 @@ Quick reference for codebase structure and exports.
 - `types.ts` - `GLTheme` type definitions
 
 ### Islands (Interactive Components)
-- `islands/Header.tsx` - Main navigation header with theme integration
-- `islands/BottomNav.tsx` - Main navigation coordinator
-- `islands/Home.tsx` - 3D logo component (Logo3D)
-- `islands/MusicPlayer.tsx` - Audio player component
+- This directory integrates components with the Fresh framework. Each file is a simple pointer that re-exports the main component logic from the `/components` directory, making it "interactive."
+- `islands/ActionZoneController.tsx` - The main interactive mobile navigation system controller. It decides which layout to display.
+- `islands/Header.tsx` - The main interactive desktop navigation header.
+- `islands/GLCanvas.tsx` - The interactive 3D logo component.
+- `islands/MusicPlayer.tsx` - The interactive audio player component.
 
-### Atomic Design System
+### Component-Based Architecture
+- All component logic is organized by feature inside the `/components` directory.
 
-#### Atoms (Basic UI Building Blocks)
-- `atoms/Icon.tsx` - SVG icon component (back arrow, menu hamburger, etc.)
-- `atoms/BaseButton.tsx` - Base button/link with Fresh Partials support
-- `atoms/Button.tsx` - Reusable styled button component
-- `atoms/ThemeToggle.tsx` - Light/dark mode toggle button
-- `atoms/ThemeDemo.tsx` - Theme system demonstration
-- `atoms/icons/` - Icon components (Facebook, Instagram, Discord, SoundCloud, Hamburger)
-- `atoms/index.ts` - Atomic component barrel exports
+#### `/components/ui/` (Generic UI Elements)
+- `Button.tsx` - A versatile button that renders as `<button>` or `<a>` with styles.
+- `Icon.tsx` - Renders simple SVG icons.
+- `ThemeToggle.tsx` - Light/dark mode toggle button.
+- `index.ts` - Barrel file for UI component exports.
 
-#### Molecules (Component Combinations)
-- `molecules/NavButton.tsx` - Smart navigation button (Icon + BaseButton + state)
-- `molecules/ExpandedMenu.tsx` - Expanded menu with social links and navigation items
-- `molecules/CollapsedNav.tsx` - Collapsed navigation with morphing buttons
-- `molecules/index.ts` - Molecule component barrel exports
+#### `/components/action-zone/` (Mobile Navigation)
+- `ActionZone.tsx` - The main presentation component for the mobile navigation. It's a "dumb" container that handles the open/closed/drag states and renders children with framer-motion animations.
+- `CollapsedNavHome.tsx` - Renders the collapsed state for the homepage.
+- `CollapsedNavPage.tsx` - Renders the collapsed state for interior pages.
+- `ExpandedMenu.tsx` - Renders the expanded menu with navigation and social links.
+- `NavButton.tsx` - A highly dynamic, animated button that uses `framer-motion`'s `layoutId` to morph between different states. It renders either an `<a>` or `<button>` tag.
+
+#### `/components/navigation/` (Desktop Navigation)
+- `Header.tsx` - The main site header, visible on desktop.
+
+#### `/components/player/` & `/components/gl/`
+- `player/MusicPlayer.tsx` - The audio player.
+- `gl/GLCanvas.tsx` - The WebGL logo canvas.
 
 ### Data Content System
-- `data/` - All static content for pages in JSON files
-  - `bandMembers.json` - Band member data for bio page
-  - `shows.json` - Shows (upcoming and past) for shows page
-  - `bioAbout.json` - About section paragraphs for bio page
-  - `bioAlbums.json` - Albums/releases for bio page
-  - `bioSections.json` - Section titles/descriptions for bio page
-  - *(add more as needed for other pages)*
+- `data/` - All static content for pages in JSON files.
+- `navigation.json` - The single source of truth for all site navigation and social links.
+- `bandMembers.json` - Band member data for bio page.
+- `shows.json` - Shows (upcoming and past) for shows page.
+- `bioAbout.json` - About section paragraphs for bio page
+- `bioAlbums.json` - Albums/releases for bio page
+- `bioSections.json` - Section titles/descriptions for bio page
 
 ### Routes (Pages)
 - `routes/index.tsx` - Homepage (re-exports partial)
@@ -154,10 +161,8 @@ Quick reference for codebase structure and exports.
 - `utils/detectTheme.ts` - Theme detection for styling
 
 ### Utils (Utility Functions)
-- `utils/navigation/NavigationStates.ts` - `getButtonStates()` - Navigation state calculation utility
-- `utils/navigation/navigationConfig.ts` - `NAV_CONFIG`, navigation configuration constants
-- `utils/navigation/index.ts` - Navigation utilities barrel exports
-- `utils/index.ts` - Main utils barrel exports
+- `utils/index.ts` - Main utils barrel exports.
+- `utils/navigation/types.ts` - Contains all TypeScript definitions for navigation, e.g., `NavButtonState`, `MenuItem`, `SocialLink`.
 
 ### Documentation
 - `THEME_SYSTEM.md` - Complete theme system architecture guide
@@ -167,6 +172,6 @@ Quick reference for codebase structure and exports.
 - **Partial-first SPA routing**: All page content lives in partials, top-level routes re-export partials for SSR and direct navigation
 - **Client-side routing**: Seamless page transitions without full reloads using Fresh Partials
 - **GL world persistence**: 3D environment stays active during navigation
-- **Adaptive navigation states**: BottomNav morphs between homepage/subpage layouts
-- **Smooth animations**: CSS transforms with 500ms ease-out transitions
-- **Route detection**: Signal-based current path tracking with polling fallback
+- **Adaptive navigation states**: ActionZone morphs between layouts (`CollapsedNavHome`, `CollapsedNavPage`) based on the current route.
+- **Smooth animations**: Powered by `framer-motion` using the `layoutId` prop for morphing effects.
+- **Route detection**: Signal-based current path tracking within `ActionZoneController`.

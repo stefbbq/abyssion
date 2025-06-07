@@ -12,9 +12,9 @@ import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $shows from './routes/shows.tsx'
-import * as $BottomNav from './islands/BottomNav.tsx'
+import * as $ActionZoneController from './islands/ActionZoneController.tsx'
+import * as $GLCanvas from './islands/GLCanvas.tsx'
 import * as $Header from './islands/Header.tsx'
-import * as $Home from './islands/Home.tsx'
 import * as $MusicPlayer from './islands/MusicPlayer.tsx'
 import type { Manifest } from '$fresh/server.ts'
 
@@ -32,9 +32,9 @@ const manifest = {
     './routes/shows.tsx': $shows,
   },
   islands: {
-    './islands/BottomNav.tsx': $BottomNav,
+    './islands/ActionZoneController.tsx': $ActionZoneController,
+    './islands/GLCanvas.tsx': $GLCanvas,
     './islands/Header.tsx': $Header,
-    './islands/Home.tsx': $Home,
     './islands/MusicPlayer.tsx': $MusicPlayer,
   },
   baseUrl: import.meta.url,

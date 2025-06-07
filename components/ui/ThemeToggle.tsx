@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import { getThemeMode, getUITheme, toggleThemeMode } from '../lib/theme/index.ts'
+import { getThemeMode, getUITheme, toggleThemeMode } from '@lib/theme/index.ts'
 
 /**
  * Simple theme toggle icon that switches between light and dark modes

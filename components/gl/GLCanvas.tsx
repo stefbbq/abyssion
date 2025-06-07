@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks'
-import { initGL, type InitOptions } from '@libgl/index.ts'
-import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient.ts'
-import { LogLevel } from '@lib/logger/constants.ts'
+import { initGL, type InitOptions } from '../../lib/gl/index.ts'
+import { initializeLoggerClient } from '../../lib/logger/utils/initializeLoggerClient.ts'
+import { LogLevel } from '../../lib/logger/constants.ts'
 
 type Props = {
   width?: number
@@ -10,9 +10,9 @@ type Props = {
 }
 
 /**
- * GL component with electrical effects and interactivity
+ * GLCanvas component with electrical effects and interactivity
  */
-export default function GL({ width = 500, height = 500 }: Props) {
+export default function GLCanvas({ width = 500, height = 500 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

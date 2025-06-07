@@ -1,16 +1,35 @@
-import { JSX } from 'preact'
+import { ComponentChildren, JSX } from 'preact'
 import { IS_BROWSER } from '$fresh/runtime.ts'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-export interface ButtonProps extends Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'size'> {
+// Base props common to both button and anchor variations
+type BaseProps = {
   variant?: ButtonVariant
   size?: ButtonSize
+  children: ComponentChildren
+  class?: string
 }
 
+// Props specific to the <button> element, without 'href'
+type ButtonElementProps =
+  & Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'size' | 'class'>
+  & { href?: never }
+
+// Props specific to the <a> element, requiring 'href'
+type AnchorElementProps =
+  & Omit<JSX.HTMLAttributes<HTMLAnchorElement>, 'size' | 'class'>
+  & { href: string }
+
+// Use a discriminated union type. Based on whether 'href' is provided,
+// TypeScript will enforce either Button-specific or Anchor-specific props.
+export type ButtonProps = BaseProps & (ButtonElementProps | AnchorElementProps)
+
 /**
- * Vercel-inspired button component with multiple variants and sizes
+ * A versatile button component that can render as a standard button
+ * or as an anchor tag for navigation, with support for Fresh Partials.
+ * It features multiple visual variants and sizes, inspired by Vercel's design system.
  */
 export function Button({
   variant = 'primary',
@@ -37,11 +56,25 @@ export function Button({
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 
+  if (props.href) {
+    // TypeScript now knows these are AnchorElementProps
+    return (
+      <a
+        {...props}
+        class={classes}
+        f-partial={`/partials${props.href === '/' ? '/home' : props.href}`}
+      >
+        {children}
+      </a>
+    )
+  }
+
+  // TypeScript knows these are ButtonElementProps
   return (
     <button
       {...props}
-      disabled={!IS_BROWSER || props.disabled}
       class={classes}
+      disabled={!IS_BROWSER || props.disabled}
     >
       {children}
     </button>
