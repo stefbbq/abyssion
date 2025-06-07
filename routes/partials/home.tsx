@@ -1,6 +1,6 @@
 import { defineRoute, RouteConfig } from '$fresh/server.ts'
 import { Head } from '$fresh/runtime.ts'
-import GL from '@components/gl/GLCanvas.tsx'
+import GL from '@molecules/GLCanvas.tsx'
 
 // disable app wrapper and layouts for partial routes
 export const config: RouteConfig = {

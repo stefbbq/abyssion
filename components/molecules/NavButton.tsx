@@ -1,5 +1,5 @@
-import type { NavButtonState } from '../../utils/navigation/types.ts'
-import { Icon } from '../ui/Icon.tsx'
+import type { NavButtonState } from '@utils/navigation/types.ts'
+import { Icon } from '@atoms/Icon.tsx'
 import { motion } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
 

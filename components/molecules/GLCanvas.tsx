@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks'
-import { initGL, type InitOptions } from '../../lib/gl/index.ts'
-import { initializeLoggerClient } from '../../lib/logger/utils/initializeLoggerClient.ts'
-import { LogLevel } from '../../lib/logger/constants.ts'
+import { initGL, type InitOptions } from '@lib/gl/index.ts'
+import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient.ts'
+import { LogLevel } from '@lib/logger/constants.ts'
 
 type Props = {
   width?: number

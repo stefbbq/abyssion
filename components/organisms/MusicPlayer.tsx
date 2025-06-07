@@ -1,6 +1,6 @@
 import { h } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { lc, log } from '../../lib/logger/index.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 interface Track {
   id: string

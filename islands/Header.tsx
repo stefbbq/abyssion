@@ -1,1 +1,1 @@
-export { default } from '../components/navigation/Header.tsx'
+export { default } from '@organisms/Header.tsx'

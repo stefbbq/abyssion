@@ -29,28 +29,29 @@ Quick reference for codebase structure and exports.
 - `islands/GLCanvas.tsx` - The interactive 3D logo component.
 - `islands/MusicPlayer.tsx` - The interactive audio player component.
 
-### Component-Based Architecture
-- All component logic is organized by feature inside the `/components` directory.
+### Component-Based Architecture (Atomic Design)
+- All component logic is organized using Atomic Design principles inside the `/components` directory, broken into `atoms`, `molecules`, and `organisms`.
 
-#### `/components/ui/` (Generic UI Elements)
+#### `/components/atoms/` (Basic building blocks)
 - `Button.tsx` - A versatile button that renders as `<button>` or `<a>` with styles.
 - `Icon.tsx` - Renders simple SVG icons.
-- `ThemeToggle.tsx` - Light/dark mode toggle button.
-- `index.ts` - Barrel file for UI component exports.
+- `icons/` - Directory containing individual SVG icon components.
+- `index.ts` - Barrel file for atom exports.
 
-#### `/components/action-zone/` (Mobile Navigation)
-- `ActionZone.tsx` - The main presentation component for the mobile navigation. It's a "dumb" container that handles the open/closed/drag states and renders children with framer-motion animations.
-- `CollapsedNavHome.tsx` - Renders the collapsed state for the homepage.
-- `CollapsedNavPage.tsx` - Renders the collapsed state for interior pages.
+#### `/components/molecules/` (Combinations of atoms)
+- `CollapsedNav.tsx` - Renders the collapsed state for the mobile action zone.
 - `ExpandedMenu.tsx` - Renders the expanded menu with navigation and social links.
+- `GLCanvas.tsx` - The WebGL logo canvas.
 - `NavButton.tsx` - A highly dynamic, animated button that uses `framer-motion`'s `layoutId` to morph between different states. It renders either an `<a>` or `<button>` tag.
+- `ThemeToggle.tsx` - Light/dark mode toggle button.
+- `index.ts` - Barrel file for molecule exports.
 
-#### `/components/navigation/` (Desktop Navigation)
+#### `/components/organisms/` (Complex components)
+- `ActionZone.tsx` - The main presentation component for the mobile navigation. It's a "dumb" container that handles the open/closed/drag states and renders children with framer-motion animations.
+- `ActionZoneController.tsx` - Controller for the ActionZone, managing state and layouts.
 - `Header.tsx` - The main site header, visible on desktop.
-
-#### `/components/player/` & `/components/gl/`
-- `player/MusicPlayer.tsx` - The audio player.
-- `gl/GLCanvas.tsx` - The WebGL logo canvas.
+- `MusicPlayer.tsx` - The audio player.
+- `index.ts` - Barrel file for organism exports.
 
 ### Data Content System
 - `data/` - All static content for pages in JSON files.

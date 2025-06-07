@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { getUITheme } from '@lib/theme/index.ts'
-import navData from '../../data/navigation.json' with { type: 'json' }
-import { ThemeToggle } from '../ui/index.ts'
+import navData from '@data/navigation.json' with { type: 'json' }
+import ThemeToggle from '@molecules/ThemeToggle.tsx'
 
 export interface HeaderProps {
   currentPath?: string

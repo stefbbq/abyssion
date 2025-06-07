@@ -1,4 +1,4 @@
-import type { NavButtonState } from '../../molecules/NavButton.tsx'
+import type { NavButtonState } from '@molecules/NavButton.tsx'
 
 /**
  * NavigationStates utility
@@ -28,22 +28,28 @@ export const getButtonStates = (currentPath: string): Record<string, NavButtonSt
 
     return {
       shows: {
-        position: { x: padding, width: navButtonWidth },
+        id: 'shows',
+        key: 'shows',
         role: 'nav-item',
+        position: 'left',
         content: { label: 'Shows' },
         action: { type: 'navigate', href: '/shows' },
         isActive: false,
       },
       contact: {
-        position: { x: padding + navButtonWidth + buttonGap, width: navButtonWidth },
+        id: 'contact',
+        key: 'contact',
         role: 'nav-item',
+        position: 'center',
         content: { label: 'Contact' },
         action: { type: 'navigate', href: '/contact' },
         isActive: false,
       },
       menu: {
-        position: { x: containerWidth - narrowWidth, width: narrowWidth },
-        role: 'menu',
+        id: 'menu',
+        key: 'menu',
+        role: 'action-button',
+        position: 'right',
         content: { label: 'Menu', icon: 'menu' },
         action: { type: 'menu' },
         isActive: false,
@@ -55,22 +61,28 @@ export const getButtonStates = (currentPath: string): Record<string, NavButtonSt
 
     return {
       shows: {
-        position: { x: padding, width: narrowWidth },
-        role: 'back',
+        id: 'shows',
+        key: 'shows',
+        role: 'back-button',
+        position: 'left',
         content: { label: 'Back', icon: 'back' },
         action: { type: 'back' },
         isActive: false,
       },
       contact: {
-        position: { x: padding + narrowWidth + buttonGap, width: titleWidth },
+        id: 'contact',
+        key: 'contact',
         role: 'page-title',
+        position: 'center',
         content: { label: isContactPage ? 'Contact' : isShowsPage ? 'Shows' : 'Page' },
         action: { type: 'none' },
         isActive: true,
       },
       menu: {
-        position: { x: containerWidth - narrowWidth, width: narrowWidth },
-        role: 'menu',
+        id: 'menu',
+        key: 'menu',
+        role: 'action-button',
+        position: 'right',
         content: { label: 'Menu', icon: 'menu' },
         action: { type: 'menu' },
         isActive: false,

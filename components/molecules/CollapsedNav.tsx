@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
-import type { NavButtonState } from '../../utils/navigation/types.ts'
+import type { NavButtonState } from '@utils/navigation/types.ts'
 import { UITheme } from '@lib/theme/types.ts'
-import { NavButton } from './NavButton.tsx'
+import { NavButton } from '@molecules/NavButton.tsx'
 
 interface CollapsedNavProps {
   buttons: NavButtonState[]

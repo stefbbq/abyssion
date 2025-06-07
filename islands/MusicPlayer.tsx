@@ -1,1 +1,1 @@
-export { default } from '../components/player/MusicPlayer.tsx'
+export { default } from '@organisms/MusicPlayer.tsx'
