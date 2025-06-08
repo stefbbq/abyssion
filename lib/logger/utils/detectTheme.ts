@@ -7,5 +7,5 @@
 export const detectDarkMode = (): boolean => {
   if (typeof window === 'undefined') return true // Default to dark for SSR
 
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  return globalThis.matchMedia && globalThis.matchMedia('(prefers-color-scheme: dark)').matches
 }

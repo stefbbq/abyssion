@@ -1,14 +1,15 @@
+import * as Three from 'three'
 import { createCircleOutline } from './createCircleOutline.ts'
 
 /**
  * Create a crosshair shape
  */
 export const createCrosshair = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   radius = 0.5,
   thickness = 0.02,
   centerRadius = 0.05,
-): import('three').Group => {
+): Three.Group => {
   const group = new THREE.Group()
 
   const centerCircle = new THREE.Mesh(

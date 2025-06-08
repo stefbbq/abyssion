@@ -4,11 +4,11 @@ import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 type DebugSystemConfig = {
   container: HTMLDivElement
-  camera: any
-  scene: any
-  bokehPass: any
-  logoLayer: any
-  state: any
+  camera: Three.Camera
+  scene: Three.Scene
+  bokehPass: Three.Pass
+  logoController: unknown
+  state: unknown
   THREE: typeof Three
 }
 
@@ -21,8 +21,8 @@ type DebugSystemResult = {
 /**
  * Sets up the debug overlay system with DOF controls and regeneration
  */
-export const setupDebugSystem = async (config: DebugSystemConfig): Promise<DebugSystemResult> => {
-  const { container, camera, scene, bokehPass, logoLayer, state, THREE } = config
+export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystemResult> => {
+  const { container, camera, scene, bokehPass, logoController, state, THREE } = config
   const { planeWidth, planeHeight } = sceneConfig
 
   // Setup DebugOverlay
@@ -106,12 +106,12 @@ export const setupDebugSystem = async (config: DebugSystemConfig): Promise<Debug
 
   // Layer regeneration function
   const handleRegenerateRandomLayers = () => {
-    if (!scene || !state.planes || !state.layers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
+    if (!scene || !state.planes || !state.logoLayers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
       console.warn('Cannot regenerate layers: missing state')
       return
     }
 
-    const { planes: newPlanes, layers: newLayers } = logoLayer.regenerate(
+    const { planes: newPlanes, logoLayers: newLayers } = logoController.regenerate(
       scene,
       state.planes,
       state.planeGeometry,
@@ -120,7 +120,7 @@ export const setupDebugSystem = async (config: DebugSystemConfig): Promise<Debug
     )
 
     state.planes = newPlanes
-    state.layers = newLayers
+    state.logoLayers = newLayers
   }
 
   return {

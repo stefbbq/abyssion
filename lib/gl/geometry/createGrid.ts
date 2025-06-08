@@ -1,14 +1,16 @@
+import * as Three from 'three'
+
 /**
  * Create a square grid pattern
  */
 export const createGrid = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   width = 2,
   height = 2,
   divisionsX = 10,
   divisionsY = 10,
   lineWidth = 0.01,
-): import('three').BufferGeometry => {
+): Three.BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
   const positions = []
   const indices = []

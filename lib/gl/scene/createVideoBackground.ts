@@ -1,9 +1,9 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
-import { createVideoCycle } from '../textures/VideoCycle/index.ts'
-import type { VideoBackgroundManager } from '../types.ts'
+import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
+import type { VideoBackgroundManager } from '@libgl/types.ts'
 
 /**
  * Creates a dual-buffer video background system with seamless cycling and responsive scaling.
@@ -16,8 +16,8 @@ import type { VideoBackgroundManager } from '../types.ts'
  * Returns undefined if video backgrounds are disabled in configuration.
  */
 export const createVideoBackground = async (
-  THREE: typeof import('three'),
-  scene: THREE.Scene,
+  THREE: typeof Three,
+  scene: Three.Scene,
 ): Promise<VideoBackgroundManager | undefined> => {
   if (!videoCycleConfig.enabled) return undefined
 

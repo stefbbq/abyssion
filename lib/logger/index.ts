@@ -20,29 +20,26 @@
  * Contexts are defined in LogContext (imported as lc).
  */
 import { LOG_LEVELS, LogContext, type LogLevel } from './constants.ts'
-import { initializeLogger } from './utils/initializeLogger.ts'
 import { type ContextFilter, createContextFilter } from './utils/createContextFilter.ts'
-import { type ContextControls, createContextControls } from './utils/createContextControls.ts'
-import { createDenoLogger } from './utils/createDenoLogger.ts'
+import { createServerLogger } from './utils/createServerLogger.ts'
 import { createClientLogger, type LogFunction } from './utils/createClientLogger.ts'
 
 let minLogLevel: LogLevel = 'warn'
 const contextFilter: ContextFilter = createContextFilter()
-const contextControls: ContextControls = createContextControls(contextFilter)
 const getMinLogLevelFn = () => minLogLevel
 
 /**
  * Set the minimum log level at runtime (for tests or dynamic changes).
  * @param level LogLevel string
  */
-export function setMinLogLevel(level: LogLevel) {
+export const setMinLogLevel = (level: LogLevel) => {
   if (LOG_LEVELS.includes(level)) minLogLevel = level
   else globalThis.console.warn(`[logger] Invalid log level: ${level}`)
 }
 
-// Context control functions - delegate to contextControls utility
-const { disable: disableContext, enable: enableContext, focus: focusContext, clearFocus, reset: resetContexts } = contextControls
-focusContext(LogContext.PREACT)
+// Context Filter
+const { disable: disableContext, enable: enableContext, focus: focusContext, clearFocus, reset: resetContexts, shouldLog } = contextFilter
+disableContext(LogContext.GL_TEXTURES)
 
 /**
  * Main log function with all level methods attached
@@ -50,11 +47,11 @@ focusContext(LogContext.PREACT)
 const log: LogFunction = createClientLogger(getMinLogLevelFn, contextFilter)
 
 /**
- * Deno-idiomatic log variant that outputs without color/styles.
+ * Deno-idiomatic logger initilize
  */
-const logDeno = createDenoLogger()
+createServerLogger()
 
 /**
  * Exported log function and log context enum (aliased as lc for brevity).
  */
-export { clearFocus, disableContext, enableContext, focusContext, initializeLogger, log, LogContext as lc, logDeno, resetContexts }
+export { clearFocus, disableContext, enableContext, focusContext, log, LogContext as lc, resetContexts }

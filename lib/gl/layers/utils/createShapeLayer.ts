@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import { createArcOutline, createCircleOutline, createHexagonOutline } from '../../geometry/index.ts'
 import { GeometricOptions } from '../GeometricLayer.ts'
 
@@ -7,7 +7,7 @@ import { GeometricOptions } from '../GeometricLayer.ts'
  * These are shapes that exist within the 3D world (not on top as overlay)
  */
 export const createShapeLayer = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = {},
 ) => {
   const {

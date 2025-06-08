@@ -45,13 +45,13 @@ export const createLogoLayer = (THREE: typeof Three) => {
     /**
      * Get all layers (static + random)
      */
-    getAllLayers: () => getAllLogoLayers(THREE),
+    getAllLayers: (): LogoLayer[] => getAllLogoLayers(THREE),
 
     /**
      * Create plane meshes from layers
      */
     createPlanes: (
-      layers: LogoLayer[],
+      logoLayers: LogoLayer[],
       planeGeometry: Three.PlaneGeometry,
       outlineTexture: Three.Texture,
       stencilTexture: Three.Texture,
@@ -59,7 +59,7 @@ export const createLogoLayer = (THREE: typeof Three) => {
     ) =>
       createPlanesFromLayers(
         THREE,
-        layers,
+        logoLayers,
         planeGeometry,
         outlineTexture,
         stencilTexture,

@@ -1,17 +1,17 @@
 import * as Three from 'three'
-import { createLogoPlaneGeometry } from '../scene/createLogoPlaneGeometry.ts'
-import { createLogoLayer } from '../layers/index.ts'
-import { createGeometricLayer } from '../layers/GeometricLayer.ts'
-import { createShadowLayer } from '../layers/ShadowLayer.ts'
-import { LogoLayer } from '../layers/LogoLayer.ts'
+import { createLogoPlaneGeometry } from '@libgl/scene/createLogoPlaneGeometry.ts'
+import { createLogoLayer } from '@libgl/layers/index.ts'
+import { createGeometricLayer } from '@libgl/layers/GeometricLayer.ts'
+import { createShadowLayer } from '@libgl/layers/ShadowLayer.ts'
+import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 
 type LayerSystemResult = {
-  logoLayer: LogoLayer
-  planes: any[]
-  layers: any[]
-  shapeLayer: any
-  shadowLayer: any
-  planeGeometry: any
+  logoController: unknown
+  planes: Three.Mesh[]
+  logoLayers: LogoLayer[]
+  shapeLayer: Three.Mesh
+  shadowLayer: Three.Mesh
+  planeGeometry: Three.PlaneGeometry
 }
 
 /**
@@ -27,14 +27,14 @@ export const setupLayerSystem = (
   const planeGeometry = createLogoPlaneGeometry(THREE)
 
   // Initialize the logo layer manager
-  const logoLayer = createLogoLayer(THREE)
+  const logoController = createLogoLayer(THREE)
 
   // Get all layers
-  const layers = logoLayer.getAllLayers()
+  const logoLayers = logoController.getAllLayers()
 
   // Create meshes for each layer
-  const planes = logoLayer.createPlanes(
-    layers,
+  const planes = logoController.createPlanes(
+    logoLayers,
     planeGeometry,
     outlineTexture,
     stencilTexture,
@@ -50,9 +50,9 @@ export const setupLayerSystem = (
   if (shadowLayer) scene.add(shadowLayer.mesh)
 
   return {
-    logoLayer,
+    logoController,
     planes,
-    layers,
+    logoLayers,
     shapeLayer,
     shadowLayer,
     planeGeometry,

@@ -1,15 +1,16 @@
+import * as Three from 'three'
 import { createCircleOutline } from './createCircleOutline.ts'
 
 /**
  * Create a circular segmented progress indicator
  */
 export const createSegmentedCircle = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   radius = 0.5,
   segments = 12,
   gapSize = 0.1,
   thickness = 0.03,
-): import('three').Group => {
+): Three.Group => {
   const group = new THREE.Group()
   const segmentAngle = (Math.PI * 2 - (gapSize * segments)) / segments
 

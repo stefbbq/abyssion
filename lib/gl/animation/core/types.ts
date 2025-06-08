@@ -17,7 +17,7 @@ export type AnimationContext = {
 export type AnimationOrchestrator = {
   readonly name: string
   readonly update: (context: AnimationContext) => void
-  readonly dispose: () => void
+  readonly dispose: (context: AnimationContext) => void
 }
 
 /**

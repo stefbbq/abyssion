@@ -1,6 +1,7 @@
 import { refreshColors } from '../colors.ts'
-import { setMinLogLevel } from '../index.ts'
+import { disableContext, setMinLogLevel } from '../index.ts'
 import { getMinLogLevel } from './getMinLogLevel.ts'
+import { LogContext } from '../constants.ts'
 
 /**
  * Client-side logger initialization (for browser)

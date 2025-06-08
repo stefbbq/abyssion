@@ -1,15 +1,17 @@
+import * as Three from 'three'
+
 /**
  * Create a rectangular data frame/panel
  */
 export const createDataPanel = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   width = 1,
   height = 0.6,
   borderThickness = 0.02,
   cornerRadius = 0.1,
   color = 0x00ffff,
   opacity = 0.3,
-): import('three').Group => {
+): Three.Group => {
   const group = new THREE.Group()
   const borderPath = new THREE.Shape()
 

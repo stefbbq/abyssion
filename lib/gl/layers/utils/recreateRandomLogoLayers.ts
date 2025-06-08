@@ -13,8 +13,6 @@ export const recreateRandomLogoLayers = (
   outlineTexture: Three.Texture,
   stencilTexture: Three.Texture,
 ) => {
-  console.log('recreateRandomLogoLayers')
-
   // Clean up all current meshes
   currentPlanes.forEach((plane, i) => {
     scene.remove(plane)
@@ -24,7 +22,6 @@ export const recreateRandomLogoLayers = (
 
   // Get fresh layer configuration
   const allLayers = getAllLogoLayers(THREE)
-  console.log('allLayers', allLayers)
 
   // Create all planes from scratch
   const allPlanes = createPlanesFromLayers(

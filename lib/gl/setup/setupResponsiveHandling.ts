@@ -1,14 +1,15 @@
+import * as Three from 'three'
 import { getResponsiveCameraZ } from '../scene/utils/getResponsiveCameraZ.ts'
 import { debugMobileResponsiveness } from '../scene/utils/mobileDebugHelper.ts'
-import type { UIOverlay } from '../types.ts'
+import type { RendererState, UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
 
 type ResponsiveConfig = {
   container: HTMLDivElement
-  camera: any
-  composer: any
+  camera: Three.Camera
+  composer: Three.EffectComposer
   uiLayer: UIOverlay
-  videoBackground?: any
-  rendererConfig: any
+  videoBackground?: VideoBackgroundManager
+  rendererConfig: RendererState
 }
 
 /**

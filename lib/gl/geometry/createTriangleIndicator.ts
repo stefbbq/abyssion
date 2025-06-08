@@ -1,11 +1,13 @@
+import * as Three from 'three'
+
 /**
  * Create a triangular target indicator
  */
 export const createTriangleIndicator = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   size = 0.3,
   thickness = 0.02,
-): import('three').BufferGeometry => {
+): Three.BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
   const points = [
     { x: 0, y: size }, // top

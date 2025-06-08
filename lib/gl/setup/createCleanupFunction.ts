@@ -1,17 +1,21 @@
+import * as Three from 'three'
+import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
+import type { EffectComposer, OrbitControls, WebGLRenderer } from 'three'
+
 type CleanupDependencies = {
   animationCleanup: () => void
   responsiveCleanup: () => void
-  controlsSystem: any
-  videoBackground?: any
-  logoLayer: any
-  scene: any
-  planes: any[]
-  shapeLayer: any
-  shadowLayer?: any
-  uiLayer: any
-  controls: any
-  renderer: any
-  composer: any
+  controlsSystem: OrbitControls | null
+  videoBackground?: VideoBackgroundManager
+  logoController: unknown
+  scene: Three.Scene
+  planes: Three.Mesh[]
+  shapeLayer: Three.Mesh
+  shadowLayer?: Three.Mesh
+  uiLayer: UIOverlay
+  controls: OrbitControls | null
+  renderer: WebGLRenderer
+  composer: EffectComposer
 }
 
 /**
@@ -24,7 +28,7 @@ export const createCleanupFunction = (dependencies: CleanupDependencies) => {
     responsiveCleanup,
     controlsSystem,
     videoBackground,
-    logoLayer,
+    logoController,
     scene,
     planes,
     shapeLayer,
@@ -58,8 +62,8 @@ export const createCleanupFunction = (dependencies: CleanupDependencies) => {
       }
 
       // Clean up planes
-      if (logoLayer && scene && planes && typeof logoLayer.dispose === 'function') {
-        logoLayer.dispose(scene, planes)
+      if (logoController && scene && planes && typeof logoController.dispose === 'function') {
+        logoController.dispose(scene, planes)
       }
 
       // Remove shape layer

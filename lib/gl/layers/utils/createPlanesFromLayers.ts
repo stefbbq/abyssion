@@ -7,14 +7,14 @@ import { LogoLayer } from '@libgl/layers/LogoLayer.ts'
  */
 export const createPlanesFromLayers = (
   THREE: typeof Three,
-  layers: LogoLayer[],
+  logoLayers: LogoLayer[],
   planeGeometry: Three.PlaneGeometry,
   outlineTexture: Three.Texture,
   stencilTexture: Three.Texture,
   scene: Three.Scene,
 ) => {
   // Sort layers by z-position only (back to front)
-  const sortedLayers = [...layers].sort((a, b) => a.zPos - b.zPos)
+  const sortedLayers = [...logoLayers].sort((a, b) => a.zPos - b.zPos)
 
   return sortedLayers.map((layer) => {
     // Convert plain object color to THREE.Color

@@ -1,4 +1,4 @@
-import type { LogoAnimationDependencies } from './types.ts'
+import type { RendererState } from '../types.ts'
 import { calculateMouseRotation } from './calculations/calculateMouseRotation.ts'
 import { calculateStaticLayerPosition } from './calculations/calculateStaticLayerPosition.ts'
 import { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
@@ -20,7 +20,7 @@ const { postProcessingConfig } = sceneConfig
  * Creates a logo animator with functional approach
  * Separates pure calculations from necessary side effects
  */
-export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
+export const createLogoAnimator = (dependencies: RendererState) => {
   let animationId: number | null = null
   let frameCount = 0
   let lastTime = 0
@@ -48,7 +48,6 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
   }
 
   const tick = (timestamp: number) => {
-    const deltaTime = timestamp - lastTime
     const totalTime = timestamp
     lastTime = timestamp
     frameCount++
@@ -83,7 +82,7 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
 
       // Update dependencies
       dependencies.planes = planes
-      dependencies.layers = layers
+      dependencies.logoLayers = layers
 
       // Update timing
       lastRegenerateTime = currentTime
@@ -92,7 +91,7 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
 
     // Apply pure layer calculations and shader updates
     dependencies.planes.forEach((plane: any, index: number) => {
-      const layer = dependencies.layers[index]
+      const layer = dependencies.logoLayers[index]
       if (!layer) return
 
       if (plane.material?.uniforms?.time) {
@@ -108,8 +107,8 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
         )
 
         if (shaderTimeResult.shouldUpdate) {
-          plane.material.uniforms.time.value = shaderTimeResult.newTimeValue
-          plane.lastUpdateTime = shaderTimeResult.newLastUpdateTime
+          plane.material.uniforms.time.value = shaderTimeResult.newTime
+          plane.lastUpdateTime = shaderTimeResult.newTime
         }
       }
 
@@ -117,7 +116,7 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
         const position = calculateRandomLayerPosition(
           totalTime,
           index,
-          dependencies.layers.length,
+          dependencies.logoLayers.length,
           layer.zPos,
         )
 

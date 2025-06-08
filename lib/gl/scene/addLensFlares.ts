@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
@@ -10,7 +11,7 @@ import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
  * @returns Canvas-based texture
  */
 const createFlareTexture = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   size: number,
   type: 'main' | 'ring' | 'streak' | 'glow',
   color: number,
@@ -96,9 +97,9 @@ const createFlareTexture = (
  * - Theme-based colors
  */
 export const addLensFlares = async (
-  THREE: typeof import('three'),
-  scene: import('three').Scene,
-): Promise<import('three').PointLight> => {
+  THREE: typeof Three,
+  scene: Three.Scene,
+): Promise<Three.PointLight> => {
   const { LensflareElement, Lensflare } = await import('three/examples/jsm/objects/Lensflare.js')
   const { lensFlare } = sceneConfig.postProcessingConfig
 

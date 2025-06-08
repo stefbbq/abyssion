@@ -1,15 +1,20 @@
 import { LOG_LEVELS, LogLevel } from '../constants.ts'
 import { isDebugModeEnabled } from '../../debug/index.ts'
 
+// Type declaration for Deno global when available
+declare const Deno: {
+  env: {
+    toObject(): Record<string, string>
+  }
+} | undefined
+
 export const getMinLogLevel = (): LogLevel => {
   let env: Record<string, string> | undefined
 
   if (typeof Deno !== 'undefined' && Deno.env?.toObject) {
     // Server-side (Deno) environment
-    console.log('Deno.env.toObject', Deno.env.toObject())
     env = Deno.env.toObject()
   } else if (typeof globalThis !== 'undefined' && (globalThis as any).ENV) {
-    console.log('globalThis.ENV', (globalThis as any).ENV)
     // Browser environment - check for injected env
     env = (globalThis as any).ENV as Record<string, string>
   }
@@ -18,7 +23,6 @@ export const getMinLogLevel = (): LogLevel => {
   if (typeof window !== 'undefined') {
     try {
       if (isDebugModeEnabled()) {
-        console.log('Debug mode enabled via centralized debug system')
         return 'trace' // Enable maximum debugging when debug mode is on
       }
     } catch {

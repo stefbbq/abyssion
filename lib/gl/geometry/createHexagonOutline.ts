@@ -1,11 +1,13 @@
+import * as Three from 'three'
+
 /**
  * Create a hexagon outline
  */
 export const createHexagonOutline = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   radius = 1,
   thickness = 0.02,
-): import('three').BufferGeometry => {
+): Three.BufferGeometry => {
   const geometry = new THREE.BufferGeometry()
   const positions = []
   const numSides = 6

@@ -2,6 +2,7 @@
  * @module GeometricLayer
  */
 
+import * as Three from 'three'
 import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { getShapeLayerConfig } from './config.ts'
 import {
@@ -18,7 +19,7 @@ import {
  * Creates a cosmic-themed 3D layer that surrounds the logo with orbital rings and celestial elements
  */
 export const createGeometricLayer = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   radius?: number,
   height?: number,
   rotationAngle = 0, // angle from the main plane in radians

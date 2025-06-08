@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
@@ -10,8 +11,8 @@ import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
  * adjusted based on the baseline dimensions system for optimal viewing.
  */
 export const createCamera = (
-  THREE: typeof import('three'),
-): Promise<import('three').PerspectiveCamera> => {
+  THREE: typeof Three,
+): Promise<Three.PerspectiveCamera> => {
   const responsiveDimensions = getBaselineDimensions()
 
   const camera = new THREE.PerspectiveCamera(

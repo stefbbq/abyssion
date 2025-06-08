@@ -36,7 +36,7 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
 
     return () => {
       document.removeEventListener('DOMContentLoaded', handleNavigate)
-      globalThis.removeEventListener('popstate', handleNavigate)
+      globalThis.addEventListener('popstate', handleNavigate)
       history.pushState = originalPushState
     }
   }, [])

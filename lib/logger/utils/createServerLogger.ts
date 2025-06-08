@@ -5,7 +5,7 @@ import { LogContext } from '../constants.ts'
  * @param ctx The log context
  * @param args Arguments to log
  */
-export const createDenoLogger = () => (ctx: LogContext, ...args: any[]): void => {
+export const createServerLogger = () => (ctx: LogContext, ...args: any[]): void => {
   const prefix = `[${ctx}]`
   if (args[0] && typeof args[0] === 'string') {
     globalThis.console.log(`${prefix} ${args[0]}`, ...args.slice(1))

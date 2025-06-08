@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 /**
@@ -10,9 +11,9 @@ import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
  * Pixel ratio is capped based on sceneConfig to prevent performance issues on high-DPI displays.
  */
 export const createRenderer = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   container: HTMLDivElement,
-): Promise<import('three').WebGLRenderer> => {
+): Promise<Three.WebGLRenderer> => {
   const { rendererConfig } = sceneConfig
 
   const renderer = new THREE.WebGLRenderer({

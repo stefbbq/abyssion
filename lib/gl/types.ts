@@ -1,8 +1,5 @@
-import type { Camera, Group, Mesh, Scene, WebGLRenderer } from 'three'
-import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import type { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-import type { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+import * as Three from 'three'
+import type { Camera, EffectComposer, Group, Mesh, OrbitControls, Scene, ShaderPass, UnrealBloomPass, WebGLRenderer } from 'three'
 import type { LogoLayer } from './layers/LogoLayer.ts'
 
 // Video background manager type
@@ -40,12 +37,12 @@ export type RendererState = {
   ditheringPass: ShaderPass
   sharpeningPass: ShaderPass
   planes: Mesh[]
-  layers: LogoLayer[]
+  logoLayers: LogoLayer[]
   time: number
   planeGeometry: any
   outlineTexture: any
   stencilTexture: any
-  THREE: typeof import('three')
+  THREE: typeof Three
   uiOverlay: UIOverlay
   shapeLayer: Group
   videoBackground?: VideoBackgroundManager

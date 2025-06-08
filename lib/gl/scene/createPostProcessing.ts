@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import {
   ditheringFragmentShader,
   ditheringVertexShader,
@@ -17,10 +18,10 @@ import type { PostProcessingConfig } from '@lib/sceneConfig.types.ts'
  * with analog film characteristics and professional color grading.
  */
 export const createPostProcessing = async (
-  THREE: typeof import('three'),
-  scene: import('three').Scene,
-  camera: import('three').Camera,
-  renderer: import('three').WebGLRenderer,
+  THREE: typeof Three,
+  scene: Three.Scene,
+  camera: Three.Camera,
+  renderer: Three.WebGLRenderer,
   width: number,
   height: number,
   postProcessingConfig: PostProcessingConfig,

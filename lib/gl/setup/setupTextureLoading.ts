@@ -1,4 +1,5 @@
-import { lc, log } from '../../logger/index.ts'
+import * as Three from 'three'
+import { lc, log } from '@lib/logger/index.ts'
 
 type TextureLoadingResult = {
   stencilTexture: any
@@ -9,7 +10,7 @@ type TextureLoadingResult = {
  * Loads and configures stencil and outline textures
  */
 export const setupTextureLoading = async (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   stencilTexturePath: string,
   outlineTexturePath: string,
 ): Promise<TextureLoadingResult> => {

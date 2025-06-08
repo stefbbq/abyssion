@@ -5,11 +5,13 @@ import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
 
 const { animationConfig: animation } = animationConfig
 
+type OrchestratorRegistry = Record<string, () => AnimationOrchestrator>
+
 /**
  * Scene orchestrator that manages multiple animation systems
  * Handles shared behaviors, orchestrator lifecycle, and transitions
  */
-export const createSceneOrchestrator = (state: RendererState) => {
+export const createSceneOrchestrator = (state: RendererState, orchestratorRegistry: OrchestratorRegistry) => {
   let time = 0
   let lastTime = 0
   let animationId: number
@@ -29,10 +31,16 @@ export const createSceneOrchestrator = (state: RendererState) => {
   }
 
   /**
-   * Register a new animation orchestrator
+   * Register a new animation orchestrator by name
    */
-  const registerOrchestrator = (orchestrator: AnimationOrchestrator) => {
-    sceneState.activeOrchestrators.set(orchestrator.name, orchestrator)
+  const registerOrchestrator = (name: string) => {
+    const orchestratorFactory = orchestratorRegistry[name]
+    if (orchestratorFactory) {
+      const orchestrator = orchestratorFactory()
+      sceneState.activeOrchestrators.set(orchestrator.name, orchestrator)
+    } else {
+      console.warn(`Orchestrator with name "${name}" not found in registry.`)
+    }
   }
 
   /**
@@ -41,22 +49,30 @@ export const createSceneOrchestrator = (state: RendererState) => {
   const unregisterOrchestrator = (name: string) => {
     const orchestrator = sceneState.activeOrchestrators.get(name)
     if (orchestrator) {
-      orchestrator.dispose()
+      const context: AnimationContext = {
+        state,
+        shared,
+        time,
+        deltaTime: 0, // Delta time is not relevant for disposal
+      }
+      orchestrator.dispose(context)
       sceneState.activeOrchestrators.delete(name)
     }
   }
 
   /**
-   * Switch to a different page orchestrator with optional transition
+   * Switch to a different page orchestrator
    */
-  const switchToPage = (pageName: string, withTransition: boolean = true) => {
-    // TODO: Handle transitions in future iteration
-    // For now, just switch directly
-
-    // Clear current orchestrators
-    sceneState.activeOrchestrators.forEach((orchestrator, name) => {
+  const switchToPage = (pageName: string) => {
+    // 1. Dispose and unregister all current orchestrators
+    sceneState.activeOrchestrators.forEach((_, name) => {
       unregisterOrchestrator(name)
     })
+
+    // 2. Register the new orchestrator
+    // Fallback to 'empty-page' if the requested page is not in the registry
+    const targetPage = orchestratorRegistry[pageName] ? pageName : 'empty-page'
+    registerOrchestrator(targetPage)
   }
 
   /**
@@ -109,8 +125,14 @@ export const createSceneOrchestrator = (state: RendererState) => {
     dispose: () => {
       cancelAnimationFrame(animationId)
       shared.mouseTracking.cleanup()
+      const context: AnimationContext = {
+        state,
+        shared,
+        time,
+        deltaTime: 0,
+      }
       sceneState.activeOrchestrators.forEach((orchestrator) => {
-        orchestrator.dispose()
+        orchestrator.dispose(context)
       })
       sceneState.activeOrchestrators.clear()
     },

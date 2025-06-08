@@ -1,15 +1,16 @@
+import * as Three from 'three'
 import { createCircleOutline } from './createCircleOutline.ts'
 
 /**
  * Create a technical diagram pattern with connections
  */
 export const createTechDiagram = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   width = 2,
   height = 1.5,
   nodeCount = 6,
   lineWidth = 0.01,
-): import('three').Group => {
+): Three.Group => {
   const group = new THREE.Group()
   const nodes = []
 

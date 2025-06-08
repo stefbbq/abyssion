@@ -4,7 +4,6 @@ import { calculateRandomLayerPosition } from '../calculations/calculateRandomLay
 import { calculateShaderTime } from '../calculations/calculateShaderTime.ts'
 import { calculateRegenerationTiming } from '../calculations/calculateRegenerationTiming.ts'
 import { calculateBloomEffect } from '../calculations/calculateBloomEffect.ts'
-import { createLogoLayer } from '../../layers/index.ts'
 import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 import ms from 'ms'
@@ -16,18 +15,14 @@ const { postProcessingConfig } = sceneConfig
  * Logo page animation orchestrator
  * Manages logo layers, regeneration, and post-processing effects
  */
-export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
+export const createLogoPageOrchestrator = (logoLayer: any): AnimationOrchestrator => {
   let lastRegenerateTime = 0
   let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
   let bloomOverrideActive = false
   let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
-  let logoLayer: ReturnType<typeof createLogoLayer> | null = null
 
   const update = (context: AnimationContext) => {
     const { state, time } = context
-
-    // Initialize logo layer manager if needed
-    if (!logoLayer) logoLayer = createLogoLayer(state.THREE)
 
     // Check layer regeneration timing
     const currentTime = Date.now()
@@ -47,14 +42,14 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
       )
 
       state.planes = planes
-      state.layers = layers
+      state.logoLayers = layers
       lastRegenerateTime = currentTime
       nextRegenerateInterval = regenerationResult.newInterval
     }
 
     // Update each plane
-    state.planes.forEach((plane, i) => {
-      const layer = state.layers[i]
+    state.planes.forEach((plane: any, i: number) => {
+      const layer = state.logoLayers[i]
 
       // Update shader time
       const shaderResult = calculateShaderTime(
@@ -72,7 +67,7 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
 
       // Calculate and apply position
       const position = layer.isRandom
-        ? calculateRandomLayerPosition(time, i, layer.zPos, state.layers.length)
+        ? calculateRandomLayerPosition(time, i, layer.zPos, state.logoLayers.length)
         : calculateStaticLayerPosition(time, i, layer.zPos, layer.isStencil)
 
       plane.position.set(position.x, position.y, position.z)
@@ -82,14 +77,14 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
       // Handle random layer burst effects
       if (layer.isRandom && Math.random() < 0.004) {
         const randomFactor = Math.sin(time * 2 + i * 0.5) * 0.3 + 0.7
-        const burstIntensity = 0.2 * randomFactor * (i + 1) / state.layers.length
+        const burstIntensity = 0.2 * randomFactor * (i + 1) / state.logoLayers.length
 
         plane.position.x += (Math.random() - 0.5) * burstIntensity
         plane.position.y += (Math.random() - 0.5) * burstIntensity
 
         setTimeout(() => {
           if (plane) {
-            const resetPosition = calculateRandomLayerPosition(time, i, layer.zPos, state.layers.length)
+            const resetPosition = calculateRandomLayerPosition(time, i, layer.zPos, state.logoLayers.length)
             plane.position.x = resetPosition.x
             plane.position.y = resetPosition.y
           }
@@ -180,12 +175,32 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
     }
   }
 
-  const dispose = () => {
+  const dispose = (context: AnimationContext) => {
+    const { state } = context
+
+    // Use the dedicated dispose method from the logoLayer instance
+    logoLayer.dispose(state.scene, state.planes)
+
+    // Remove other layers from scene
+    if (state.shapeLayer?.parent) state.shapeLayer.parent.remove(state.shapeLayer)
+    if (state.shadowLayer?.parent) state.shadowLayer.parent.remove(state.shadowLayer)
+
+    // Dispose of their resources if they have a dispose method
+    if (typeof state.shapeLayer?.dispose === 'function') state.shapeLayer.dispose()
+    if (typeof state.shadowLayer?.dispose === 'function') state.shadowLayer.dispose()
+
+    // Clear arrays from state to prevent artifacts on re-navigation
+    state.planes = []
+    state.logoLayers = []
+
+    // Clean up timeouts
     if (bloomOverrideTimeout) {
       clearTimeout(bloomOverrideTimeout)
       bloomOverrideTimeout = null
     }
-    logoLayer = null
+
+    // Reset local state of the orchestrator
+    lastRegenerateTime = 0
   }
 
   return {

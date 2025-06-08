@@ -1,13 +1,14 @@
-import type { InitOptions } from '../types.ts'
-import { createScene } from '../scene/createScene.ts'
-import { createCamera } from '../scene/createCamera.ts'
-import { createRenderer } from '../scene/createRenderer.ts'
-import { getResponsiveCameraZ } from '../scene/utils/getResponsiveCameraZ.ts'
+import * as Three from 'three'
+import type { InitOptions } from '@libgl/types.ts'
+import { createScene } from '@libgl/scene/createScene.ts'
+import { createCamera } from '@libgl/scene/createCamera.ts'
+import { createRenderer } from '@libgl/scene/createRenderer.ts'
+import { getResponsiveCameraZ } from '@libgl/scene/utils/getResponsiveCameraZ.ts'
 
 type CoreRenderingResult = {
-  scene: any
-  camera: any
-  renderer: any
+  scene: Three.Scene
+  camera: Three.Camera
+  renderer: Three.WebGLRenderer
 }
 
 /**
@@ -15,7 +16,7 @@ type CoreRenderingResult = {
  * with initial responsive positioning
  */
 export const setupCoreRendering = async (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: InitOptions,
 ): Promise<CoreRenderingResult> => {
   const { container } = options

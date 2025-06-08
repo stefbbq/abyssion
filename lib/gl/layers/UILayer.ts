@@ -1,9 +1,4 @@
-/**
- * @module UILayer
- *
- * Manages the 3D shape layer around the logo
- */
-
+import * as Three from 'three'
 import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { getShapeLayerConfig } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
@@ -14,7 +9,7 @@ import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
  * Creates a responsive 3D shape layer that surrounds the logo
  */
 export const createUILayer = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   width: number,
   height: number,
 ) => {
