@@ -1,5 +1,5 @@
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
-import { getCurrentTheme } from '@libgl/theme/theme.ts'
+import { getGLTheme } from '@libgl/theme/index.ts'
 import type { GeometricOptions } from './GeometricLayer.ts'
 import layersConfig from '@lib/configLayers.json' with { type: 'json' }
 
@@ -9,7 +9,7 @@ const { geometricOptions, staticLogoLayers, randomLayerConfig, uiOverlayConfig, 
  * Custom configs for each geometry utility
  */
 export function getDashedOrbitsConfig(): GeometricOptions {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.dashedOrbits
   return {
     ...config,
@@ -19,7 +19,7 @@ export function getDashedOrbitsConfig(): GeometricOptions {
 }
 
 export function getConcentricRingsConfig(): GeometricOptions {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.concentricRings
   return {
     ...config,
@@ -29,7 +29,7 @@ export function getConcentricRingsConfig(): GeometricOptions {
 }
 
 export function getCelestialBodiesConfig(): GeometricOptions {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.celestialBodies
   return {
     ...config,
@@ -39,7 +39,7 @@ export function getCelestialBodiesConfig(): GeometricOptions {
 }
 
 export function getOrbitalGridsConfig(): GeometricOptions {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.orbitalGrids
   return {
     ...config,
@@ -49,7 +49,7 @@ export function getOrbitalGridsConfig(): GeometricOptions {
 }
 
 export function getOrbitalMarkersConfig(): GeometricOptions {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.orbitalMarkers
   return {
     ...config,
@@ -59,7 +59,7 @@ export function getOrbitalMarkersConfig(): GeometricOptions {
 }
 
 export const getOrbitalParticlesConfig = (): GeometricOptions => {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
   const config = geometricOptions.orbitalParticles
   return {
     ...config,
@@ -70,7 +70,7 @@ export const getOrbitalParticlesConfig = (): GeometricOptions => {
 
 // helper function to get theme-based layers
 const getThemeBasedLayers = (): LogoLayer[] => {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
 
   return staticLogoLayers.map((layer, index) => {
     const colorMap = [
@@ -101,7 +101,7 @@ export { randomLayerConfig }
 
 // helper function to get theme-based ui config
 const getThemeBasedUIConfig = () => {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
 
   return {
     ...uiOverlayConfig,
@@ -122,7 +122,7 @@ export const getUIOverlayConfig = () => getThemeBasedUIConfig()
 
 // helper function to get theme-based shape layer config
 const getThemeBasedShapeLayerConfig = () => {
-  const theme = getCurrentTheme()
+  const theme = getGLTheme()
 
   return {
     ...shapeLayerConfig,

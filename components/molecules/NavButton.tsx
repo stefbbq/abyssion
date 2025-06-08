@@ -1,4 +1,4 @@
-import type { NavButtonState } from '@utils/navigation/types.ts'
+import type { NavButtonState } from '@data/types.ts'
 import { Icon } from '@atoms/Icon.tsx'
 import { motion } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
@@ -83,4 +83,4 @@ export const NavButton = ({ id, state, onAction, style, onMouseEnter, onMouseLea
 }
 
 // export the types for use in other components
-export type { NavButtonProps, NavButtonState }
+export type { NavButtonProps }

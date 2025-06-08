@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useSignal } from '@preact/signals'
 import { getTheme } from '@lib/theme/index.ts'
-import { ExpandedMenu } from '@molecules/ExpandedMenu.tsx'
-import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneData from '@data/nav-actionZone-animation.json' with { type: 'json' }
-import ActionZone from '@organisms/ActionZone.tsx'
-import { CollapsedNav } from '@molecules/CollapsedNav.tsx'
-import type { NavButtonState } from '@data/types.ts'
+import { ExpandedMenu } from './ExpandedMenu.tsx'
+import navData from '../../data/nav.json' with { type: 'json' }
+import actionZoneData from '../../data/nav-actionZone-animation.json' with { type: 'json' }
+import ActionZone from './ActionZone.tsx'
+import { CollapsedNav } from './CollapsedNav.tsx'
+import type { NavButtonState } from '@utils/navigation/types.ts'
 
 export interface ActionZoneControllerProps {
   currentPath?: string
@@ -68,12 +68,16 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
   if (!isMounted) return null
 
   const isHomepage = currentRoute.value === '/'
+  const page = navData.mainNav.find((p: any) => p.path === currentRoute.value)
 
   const getCollapsedButtons = () => {
-    if (isHomepage) return actionZoneData.home as NavButtonState[]
-
+    if (isHomepage) {
+      return actionZoneData.home as NavButtonState[]
+    }
     const routeKey = currentRoute.value.replace('/', '')
     const page = navData.mainNav.find((p: any) => p.path === currentRoute.value)
+
+    // Find a specific button configuration for the route, or fall back to the generic 'page' config
     const buttonsConfig = (actionZoneData as any)[routeKey] || actionZoneData.page
 
     const pageButtons = buttonsConfig.map((button: any) => {
@@ -81,10 +85,8 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
         const label = button.content.label || page?.label || ''
         return { ...button, content: { label } }
       }
-
       return button
     })
-
     return pageButtons as NavButtonState[]
   }
 

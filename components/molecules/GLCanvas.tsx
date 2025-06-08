@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks'
 import { initGL, type InitOptions } from '@lib/gl/index.ts'
-import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient.ts'
 import { LogLevel } from '@lib/logger/constants.ts'
 
 type Props = {
@@ -16,9 +15,6 @@ export default function GLCanvas({ width = 500, height = 500 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Initialize client-side logger (theme colors)
-    initializeLoggerClient()
-
     if (!containerRef.current) return
 
     // Initialize GL environment

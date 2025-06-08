@@ -20,14 +20,13 @@
  * Contexts are defined in LogContext (imported as lc).
  */
 import { LOG_LEVELS, LogContext, type LogLevel } from './constants.ts'
-import { getMinLogLevel } from './utils/getMinLogLevel.ts'
 import { initializeLogger } from './utils/initializeLogger.ts'
 import { type ContextFilter, createContextFilter } from './utils/createContextFilter.ts'
 import { type ContextControls, createContextControls } from './utils/createContextControls.ts'
 import { createDenoLogger } from './utils/createDenoLogger.ts'
 import { createClientLogger, type LogFunction } from './utils/createClientLogger.ts'
 
-let minLogLevel: LogLevel = getMinLogLevel()
+let minLogLevel: LogLevel = 'warn'
 const contextFilter: ContextFilter = createContextFilter()
 const contextControls: ContextControls = createContextControls(contextFilter)
 const getMinLogLevelFn = () => minLogLevel

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import { getThemeMode, getUITheme, toggleThemeMode } from '@lib/theme/index.ts'
+import { getTheme, getThemeMode, toggleThemeMode } from '@lib/theme/index.ts'
 
 /**
  * Simple theme toggle icon that switches between light and dark modes
@@ -7,12 +7,12 @@ import { getThemeMode, getUITheme, toggleThemeMode } from '@lib/theme/index.ts'
  */
 export default function ThemeToggle() {
   const [currentMode, setCurrentMode] = useState<'light' | 'dark'>(getThemeMode())
-  const [theme, setTheme] = useState(getUITheme())
+  const [theme, setTheme] = useState(getTheme())
 
   const handleToggle = () => {
     const newMode = toggleThemeMode()
     setCurrentMode(newMode)
-    setTheme(getUITheme())
+    setTheme(getTheme())
 
     // Update document class for global theme switching
     document.documentElement.classList.toggle('light-mode', newMode === 'light')

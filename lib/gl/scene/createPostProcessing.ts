@@ -6,7 +6,7 @@ import {
   sharpeningFragmentShader,
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
-import type { PostProcessingConfig } from '../../sceneConfig.json.d.ts'
+import type { PostProcessingConfig } from '@lib/sceneConfig.types.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.

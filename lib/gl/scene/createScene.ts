@@ -1,4 +1,4 @@
-import { getCurrentTheme } from '@libgl/theme/theme.ts'
+import { getGLTheme } from '@libgl/theme/index.ts'
 
 /**
  * Create and initialize the basic 3D scene
@@ -7,6 +7,6 @@ export const createScene = (
   THREE: typeof import('three'),
 ): Promise<import('three').Scene> => {
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(getCurrentTheme().background)
+  scene.background = new THREE.Color(getGLTheme().background)
   return scene
 }

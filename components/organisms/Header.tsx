@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
-import { getUITheme } from '@lib/theme/index.ts'
-import navData from '@data/navigation.json' with { type: 'json' }
+import { getTheme } from '@lib/theme/index.ts'
+import navData from '@data/nav.json' with { type: 'json' }
 import ThemeToggle from '@molecules/ThemeToggle.tsx'
 
 export interface HeaderProps {
@@ -13,7 +13,7 @@ export interface HeaderProps {
  * Uses new theme system for automatic light/dark mode support
  */
 export default function Header({ currentPath }: HeaderProps) {
-  const theme = getUITheme()
+  const theme = getTheme()
   const isActive = (path: string) => currentPath === path
   const isHomepage = currentPath === '/'
 

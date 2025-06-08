@@ -4,9 +4,14 @@ import { hexToCSS } from './utils/hexToCSS.ts'
 import { rgbToCSS } from './utils/rgbToCSS.ts'
 
 /**
+ * Current theme mode - can be toggled
+ */
+let currentThemeMode: 'light' | 'dark' = 'dark'
+
+/**
  * Create UI theme from base theme with mode-aware contrast
  */
-export const createUITheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme => {
+export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme => {
   const isDarkMode = baseTheme.mode === 'dark'
 
   return {
@@ -72,11 +77,6 @@ export const createUITheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme
 }
 
 /**
- * Current theme mode - can be toggled
- */
-let currentThemeMode: 'light' | 'dark' = 'dark'
-
-/**
  * Get current base theme based on mode
  */
 export const getCurrentBaseTheme = (): BaseTheme => currentThemeMode === 'dark' ? deepSpaceHUDTheme : deepSpaceHUDLightTheme
@@ -84,7 +84,7 @@ export const getCurrentBaseTheme = (): BaseTheme => currentThemeMode === 'dark' 
 /**
  * Get current UI theme instance
  */
-export const getUITheme = (): UITheme => createUITheme(getCurrentBaseTheme())
+export const getTheme = (): UITheme => createTheme(getCurrentBaseTheme())
 
 /**
  * Toggle between light and dark themes
@@ -106,6 +106,6 @@ export const setThemeMode = (mode: 'light' | 'dark'): void => {
  */
 export const getThemeMode = (): 'light' | 'dark' => currentThemeMode
 
-export { createBaseTheme } from './utils/createBaseTheme.ts'
-export { createRGB } from './utils/createRGB.ts'
-export * from './themes/index.ts'
+export { createBaseTheme } from '@libtheme/utils/createBaseTheme.ts'
+export { createRGB } from '@libtheme/utils/createRGB.ts'
+export * from '@libtheme/themes/index.ts'

@@ -1,11 +1,11 @@
 import { defineRoute, RouteConfig } from '$fresh/server.ts'
 import { Head } from '$fresh/runtime.ts'
-import bandMembers from '../../data/bandMembers.json' with { type: 'json' }
-import bioAbout from '../../data/bioAbout.json' with { type: 'json' }
-import bioAlbums from '../../data/bioAlbums.json' with { type: 'json' }
-import bioSections from '../../data/bioSections.json' with { type: 'json' }
+import bandMembers from '@data/content-bio-members.json' with { type: 'json' }
+import bioAbout from '@data/content-bio-about.json' with { type: 'json' }
+import bioAlbums from '@data/content-bio-music.json' with { type: 'json' }
+import bioSections from '@data/content-bio-sections.json' with { type: 'json' }
+import type { Album, BandMember, BioSection } from '@data/types.ts'
 
-// disable app wrapper and layouts for partial routes
 export const config: RouteConfig = {
   skipAppWrapper: true,
   skipInheritedLayouts: true,
@@ -37,9 +37,9 @@ export default defineRoute(() => {
             </section>
 
             <section class='bg-white rounded-2xl shadow-sm border border-gray-200 p-8'>
-              <h2 class='text-3xl font-bold text-gray-900 mb-8'>{bioSections.membersTitle}</h2>
+              <h2 class='text-3xl font-bold text-gray-900 mb-8'>{(bioSections as BioSection).membersTitle}</h2>
               <div class='grid gap-8 md:grid-cols-2 lg:grid-cols-3'>
-                {bandMembers.map((member: any) => (
+                {bandMembers.map((member: BandMember) => (
                   <div key={member.id} class='text-center'>
                     <div class='w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-full overflow-hidden'>
                       <img
@@ -64,9 +64,9 @@ export default defineRoute(() => {
             </section>
 
             <section class='bg-white rounded-2xl shadow-sm border border-gray-200 p-8'>
-              <h2 class='text-3xl font-bold text-gray-900 mb-8'>{bioSections.albumsTitle}</h2>
+              <h2 class='text-3xl font-bold text-gray-900 mb-8'>{(bioSections as BioSection).albumsTitle}</h2>
               <div class='space-y-6'>
-                {bioAlbums.map((album: any, idx: number) => (
+                {bioAlbums.map((album: Album, idx: number) => (
                   <div key={idx} class='flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors'>
                     <span class='font-semibold text-gray-900 md:w-24 flex-shrink-0'>{album.year}</span>
                     <span class='flex-1 text-lg font-semibold text-gray-900'>"{album.title}"</span>

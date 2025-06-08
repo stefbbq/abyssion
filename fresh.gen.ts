@@ -4,6 +4,7 @@
 
 import * as $_404 from './routes/_404.tsx'
 import * as $_app from './routes/_app.tsx'
+import * as $_middleware from './routes/_middleware.ts'
 import * as $bio from './routes/bio.tsx'
 import * as $contact from './routes/contact.tsx'
 import * as $index from './routes/index.tsx'
@@ -12,16 +13,20 @@ import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $shows from './routes/shows.tsx'
+import * as $theme from './routes/theme.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
+import * as $ClientInitializer from './islands/ClientInitializer.tsx'
 import * as $GLCanvas from './islands/GLCanvas.tsx'
 import * as $Header from './islands/Header.tsx'
 import * as $MusicPlayer from './islands/MusicPlayer.tsx'
+import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
 import type { Manifest } from '$fresh/server.ts'
 
 const manifest = {
   routes: {
     './routes/_404.tsx': $_404,
     './routes/_app.tsx': $_app,
+    './routes/_middleware.ts': $_middleware,
     './routes/bio.tsx': $bio,
     './routes/contact.tsx': $contact,
     './routes/index.tsx': $index,
@@ -30,12 +35,15 @@ const manifest = {
     './routes/partials/home.tsx': $partials_home,
     './routes/partials/shows.tsx': $partials_shows,
     './routes/shows.tsx': $shows,
+    './routes/theme.tsx': $theme,
   },
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
+    './islands/ClientInitializer.tsx': $ClientInitializer,
     './islands/GLCanvas.tsx': $GLCanvas,
     './islands/Header.tsx': $Header,
     './islands/MusicPlayer.tsx': $MusicPlayer,
+    './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest
