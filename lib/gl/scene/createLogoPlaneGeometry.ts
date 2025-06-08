@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 
 /**
@@ -8,7 +9,7 @@ import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
  * This geometry serves as the foundation for all logo layer meshes in the 3D scene,
  * providing a uniform canvas for shader-based logo rendering effects.
  */
-export const createLogoPlaneGeometry = (THREE: typeof import('three')): import('three').PlaneGeometry => {
+export const createLogoPlaneGeometry = (THREE: typeof Three): Three.PlaneGeometry => {
   const { planeWidth, planeHeight } = getBaselineDimensions()
   return new THREE.PlaneGeometry(planeWidth, planeHeight)
 }

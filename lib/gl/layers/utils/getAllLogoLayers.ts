@@ -1,11 +1,12 @@
+import * as Three from 'three'
 import { getStaticLogoLayers } from '../config.ts'
-import { LogoLayer } from '../LogoLayer.ts'
+import { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
 
 /**
  * Get all logo layers (static + random), sorted by z-position
  */
-export const getAllLogoLayers = (THREE: typeof import('three')): LogoLayer[] => {
+export const getAllLogoLayers = (THREE: typeof Three): LogoLayer[] => {
   const staticLogoLayers = getStaticLogoLayers()
 
   // always keep the stencil layer from static layers

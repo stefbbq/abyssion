@@ -1,12 +1,13 @@
-import { createCircleOutline, createHexagonOutline } from '../../geometry/index.ts'
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getOrbitalMarkersConfig } from '../config.ts'
+import * as Three from 'three'
+import { createCircleOutline, createHexagonOutline } from '@libgl/geometry/index.ts'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getOrbitalMarkersConfig } from '@libgl/layers/config.ts'
 
 /**
  * Creates markers and indicators along orbital paths
  */
 export const createOrbitalMarkers = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getOrbitalMarkersConfig ? getOrbitalMarkersConfig() : {},
 ) => {
   const {

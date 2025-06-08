@@ -1,10 +1,12 @@
+import * as Three from 'three'
 import { createLogoPlaneGeometry } from '../scene/createLogoPlaneGeometry.ts'
 import { createLogoLayer } from '../layers/index.ts'
 import { createGeometricLayer } from '../layers/GeometricLayer.ts'
 import { createShadowLayer } from '../layers/ShadowLayer.ts'
+import { LogoLayer } from '../layers/LogoLayer.ts'
 
 type LayerSystemResult = {
-  logoLayer: any
+  logoLayer: LogoLayer
   planes: any[]
   layers: any[]
   shapeLayer: any
@@ -15,12 +17,12 @@ type LayerSystemResult = {
 /**
  * Sets up the complete layer system including logo, geometric, and shadow layers
  */
-export const setupLayerSystem = async (
-  THREE: typeof import('three'),
-  scene: any,
-  outlineTexture: any,
-  stencilTexture: any,
-): Promise<LayerSystemResult> => {
+export const setupLayerSystem = (
+  THREE: typeof Three,
+  scene: Three.Scene,
+  outlineTexture: Three.Texture,
+  stencilTexture: Three.Texture,
+): LayerSystemResult => {
   // Create plane geometry for our logo layers
   const planeGeometry = createLogoPlaneGeometry(THREE)
 
@@ -45,9 +47,7 @@ export const setupLayerSystem = async (
 
   // Add the shadow layer behind the logo
   const shadowLayer = createShadowLayer(THREE)
-  if (shadowLayer) {
-    scene.add(shadowLayer.mesh)
-  }
+  if (shadowLayer) scene.add(shadowLayer.mesh)
 
   return {
     logoLayer,

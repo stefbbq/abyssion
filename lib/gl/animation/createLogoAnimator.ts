@@ -76,7 +76,6 @@ export const createLogoAnimator = (dependencies: LogoAnimationDependencies) => {
       const { planes, layers } = logoLayer.regenerate(
         dependencies.scene,
         dependencies.planes,
-        dependencies.layers,
         dependencies.planeGeometry,
         dependencies.outlineTexture,
         dependencies.stencilTexture,

@@ -1,12 +1,12 @@
-import * as THREE from 'three'
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getDashedOrbitsConfig } from '../config.ts'
+import * as Three from 'three'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getDashedOrbitsConfig } from '@libgl/layers/config.ts'
 
 /**
  * Creates dashed orbit lines with varying patterns
  */
 export const createDashedOrbits = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getDashedOrbitsConfig(),
 ) => {
   const {
@@ -16,7 +16,6 @@ export const createDashedOrbits = (
     color = 0x00ffff,
     secondaryColor = 0xff00ff,
     rotationAngle = 0,
-    opacity = 1,
     minOpacity = 0.1,
     maxOpacity = 1,
     variationFactor = 1,
@@ -39,10 +38,10 @@ export const createDashedOrbits = (
     const opacityJitterAmount = 0.15 * Math.abs(maxOpacity - minOpacity) // tune as needed
 
     // Evenly space orbits, add randomness based on variationFactor
-    let baseRadius = lerp(minRadius, maxRadius, t)
+    const baseRadius = lerp(minRadius, maxRadius, t)
     const orbitRadius = baseRadius + rand() * variationFactor * radiusJitterAmount
     // Opacity: most opaque in the center, least on the outside, add randomness
-    let baseOpacity = lerp(maxOpacity, minOpacity, t)
+    const baseOpacity = lerp(maxOpacity, minOpacity, t)
     const orbitOpacity = Math.max(0, Math.min(1, baseOpacity + rand() * variationFactor * opacityJitterAmount))
 
     const curve = new THREE.EllipseCurve(

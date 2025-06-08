@@ -1,3 +1,4 @@
+import * as Three from 'three'
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { randomLayerConfig } from '@libgl/layers/config.ts'
 import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
@@ -8,7 +9,7 @@ import { getGLTheme } from '@libgl/theme/index.ts'
  * Generate a random layer with position based on index
  */
 export const createLogoLayer = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
 ): LogoLayer => {
   const {
     cyanProbability,

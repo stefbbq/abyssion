@@ -1,5 +1,5 @@
-import { lc, log } from '../../logger/index.ts'
-import { DebugOverlay } from '../debug/DebugOverlay.ts'
+import * as Three from 'three'
+import { DebugOverlay } from '@libgl/debug/DebugOverlay.ts'
 import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
 
 type DebugSystemConfig = {
@@ -9,7 +9,7 @@ type DebugSystemConfig = {
   bokehPass: any
   logoLayer: any
   state: any
-  THREE: typeof import('three')
+  THREE: typeof Three
 }
 
 type DebugSystemResult = {
@@ -106,12 +106,14 @@ export const setupDebugSystem = async (config: DebugSystemConfig): Promise<Debug
 
   // Layer regeneration function
   const handleRegenerateRandomLayers = () => {
-    // Note: In the new system, regeneration happens automatically in the logo page orchestrator
-    // This function is kept for keyboard control compatibility
+    if (!scene || !state.planes || !state.layers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
+      console.warn('Cannot regenerate layers: missing state')
+      return
+    }
+
     const { planes: newPlanes, layers: newLayers } = logoLayer.regenerate(
       scene,
       state.planes,
-      state.layers,
       state.planeGeometry,
       state.outlineTexture,
       state.stencilTexture,

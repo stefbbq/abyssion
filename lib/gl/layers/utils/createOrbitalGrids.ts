@@ -1,12 +1,12 @@
-import * as THREE from 'three'
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getOrbitalGridsConfig } from '../config.ts'
+import * as Three from 'three'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getOrbitalGridsConfig } from '@libgl/layers/config.ts'
 
 /**
  * Creates grid patterns along orbital planes
  */
 export const createOrbitalGrids = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getOrbitalGridsConfig(),
 ) => {
   const {
@@ -24,7 +24,6 @@ export const createOrbitalGrids = (
 
   for (let i = 0; i < gridCount; i++) {
     const gridRadius = radius * (0.9 + i * 0.2)
-    const divisions = 16 + i * 8
     const gridOpacity = opacity - i * 0.05
 
     const gridMaterial = new THREE.LineBasicMaterial({

@@ -1,12 +1,13 @@
-import { createCircleOutline } from '../../geometry/index.ts'
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getCelestialBodiesConfig } from '../config.ts'
+import * as Three from 'three'
+import { createCircleOutline } from '@libgl/geometry/index.ts'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getCelestialBodiesConfig } from '@libgl/layers/config.ts'
 
 /**
  * Creates celestial bodies that orbit the logo
  */
 export const createCelestialBodies = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getCelestialBodiesConfig(),
 ) => {
   const {
@@ -29,9 +30,7 @@ export const createCelestialBodies = (
   const bodyCount = 3
   bodyGroup.rotation.x = rotationAngle
 
-  function lerp(a: number, b: number, t: number) {
-    return a + (b - a) * t
-  }
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
   for (let i = 0; i < bodyCount; i++) {
     const t = Number(bodyCount) === 1 ? 0.5 : i / (bodyCount - 1)
@@ -51,6 +50,7 @@ export const createCelestialBodies = (
     const z = planarDistribution ? 0 : (i - 1) * height * 0.4 * variationFactor
     const size = (0.2 + i * 0.15) * scale
     let body
+
     if (i === 0) {
       body = new THREE.Mesh(
         new THREE.SphereGeometry(size, 32, 32),
@@ -90,5 +90,6 @@ export const createCelestialBodies = (
     body.userData = { rotSpeed }
     bodyGroup.add(body)
   }
+
   return bodyGroup
 }

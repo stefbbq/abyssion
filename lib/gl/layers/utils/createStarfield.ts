@@ -1,11 +1,11 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import { GeometricOptions } from '../GeometricLayer.ts'
 
 /**
  * Creates a detailed starfield of small particles
  */
 export const createStarfield = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = {},
 ) => {
   const {

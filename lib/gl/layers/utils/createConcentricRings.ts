@@ -1,19 +1,18 @@
-import * as THREE from 'three'
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getConcentricRingsConfig } from '../config.ts'
+import * as Three from 'three'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getConcentricRingsConfig } from '@libgl/layers/config.ts'
 
 /**
  * Creates concentric rings with configurable properties
  */
 export const createConcentricRings = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getConcentricRingsConfig(),
 ) => {
   const {
     radius = 1,
     minRadius = 0.5,
     maxRadius = 1.5,
-    height = 0.5,
     color = 0x00ffff,
     secondaryColor = 0xff00ff,
     rotationAngle = 0,
@@ -28,9 +27,7 @@ export const createConcentricRings = (
   const ringGroup = new THREE.Group()
   const ringCount = 6
 
-  function lerp(a: number, b: number, t: number) {
-    return a + (b - a) * t
-  }
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
   for (let i = 0; i < ringCount; i++) {
     const t = Number(ringCount) === 1 ? 0.5 : i / (ringCount - 1)
@@ -53,9 +50,9 @@ export const createConcentricRings = (
     })
     const ring = new THREE.Mesh(ringGeometry, ringMaterial)
     ring.rotation.x = 0 + rotationAngle
-    const individualVariation = variationFactor * (Math.PI * 0.08 * (i - ringCount / 2) * 0.5)
     ring.rotation.z = variationFactor * (Math.PI * 0.05 * i * 0.3)
     ringGroup.add(ring)
   }
+
   return ringGroup
 }

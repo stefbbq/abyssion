@@ -1,4 +1,5 @@
-import { createCircleOutline, createGrid, createHexagonOutline, createTriangleIndicator } from '../../geometry/index.ts'
+import * as Three from 'three'
+import { createCircleOutline, createGrid, createHexagonOutline, createTriangleIndicator } from '@libgl/geometry/index.ts'
 
 /**
  * available shape types for tech shape generation
@@ -10,7 +11,7 @@ export type TechShapeType = 'hexagon' | 'circle' | 'triangle' | 'grid'
  * @param THREE threejs instance
  * @returns random technical shape mesh
  */
-export const createRandomTechShape = (THREE: typeof import('three')) => {
+export const createRandomTechShape = (THREE: typeof Three) => {
   // choose a random shape type from the available shapes
   const shapeTypes: TechShapeType[] = [
     'hexagon',
@@ -83,7 +84,7 @@ export const createRandomTechShape = (THREE: typeof import('three')) => {
  * @returns configured technical shape mesh
  */
 export const createTechShape = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   type: TechShapeType,
   size: number,
   color: number | string,

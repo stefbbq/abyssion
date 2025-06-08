@@ -5,6 +5,7 @@
  * Coordinates with utils to generate logo layers.
  */
 
+import * as Three from 'three'
 import { getAllLogoLayers } from './utils/getAllLogoLayers.ts'
 import { createPlanesFromLayers } from './utils/createPlanesFromLayers.ts'
 import { recreateRandomLogoLayers } from './utils/recreateRandomLogoLayers.ts'
@@ -39,7 +40,7 @@ export type LogoLayer = {
  * Creates and manages the core logo layer system
  * Returns a single object with all necessary methods for working with layers
  */
-export const createLogoLayer = (THREE: typeof import('three')) => {
+export const createLogoLayer = (THREE: typeof Three) => {
   return {
     /**
      * Get all layers (static + random)
@@ -51,10 +52,10 @@ export const createLogoLayer = (THREE: typeof import('three')) => {
      */
     createPlanes: (
       layers: LogoLayer[],
-      planeGeometry: any,
-      outlineTexture: any,
-      stencilTexture: any,
-      scene: any,
+      planeGeometry: Three.PlaneGeometry,
+      outlineTexture: Three.Texture,
+      stencilTexture: Three.Texture,
+      scene: Three.Scene,
     ) =>
       createPlanesFromLayers(
         THREE,
@@ -69,18 +70,16 @@ export const createLogoLayer = (THREE: typeof import('three')) => {
      * Clean up and regenerate all random layers
      */
     regenerate: (
-      scene: any,
-      currentPlanes: any[],
-      currentLayers: LogoLayer[],
-      planeGeometry: any,
-      outlineTexture: any,
-      stencilTexture: any,
+      scene: Three.Scene,
+      currentPlanes: Three.Mesh[],
+      planeGeometry: Three.PlaneGeometry,
+      outlineTexture: Three.Texture,
+      stencilTexture: Three.Texture,
     ) =>
       recreateRandomLogoLayers(
         THREE,
         scene,
         currentPlanes,
-        currentLayers,
         planeGeometry,
         outlineTexture,
         stencilTexture,
@@ -89,6 +88,6 @@ export const createLogoLayer = (THREE: typeof import('three')) => {
     /**
      * Dispose of all layer meshes
      */
-    dispose: (scene: any, planes: any[]) => disposeLogoLayers(scene, planes),
+    dispose: (scene: Three.Scene, planes: Three.Mesh[]) => disposeLogoLayers(scene, planes),
   }
 }

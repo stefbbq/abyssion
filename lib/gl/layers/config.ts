@@ -8,7 +8,7 @@ const { geometricOptions, staticLogoLayers, randomLayerConfig, uiOverlayConfig, 
 /**
  * Custom configs for each geometry utility
  */
-export function getDashedOrbitsConfig(): GeometricOptions {
+export const getDashedOrbitsConfig = (): GeometricOptions => {
   const theme = getGLTheme()
   const config = geometricOptions.dashedOrbits
   return {
@@ -18,7 +18,7 @@ export function getDashedOrbitsConfig(): GeometricOptions {
   }
 }
 
-export function getConcentricRingsConfig(): GeometricOptions {
+export const getConcentricRingsConfig = (): GeometricOptions => {
   const theme = getGLTheme()
   const config = geometricOptions.concentricRings
   return {
@@ -28,7 +28,7 @@ export function getConcentricRingsConfig(): GeometricOptions {
   }
 }
 
-export function getCelestialBodiesConfig(): GeometricOptions {
+export const getCelestialBodiesConfig = (): GeometricOptions => {
   const theme = getGLTheme()
   const config = geometricOptions.celestialBodies
   return {
@@ -38,7 +38,7 @@ export function getCelestialBodiesConfig(): GeometricOptions {
   }
 }
 
-export function getOrbitalGridsConfig(): GeometricOptions {
+export const getOrbitalGridsConfig = (): GeometricOptions => {
   const theme = getGLTheme()
   const config = geometricOptions.orbitalGrids
   return {
@@ -48,7 +48,7 @@ export function getOrbitalGridsConfig(): GeometricOptions {
   }
 }
 
-export function getOrbitalMarkersConfig(): GeometricOptions {
+export const getOrbitalMarkersConfig = (): GeometricOptions => {
   const theme = getGLTheme()
   const config = geometricOptions.orbitalMarkers
   return {

@@ -1,3 +1,6 @@
+import * as Three from 'three'
+import type { RGBColor } from '@libtheme/types.ts'
+
 /**
  * Generate a random color from seed color and randomness percentage
  *
@@ -6,13 +9,11 @@
  * @param randomness - How much to randomize (0.0 = no change, 1.0 = full random)
  * @returns Three.js Color object
  */
-import type { RGBColor } from '@libtheme/types.ts'
-
 export const getRandomColor = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   seedColor: RGBColor,
   randomness: number = 0.3,
-): import('three').Color => {
+): Three.Color => {
   // calculate random adjustments for each channel
   const rAdjust = (Math.random() - 0.5) * randomness
   const gAdjust = (Math.random() - 0.5) * randomness

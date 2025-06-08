@@ -1,16 +1,17 @@
-import { createElectricShaderMaterial } from '../../shaders/ElectricShader.ts'
-import { LogoLayer } from '../LogoLayer.ts'
+import * as Three from 'three'
+import { createElectricShaderMaterial } from '@libgl/shaders/ElectricShader.ts'
+import { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 
 /**
  * Create meshes for each layer
  */
 export const createPlanesFromLayers = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   layers: LogoLayer[],
-  planeGeometry: any,
-  outlineTexture: any,
-  stencilTexture: any,
-  scene: any,
+  planeGeometry: Three.PlaneGeometry,
+  outlineTexture: Three.Texture,
+  stencilTexture: Three.Texture,
+  scene: Three.Scene,
 ) => {
   // Sort layers by z-position only (back to front)
   const sortedLayers = [...layers].sort((a, b) => a.zPos - b.zPos)

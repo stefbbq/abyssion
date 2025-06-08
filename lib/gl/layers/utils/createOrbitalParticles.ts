@@ -1,11 +1,12 @@
-import { GeometricOptions } from '../GeometricLayer.ts'
-import { getOrbitalParticlesConfig } from '../config.ts'
+import * as Three from 'three'
+import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
+import { getOrbitalParticlesConfig } from '@libgl/layers/config.ts'
 
 /**
  * creates particle distributions along orbital paths
  */
 export const createOrbitalParticles = (
-  THREE: typeof import('three'),
+  THREE: typeof Three,
   options: GeometricOptions = getOrbitalParticlesConfig(),
 ) => {
   const {
@@ -74,7 +75,6 @@ export const createOrbitalParticles = (
     orbitParticleGroup.rotation.x = 0 + rotationAngle
 
     // Apply additional rotation based on variationFactor
-    const individualVariation = variationFactor * (Math.PI * 0.1 * (i - orbitCount / 2) * 0.3)
     orbitParticleGroup.rotation.z = Math.PI * 0.05 * i * variationFactor
 
     // Add to parent

@@ -154,7 +154,7 @@ export const initGL = async (options: InitOptions) => {
     renderer.autoClear = true // Restore default
   }
 
-  // Start animation loop - use new composable system
+  // Start animation loop
   const animationCleanup = startAnimationLoop(state)
 
   // Create and return cleanup function

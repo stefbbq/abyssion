@@ -27,9 +27,7 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
     const { state, time } = context
 
     // Initialize logo layer manager if needed
-    if (!logoLayer) {
-      logoLayer = createLogoLayer(state.THREE)
-    }
+    if (!logoLayer) logoLayer = createLogoLayer(state.THREE)
 
     // Check layer regeneration timing
     const currentTime = Date.now()
@@ -43,7 +41,6 @@ export const createLogoPageOrchestrator = (): AnimationOrchestrator => {
       const { planes, layers } = logoLayer.regenerate(
         state.scene,
         state.planes,
-        state.layers,
         state.planeGeometry,
         state.outlineTexture,
         state.stencilTexture,
