@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks'
-import type { NavButtonState } from '@utils/navigation/types.ts'
+import type { NavButtonState } from '@data/types.ts'
 import { UITheme } from '@lib/theme/types.ts'
 import { NavButton } from '@molecules/NavButton.tsx'
 

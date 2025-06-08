@@ -1,6 +1,7 @@
 # Codex
 
 Reference for the codebase structure.
+Use this as a starting point before doing anything!
 
 ## Core Architecture
 

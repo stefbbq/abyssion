@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useSignal } from '@preact/signals'
 import { getTheme } from '@lib/theme/index.ts'
-import { ExpandedMenu } from './ExpandedMenu.tsx'
-import navData from '../../data/nav.json' with { type: 'json' }
-import actionZoneData from '../../data/nav-actionZone-animation.json' with { type: 'json' }
-import ActionZone from './ActionZone.tsx'
-import { CollapsedNav } from './CollapsedNav.tsx'
-import type { NavButtonState } from '@utils/navigation/types.ts'
+import { ExpandedMenu } from '@molecules/ExpandedMenu.tsx'
+import navData from '@data/nav.json' with { type: 'json' }
+import actionZoneData from '@data/nav-actionZone-animation.json' with { type: 'json' }
+import ActionZone from '@organisms/ActionZone.tsx'
+import { CollapsedNav } from '@molecules/CollapsedNav.tsx'
+import type { NavButtonState } from '@data/types.ts'
 
 export interface ActionZoneControllerProps {
   currentPath?: string
