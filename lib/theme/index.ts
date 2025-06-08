@@ -52,7 +52,7 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
         isDarkMode
           ? { r: 0, g: 0, b: 0 } // Pure black base for dark mode
           : baseTheme.foreground, // Use foreground for light mode
-        isDarkMode ? 0.8 : 0.05, // Much more opaque in dark mode
+        isDarkMode ? 0.5 : 0.05, // Much more opaque in dark mode
       ),
       backdrop: 'blur(12px)',
       border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.3 : 0.15), // Brighter glass border in dark mode

@@ -118,7 +118,7 @@ export default function ActionZone({
         className={`fixed bottom-4 left-4 right-4 z-50 md:hidden overflow-hidden transition-all duration-300 ease-out`}
         style={{
           height: `${getCurrentHeight()}px`,
-          backgroundColor: theme.colors.background.secondary || '#2a2a2a',
+          backgroundColor: theme.glass.background,
           borderRadius: showExpandedContent ? '24px' : '40px',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
