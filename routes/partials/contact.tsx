@@ -11,14 +11,12 @@ export const config: RouteConfig = {
 
 export default defineRoute(() => {
   const theme = getTheme()
-
   const inputStyles = {
     backgroundColor: theme.colors.background.secondary,
     border: `1px solid ${theme.colors.border.primary}`,
     color: theme.colors.text.primary,
     '--focus-ring-color': theme.colors.interactive.primary,
   }
-
   const focusClasses = 'focus:ring-2 focus:ring-[var(--focus-ring-color)] focus:border-transparent'
 
   return (
@@ -28,11 +26,10 @@ export default defineRoute(() => {
         <meta name='description' content='Get in touch with abyssion' />
       </Head>
 
-      <div class='min-h-screen pb-20 md:pb-0' style={{ backgroundColor: theme.colors.background.primary }}>
-        <main class='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+      <div class='min-h-screen pb-20 md:pb-0' style={{ backgroundColor: `${theme.colors.background.primary}CC` }}>
+        <main class='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12'>
           <div class='space-y-16'>
             <section class='text-center'>
-              <h1 class='text-5xl font-bold mb-6' style={{ color: theme.colors.text.primary }}>Contact</h1>
               <p class='text-xl max-w-2xl mx-auto' style={{ color: theme.colors.text.secondary }}>
                 Get in touch with us for bookings, collaborations, or just to say hello.
               </p>

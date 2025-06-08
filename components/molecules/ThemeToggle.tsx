@@ -19,7 +19,7 @@ export default function ThemeToggle() {
     document.documentElement.classList.toggle('dark-mode', newMode === 'dark')
 
     // Reload the page to apply theme changes globally
-    window.location.reload()
+    globalThis.location.reload()
   }
 
   useEffect(() => {
