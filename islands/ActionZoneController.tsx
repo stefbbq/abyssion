@@ -103,7 +103,7 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
       expandedChildren={
         <ExpandedMenu
           currentPath={currentRoute.value}
-          menuItems={navData.expandedMenu}
+          menuItems={navData.mainNav}
           socialLinks={navData.socialLinks}
           onMenuClose={() => setIsMenuOpen(false)}
           onAnchorLink={handleAnchorLink}

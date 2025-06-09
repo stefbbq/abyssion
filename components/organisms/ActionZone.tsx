@@ -3,6 +3,10 @@ import { getTheme } from '@lib/theme/index.ts'
 import { ComponentChildren } from 'preact'
 import { AnimatePresence, motion } from 'framer-motion'
 
+const EXPANDED_HEIGHT = 400
+const COLLAPSED_HEIGHT = 80
+const DRAG_THRESHOLD = 80
+
 export interface ActionZoneProps {
   isMenuOpen: boolean
   setIsMenuOpen: (isOpen: boolean) => void
@@ -46,8 +50,6 @@ export default function ActionZone({
 
     const currentY = e.touches[0].clientY
     const deltaY = currentY - startY
-    const EXPANDED_HEIGHT = 400
-    const COLLAPSED_HEIGHT = 80
 
     if (isMenuOpen) {
       const newDragY = Math.max(0, Math.min(EXPANDED_HEIGHT - COLLAPSED_HEIGHT, deltaY))
@@ -62,12 +64,8 @@ export default function ActionZone({
     if (!isDragging) return
     e.preventDefault()
 
-    const DRAG_THRESHOLD = 80
-    if (isMenuOpen && dragY > DRAG_THRESHOLD) {
-      setIsMenuOpen(false)
-    } else if (!isMenuOpen && dragY < -DRAG_THRESHOLD) {
-      setIsMenuOpen(true)
-    }
+    if (isMenuOpen && dragY > DRAG_THRESHOLD) setIsMenuOpen(false)
+    else if (!isMenuOpen && dragY < -DRAG_THRESHOLD) setIsMenuOpen(true)
 
     setIsDragging(false)
     setDragY(0)
@@ -84,10 +82,6 @@ export default function ActionZone({
       }
     }
   }, [isDragging, isMenuOpen, startY, dragY])
-
-  // layout calculations
-  const EXPANDED_HEIGHT = 400
-  const COLLAPSED_HEIGHT = 80
 
   const getCurrentHeight = () => {
     if (isDragging) {
