@@ -1,7 +1,7 @@
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { getGLTheme } from '@libgl/theme/index.ts'
 import type { GeometricOptions } from './GeometricLayer.ts'
-import layersConfig from '@lib/configLayers.json' with { type: 'json' }
+import layersConfig from '@libgl/configLayers.json' with { type: 'json' }
 
 const { geometricOptions, staticLogoLayers, randomLayerConfig, uiOverlayConfig, shapeLayerConfig } = layersConfig
 

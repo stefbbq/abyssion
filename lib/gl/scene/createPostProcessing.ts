@@ -4,6 +4,8 @@ import {
   ditheringVertexShader,
   finalPassFragmentShader,
   finalPassVertexShader,
+  pixelationFragmentShader,
+  pixelationVertexShader,
   sharpeningFragmentShader,
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
@@ -73,20 +75,6 @@ export const createPostProcessing = async (
   composer.addPass(bokehPass)
 
   /**
-   * FilmPass
-   * Adds film grain and scanlines to the rendered image, simulating the look of analog film and adding subtle movement and texture.
-   * This enhances depth perception and reduces the digital "cleanliness" of the render.
-   */
-  const { film } = postProcessingConfig
-  const filmPass = new FilmPass(
-    film.noiseIntensity,
-    film.scanlineIntensity,
-    film.scanlineCount,
-    film.grayscale,
-  )
-  composer.addPass(filmPass)
-
-  /**
    * UnrealBloomPass (Bloom)
    * Creates a glowing effect around bright areas of the image, simulating how real cameras and eyes perceive intense light.
    * This makes highlights pop and gives the scene a more atmospheric, dreamy quality.
@@ -117,6 +105,37 @@ export const createPostProcessing = async (
     fragmentShader: sharpeningFragmentShader,
   })
   if (sharpening.enabled) composer.addPass(sharpeningPass)
+
+  /**
+   * PixelationPass
+   * Applies a blocky pixelation effect to the image. This pass is not enabled by default and can be toggled by orchestrators.
+   */
+  const pixelationPass = new ShaderPass({
+    uniforms: {
+      tDiffuse: { value: null },
+      pixelSize: { value: 16 }, // Default block size
+      resolution: { value: new THREE.Vector2(width, height) },
+    },
+    vertexShader: pixelationVertexShader,
+    fragmentShader: pixelationFragmentShader,
+  })
+  pixelationPass.enabled = false
+  composer.addPass(pixelationPass)
+
+  /**
+   * FilmPass
+   * Adds film grain and scanlines to the rendered image, simulating the look of analog film and adding subtle movement and texture.
+   * This enhances depth perception and reduces the digital "cleanliness" of the render.
+   * Now applied after pixelation for correct visual stacking.
+   */
+  const { film } = postProcessingConfig
+  const filmPass = new FilmPass(
+    film.noiseIntensity,
+    film.scanlineIntensity,
+    film.scanlineCount,
+    film.grayscale,
+  )
+  composer.addPass(filmPass)
 
   /**
    * FinalPass
@@ -155,5 +174,5 @@ export const createPostProcessing = async (
   ditheringPass.renderToScreen = true
   composer.addPass(ditheringPass)
 
-  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass }
+  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass }
 }

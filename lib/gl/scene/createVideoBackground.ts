@@ -1,5 +1,5 @@
 import * as Three from 'three'
-import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
 import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'

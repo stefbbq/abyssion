@@ -1,14 +1,14 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
-import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
-import controlsConfig from '../configControls.json' with { type: 'json' }
+import sceneConfig from './sceneConfig.json' with { type: 'json' }
+import animationConfig from './configAnimation.json' with { type: 'json' }
+import controlsConfig from './configControls.json' with { type: 'json' }
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addLensFlares } from './scene/addLensFlares.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
 import { createControlsSystem } from './controls/index.ts'
 import { createUILayer } from './layers/UILayer.ts'
-import { createEmptyPageOrchestrator, createLogoPageOrchestrator, createSceneOrchestrator } from './animation/index.ts'
+import { createContentPageOrchestrator, createLogoPageOrchestrator, createSceneOrchestrator } from './animation/index.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
 import { isDebugModeEnabled } from '@lib/debug/index.ts'
 import {
@@ -40,7 +40,7 @@ export const initGL = async (options: InitOptions) => {
   const videoBackground = await addVideoBackground(THREE, scene) as any
 
   // Set up post-processing effects
-  const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass } = await createPostProcessing(
+  const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass } = await createPostProcessing(
     THREE,
     scene,
     camera,
@@ -92,6 +92,7 @@ export const initGL = async (options: InitOptions) => {
     finalPass,
     ditheringPass,
     sharpeningPass,
+    pixelationPass,
     planes,
     logoLayers,
     time: 0,
@@ -160,7 +161,7 @@ export const initGL = async (options: InitOptions) => {
   // Define the registry of page orchestrators
   const orchestratorRegistry = {
     'logo-page': () => createLogoPageOrchestrator(logoController),
-    'empty-page': createEmptyPageOrchestrator,
+    'content-page': createContentPageOrchestrator,
   }
 
   // Create the scene orchestrator

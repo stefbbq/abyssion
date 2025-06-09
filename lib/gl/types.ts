@@ -46,4 +46,5 @@ export type RendererState = {
   uiOverlay: UIOverlay
   shapeLayer: Group
   videoBackground?: VideoBackgroundManager
+  pixelationPass: ShaderPass
 }

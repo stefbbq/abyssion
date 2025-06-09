@@ -4,7 +4,7 @@
  * Only visible when debug mode is enabled via query parameter or cookie
  */
 
-import controlsConfig from '../../configControls.json' with { type: 'json' }
+import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
 import { isDebugModeEnabled, setDebugMode } from '@lib/debug/index.ts'
 
 /**

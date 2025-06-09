@@ -1,5 +1,5 @@
 import * as Three from 'three'
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
 
 /**
  * Creates and configures a WebGL renderer with responsive sizing and DOM integration.

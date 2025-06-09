@@ -18,7 +18,7 @@ export default function ClientInitializer() {
       }
 
       const path = globalThis.location.pathname
-      const pageName = path === '/' ? 'logo-page' : 'empty-page'
+      const pageName = path === '/' ? 'logo-page' : 'content-page'
       sceneOrchestrator.switchToPage(pageName)
     }
 

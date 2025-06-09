@@ -1,12 +1,12 @@
 import { lc, log } from '@lib/logger/index.ts'
-import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
 import { createVideoLoadingStream } from './utils/createVideoLoadingStream.ts'
 import { createInitialPlaybackState } from './utils/createInitialPlaybackState.ts'
 import { shouldStartPlayback } from './utils/shouldStartPlayback.ts'
 import { selectNextVideoIndex } from './utils/selectNextVideoIndex.ts'
 import { updateRecentIndices } from './utils/updateRecentIndices.ts'
-import type { VideoBackgroundManager } from '../../types.ts'
+import type { VideoBackgroundManager } from '@libgl/types.ts'
 import type { BufferObject, PlaybackState, VideoTexture } from './types.ts'
 import ms from 'ms'
 
@@ -26,6 +26,7 @@ export const createVideoCycle = (
   // Prevent concurrent transitions
   let isTransitioning = false
   let nextVideoPrepared = false
+  // deno-lint-ignore no-unused-vars
   let preparedVideoIndex = -1
 
   // Buffers - mutable boundary
@@ -182,7 +183,8 @@ export const createVideoCycle = (
         nextIndex = hiddenBuffer._plannedVideoIndex
         duration = hiddenBuffer._plannedDuration || 10
 
-        log.debug(lc.GL_TEXTURES, `Smooth transition to prepared video ${nextIndex}`)
+        const videoName = state.videos[nextIndex]?.video?.src?.split('/').pop() || '(unknown)'
+        log.debug(lc.GL_TEXTURES, `Smooth transition to prepared video ${nextIndex} (${videoName})`)
 
         // Just swap buffers - video is already playing!
         const temp = activeBuffer

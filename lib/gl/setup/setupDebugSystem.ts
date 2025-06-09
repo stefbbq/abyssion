@@ -1,6 +1,6 @@
 import * as Three from 'three'
 import { DebugOverlay } from '@libgl/debug/DebugOverlay.ts'
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
 
 type DebugSystemConfig = {
   container: HTMLDivElement

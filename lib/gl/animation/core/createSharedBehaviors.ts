@@ -1,6 +1,6 @@
 import { createMouseTracking } from '../../controls/index.ts'
 import { calculateRotationInterpolation } from '../calculations/calculateRotationInterpolation.ts'
-import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
+import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 
 /**
  * Shared behaviors available to all animation orchestrators

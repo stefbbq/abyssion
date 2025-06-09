@@ -1,7 +1,7 @@
 import type { RendererState } from '../types.ts'
 import type { AnimationContext, AnimationOrchestrator, SceneState } from './core/types.ts'
 import { createSharedBehaviors } from './core/createSharedBehaviors.ts'
-import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
+import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 
 const { animationConfig: animation } = animationConfig
 
@@ -70,8 +70,8 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
     })
 
     // 2. Register the new orchestrator
-    // Fallback to 'empty-page' if the requested page is not in the registry
-    const targetPage = orchestratorRegistry[pageName] ? pageName : 'empty-page'
+    // Fallback to 'content-page' if the requested page is not in the registry
+    const targetPage = orchestratorRegistry[pageName] ? pageName : 'content-page'
     registerOrchestrator(targetPage)
   }
 

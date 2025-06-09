@@ -1,11 +1,11 @@
-import type { AnimationContext, AnimationOrchestrator } from '../core/types.ts'
-import { calculateStaticLayerPosition } from '../calculations/calculateStaticLayerPosition.ts'
-import { calculateRandomLayerPosition } from '../calculations/calculateRandomLayerPosition.ts'
-import { calculateShaderTime } from '../calculations/calculateShaderTime.ts'
-import { calculateRegenerationTiming } from '../calculations/calculateRegenerationTiming.ts'
+import type { AnimationContext, AnimationOrchestrator } from '@libgl/animation/core/types.ts'
+import { calculateStaticLayerPosition } from '@libgl/animation/calculations/calculateStaticLayerPosition.ts'
+import { calculateRandomLayerPosition } from '@libgl/animation/calculations/calculateRandomLayerPosition.ts'
+import { calculateShaderTime } from '@libgl/animation/calculations/calculateShaderTime.ts'
+import { calculateRegenerationTiming } from '@libgl/animation/calculations/calculateRegenerationTiming.ts'
 import { calculateBloomEffect } from '../calculations/calculateBloomEffect.ts'
-import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
+import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
 import ms from 'ms'
 
 const { animationConfig: animation } = animationConfig

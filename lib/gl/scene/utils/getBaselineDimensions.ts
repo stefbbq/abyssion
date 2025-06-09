@@ -1,4 +1,4 @@
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
 import { calculateFarPlaneSize } from './calculateFarPlaneSize.ts'
 import { getResponsiveCameraZ } from './getResponsiveCameraZ.ts'
 

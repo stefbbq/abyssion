@@ -34,3 +34,4 @@ export type ShaderParams = {
 export * from './ElectricShader.ts'
 export * from './DitheringShader.ts'
 export * from './SharpeningShader.ts'
+export * from './PixelationShader.ts'

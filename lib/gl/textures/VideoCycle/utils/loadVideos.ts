@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { lc, log } from '@lib/logger/index.ts'
-import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import { loadVideo } from './loadVideo.ts'
 
 /**

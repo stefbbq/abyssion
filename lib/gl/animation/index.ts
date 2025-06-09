@@ -10,7 +10,7 @@ export type { AnimationContext, AnimationOrchestrator, SceneState, TransitionSta
 
 // Page orchestrators
 export { createLogoPageOrchestrator } from './orchestrators/createLogoPageOrchestrator.ts'
-export { createEmptyPageOrchestrator } from './orchestrators/createEmptyPageOrchestrator.ts'
+export { createContentPageOrchestrator } from './orchestrators/createContentPageOrchestrator.ts'
 
 // Pure calculation functions (reusable across orchestrators)
 export { calculateStaticLayerPosition } from './calculations/calculateStaticLayerPosition.ts'
