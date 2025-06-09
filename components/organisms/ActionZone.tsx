@@ -1,17 +1,28 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useRef } from 'preact/hooks'
 import { getTheme } from '@lib/theme/index.ts'
 import { ComponentChildren } from 'preact'
 import { AnimatePresence, motion } from 'framer-motion'
+import { animationStyleFunctions } from '@lib/utils/actionZoneAnimationStyles.ts'
 
-const COLLAPSED_HEIGHT = 80
-const DRAG_THRESHOLD = 80
-
-export interface ActionZoneProps {
+type Props = {
   isMenuOpen: boolean
   setIsMenuOpen: (isOpen: boolean) => void
   collapsedChildren: ComponentChildren
   expandedChildren: ComponentChildren
   routeKey: string
+  /**
+   * animationConfig: settings for framer-motion transition, from config
+   */
+  animationConfig?: Record<string, any>
+  layoutConfig?: Record<string, any>
+}
+
+function resolveConfigValue(value: any) {
+  if (typeof value === 'string' && value.endsWith('()')) {
+    const fnName = value.replace('()', '')
+    return (animationStyleFunctions as Record<string, (...args: any[]) => any>)[fnName]?.()
+  }
+  return value
 }
 
 /**
@@ -26,18 +37,21 @@ export default function ActionZone({
   collapsedChildren,
   expandedChildren,
   routeKey,
-}: ActionZoneProps) {
+  animationConfig = {},
+  layoutConfig = {},
+}: Props) {
   const navRef = useRef<HTMLElement>(null)
   const theme = getTheme()
-
   const showExpandedContent = isMenuOpen
+  const height = resolveConfigValue(layoutConfig.height)
+  const borderRadius = resolveConfigValue(layoutConfig.borderRadius)
 
   return (
     <>
       {/* overlay for expanded menu */}
       {showExpandedContent && (
         <div
-          className='fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300'
+          className='fixed inset-0 bg-black/50 z-40 md:hidden'
           onClick={() => setIsMenuOpen(false)}
         />
       )}
@@ -47,17 +61,18 @@ export default function ActionZone({
         layout
         ref={navRef}
         // @ts-ignore - framer-motion types not fully compatible with Preact
-        className={`fixed bottom-4 left-4 right-4 z-50 md:hidden overflow-hidden transition-all duration-300 ease-out`}
+        className={`fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden`}
         animate={{
-          height: isMenuOpen ? 'auto' : COLLAPSED_HEIGHT,
-          borderRadius: isMenuOpen ? '24px' : '40px',
+          height,
+          borderRadius,
         }}
         initial={false}
-        transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
+        transition={animationConfig}
         style={{
           backgroundColor: theme.glass.background,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
+          boxShadow: '0 8px 32px 0 rgba(0,0,0,0.25)',
         }}
       >
         {/* drag handle for expanded menu */}

@@ -4,9 +4,11 @@ import { getTheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneData from '@data/nav-actionZone-animation.json' with { type: 'json' }
+import actionZoneData from '@data/nav-actionZone-animation.ts'
 import ActionZone from '@organisms/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
+import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
+import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
 
 type Props = {
   currentPath?: string
@@ -67,49 +69,68 @@ export default function ActionZoneController({ currentPath }: Props) {
 
   if (!isMounted) return null
 
-  const isHomepage = currentRoute.value === '/'
-
+  /**
+   * getCollapsedButtons
+   * Returns the correct button array for the current route and state, using the config and route-matching utility.
+   * Uses 'collapsed-default' state for now.
+   */
   const getCollapsedButtons = () => {
-    if (isHomepage) return actionZoneData.home as NavButtonState[]
+    const state = 'collapsedDefault'
+    const config = matchRouteConfig(actionZoneData, state, currentRoute.value)
+    if (!config || !Array.isArray(config.buttons)) return []
 
-    const routeKey = currentRoute.value.replace('/', '')
+    // Patch in page title if needed
     const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
-    const buttonsConfig = (actionZoneData as Record<string, NavButtonState[]>)[routeKey] || actionZoneData.page
-
-    const pageButtons = buttonsConfig.map((button: NavButtonState) => {
+    return config.buttons.map((button: NavButtonState) => {
       if (button.role === 'page-title') {
         const label = button.content.label || page?.label || ''
-        return { ...button, content: { label } }
+        return { ...button, content: { ...button.content, label } }
       }
-
       return button
     })
-
-    return pageButtons as NavButtonState[]
   }
 
+  // Determine the current ActionZone state
+  const state = isMenuOpen ? 'expandedMenu' : 'collapsedDefault'
+  const animationConfig = matchRouteConfig(actionZoneData, state, currentRoute.value)?.animation || {}
+  const layoutConfig = matchRouteConfig(actionZoneData, state, currentRoute.value)?.layout || {}
+
   return (
-    <ActionZone
-      isMenuOpen={isMenuOpen}
-      setIsMenuOpen={setIsMenuOpen}
-      routeKey={currentRoute.value}
-      collapsedChildren={
-        <ActionZoneNav
-          onAction={handleAction}
-          theme={theme}
-          buttons={getCollapsedButtons()}
+    <>
+      <div className='md:hidden'>
+        <ActionZoneFadeout
+          height={160}
+          gradientStart={0}
+          gradientEnd={90}
+          color={theme.glass.background}
+          bottom={0}
+          zIndex={49}
         />
-      }
-      expandedChildren={
-        <ActionZoneExpandedMenu
-          currentPath={currentRoute.value}
-          menuItems={navData.mainNav}
-          socialLinks={navData.socialLinks}
-          onMenuClose={() => setIsMenuOpen(false)}
-          onAnchorLink={handleAnchorLink}
-          theme={theme}
+        <ActionZone
+          isMenuOpen={isMenuOpen}
+          setIsMenuOpen={setIsMenuOpen}
+          routeKey={currentRoute.value}
+          animationConfig={animationConfig}
+          layoutConfig={layoutConfig}
+          collapsedChildren={
+            <ActionZoneNav
+              onAction={handleAction}
+              theme={theme}
+              buttons={getCollapsedButtons()}
+            />
+          }
+          expandedChildren={
+            <ActionZoneExpandedMenu
+              currentPath={currentRoute.value}
+              menuItems={navData.mainNav}
+              socialLinks={navData.socialLinks}
+              onMenuClose={() => setIsMenuOpen(false)}
+              onAnchorLink={handleAnchorLink}
+              theme={theme}
+            />
+          }
         />
-      }
-    />
+      </div>
+    </>
   )
 }

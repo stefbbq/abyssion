@@ -21,7 +21,7 @@ type Props = {
  */
 export const ActionZoneButton = ({ id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin }: Props) => {
   const getBaseClasses = () =>
-    'w-full h-full inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2'
+    'w-full h-full inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2'
 
   const handleClick = () => {
     if (state.action.type !== 'none') onAction(state.action)
