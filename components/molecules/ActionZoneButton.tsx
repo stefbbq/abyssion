@@ -1,9 +1,9 @@
 import type { NavButtonState } from '@data/types.ts'
-import { Icon } from '@atoms/Icon.tsx'
+import { BackIcon, MenuIcon } from '@atoms/icons/index.ts'
 import { motion } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
 
-interface NavButtonProps {
+type Props = {
   id: string
   state: NavButtonState
   onAction: (action: NavButtonState['action']) => void
@@ -19,14 +19,12 @@ interface NavButtonProps {
  * Combines Icon and BaseButton atoms with animation state management
  * Handles smooth morphing between different navigation roles
  */
-export const NavButton = ({ id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin }: NavButtonProps) => {
+export const ActionZoneButton = ({ id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin }: Props) => {
   const getBaseClasses = () =>
     'w-full h-full inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2'
 
   const handleClick = () => {
-    if (state.action.type !== 'none') {
-      onAction(state.action)
-    }
+    if (state.action.type !== 'none') onAction(state.action)
   }
 
   const showText = state.role === 'nav-item' || state.role === 'page-title'
@@ -45,15 +43,16 @@ export const NavButton = ({ id, state, onAction, style, onMouseEnter, onMouseLea
           <a
             href={state.action.href}
             className={`${getBaseClasses()} nav-button`}
-            style={style}
+            style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             aria-label={state.content.label}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            {...{ onMouseEnter, onMouseLeave }}
             f-client-nav
+            onClick={() => onAction(state.action)}
           >
             {state.content.icon && (
               <motion.div layout='position'>
-                <Icon type={state.content.icon} />
+                {state.content.icon === 'back' && <BackIcon />}
+                {state.content.icon === 'menu' && <MenuIcon />}
               </motion.div>
             )}
             {showText && <motion.span layout='position'>{state.content.label}</motion.span>}
@@ -63,15 +62,15 @@ export const NavButton = ({ id, state, onAction, style, onMouseEnter, onMouseLea
           <button
             onClick={handleClick}
             className={`${getBaseClasses()} nav-button`}
-            style={style}
+            style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             disabled={state.action.type === 'none'}
             aria-label={state.content.label}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            {...{ onMouseEnter, onMouseLeave }}
           >
             {state.content.icon && (
               <motion.div layout='position'>
-                <Icon type={state.content.icon} />
+                {state.content.icon === 'back' && <BackIcon />}
+                {state.content.icon === 'menu' && <MenuIcon />}
               </motion.div>
             )}
             {showText && <motion.span layout='position'>{state.content.label}</motion.span>}
@@ -81,6 +80,3 @@ export const NavButton = ({ id, state, onAction, style, onMouseEnter, onMouseLea
     </div>
   )
 }
-
-// export the types for use in other components
-export type { NavButtonProps }

@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useSignal } from '@preact/signals'
 import { getTheme } from '@lib/theme/index.ts'
-import { ExpandedMenu } from '@molecules/ExpandedMenu.tsx'
+import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
+import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
 import actionZoneData from '@data/nav-actionZone-animation.json' with { type: 'json' }
 import ActionZone from '@organisms/ActionZone.tsx'
-import { CollapsedNav } from '@molecules/CollapsedNav.tsx'
-import type { NavButtonState } from '@data/types.ts'
+import type { MenuItem, NavButtonState } from '@data/types.ts'
 
-export interface ActionZoneControllerProps {
+type Props = {
   currentPath?: string
 }
 
-export default function ActionZoneController({ currentPath }: ActionZoneControllerProps) {
+export default function ActionZoneController({ currentPath }: Props) {
   const [isMounted, setIsMounted] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const theme = getTheme()
@@ -41,7 +41,7 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
     }
   }, [])
 
-  const handleAction = (action: any) => {
+  const handleAction = (action: NavButtonState['action']) => {
     switch (action.type) {
       case 'back':
         globalThis.history.back()
@@ -73,10 +73,10 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
     if (isHomepage) return actionZoneData.home as NavButtonState[]
 
     const routeKey = currentRoute.value.replace('/', '')
-    const page = navData.mainNav.find((p: any) => p.path === currentRoute.value)
-    const buttonsConfig = (actionZoneData as any)[routeKey] || actionZoneData.page
+    const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
+    const buttonsConfig = (actionZoneData as Record<string, NavButtonState[]>)[routeKey] || actionZoneData.page
 
-    const pageButtons = buttonsConfig.map((button: any) => {
+    const pageButtons = buttonsConfig.map((button: NavButtonState) => {
       if (button.role === 'page-title') {
         const label = button.content.label || page?.label || ''
         return { ...button, content: { label } }
@@ -94,14 +94,14 @@ export default function ActionZoneController({ currentPath }: ActionZoneControll
       setIsMenuOpen={setIsMenuOpen}
       routeKey={currentRoute.value}
       collapsedChildren={
-        <CollapsedNav
+        <ActionZoneNav
           onAction={handleAction}
           theme={theme}
           buttons={getCollapsedButtons()}
         />
       }
       expandedChildren={
-        <ExpandedMenu
+        <ActionZoneExpandedMenu
           currentPath={currentRoute.value}
           menuItems={navData.mainNav}
           socialLinks={navData.socialLinks}

@@ -11,7 +11,6 @@ export default function ClientInitializer() {
     if (isDebugModeEnabled()) resetContexts()
 
     const handleRouteChange = () => {
-      console.log('handleRouteChange')
       const sceneOrchestrator = getSceneOrchestrator()
       if (!sceneOrchestrator) {
         console.warn('Scene orchestrator not found. GL system may not be initialized yet.')

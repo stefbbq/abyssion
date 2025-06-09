@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { getTheme, getThemeMode, toggleThemeMode } from '@lib/theme/index.ts'
+import { MoonIcon, SunIcon } from '@atoms/icons/index.ts'
 
 /**
  * Simple theme toggle icon that switches between light and dark modes
@@ -45,31 +46,7 @@ export default function ThemeToggle() {
       }}
       title={`Switch to ${currentMode === 'dark' ? 'light' : 'dark'} mode`}
     >
-      {/* Yin-yang style theme icon */}
-      <svg
-        class='w-5 h-5'
-        viewBox='0 0 24 24'
-      >
-        {/* Outer circle outline */}
-        <circle
-          cx='12'
-          cy='12'
-          r='10'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth='2'
-        />
-        {/* Filled semicircle - position changes based on mode */}
-        <path
-          d={
-            currentMode === 'dark'
-              ? 'M 12 2 A 10 10 0 0 1 12 22 Z' // Right half filled for dark mode
-              : 'M 12 2 A 10 10 0 0 0 12 22 Z' // Left half filled for light mode
-          }
-          fill='currentColor'
-          stroke='none'
-        />
-      </svg>
+      {currentMode === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>
   )
 }

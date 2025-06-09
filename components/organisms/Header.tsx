@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks'
 import { getTheme } from '@lib/theme/index.ts'
 import navData from '@data/nav.json' with { type: 'json' }
 import ThemeToggle from '@molecules/ThemeToggle.tsx'
+import * as SocialIcons from '@atoms/icons/index.ts'
 
 export interface HeaderProps {
   currentPath?: string
@@ -105,22 +106,25 @@ export default function Header({ currentPath }: HeaderProps) {
 
             {/* Social Icons */}
             <div class='flex items-center space-x-3'>
-              {navData.socialLinks.map((social) => (
-                <a
-                  key={social.key}
-                  href={social.url}
-                  aria-label={social.label}
-                  class={`transition-colors focus:ring-offset-2 rounded ${getFocusClass()}`}
-                  style={{
-                    color: theme.colors.text.secondary,
-                    '--tw-ring-color': isUsingKeyboard ? theme.colors.interactive.primary : 'transparent',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = theme.colors.text.primary}
-                  onMouseLeave={(e) => e.currentTarget.style.color = theme.colors.text.secondary}
-                >
-                  <div class='w-5 h-5 bg-current opacity-50'></div>
-                </a>
-              ))}
+              {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: string }>).map((social) => {
+                const IconComponent = (SocialIcons as Record<string, any>)[social.icon]
+                return (
+                  <a
+                    key={social.key}
+                    href={social.url}
+                    aria-label={social.label}
+                    class={`transition-colors focus:ring-offset-2 rounded ${getFocusClass()}`}
+                    style={{
+                      color: theme.colors.text.secondary,
+                      '--tw-ring-color': isUsingKeyboard ? theme.colors.interactive.primary : 'transparent',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = theme.colors.text.primary}
+                    onMouseLeave={(e) => e.currentTarget.style.color = theme.colors.text.secondary}
+                  >
+                    {IconComponent ? <IconComponent className='w-5 h-5 opacity-50' /> : <div class='w-5 h-5 bg-current opacity-50'></div>}
+                  </a>
+                )
+              })}
               <ThemeToggle />
             </div>
           </div>

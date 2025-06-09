@@ -26,22 +26,26 @@
     {
       "key": "facebook",
       "url": "https://facebook.com/abyssionofficial",
-      "label": "Facebook"
+      "label": "Facebook",
+      "icon": "FacebookIcon"
     },
     {
       "key": "instagram",
       "url": "https://instagram.com/abyssionofficial",
-      "label": "Instagram"
+      "label": "Instagram",
+      "icon": "InstagramIcon"
     },
     {
       "key": "discord",
       "url": "https://discord.gg/your-invite-code",
-      "label": "Discord"
+      "label": "Discord",
+      "icon": "DiscordIcon"
     },
     {
       "key": "soundcloud",
       "url": "https://soundcloud.com/abyssionofficial",
-      "label": "SoundCloud"
+      "label": "SoundCloud",
+      "icon": "SoundCloudIcon"
     }
   ]
 }

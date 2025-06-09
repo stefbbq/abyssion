@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import type { NavButtonState } from '@data/types.ts'
 import { UITheme } from '@lib/theme/types.ts'
-import { NavButton } from '@molecules/NavButton.tsx'
+import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
 
 interface CollapsedNavProps {
   buttons: NavButtonState[]
@@ -9,7 +9,7 @@ interface CollapsedNavProps {
   theme: UITheme
 }
 
-export const CollapsedNav = ({ buttons, onAction, theme }: CollapsedNavProps) => {
+export const ActionZoneNav = ({ buttons, onAction, theme }: CollapsedNavProps) => {
   const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null)
 
   const getButtonStyles = (state: NavButtonState, isHovered: boolean) => {
@@ -35,21 +35,19 @@ export const CollapsedNav = ({ buttons, onAction, theme }: CollapsedNavProps) =>
   }
 
   return (
-    <div class='px-6 h-full'>
-      <div class='relative h-full w-full flex items-center gap-2'>
-        {buttons.map((buttonState) => (
-          <NavButton
-            key={buttonState.id}
-            id={buttonState.id}
-            state={buttonState}
-            onAction={onAction}
-            style={getButtonStyles(buttonState, hoveredButtonId === buttonState.id)}
-            onMouseEnter={() => setHoveredButtonId(buttonState.id)}
-            onMouseLeave={() => setHoveredButtonId(null)}
-            flex={buttonState.role === 'action-button' || buttonState.role === 'back-button' ? '0 0 auto' : '1 1 0%'}
-          />
-        ))}
-      </div>
+    <div class='w-full flex items-center gap-2 px-6 h-full'>
+      {buttons.map((buttonState) => (
+        <ActionZoneButton
+          key={buttonState.id}
+          id={buttonState.id}
+          state={buttonState}
+          onAction={onAction}
+          style={getButtonStyles(buttonState, hoveredButtonId === buttonState.id)}
+          onMouseEnter={() => setHoveredButtonId(buttonState.id)}
+          onMouseLeave={() => setHoveredButtonId(null)}
+          flex={buttonState.role === 'action-button' || buttonState.role === 'back-button' ? '0 0 auto' : '1 1 0%'}
+        />
+      ))}
     </div>
   )
 }
