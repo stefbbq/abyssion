@@ -191,3 +191,18 @@ Component logic is organized using Atomic Design principles in `/components`
 - **Data & Types**: All static content is in `/data`, with all corresponding TypeScript types co-located in `data/types.ts`
 - **State Management**: Primarily Preact Signals for UI state
 - **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic
+
+## Chromatic Aberration & Glitch Effects
+
+- The chromatic aberration (RGB split) and glitch effect is implemented in `lib/gl/shaders/ElectricShader.ts` as `finalPassFragmentShader`.
+- The effect can operate in two modes:
+  - Classic: Subtle, global chromatic aberration.
+  - Segmented/Flickery: Horizontal bands flicker and desync, with theme color pops (purple, blue, etc.) appearing in some bands. Bands and color pops are controlled by noise/hash for irregularity.
+- The mode and effect parameters are controlled by uniforms:
+  - `segmentedGlitchMode`: 0 = classic, 1 = segmented/flickery
+  - `glitchIntensity`: How strong the segmented effect is (tunable for animation)
+  - `flickerRate`: How fast bands flicker (tunable for animation)
+  - `colorPopIntensity`: How much theme color pops in (tunable for animation)
+  - `themePrimary`, `themeAccent`, `themeSecondary`: Theme colors used for color pops
+- All uniforms can be animated (e.g., for page transitions) by updating the values in the post-processing pipeline (`lib/gl/scene/createPostProcessing.ts`).
+- The effect is visible in the final post-processing pass (`finalPass`).

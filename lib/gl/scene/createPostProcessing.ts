@@ -141,19 +141,36 @@ export const createPostProcessing = async (
   /**
    * FinalPass
    * Applies final color grading and chromatic aberration (subtle color fringing on edges) to give the render a unique visual signature.
-   * This is the last "creative" pass before output.
+   * Now supports segmented, flickery, theme-colored glitch bands.
+   * All effect parameters are exposed as uniforms for animation control.
    */
   const { finalPass: finalPassConfig } = postProcessingConfig
+  // get theme colors (example: from UITheme or BaseTheme)
+  // TODO: wire up actual theme color retrieval
+  const themePrimary = new THREE.Color(0xff005c)
+  const themeAccent = new THREE.Color(0x00ffe7)
+  const themeSecondary = new THREE.Color(0x6200ea)
   const finalPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
       time: { value: 0 },
       chromaStrength: { value: finalPassConfig.chromaStrength },
       gain: { value: finalPassConfig.gain ?? 1.0 },
+      segmentedGlitchMode: { value: 0 }, // 0 = classic, 1 = segmented
+      glitchIntensity: { value: 0.7 }, // exposed for animation
+      flickerRate: { value: 2.0 }, // slower block animation for analog feel
+      colorPopIntensity: { value: 1 }, // exposed for animation
+      themePrimary: { value: themePrimary.toArray() },
+      themeAccent: { value: themeAccent.toArray() },
+      themeSecondary: { value: themeSecondary.toArray() },
+      blockSize: { value: 48 }, // average block size (larger = fewer, bigger blocks)
+      blockOnProbability: { value: 0.000 }, // probability a block is on (lower = cleaner signal)
+      burstProbability: { value: 0.1 }, // probability of a global burst (lower = rarer bursts)
     },
     vertexShader: finalPassVertexShader,
     fragmentShader: finalPassFragmentShader,
   })
+  finalPass.renderToScreen = true
   composer.addPass(finalPass)
 
   /**
