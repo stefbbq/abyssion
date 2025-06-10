@@ -9,8 +9,8 @@ import { calculateRegenerationTiming } from './calculations/calculateRegeneratio
 import { smoothRotationInterpolation } from './utils/smoothRotationInterpolation.ts'
 import { getRandomInterval } from './utils/getRandomInterval.ts'
 import { createLogoLayer } from '../layers/index.ts'
-import animationConfig from '@lib/configAnimation.json' with { type: 'json' }
-import sceneConfig from '@lib/sceneConfig.json' with { type: 'json' }
+import animationConfig from '../configAnimation.json' with { type: 'json' }
+import sceneConfig from '../sceneConfig.json' with { type: 'json' }
 import ms from 'ms'
 
 const { animationConfig: animation, userReactivity } = animationConfig

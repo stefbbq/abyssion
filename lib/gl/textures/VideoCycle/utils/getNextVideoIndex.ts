@@ -1,4 +1,4 @@
-import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfig from '../../../configVideoCycle.json' with { type: 'json' }
 
 /**
  * Determines the next video index to play while avoiding recent videos

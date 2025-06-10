@@ -15,10 +15,10 @@ import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $shows from './routes/shows.tsx'
 import * as $theme from './routes/theme.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
-import * as $ClientInitializer from './islands/ClientInitializer.tsx'
 import * as $GLCanvas from './islands/GLCanvas.tsx'
 import * as $Header from './islands/Header.tsx'
 import * as $MusicPlayer from './islands/MusicPlayer.tsx'
+import * as $PageContainer from './islands/PageContainer.tsx'
 import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
 import type { Manifest } from '$fresh/server.ts'
 
@@ -39,10 +39,10 @@ const manifest = {
   },
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
-    './islands/ClientInitializer.tsx': $ClientInitializer,
     './islands/GLCanvas.tsx': $GLCanvas,
     './islands/Header.tsx': $Header,
     './islands/MusicPlayer.tsx': $MusicPlayer,
+    './islands/PageContainer.tsx': $PageContainer,
     './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
   },
   baseUrl: import.meta.url,

@@ -22,7 +22,7 @@ export default defineRoute(() => {
         <meta name='description' content='Learn about the band abyssion' />
       </Head>
 
-      <div class='min-h-screen pb-20 md:pb-0' style={{ backgroundColor: `${theme.colors.background.primary}CC` }}>
+      <div class='min-h-screen pb-20 md:pb-0'>
         <main class='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12'>
           <div class='space-y-16'>
             <section class='text-center'>

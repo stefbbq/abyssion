@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { lc, log } from '@lib/logger/index.ts'
-import videoCycleConfig from '@lib/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfig from '../../../configVideoCycle.json' with { type: 'json' }
 import { getNewStartTimeAndDuration } from './getNewStartTimeAndDuration.ts'
 import { getNextVideoIndex } from './getNextVideoIndex.ts'
 import type { BufferObject } from '../types.ts'
