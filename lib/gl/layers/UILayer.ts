@@ -1,3 +1,9 @@
+/**
+ * @module UILayer
+ *
+ * Creates a responsive 3D shape layer that surrounds the logo
+ */
+
 import * as Three from 'three'
 import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { getShapeLayerConfig } from './config.ts'

@@ -16,6 +16,49 @@ import {
 } from './utils/index.ts'
 
 /**
+ * common configuration options for geometric visual components
+ * handles appearance, positioning and variation for 3D shapes
+ */
+export type GeometricOptions = {
+  /** number of geometric shapes to create */
+  count?: number
+  /** depth offset of the geometric shape in world units */
+  zPosition?: number
+  /** base radius of the geometric shape in world units */
+  radius?: number
+  /** minimum radius for variation (used with variationFactor) */
+  minRadius?: number
+  /** maximum radius for variation (used with variationFactor) */
+  maxRadius?: number
+  /** vertical dimension of the shape in world units */
+  height?: number
+  /** primary color of the geometry as hex number (0xff0000) or string ('#ff0000') */
+  color?: number | string
+  /** secondary/accent color for multi-colored geometries */
+  secondaryColor?: number | string
+  /** rotation angle in radians from the main reference plane */
+  rotationAngle?: number
+  /** transparency level from 0 (fully transparent) to 1 (fully opaque) */
+  opacity?: number
+  /** minimum opacity for variation (used with variationFactor) */
+  minOpacity?: number
+  /** maximum opacity for variation (used with variationFactor) */
+  maxOpacity?: number
+  /** number of subdivisions for curved surfaces (higher = smoother) */
+  segments?: number
+  /** width/depth of the geometry from surface to surface */
+  thickness?: number
+  /** controls randomization intensity in position and rotation (0-1) */
+  variationFactor?: number
+  /** when true, elements are distributed along a flat plane rather than in 3D space */
+  planarDistribution?: boolean
+  /** width of lines for wireframe or line-based geometries */
+  linewidth?: number
+  /** uniform size multiplier for the entire component */
+  scale?: number
+}
+
+/**
  * Creates a cosmic-themed 3D layer that surrounds the logo with orbital rings and celestial elements
  */
 export const createGeometricLayer = (
@@ -155,64 +198,4 @@ export const createGeometricLayer = (
   // }))
 
   return shapeGroup
-}
-
-/**
- * common configuration options for geometric visual components
- * handles appearance, positioning and variation for 3D shapes
- */
-export type GeometricOptions = {
-  /** number of geometric shapes to create */
-  count?: number
-
-  /** depth offset of the geometric shape in world units */
-  zPosition?: number
-
-  /** base radius of the geometric shape in world units */
-  radius?: number
-
-  /** minimum radius for variation (used with variationFactor) */
-  minRadius?: number
-
-  /** maximum radius for variation (used with variationFactor) */
-  maxRadius?: number
-
-  /** vertical dimension of the shape in world units */
-  height?: number
-
-  /** primary color of the geometry as hex number (0xff0000) or string ('#ff0000') */
-  color?: number | string
-
-  /** secondary/accent color for multi-colored geometries */
-  secondaryColor?: number | string
-
-  /** rotation angle in radians from the main reference plane */
-  rotationAngle?: number
-
-  /** transparency level from 0 (fully transparent) to 1 (fully opaque) */
-  opacity?: number
-
-  /** minimum opacity for variation (used with variationFactor) */
-  minOpacity?: number
-
-  /** maximum opacity for variation (used with variationFactor) */
-  maxOpacity?: number
-
-  /** number of subdivisions for curved surfaces (higher = smoother) */
-  segments?: number
-
-  /** width/depth of the geometry from surface to surface */
-  thickness?: number
-
-  /** controls randomization intensity in position and rotation (0-1) */
-  variationFactor?: number
-
-  /** when true, elements are distributed along a flat plane rather than in 3D space */
-  planarDistribution?: boolean
-
-  /** width of lines for wireframe or line-based geometries */
-  linewidth?: number
-
-  /** uniform size multiplier for the entire component */
-  scale?: number
 }

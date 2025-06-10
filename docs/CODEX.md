@@ -168,6 +168,7 @@ Component logic is organized using Atomic Design principles in `/components`
 
 - `textures/VideoCycle/index.ts` - `createVideoCycle()`
 - `shaders/index.ts` - Barrel exports for GLSL shaders
+- `shaders/ShadowShader.ts` - Gradient shadow shader for the logo layer
 
 ## Debug & Logger Systems
 

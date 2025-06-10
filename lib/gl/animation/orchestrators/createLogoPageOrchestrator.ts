@@ -6,6 +6,7 @@ import { calculateRegenerationTiming } from '@libgl/animation/calculations/calcu
 import { calculateBloomEffect } from '../calculations/calculateBloomEffect.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import configScene from '../../configScene.json' with { type: 'json' }
+import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
 
 const { animationConfig: animation } = animationConfig
@@ -15,7 +16,7 @@ const { postProcessingConfig } = configScene
  * Logo page animation orchestrator
  * Manages logo layers, regeneration, and post-processing effects
  */
-export const createLogoPageOrchestrator = (logoLayer: any): AnimationOrchestrator => {
+export const createLogoPageOrchestrator = (logoController: LogoController): AnimationOrchestrator => {
   let lastRegenerateTime = 0
   let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
   let bloomOverrideActive = false
@@ -33,22 +34,22 @@ export const createLogoPageOrchestrator = (logoLayer: any): AnimationOrchestrato
     )
 
     if (regenerationResult.shouldRegenerate) {
-      const { planes, layers } = logoLayer.regenerate(
+      const { planes, layers } = logoController.regenerate(
         state.scene,
-        state.planes,
+        state.logoPlanes,
         state.planeGeometry,
         state.outlineTexture,
         state.stencilTexture,
       )
 
-      state.planes = planes
+      state.logoPlanes = planes
       state.logoLayers = layers
       lastRegenerateTime = currentTime
       nextRegenerateInterval = regenerationResult.newInterval
     }
 
     // Update each plane
-    state.planes.forEach((plane: any, i: number) => {
+    state.logoPlanes.forEach((plane: any, i: number) => {
       const layer = state.logoLayers[i]
 
       // Update shader time
@@ -179,7 +180,7 @@ export const createLogoPageOrchestrator = (logoLayer: any): AnimationOrchestrato
     const { state } = context
 
     // Use the dedicated dispose method from the logoLayer instance
-    logoLayer.dispose(state.scene, state.planes)
+    logoController.dispose(state.scene, state.logoPlanes)
 
     // Remove other layers from scene
     if (state.shapeLayer?.parent) state.shapeLayer.parent.remove(state.shapeLayer)
@@ -190,7 +191,7 @@ export const createLogoPageOrchestrator = (logoLayer: any): AnimationOrchestrato
     if (typeof state.shadowLayer?.dispose === 'function') state.shadowLayer.dispose()
 
     // Clear arrays from state to prevent artifacts on re-navigation
-    state.planes = []
+    state.logoPlanes = []
     state.logoLayers = []
 
     // Clean up timeouts

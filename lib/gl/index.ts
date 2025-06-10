@@ -75,7 +75,7 @@ export const initGL = async (options: InitOptions) => {
   )
 
   // Setup layer system
-  const { logoController, planes, logoLayers, shapeLayer, shadowLayer, planeGeometry } = setupLayerSystem(
+  const { logoController, logoPlanes, logoLayers, shapeLayer, shadowLayer, planeGeometry } = setupLayerSystem(
     THREE,
     scene,
     outlineTexture,
@@ -94,7 +94,8 @@ export const initGL = async (options: InitOptions) => {
     ditheringPass,
     sharpeningPass,
     pixelationPass,
-    planes,
+    logoController,
+    logoPlanes,
     logoLayers,
     time: 0,
     planeGeometry,
@@ -182,7 +183,7 @@ export const initGL = async (options: InitOptions) => {
     videoBackground,
     logoController,
     scene,
-    planes,
+    logoPlanes,
     shapeLayer,
     shadowLayer,
     uiLayer,

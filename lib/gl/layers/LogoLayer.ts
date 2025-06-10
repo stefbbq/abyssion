@@ -36,11 +36,37 @@ export type LogoLayer = {
   isRandom: boolean
 }
 
+// function type aliases for clarity and DRYness
+export type GetAllLayers = () => LogoLayer[]
+export type CreatePlanes = (
+  logoLayers: LogoLayer[],
+  planeGeometry: Three.PlaneGeometry,
+  outlineTexture: Three.Texture,
+  stencilTexture: Three.Texture,
+  scene: Three.Scene,
+) => Three.Mesh[]
+export type RegenerateResult = { planes: Three.Mesh[]; layers: LogoLayer[] }
+export type RegeneratePlanes = (
+  scene: Three.Scene,
+  currentPlanes: Three.Mesh[],
+  planeGeometry: Three.PlaneGeometry,
+  outlineTexture: Three.Texture,
+  stencilTexture: Three.Texture,
+) => RegenerateResult
+export type DisposePlanes = (scene: Three.Scene, planes: Three.Mesh[]) => void
+
+export type LogoController = {
+  getAllLayers: GetAllLayers
+  createPlanes: CreatePlanes
+  regenerate: RegeneratePlanes
+  dispose: DisposePlanes
+}
+
 /**
  * Creates and manages the core logo layer system
  * Returns a single object with all necessary methods for working with layers
  */
-export const createLogoLayer = (THREE: typeof Three) => {
+export const createLogoLayer = (THREE: typeof Three): LogoController => {
   return {
     /**
      * Get all layers (static + random)

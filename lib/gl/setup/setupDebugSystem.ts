@@ -1,14 +1,17 @@
 import * as Three from 'three'
 import { DebugOverlay } from '@libgl/debug/DebugOverlay.ts'
-import configScene from '../configScene.json' with { type: 'json' }
+import configScene from '@libgl/configScene.json' with { type: 'json' }
+import type { ConfigScene } from '@libgl/configScene.types.ts'
+import type { LogoController } from '@libgl/layers/LogoLayer.ts'
+import type { RendererState } from '@libgl/types.ts'
 
 type DebugSystemConfig = {
   container: HTMLDivElement
   camera: Three.Camera
   scene: Three.Scene
   bokehPass: Three.Pass
-  logoController: unknown
-  state: unknown
+  logoController: LogoController
+  state: RendererState
   THREE: typeof Three
 }
 
@@ -23,7 +26,7 @@ type DebugSystemResult = {
  */
 export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystemResult> => {
   const { container, camera, scene, bokehPass, logoController, state, THREE } = config
-  const { planeWidth, planeHeight } = configScene
+  const { planeWidth, planeHeight } = configScene as ConfigScene
 
   // Setup DebugOverlay
   const debugOverlay = new DebugOverlay(container, {
@@ -98,7 +101,9 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
 
   // Debug info updater function
   const updateDebugInfo = () => {
-    const planesZ = state.planes ? state.planes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>') : ''
+    const planesZ = state.logoPlanes
+      ? state.logoPlanes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>')
+      : ''
     debugOverlay?.setDebugInfo(
       `<b>Camera Z:</b> ${camera.position.z.toFixed(3)}<br>${planesZ}`,
     )
@@ -106,20 +111,20 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
 
   // Layer regeneration function
   const handleRegenerateRandomLayers = () => {
-    if (!scene || !state.planes || !state.logoLayers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
+    if (!scene || !state.logoPlanes || !state.logoLayers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
       console.warn('Cannot regenerate layers: missing state')
       return
     }
 
-    const { planes: newPlanes, logoLayers: newLayers } = logoController.regenerate(
+    const { planes: newPlanes, layers: newLayers } = logoController.regenerate(
       scene,
-      state.planes,
+      state.logoPlanes,
       state.planeGeometry,
       state.outlineTexture,
       state.stencilTexture,
     )
 
-    state.planes = newPlanes
+    state.logoPlanes = newPlanes
     state.logoLayers = newLayers
   }
 

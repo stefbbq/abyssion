@@ -1,6 +1,7 @@
 import * as Three from 'three'
 import type { Camera, EffectComposer, Group, Mesh, OrbitControls, Scene, ShaderPass, UnrealBloomPass, WebGLRenderer } from 'three'
 import type { LogoLayer } from './layers/LogoLayer.ts'
+import type { LogoController } from './layers/LogoLayer.ts'
 
 // Video background manager type
 export type VideoBackgroundManager = {
@@ -36,7 +37,8 @@ export type RendererState = {
   finalPass: ShaderPass
   ditheringPass: ShaderPass
   sharpeningPass: ShaderPass
-  planes: Mesh[]
+  logoController: LogoController
+  logoPlanes: Mesh[]
   logoLayers: LogoLayer[]
   time: number
   planeGeometry: any

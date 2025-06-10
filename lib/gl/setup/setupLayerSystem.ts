@@ -3,11 +3,11 @@ import { createLogoPlaneGeometry } from '@libgl/scene/createLogoPlaneGeometry.ts
 import { createLogoLayer } from '@libgl/layers/index.ts'
 import { createGeometricLayer } from '@libgl/layers/GeometricLayer.ts'
 import { createShadowLayer } from '@libgl/layers/ShadowLayer.ts'
-import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
+import type { LogoController, LogoLayer } from '@libgl/layers/LogoLayer.ts'
 
-type LayerSystemResult = {
-  logoController: unknown
-  planes: Three.Mesh[]
+type LayerSystem = {
+  logoController: LogoController
+  logoPlanes: Three.Mesh[]
   logoLayers: LogoLayer[]
   shapeLayer: Three.Mesh
   shadowLayer: Three.Mesh
@@ -22,18 +22,12 @@ export const setupLayerSystem = (
   scene: Three.Scene,
   outlineTexture: Three.Texture,
   stencilTexture: Three.Texture,
-): LayerSystemResult => {
-  // Create plane geometry for our logo layers
+): LayerSystem => {
+  // Logo Layers
   const planeGeometry = createLogoPlaneGeometry(THREE)
-
-  // Initialize the logo layer manager
   const logoController = createLogoLayer(THREE)
-
-  // Get all layers
   const logoLayers = logoController.getAllLayers()
-
-  // Create meshes for each layer
-  const planes = logoController.createPlanes(
+  const logoPlanes = logoController.createPlanes(
     logoLayers,
     planeGeometry,
     outlineTexture,
@@ -41,17 +35,17 @@ export const setupLayerSystem = (
     scene,
   )
 
-  // Add the shape layer around the logo (part of the 3D scene)
+  // Geometric Layer
   const shapeLayer = createGeometricLayer(THREE, 2, 2, 0)
   scene.add(shapeLayer)
 
-  // Add the shadow layer behind the logo
+  // Shadow Layer
   const shadowLayer = createShadowLayer(THREE)
   if (shadowLayer) scene.add(shadowLayer.mesh)
 
   return {
     logoController,
-    planes,
+    logoPlanes,
     logoLayers,
     shapeLayer,
     shadowLayer,
