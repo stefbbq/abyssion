@@ -1,6 +1,6 @@
 import * as Three from 'three'
 import { DebugOverlay } from '@libgl/debug/DebugOverlay.ts'
-import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
+import configScene from '../configScene.json' with { type: 'json' }
 
 type DebugSystemConfig = {
   container: HTMLDivElement
@@ -23,7 +23,7 @@ type DebugSystemResult = {
  */
 export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystemResult> => {
   const { container, camera, scene, bokehPass, logoController, state, THREE } = config
-  const { planeWidth, planeHeight } = sceneConfig
+  const { planeWidth, planeHeight } = configScene
 
   // Setup DebugOverlay
   const debugOverlay = new DebugOverlay(container, {

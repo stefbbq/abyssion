@@ -5,11 +5,11 @@ import { calculateShaderTime } from '@libgl/animation/calculations/calculateShad
 import { calculateRegenerationTiming } from '@libgl/animation/calculations/calculateRegenerationTiming.ts'
 import { calculateBloomEffect } from '../calculations/calculateBloomEffect.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
-import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
+import configScene from '../../configScene.json' with { type: 'json' }
 import ms from 'ms'
 
 const { animationConfig: animation } = animationConfig
-const { postProcessingConfig } = sceneConfig
+const { postProcessingConfig } = configScene
 
 /**
  * Logo page animation orchestrator

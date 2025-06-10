@@ -1,6 +1,7 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
-import sceneConfig from './sceneConfig.json' with { type: 'json' }
+import type { ConfigScene } from './configScene.types.ts'
+import configScene from './configScene.json' with { type: 'json' }
 import animationConfig from './configAnimation.json' with { type: 'json' }
 import controlsConfig from './configControls.json' with { type: 'json' }
 import { createPostProcessing } from './scene/createPostProcessing.ts'
@@ -26,7 +27,7 @@ let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createScen
  * Initialize the GL scene using composable setup functions
  */
 export const initGL = async (options: InitOptions) => {
-  const { rendererConfig, postProcessingConfig } = sceneConfig
+  const { rendererConfig, postProcessingConfig } = configScene as ConfigScene
   const { width, height, outlineTexturePath, stencilTexturePath, container } = options
   const THREE = await import('three')
 

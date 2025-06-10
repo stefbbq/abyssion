@@ -10,11 +10,11 @@ import { smoothRotationInterpolation } from './utils/smoothRotationInterpolation
 import { getRandomInterval } from './utils/getRandomInterval.ts'
 import { createLogoLayer } from '../layers/index.ts'
 import animationConfig from '../configAnimation.json' with { type: 'json' }
-import sceneConfig from '../sceneConfig.json' with { type: 'json' }
+import configScene from '../configScene.json' with { type: 'json' }
 import ms from 'ms'
 
 const { animationConfig: animation, userReactivity } = animationConfig
-const { postProcessingConfig } = sceneConfig
+const { postProcessingConfig } = configScene
 
 /**
  * Creates a logo animator with functional approach

@@ -86,7 +86,7 @@ This directory contains interactive client-side components (islands)
 - `islands/ThemeVisualizer.tsx` - The interactive UI for visualizing different application themes
 - `islands/GLCanvas.tsx` - The interactive 3D logo component
 - `islands/MusicPlayer.tsx` - The interactive audio player component
-- `islands/ClientInitializer.tsx` - Initializes client-side systems (e.g., logger) and debug settings
+- `islands/PageContainer.tsx` - Handles client-side systems (logger, debug, GL scene orchestration, and background transitions)
 
 ## Component-Based Architecture (Atomic Design)
 
@@ -130,6 +130,20 @@ Component logic is organized using Atomic Design principles in `/components`
 - `scene/createPostProcessing.ts` - `createPostProcessing()`
 - `scene/createLogoPlaneGeometry.ts` - `createLogoPlaneGeometry()`
 - `scene/utils/getResponsiveCameraZ.ts` - `getResponsiveCameraZ()`
+
+### Post-Processing Config (`configScene.json`)
+
+- `postProcessingConfig.finalPass.gain`: Multiplies the final output color for true post-process brightness control. Allows output beyond [0,1] for extra intensity. Example:
+
+  ```json
+  "finalPass": {
+    "chromaStrength": 0.002,
+    "ditherStrength": 10,
+    "ditherFrequency": 1000.0,
+    "ditherAnimation": 0.1,
+    "gain": 1.25
+  }
+  ```
 
 ## Animation
 

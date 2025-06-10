@@ -1,5 +1,6 @@
 import * as Three from 'three'
-import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
+import configScene from '@libgl/configScene.json' with { type: 'json' }
+import type { ConfigScene } from '@libgl/configScene.types.ts'
 
 /**
  * Creates and configures a WebGL renderer with responsive sizing and DOM integration.
@@ -8,18 +9,23 @@ import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
  * automatically handles viewport resizing, and integrates the canvas into the provided
  * DOM container with proper styling for full-screen coverage. Clears any existing
  * content from the container and applies CSS positioning to center the canvas.
- * Pixel ratio is capped based on sceneConfig to prevent performance issues on high-DPI displays.
+ * Pixel ratio is capped based on configScene to prevent performance issues on high-DPI displays.
  */
 export const createRenderer = (
   THREE: typeof Three,
   container: HTMLDivElement,
 ): Promise<Three.WebGLRenderer> => {
-  const { rendererConfig } = sceneConfig
+  const { rendererConfig } = configScene as ConfigScene
 
   const renderer = new THREE.WebGLRenderer({
     antialias: rendererConfig.antialias,
     alpha: rendererConfig.alpha,
   })
+
+  // enable ACES Filmic tone mapping for exposure control
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  // set overall exposure (scene brightness) from config
+  renderer.toneMappingExposure = rendererConfig.exposure
 
   const updateSize = () => {
     // Use actual viewport dimensions, not the initial width/height parameters

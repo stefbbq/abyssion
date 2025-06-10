@@ -6,7 +6,8 @@
     "pixelRatioMultiplier": 1.5,
     "pixelRatioMax": 2.5,
     "antialias": true,
-    "alpha": true
+    "alpha": true,
+    "exposure": 1
   },
   "postProcessingConfig": {
     "bokeh": {
@@ -15,7 +16,6 @@
       "maxblur": 1
     },
     "bloom": {
-      "exposure": 1,
       "bloomStrength": 0.3,
       "bloomThreshold": 0.2,
       "bloomRadius": 0.8,
@@ -33,11 +33,16 @@
       "chromaStrength": 0.002,
       "ditherStrength": 10,
       "ditherFrequency": 1000.0,
-      "ditherAnimation": 0.1
+      "ditherAnimation": 0.1,
+      "gain": 1.25
     },
     "sharpening": {
       "strength": 0.2,
       "enabled": true
+    },
+    "pixelate": {
+      "enabled": false,
+      "pixelSize": 16
     },
     "lensFlare": {
       "lightIntensity": 0.8,

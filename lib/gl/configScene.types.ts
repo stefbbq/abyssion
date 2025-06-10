@@ -1,7 +1,5 @@
 /** Parameters for controlling the bloom post-processing effect */
 export type BloomParams = {
-  /** Controls the overall brightness of the scene */
-  exposure: number
   /** Controls the intensity of the bloom glow effect */
   bloomStrength: number
   /** Minimum brightness threshold for pixels to bloom */
@@ -48,6 +46,8 @@ export type FinalPassParams = {
   ditherFrequency: number
   /** Dithering animation amount */
   ditherAnimation: number
+  /** Gain/brightness multiplier for final pass (default 1.0) */
+  gain?: number
 }
 
 /** Parameters for sharpening effect */
@@ -88,6 +88,14 @@ export type LensFlareParams = {
   }
 }
 
+/** Parameters for pixelation effect */
+export type PixelateParams = {
+  /** Whether pixelation is enabled */
+  enabled: boolean
+  /** Size of each pixel block */
+  pixelSize: number
+}
+
 /** Complete post-processing configuration */
 export type PostProcessingConfig = {
   /** Bokeh/depth of field parameters */
@@ -100,6 +108,8 @@ export type PostProcessingConfig = {
   finalPass: FinalPassParams
   /** Sharpening parameters */
   sharpening: SharpeningParams
+  /** Pixelation parameters */
+  pixelate?: PixelateParams
   /** Lens flare parameters */
   lensFlare: LensFlareParams
 }
@@ -114,10 +124,12 @@ export type RendererConfig = {
   antialias: boolean
   /** Whether to enable alpha transparency */
   alpha: boolean
+  /** Renderer exposure (overall scene brightness) */
+  exposure: number
 }
 
 /** Complete scene configuration */
-export type SceneConfig = {
+export type ConfigScene = {
   /** Logo aspect ratio */
   logoAspectRatio: number
   /** Plane width in world units */
@@ -130,5 +142,5 @@ export type SceneConfig = {
   postProcessingConfig: PostProcessingConfig
 }
 
-declare const sceneConfig: SceneConfig
-export default sceneConfig
+declare const configScene: ConfigScene
+export default configScene

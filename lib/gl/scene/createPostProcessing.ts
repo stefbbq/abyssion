@@ -9,7 +9,7 @@ import {
   sharpeningFragmentShader,
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
-import type { PostProcessingConfig } from '@lib/sceneConfig.types.ts'
+import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.
@@ -108,18 +108,19 @@ export const createPostProcessing = async (
 
   /**
    * PixelationPass
-   * Applies a blocky pixelation effect to the image. This pass is not enabled by default and can be toggled by orchestrators.
+   * Applies a blocky pixelation effect to the image. Controlled by postProcessingConfig.pixelate.
    */
+  const pixelateConfig = postProcessingConfig.pixelate || { enabled: false, pixelSize: 16 }
   const pixelationPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
-      pixelSize: { value: 16 }, // Default block size
+      pixelSize: { value: pixelateConfig.pixelSize },
       resolution: { value: new THREE.Vector2(width, height) },
     },
     vertexShader: pixelationVertexShader,
     fragmentShader: pixelationFragmentShader,
   })
-  pixelationPass.enabled = false
+  pixelationPass.enabled = pixelateConfig.enabled
   composer.addPass(pixelationPass)
 
   /**
@@ -148,6 +149,7 @@ export const createPostProcessing = async (
       tDiffuse: { value: null },
       time: { value: 0 },
       chromaStrength: { value: finalPassConfig.chromaStrength },
+      gain: { value: finalPassConfig.gain ?? 1.0 },
     },
     vertexShader: finalPassVertexShader,
     fragmentShader: finalPassFragmentShader,

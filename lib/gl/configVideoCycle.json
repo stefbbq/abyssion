@@ -1,13 +1,13 @@
 {
   "enabled": true,
   "cycling": {
-    "minVideoLength": 1,
-    "maxVideoLength": 3,
-    "playbackSpeed": 1,
+    "minVideoLength": 1.5,
+    "maxVideoLength": 5,
+    "playbackSpeed": 1.2,
     "antiRepeat": 2
   },
   "appearance": {
-    "opacity": 0.5
+    "opacity": 0.75
   },
   "position": {
     "z": -10,

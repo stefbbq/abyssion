@@ -1,4 +1,4 @@
-import sceneConfig from '@libgl/sceneConfig.json' with { type: 'json' }
+import configScene from '../../configScene.json' with { type: 'json' }
 import { calculateFarPlaneSize } from './calculateFarPlaneSize.ts'
 import { getResponsiveCameraZ } from './getResponsiveCameraZ.ts'
 
@@ -37,7 +37,7 @@ export interface ResponsiveDimensions {
  * - Provides overflow for video backgrounds to ensure full coverage
  */
 export const getBaselineDimensions = (): ResponsiveDimensions => {
-  const { planeWidth, planeHeight } = sceneConfig
+  const { planeWidth, planeHeight } = configScene
 
   // Use defaults as specified
   const fov = 60

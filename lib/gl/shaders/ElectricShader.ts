@@ -105,6 +105,7 @@ export const finalPassFragmentShader = `
   uniform sampler2D tDiffuse;
   uniform float time;
   uniform float chromaStrength;
+  uniform float gain;
   varying vec2 vUv;
   
   void main() {
@@ -132,7 +133,7 @@ export const finalPassFragmentShader = `
     vig = pow(vig, 0.25);
     color *= vec4(vig, vig, vig, 1.0);
     
-    gl_FragColor = color;
+    gl_FragColor = color * gain;
   }
 `
 
