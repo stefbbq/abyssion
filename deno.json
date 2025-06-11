@@ -7,7 +7,10 @@
     "start": "deno run -A --watch=static/,routes/ dev.ts",
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts",
-    "update": "deno run -A -r https://fresh.deno.dev/update ."
+    "update": "deno run -A -r https://fresh.deno.dev/update .",
+    "shaders:build": "deno run --allow-read --allow-write scripts/glsl-to-ts.ts",
+    "dev": "deno task shaders:build && deno run --allow-all dev.ts",
+    "watch": "deno run --allow-read --allow-write --allow-run dev-watch.ts"
   },
   "lint": {
     "rules": {

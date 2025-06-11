@@ -30,3 +30,7 @@ cov.lcov
 # Misc
 *.bak
 *.tmp
+
+# Shaders
+lib/gl/shaders/glsl/**/*.frag.ts
+lib/gl/shaders/glsl/**/*.vert.ts
