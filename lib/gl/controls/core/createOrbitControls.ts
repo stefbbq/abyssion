@@ -1,12 +1,12 @@
 import type { OrbitControlsConfig } from '../types.ts'
-import * as THREE from 'three'
+import * as Three from 'three'
 
 /**
  * Create and configure orbit controls
  * Pure function that sets up Three.js OrbitControls with given configuration
  */
 export const createOrbitControls = async (
-  camera: THREE.Camera,
+  camera: Three.Camera,
   domElement: HTMLElement,
   config: OrbitControlsConfig,
 ) => {

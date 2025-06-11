@@ -2,8 +2,8 @@ import * as Three from 'three'
 import { lc, log } from '@lib/logger/index.ts'
 
 type TextureLoadingResult = {
-  stencilTexture: any
-  outlineTexture: any
+  stencilTexture: Three.Texture
+  outlineTexture: Three.Texture
 }
 
 /**
@@ -21,12 +21,12 @@ export const setupTextureLoading = async (
   const stencilTexture = await new Promise((resolve, reject) => {
     textureLoader.load(
       stencilTexturePath,
-      (texture: any) => {
+      (texture: Three.Texture) => {
         log(lc.GL, 'Stencil texture loaded successfully')
         resolve(texture)
       },
       undefined,
-      (error: any) => {
+      (error: Error) => {
         log.error(lc.GL, 'Error loading stencil texture:', error)
         reject(error)
       },
@@ -37,12 +37,12 @@ export const setupTextureLoading = async (
   const outlineTexture = await new Promise((resolve, reject) => {
     textureLoader.load(
       outlineTexturePath,
-      (texture: any) => {
+      (texture: Three.Texture) => {
         log(lc.GL, 'Outline texture loaded successfully')
         resolve(texture)
       },
       undefined,
-      (error: any) => {
+      (error: Error) => {
         log.error(lc.GL, 'Error loading outline texture:', error)
         reject(error)
       },

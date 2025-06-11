@@ -13,27 +13,24 @@ class MockMouseEvent {
   }
 }
 
-const eventListeners = new Map<string, Function[]>()
+const eventListeners = new Map<string, EventListenerOrEventListenerObject[]>()
 const originalAddEventListener = globalThis.addEventListener
 const originalRemoveEventListener = globalThis.removeEventListener
 
 function setupEventListenerMocks() {
   eventListeners.clear()
 
-  globalThis.addEventListener = (type: string, listener: any) => {
-    if (!eventListeners.has(type)) {
-      eventListeners.set(type, [])
-    }
+  globalThis.addEventListener = (type: string, listener: EventListenerOrEventListenerObject) => {
+    if (!eventListeners.has(type)) eventListeners.set(type, [])
     eventListeners.get(type)!.push(listener)
   }
 
-  globalThis.removeEventListener = (type: string, listener: any) => {
+  globalThis.removeEventListener = (type: string, listener: EventListenerOrEventListenerObject) => {
     const listeners = eventListeners.get(type)
+
     if (listeners) {
       const index = listeners.indexOf(listener)
-      if (index !== -1) {
-        listeners.splice(index, 1)
-      }
+      if (index !== -1) listeners.splice(index, 1)
     }
   }
 }
@@ -41,9 +38,9 @@ function setupEventListenerMocks() {
 function triggerMouseEvent(clientX: number, clientY: number) {
   const listeners = eventListeners.get('mousemove')
   if (listeners && listeners.length > 0) {
-    const event = new MockMouseEvent('mousemove', { clientX, clientY }) as any
+    const event = new MockMouseEvent('mousemove', { clientX, clientY })
     // Call the actual listener function registered by createMouseTracking
-    listeners.forEach((listener) => listener(event))
+    listeners.forEach((listener) => typeof listener === 'function' && listener(event as unknown as Event))
   }
 }
 

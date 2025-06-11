@@ -25,17 +25,17 @@ export const createLogoLayer = (
 
   // decide if this should be a cyan-ish, magenta-ish, or white-ish layer
   const colorType = Math.random()
-  let color: any
+  let color: Three.Color
 
   if (colorType < cyanProbability) {
     // cyan range from theme
-    color = getRandomColor(THREE, theme.ghostingColors.cyan)
+    color = getRandomColor(Three, theme.ghostingColors.cyan)
   } else if (colorType < cyanProbability + magentaProbability) {
     // magenta range from theme
-    color = getRandomColor(THREE, theme.ghostingColors.magenta)
+    color = getRandomColor(Three, theme.ghostingColors.magenta)
   } else {
     // white-ish (desaturated) from theme
-    color = getRandomColor(THREE, theme.primary, 0.1)
+    color = getRandomColor(Three, theme.primary, 0.1)
   }
 
   // decide if this layer should be in front or behind based on frontBias

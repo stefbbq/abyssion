@@ -86,6 +86,7 @@ export default function ActionZoneController({ currentPath }: Props) {
         const label = button.content.label || page?.label || ''
         return { ...button, content: { ...button.content, label } }
       }
+
       return button
     })
   }
@@ -107,11 +108,8 @@ export default function ActionZoneController({ currentPath }: Props) {
           zIndex={49}
         />
         <ActionZone
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
+          {...{ isMenuOpen, setIsMenuOpen, animationConfig, layoutConfig }}
           routeKey={currentRoute.value}
-          animationConfig={animationConfig}
-          layoutConfig={layoutConfig}
           collapsedChildren={
             <ActionZoneNav
               onAction={handleAction}

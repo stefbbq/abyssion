@@ -1,9 +1,10 @@
 import { assert, assertEquals } from '$std/assert/mod.ts'
-import type { KeyboardInputConfig, OrbitControlsConfig } from '../types.ts'
+import type { KeyboardInputConfig, OrbitControlsConfig } from '@libgl/controls/types.ts'
+import * as Three from 'three'
 
 // Mock camera and dom element
 class MockCamera {}
-class MockHTMLElement {}
+class MockHTMLElement extends HTMLElement {}
 
 // Mock orbit controls
 class MockOrbitControls {
@@ -18,12 +19,11 @@ class MockOrbitControls {
   enablePan = true
   panSpeed = 0.5
   autoRotateSpeed = 1.0
-
-  constructor(public camera: any, public domElement: any) {}
+  constructor(public camera: Three.Camera, public domElement: HTMLElement) {}
 }
 
 // Mock functions to replace imports
-const mockCreateOrbitControls = (camera: any, domElement: any, config: any) => {
+const mockCreateOrbitControls = (camera: Three.Camera, domElement: HTMLElement, config: OrbitControlsConfig) => {
   const controls = new MockOrbitControls(camera, domElement)
   Object.assign(controls, config)
   return controls
@@ -49,8 +49,8 @@ const mockCreateKeyboardControls = () => ({
 
 // Mock createControlsSystem
 const createControlsSystemMock = async (
-  camera: any,
-  domElement: any,
+  camera: Three.Camera,
+  domElement: HTMLElement,
   options: {
     readonly orbitConfig?: Partial<OrbitControlsConfig>
     readonly keyboardConfig: KeyboardInputConfig

@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import { lc, log } from '@lib/logger/index.ts'
 import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import { loadVideo } from './loadVideo.ts'
@@ -11,13 +11,13 @@ import { loadVideo } from './loadVideo.ts'
  */
 export const loadVideos = async (): Promise<{
   videos: HTMLVideoElement[]
-  videoTextures: THREE.VideoTexture[]
-  loadNextVideo: () => Promise<{ video: HTMLVideoElement | null; texture: THREE.VideoTexture | null }>
+  videoTextures: Three.VideoTexture[]
+  loadNextVideo: () => Promise<{ video: HTMLVideoElement | null; texture: Three.VideoTexture | null }>
   hasMoreVideos: () => boolean
 }> => {
   const { videos: { path: videosPath } } = videoCycleConfig
   const videos: HTMLVideoElement[] = []
-  const videoTextures: THREE.VideoTexture[] = []
+  const videoTextures: Three.VideoTexture[] = []
   let loadedCount = 0
 
   try {
@@ -33,11 +33,13 @@ export const loadVideos = async (): Promise<{
       const manifest = await response.json()
 
       if (Array.isArray(manifest)) {
-        videoFiles = manifest.map((video: any) => {
-          if (typeof video === 'string') return video
-          else if (video && video.file) return video.file
-          return null
-        }).filter(Boolean)
+        videoFiles = manifest
+          .map((video: string | { file: string } | null) => {
+            if (typeof video === 'string') return video
+            else if (video && video.file) return video.file
+            return null
+          })
+          .filter((file): file is string => Boolean(file))
       }
     } catch (error) {
       log.error(lc.GL_VIDEO, 'Error loading video manifest:', error)

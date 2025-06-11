@@ -41,9 +41,9 @@ export type RendererState = {
   logoPlanes: Mesh[]
   logoLayers: LogoLayer[]
   time: number
-  planeGeometry: any
-  outlineTexture: any
-  stencilTexture: any
+  planeGeometry: Three.PlaneGeometry
+  outlineTexture: Three.Texture
+  stencilTexture: Three.Texture
   THREE: typeof Three
   uiOverlay: UIOverlay
   shapeLayer: Group

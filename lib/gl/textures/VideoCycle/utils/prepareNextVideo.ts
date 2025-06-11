@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import { lc, log } from '@lib/logger/index.ts'
 import videoCycleConfig from '../../../configVideoCycle.json' with { type: 'json' }
 import { getNewStartTimeAndDuration } from './getNewStartTimeAndDuration.ts'
@@ -14,7 +14,7 @@ import type { BufferObject } from '../types.ts'
 export const prepareNextVideo = async (
   initialIndex: number,
   videos: HTMLVideoElement[],
-  videoTextures: THREE.VideoTexture[],
+  videoTextures: Three.VideoTexture[],
   currentVideoIndex: number,
   recentVideoIndices: number[],
   hiddenBuffer: BufferObject,
@@ -90,7 +90,7 @@ export const prepareNextVideo = async (
       hiddenBuffer._playStartTime = Date.now()
 
       // Swap in the NEW texture but first capture the previous one so we pause the correct video
-      const previousTexture = hiddenBuffer.material.map as THREE.VideoTexture | null
+      const previousTexture = hiddenBuffer.material.map as Three.VideoTexture | null
 
       hiddenBuffer.material.map = texture
       hiddenBuffer.material.needsUpdate = true

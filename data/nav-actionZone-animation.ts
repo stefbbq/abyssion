@@ -1,6 +1,7 @@
 import { animationStyleFunctions, easeInEasing } from '@lib/utils/actionZoneAnimationStyles.ts'
+import type { ActionZoneAnimationConfig } from './types.ts'
 
-const actionZoneAnimationConfig = {
+const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
   collapsedDefault: {
     default: {
       buttons: [

@@ -30,7 +30,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
 
   // Setup DebugOverlay
   const debugOverlay = new DebugOverlay(container, {
-    initialDebug: false,
+    forceDebug: false,
     onToggleDebug: () => {
       if (state.controls) state.controls.enabled = true
     },
@@ -102,7 +102,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
   // Debug info updater function
   const updateDebugInfo = () => {
     const planesZ = state.logoPlanes
-      ? state.logoPlanes.map((p: any, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>')
+      ? state.logoPlanes.map((p: Three.Mesh, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>')
       : ''
     debugOverlay?.setDebugInfo(
       `<b>Camera Z:</b> ${camera.position.z.toFixed(3)}<br>${planesZ}`,

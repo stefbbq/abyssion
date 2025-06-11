@@ -13,14 +13,14 @@ type Props = {
   /**
    * animationConfig: settings for framer-motion transition, from config
    */
-  animationConfig?: Record<string, any>
-  layoutConfig?: Record<string, any>
+  animationConfig?: Record<string, unknown>
+  layoutConfig?: Record<string, unknown>
 }
 
-function resolveConfigValue(value: any) {
+const resolveConfigValue = (value: string | unknown) => {
   if (typeof value === 'string' && value.endsWith('()')) {
     const fnName = value.replace('()', '')
-    return (animationStyleFunctions as Record<string, (...args: any[]) => any>)[fnName]?.()
+    return (animationStyleFunctions as Record<string, (...args: unknown[]) => unknown>)[fnName]?.()
   }
   return value
 }

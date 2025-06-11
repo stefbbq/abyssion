@@ -75,7 +75,7 @@ export const createClientLogger = (
     const prefix = `%c[${ctx}]%c`
 
     // Output to console with proper typing
-    const consoleMethod = con[method] as (...args: any[]) => void
+    const consoleMethod = con[method] as (...args: unknown[]) => void
     if (args[0] && typeof args[0] === 'string') {
       consoleMethod(`${prefix} ${args[0]}`, cStyle, lStyle, ...args.slice(1))
     } else {

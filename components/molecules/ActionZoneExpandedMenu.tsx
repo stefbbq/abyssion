@@ -2,6 +2,7 @@ import type { MenuItem, NavButtonState, SocialLink } from '@data/types.ts'
 import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import * as SocialIcons from '@atoms/icons/index.ts'
+import type { UITheme } from '@libtheme/types.ts'
 
 type Props = {
   currentPath: string
@@ -9,7 +10,7 @@ type Props = {
   socialLinks: SocialLink[]
   onMenuClose: () => void
   onAnchorLink: (path: string) => void
-  theme: any
+  theme: UITheme
 }
 
 /**

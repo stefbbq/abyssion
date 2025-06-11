@@ -1,3 +1,5 @@
+import * as Three from 'three'
+
 /**
  * Controls module types
  * Pure type definitions for mouse controls and orbit camera controls
@@ -56,7 +58,7 @@ export type KeyboardInputConfig = {
  * Controls system dependencies
  */
 export type ControlsDependencies = {
-  readonly camera: any // Three.js Camera type
+  readonly camera: Three.Camera
   readonly domElement: HTMLElement
   readonly config: OrbitControlsConfig
   readonly keyboardConfig: KeyboardInputConfig

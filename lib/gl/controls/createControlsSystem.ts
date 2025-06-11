@@ -3,13 +3,13 @@ import { createMouseTracking } from './core/createMouseTracking.ts'
 import { createKeyboardControls } from './core/createKeyboardControls.ts'
 import { defaultOrbitControlsConfig } from './config/defaultOrbitControlsConfig.ts'
 import type { KeyboardInputConfig, OrbitControlsConfig } from './types.ts'
-import * as THREE from 'three'
+import * as Three from 'three'
 
 /**
  * Controls system state
  */
 type ControlsSystem = {
-  readonly orbitControls: any // Three.js OrbitControls
+  readonly orbitControls: Three.OrbitControls
   readonly mouseTracking: ReturnType<typeof createMouseTracking>
   readonly keyboardControls: ReturnType<typeof createKeyboardControls>
   readonly cleanup: () => void
@@ -20,7 +20,7 @@ type ControlsSystem = {
  * Main orchestrating function that composes all control subsystems
  */
 export const createControlsSystem = async (
-  camera: THREE.Camera,
+  camera: Three.Camera,
   domElement: HTMLElement,
   options: {
     readonly orbitConfig?: Partial<OrbitControlsConfig>

@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 
 /**
  * Represents a video element paired with its corresponding Three.js texture
@@ -8,7 +8,7 @@ export type VideoTexture = {
   /** The HTML video element containing the video data */
   video: HTMLVideoElement
   /** The Three.js texture created from the video element */
-  texture: THREE.VideoTexture
+  texture: Three.VideoTexture
 }
 
 /**
@@ -38,7 +38,7 @@ export type VideoLoadResult = {
   /** The loaded HTML video element, null if loading failed */
   readonly video: HTMLVideoElement | null
   /** The created Three.js texture, null if loading failed */
-  readonly texture: THREE.VideoTexture | null
+  readonly texture: Three.VideoTexture | null
 }
 
 /**
@@ -49,7 +49,7 @@ export type VideoLoader = {
   /** Array of loaded HTML video elements */
   readonly videos: HTMLVideoElement[]
   /** Array of created Three.js video textures */
-  readonly videoTextures: THREE.VideoTexture[]
+  readonly videoTextures: Three.VideoTexture[]
   /** Loads the next video in sequence */
   readonly loadNextVideo: () => Promise<VideoLoadResult>
   /** Checks if more videos are available to load */
@@ -62,11 +62,11 @@ export type VideoLoader = {
  */
 export type BufferObject = {
   /** The Three.js mesh displaying the video */
-  mesh: THREE.Mesh
+  mesh: Three.Mesh
   /** Material used for video rendering */
-  material: THREE.MeshBasicMaterial
+  material: Three.MeshBasicMaterial
   /** Geometry defining the video plane */
-  geometry: THREE.PlaneGeometry
+  geometry: Three.PlaneGeometry
   /** Planned start time for video playback */
   _plannedStartTime?: number
   /** Planned duration for video playback */

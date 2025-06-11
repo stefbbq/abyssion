@@ -50,11 +50,11 @@ export const createCleanupFunction = (dependencies: CleanupDependencies) => {
       if (scene && shapeLayer) {
         scene.remove(shapeLayer)
         if (shapeLayer.traverse) {
-          shapeLayer.traverse((object: any) => {
+          shapeLayer.traverse((object: Three.Object3D) => {
             if (object && 'geometry' in object && object.geometry) object.geometry.dispose()
             if (object && 'material' in object && object.material) {
               if (Array.isArray(object.material)) {
-                object.material.forEach((material: any) => {
+                object.material.forEach((material: Three.Material) => {
                   if (material && typeof material.dispose === 'function') material.dispose()
                 })
               } else if (typeof object.material.dispose === 'function') object.material.dispose()
@@ -64,11 +64,11 @@ export const createCleanupFunction = (dependencies: CleanupDependencies) => {
       }
       if (shadowLayer && typeof shadowLayer.dispose === 'function') shadowLayer.dispose()
       if (uiLayer && uiLayer.scene) {
-        uiLayer.scene.traverse((object: any) => {
+        uiLayer.scene.traverse((object: Three.Object3D) => {
           if (object && 'geometry' in object && object.geometry) object.geometry.dispose()
           if (object && 'material' in object && object.material) {
             if (Array.isArray(object.material)) {
-              object.material.forEach((material: any) => {
+              object.material.forEach((material: Three.Material) => {
                 if (material && typeof material.dispose === 'function') material.dispose()
               })
             } else if (typeof object.material.dispose === 'function') object.material.dispose()

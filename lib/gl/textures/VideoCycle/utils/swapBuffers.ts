@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import { lc, log } from '@lib/logger/index.ts'
 import type { BufferObject } from '../types.ts'
 import ms from 'ms'
@@ -68,7 +68,7 @@ export const swapBuffers = async (params: SwapBuffersParams): Promise<{
     log(lc.GL_TEXTURES, `[${new Date().toLocaleTimeString()}] Video ${plannedVideoIndex} playing at ${plannedStartTime.toFixed(2)}s`)
 
     // Capture reference to the video in the currently active buffer (which will become hidden) so we can pause it after the swap
-    const oldActiveVideoTexture = activeBuffer.material.map as THREE.VideoTexture | null
+    const oldActiveVideoTexture = activeBuffer.material.map as Three.VideoTexture | null
     const oldActiveVideoElement = oldActiveVideoTexture ? (oldActiveVideoTexture.image as HTMLVideoElement) : null
 
     // Swap active and hidden buffer references

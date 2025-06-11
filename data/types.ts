@@ -98,3 +98,29 @@ export type BioSection = {
   membersTitle: string
   albumsTitle: string
 }
+
+/**
+ * Animation config for a single action zone state (collapsed, expanded, etc).
+ */
+export type ActionZoneAnimationButton = NavButtonState
+
+export type ActionZoneAnimationLayout = {
+  height: () => number | string
+  borderRadius: () => number | string
+}
+
+export type ActionZoneAnimation = {
+  buttons?: ActionZoneAnimationButton[]
+  animation?: {
+    type: 'spring' | 'tween'
+    duration: number
+    easing: string | number[] | ((t: number) => number)
+  }
+  layout?: ActionZoneAnimationLayout
+}
+
+export type ActionZoneAnimationConfig = {
+  collapsedDefault: Record<string, ActionZoneAnimation>
+  collapsedBack: Record<string, ActionZoneAnimation>
+  expandedMenu: Record<string, ActionZoneAnimation>
+}

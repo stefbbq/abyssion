@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./*"],
+      "@utils/*": ["utils/*"],
+      "@data/*": ["data/*"],
+      "@islands/*": ["islands/*"],
+      "@components/*": ["components/*"],
+      "@atoms/*": ["components/atoms/*"],
+      "@molecules/*": ["components/molecules/*"],
+      "@organisms/*": ["components/organisms/*"],
+      "@lib/*": ["lib/*"],
+      "@libgl/*": ["lib/gl/*"],
+      "@libtheme/*": ["lib/theme/*"],
+      "@liblogger/*": ["lib/logger/*"]
+    },
+    "types": []
+  },
+  "include": [
+    "./lib/**/*.ts",
+    "./components/**/*.ts",
+    "./islands/**/*.ts",
+    "./scripts/**/*.ts",
+    "./routes/**/*.ts"
+  ]
+}

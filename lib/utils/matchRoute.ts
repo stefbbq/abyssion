@@ -10,10 +10,10 @@
  * @returns The config object for the best-matching route, or the 'default' config for that state
  */
 export const matchRouteConfig = (
-  config: Record<string, any>,
+  config: RouteConfig,
   state: string,
   route: string,
-): any => {
+): unknown => {
   const stateConfig = config[state]
   if (!stateConfig) return undefined
 

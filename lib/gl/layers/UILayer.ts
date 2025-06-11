@@ -107,10 +107,10 @@ export const createUILayer = (
     baseLayer.scale.setScalar(newScale)
 
     // Update tech shapes
-    shapeGroup.children.forEach((child: any, index: number) => {
+    shapeGroup.children.forEach((child: Three.Object3D, index: number) => {
       if (index === 0) return // Skip base layer
 
-      const shape = child as any
+      const shape = child as Three.Mesh
       const baseScale = isMobileDevice() ? 0.8 : 1.0
       shape.scale.setScalar(baseScale * newScale)
     })

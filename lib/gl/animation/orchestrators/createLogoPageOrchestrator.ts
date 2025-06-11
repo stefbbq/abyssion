@@ -8,6 +8,8 @@ import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import configScene from '../../configScene.json' with { type: 'json' }
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
+import * as Three from 'three'
+import type { RendererState } from '@libgl/types.ts'
 
 const { animationConfig: animation } = animationConfig
 const { postProcessingConfig } = configScene
@@ -49,7 +51,7 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
     }
 
     // Update each plane
-    state.logoPlanes.forEach((plane: any, i: number) => {
+    state.logoPlanes.forEach((plane: Three.Mesh, i: number) => {
       const layer = state.logoLayers[i]
 
       // Update shader time
@@ -109,7 +111,7 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
     updatePostProcessing(state, time)
   }
 
-  const updatePostProcessing = (state: any, currentTime: number) => {
+  const updatePostProcessing = (state: RendererState, currentTime: number) => {
     // Final pass chromatic aberration glitch
     if (state.finalPass?.uniforms) {
       state.finalPass.uniforms.time.value = currentTime % ms('1000ms')

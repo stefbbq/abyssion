@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as Three from 'three'
 import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import ms from 'ms'
 import { lc, log } from '@lib/logger/index.ts'
@@ -12,7 +12,7 @@ import { lc, log } from '@lib/logger/index.ts'
  */
 export const loadVideo = (path: string): Promise<{
   video: HTMLVideoElement
-  texture: THREE.VideoTexture | null
+  texture: Three.VideoTexture | null
   success: boolean
 }> => {
   return new Promise((resolve) => {
@@ -45,10 +45,10 @@ export const loadVideo = (path: string): Promise<{
       video.removeEventListener('error', handleError)
 
       // Create texture
-      const texture = new THREE.VideoTexture(video)
-      texture.minFilter = THREE.LinearFilter
-      texture.magFilter = THREE.LinearFilter
-      texture.format = THREE.RGBAFormat
+      const texture = new Three.VideoTexture(video)
+      texture.minFilter = Three.LinearFilter
+      texture.magFilter = Three.LinearFilter
+      texture.format = Three.RGBAFormat
 
       // Set initial video properties
       video.currentTime = 0
