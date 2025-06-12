@@ -1,5 +1,2 @@
-export * from './NavButton.tsx'
-export * from './CollapsedNav.tsx'
 export * from './GLCanvas.tsx'
 export * from './ThemeToggle.tsx'
-export * from './ExpandedMenu.tsx'

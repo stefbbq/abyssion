@@ -1,4 +1,4 @@
-import type { AnimationBehavior, AnimationEngineState, AnimationFrame } from '../types.ts'
+import type { AnimationBehavior, AnimationEngineState } from '../types.ts'
 
 /**
  * Creates an immutable animation engine state

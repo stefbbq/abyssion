@@ -1,4 +1,4 @@
-import type { VideoTexture } from '../VideoCycle.d.ts'
+import type { VideoTexture } from '@libgl/textures/VideoCycle/types.ts'
 
 /**
  * Adds new videos to the existing queue immutably

@@ -2,7 +2,7 @@ import { lc, log } from '@lib/logger/index.ts'
 import { loadVideos } from './loadVideos.ts'
 import { convertLoaderToVideoTextures } from './convertLoaderToVideoTextures.ts'
 import { addVideosToQueue } from './addVideosToQueue.ts'
-import type { VideoLoader, VideoTexture } from '../VideoCycle.d.ts'
+import type { VideoLoader, VideoTexture } from '../types.ts'
 import ms from 'ms'
 
 /**

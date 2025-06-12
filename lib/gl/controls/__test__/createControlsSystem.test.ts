@@ -190,9 +190,7 @@ Deno.test('createControlsSystem', async (test) => {
     assertEquals(toggleRotationCalled, initialCallCount + 1)
   })
 
-  await test.step('should handle regenerate layers callback', async () => {
-    const system = await createControlsSystemMock(mockCamera, mockDomElement, testOptions)
-
+  await test.step('should handle regenerate layers callback', () => {
     const initialCallCount = regenerateLayersCalled
 
     // Simulate regenerate layers callback

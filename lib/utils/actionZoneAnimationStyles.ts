@@ -39,7 +39,7 @@ export const easingPresets: { [key: string]: number[] } = {
 /**
  * Mapping of function names to implementations for config resolution
  */
-export const animationStyleFunctions: { [key: string]: (...args: unknown[]) => unknown } = {
+export const animationStyleFunctions: { [key: string]: () => string | number } = {
   getCollapsedHeight,
   getCollapsedBorderRadius,
   getExpandedHeight,

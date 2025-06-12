@@ -1,4 +1,5 @@
-import { lc, log } from '../../../../logger/index.ts'
+import ms from 'ms'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Calculates a new start time and duration for a video segment, ensuring it fits within specified length constraints.
@@ -37,6 +38,7 @@ export const getNewStartTimeAndDuration = (
     const latestStartTime = video.duration - duration - marginSeconds
     const startTime = earliestStartTime + Math.random() * (latestStartTime - earliestStartTime)
 
+    // deno-lint-ignore prefer-const
     let timeoutId: number
 
     const onSeeked = () => {
@@ -50,7 +52,7 @@ export const getNewStartTimeAndDuration = (
       video.removeEventListener('seeked', onSeeked)
       log.warn(lc.GL_VIDEO, 'Video seek timeout after 3s, resolving anyway')
       resolve({ startTime, duration })
-    }, 3000)
+    }, ms('3s'))
 
     video.addEventListener('seeked', onSeeked)
 

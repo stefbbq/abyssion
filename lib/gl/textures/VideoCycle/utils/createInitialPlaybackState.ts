@@ -1,4 +1,4 @@
-import type { PlaybackState, VideoTexture } from '../VideoCycle.d.ts'
+import type { PlaybackState, VideoTexture } from '../types.ts'
 import { shouldStartPlayback } from './shouldStartPlayback.ts'
 
 /**

@@ -17,7 +17,7 @@ export type ContextFilter = {
  * @returns ContextFilter object with methods for filtering log contexts
  */
 export const createContextFilter = (): ContextFilter => {
-  let disabledContexts: Set<LogContext> = new Set()
+  const disabledContexts: Set<LogContext> = new Set()
   let focusedContext: LogContext | null = null
 
   return {

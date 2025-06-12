@@ -5,15 +5,6 @@
 // Run with: deno run --allow-read --allow-write --allow-run dev-watch.ts
 
 const SHADER_DIR = 'lib/gl/shaders/glsl'
-const BUILD_CMD = [
-  'deno',
-  'run',
-  '--allow-read',
-  '--allow-write',
-  'scripts/glsl-to-ts.ts',
-]
-const APP_CMD = ['deno', 'run', '--allow-all', 'dev.ts']
-
 let app: Deno.ChildProcess | undefined
 let debounceTimer: number | undefined
 
@@ -35,7 +26,7 @@ async function buildShaders() {
   }
 }
 
-async function startApp() {
+function startApp() {
   const command = new Deno.Command('deno', {
     args: ['run', '--allow-all', 'dev.ts'],
     stdout: 'inherit',

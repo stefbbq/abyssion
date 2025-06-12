@@ -13,6 +13,8 @@ import { shadowFragmentShader, shadowVertexShader } from '@libgl/shaders/ShadowS
 export type ShadowLayer = {
   // The mesh containing the shadow
   mesh: Mesh
+  // The parent object (if attached to a scene graph)
+  parent?: Three.Object3D | null
   // Dispose of the shadow layer
   dispose: () => void
 }

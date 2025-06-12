@@ -3,13 +3,22 @@ import { createOrbitControls } from '../createOrbitControls.ts'
 import type { OrbitControlsConfig } from '../../types.ts'
 
 // Simple mock objects for interface testing
+interface MinimalHTMLElement {
+  style: Record<string, unknown>
+  addEventListener: (...args: unknown[]) => void
+  removeEventListener: (...args: unknown[]) => void
+  getBoundingClientRect: () => { left: number; top: number; width: number; height: number }
+  readonly clientWidth: number
+  readonly clientHeight: number
+}
+
 class MockCamera {
   position = { x: 0, y: 0, z: 5 }
   up = { x: 0, y: 1, z: 0 }
 }
 
-class MockHTMLElement {
-  style: Record<string, any> = {}
+class MockHTMLElement implements MinimalHTMLElement {
+  style: Record<string, unknown> = {}
 
   constructor() {
     this.style.touchAction = ''
@@ -31,7 +40,7 @@ class MockHTMLElement {
 
 Deno.test('createOrbitControls', async (test) => {
   const mockCamera = new MockCamera()
-  const mockDomElement = new MockHTMLElement()
+  const mockDomElement = new MockHTMLElement() as unknown as HTMLElement
 
   const testConfig: OrbitControlsConfig = {
     enableDamping: true,
@@ -53,7 +62,7 @@ Deno.test('createOrbitControls', async (test) => {
 
   await test.step('should accept camera, domElement, and config parameters', () => {
     // Test that the function can be called with correct parameters
-    const call = () => createOrbitControls(mockCamera as any, mockDomElement as any, testConfig)
+    const call = () => createOrbitControls(mockCamera, mockDomElement, testConfig)
 
     // Should not throw on parameter validation
     assert(typeof call === 'function')
@@ -89,8 +98,8 @@ Deno.test('createOrbitControls', async (test) => {
     }
 
     // Should accept all valid configurations
-    const call1 = () => createOrbitControls(mockCamera as any, mockDomElement as any, minimalConfig)
-    const call2 = () => createOrbitControls(mockCamera as any, mockDomElement as any, edgeConfig)
+    const call1 = () => createOrbitControls(mockCamera, mockDomElement, minimalConfig)
+    const call2 = () => createOrbitControls(mockCamera, mockDomElement, edgeConfig)
 
     assert(typeof call1 === 'function')
     assert(typeof call2 === 'function')
@@ -110,12 +119,12 @@ Deno.test('createOrbitControls', async (test) => {
   await test.step('should handle different camera and element combinations', () => {
     const camera1 = new MockCamera()
     const camera2 = new MockCamera()
-    const element1 = new MockHTMLElement()
-    const element2 = new MockHTMLElement()
+    const element1 = new MockHTMLElement() as unknown as HTMLElement
+    const element2 = new MockHTMLElement() as unknown as HTMLElement
 
     // Should accept different combinations
-    const call1 = () => createOrbitControls(camera1 as any, element1 as any, testConfig)
-    const call2 = () => createOrbitControls(camera2 as any, element2 as any, testConfig)
+    const call1 = () => createOrbitControls(camera1, element1, testConfig)
+    const call2 = () => createOrbitControls(camera2, element2, testConfig)
 
     assert(typeof call1 === 'function')
     assert(typeof call2 === 'function')
@@ -125,7 +134,7 @@ Deno.test('createOrbitControls', async (test) => {
     const readonlyConfig = testConfig as Readonly<OrbitControlsConfig>
 
     // Should accept readonly configuration
-    const call = () => createOrbitControls(mockCamera as any, mockDomElement as any, readonlyConfig)
+    const call = () => createOrbitControls(mockCamera, mockDomElement, readonlyConfig)
 
     assert(typeof call === 'function')
   })

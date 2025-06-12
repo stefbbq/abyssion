@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const synthDriftTheme = createBaseTheme({
   name: 'synth-drift',
+  mode: 'light',
 
   // Original colors
   primary: hexStringToRGB('#ff00cc'),

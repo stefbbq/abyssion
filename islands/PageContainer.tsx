@@ -16,6 +16,7 @@ import { getSceneOrchestrator } from '@lib/gl/index.ts'
 const PageContainer = ({ children }: { children: preact.ComponentChildren }) => {
   const theme = getTheme()
   const subpageBgColor = rgbToCSS(hexStringToRGB(theme.colors.background.primary), 0.8)
+  // deno-lint-ignore no-unused-vars
   const [isHomePage, setIsHomePage] = useState(false)
   const [bgColor, setBgColor] = useState('transparent')
 

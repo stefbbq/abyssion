@@ -14,8 +14,10 @@ export const getMinLogLevel = (): LogLevel => {
   if (typeof Deno !== 'undefined' && Deno.env?.toObject) {
     // Server-side (Deno) environment
     env = Deno.env.toObject()
+    // deno-lint-ignore no-explicit-any
   } else if (typeof globalThis !== 'undefined' && (globalThis as any).ENV) {
     // Browser environment - check for injected env
+    // deno-lint-ignore no-explicit-any
     env = (globalThis as any).ENV as Record<string, string>
   }
 

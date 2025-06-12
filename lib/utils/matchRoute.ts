@@ -1,3 +1,5 @@
+import type { ActionZoneAnimation, ActionZoneAnimationConfig } from '@data/types.ts'
+
 /**
  * matchRouteConfig
  * Given a config object, a state key, and a route, returns the best-matching config for that state and route.
@@ -10,11 +12,11 @@
  * @returns The config object for the best-matching route, or the 'default' config for that state
  */
 export const matchRouteConfig = (
-  config: RouteConfig,
+  config: ActionZoneAnimationConfig,
   state: string,
   route: string,
-): unknown => {
-  const stateConfig = config[state]
+): ActionZoneAnimation | undefined => {
+  const stateConfig = config[state as keyof typeof config]
   if (!stateConfig) return undefined
 
   // Try to find the most specific matching route key
@@ -22,6 +24,6 @@ export const matchRouteConfig = (
   // Sort by length descending for most specific match
   routeKeys.sort((a, b) => b.length - a.length)
   const match = routeKeys.find((key) => route.startsWith(key))
-  if (match) return stateConfig[match]
-  return stateConfig['default']
+  if (match) return stateConfig[match as keyof typeof stateConfig]
+  return stateConfig['default' as keyof typeof stateConfig]
 }

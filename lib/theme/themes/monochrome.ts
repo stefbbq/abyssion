@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const monochromeTheme = createBaseTheme({
   name: 'monochrome',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ffffff'),

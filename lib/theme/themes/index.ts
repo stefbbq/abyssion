@@ -1,5 +1,6 @@
 /**
  * Comprehensive theme definitions for both Preact and GL usage
+ * All themes include a 'mode' property for light/dark support
  * Contains the full color palette for each theme
  */
 

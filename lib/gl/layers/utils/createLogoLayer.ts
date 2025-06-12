@@ -8,9 +8,7 @@ import { getGLTheme } from '@libgl/theme/index.ts'
 /**
  * Generate a random layer with position based on index
  */
-export const createLogoLayer = (
-  THREE: typeof Three,
-): LogoLayer => {
+export const createLogoLayer = (): LogoLayer => {
   const {
     cyanProbability,
     magentaProbability,

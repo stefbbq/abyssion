@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const geomodAtlasTheme = createBaseTheme({
   name: 'geomod-atlas',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#00f2ff'),

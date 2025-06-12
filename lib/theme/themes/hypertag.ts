@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const hypertagTheme = createBaseTheme({
   name: 'hypertag',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ffec00'),

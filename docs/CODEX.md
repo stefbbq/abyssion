@@ -36,7 +36,7 @@ The system uses a `BaseTheme` (color palette + mode) to generate two distinct th
 - **`/islands`**: Interactive Components
   - `ActionZoneController.tsx`: Interactive mobile navigation.
   - `ThemeVisualizer.tsx`: UI for visualizing themes.
-  - `Header.tsx`, `GLCanvas.tsx`, `MusicPlayer.tsx`: Other major interactive components.
+  - `Header.tsx`, `GLCanvas.tsx` Other major interactive components.
 
 - **`/components`**: Reusable UI Components (Atomic Design)
   - `/atoms`: Basic building blocks (`Button`, `Icon`).
@@ -85,7 +85,6 @@ This directory contains interactive client-side components (islands)
 - `islands/Header.tsx` - The main interactive desktop navigation header
 - `islands/ThemeVisualizer.tsx` - The interactive UI for visualizing different application themes
 - `islands/GLCanvas.tsx` - The interactive 3D logo component
-- `islands/MusicPlayer.tsx` - The interactive audio player component
 - `islands/PageContainer.tsx` - Handles client-side systems (logger, debug, GL scene orchestration, and background transitions)
 
 ## Component-Based Architecture (Atomic Design)
@@ -94,7 +93,7 @@ Component logic is organized using Atomic Design principles in `/components`
 
 - **/components/atoms/**: Basic building blocks (`Button.tsx`, `Icon.tsx`)
 - **/components/molecules/**: Combinations of atoms (`CollapsedNav.tsx`, `ExpandedMenu.tsx`)
-- **/components/organisms/**: Complex components (`ActionZone.tsx`, `Header.tsx`, `MusicPlayer.tsx`)
+- **/components/organisms/**: Complex components (`ActionZone.tsx`, `Header.tsx`)
 
 ## Data Content System
 

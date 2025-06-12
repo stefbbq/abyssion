@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const synthwaveTheme = createBaseTheme({
   name: 'synthwave',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ffffff'),

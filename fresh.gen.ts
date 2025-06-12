@@ -17,7 +17,6 @@ import * as $theme from './routes/theme.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $GLCanvas from './islands/GLCanvas.tsx'
 import * as $Header from './islands/Header.tsx'
-import * as $MusicPlayer from './islands/MusicPlayer.tsx'
 import * as $PageContainer from './islands/PageContainer.tsx'
 import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
 import type { Manifest } from '$fresh/server.ts'
@@ -41,7 +40,6 @@ const manifest = {
     './islands/ActionZoneController.tsx': $ActionZoneController,
     './islands/GLCanvas.tsx': $GLCanvas,
     './islands/Header.tsx': $Header,
-    './islands/MusicPlayer.tsx': $MusicPlayer,
     './islands/PageContainer.tsx': $PageContainer,
     './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
   },

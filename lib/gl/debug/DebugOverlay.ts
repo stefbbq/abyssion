@@ -43,6 +43,14 @@ export type DOFChangeMeta = {
   eventType?: string
 }
 
+export type DebugOverlayType = {
+  updateDOFControls: (params: DOFParams, onChange: (params: DOFParams, meta?: DOFChangeMeta) => void) => void
+  setDebugInfo: (html: string) => void
+  destroy: () => void
+  isAvailable: () => boolean
+  bokehPass?: { materialBokeh: { uniforms: { focus: { value: number }; aperture: { value: number }; maxblur: { value: number } } } }
+}
+
 /**
  * Debug overlay for 3D scene inspection and parameter tuning
  * Provides keyboard shortcuts and UI controls for debugging
@@ -56,7 +64,7 @@ export type DOFChangeMeta = {
  * })
  * ```
  */
-export class DebugOverlay {
+export class DebugOverlay implements DebugOverlayType {
   /** The container element for the debug overlay */
   private readonly container: HTMLElement
   /** Instructions div element */
@@ -67,6 +75,8 @@ export class DebugOverlay {
   private debugEnabled: boolean
   /** Configuration options */
   private readonly options: DebugOverlayOptions
+  /** Bokeh pass */
+  public bokehPass?: { materialBokeh: { uniforms: { focus: { value: number }; aperture: { value: number }; maxblur: { value: number } } } }
 
   /**
    * Create a new debug overlay
@@ -86,7 +96,7 @@ export class DebugOverlay {
     if (this.debugEnabled || options.forceDebug !== undefined) {
       this.setup()
       this.setDebug(this.debugEnabled)
-      window.addEventListener('keydown', this.handleKey)
+      globalThis.addEventListener('keydown', this.handleKey)
     }
   }
 
@@ -120,11 +130,11 @@ export class DebugOverlay {
    * @param e - The keyboard event
    */
   private handleKey = (e: KeyboardEvent): void => {
-    if ((controlsConfig.inputKeys as any).toggleDebug?.includes(e.key)) {
+    if (controlsConfig.inputKeys.toggleDebug?.includes(e.key)) {
       // If debug overlay wasn't initialized, check if we should enable it now
       if (!this.isAvailable() && isDebugModeEnabled()) {
         this.setup()
-        window.addEventListener('keydown', this.handleKey)
+        globalThis.addEventListener('keydown', this.handleKey)
       }
       this.toggleDebug()
     }
@@ -200,7 +210,7 @@ export class DebugOverlay {
           </ul>
           <b>Hotkeys:</b>
           <ul style="margin:4px 0 4px 18px; padding:0;">
-            <li><b>${(controlsConfig.inputKeys as any).toggleDebug?.[0]?.toUpperCase() || 'D'}</b>: Toggle debug panel</li>
+            <li><b>${controlsConfig.inputKeys.toggleDebug?.[0]?.toUpperCase() || 'D'}</b>: Toggle debug panel</li>
             <li><b>${controlsConfig.inputKeys.toggleRotation[0].toUpperCase()}</b>: Toggle auto-rotation</li>
             <li><b>${controlsConfig.inputKeys.regenerateLayers[0].toUpperCase()}</b>: Regenerate layers</li>
           </ul>
@@ -298,7 +308,7 @@ export class DebugOverlay {
    * @public
    */
   public destroy(): void {
-    window.removeEventListener('keydown', this.handleKey)
+    globalThis.removeEventListener('keydown', this.handleKey)
     this.container.removeChild(this.debugPanel)
   }
 

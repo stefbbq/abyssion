@@ -71,7 +71,7 @@ export const createLogoLayer = (THREE: typeof Three): LogoController => {
     /**
      * Get all layers (static + random)
      */
-    getAllLayers: (): LogoLayer[] => getAllLogoLayers(THREE),
+    getAllLayers: (): LogoLayer[] => getAllLogoLayers(),
 
     /**
      * Create plane meshes from layers

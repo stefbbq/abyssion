@@ -46,7 +46,7 @@ export const loadVideos = async (): Promise<{
       return {
         videos,
         videoTextures,
-        loadNextVideo: async () => ({ video: null, texture: null }),
+        loadNextVideo: async () => (await Promise.resolve({ video: null, texture: null })),
         hasMoreVideos: () => false,
       }
     }
@@ -56,7 +56,7 @@ export const loadVideos = async (): Promise<{
       return {
         videos,
         videoTextures,
-        loadNextVideo: async () => ({ video: null, texture: null }),
+        loadNextVideo: async () => (await Promise.resolve({ video: null, texture: null })),
         hasMoreVideos: () => false,
       }
     }
@@ -123,7 +123,7 @@ export const loadVideos = async (): Promise<{
   return {
     videos,
     videoTextures,
-    loadNextVideo: async () => ({ video: null, texture: null }),
+    loadNextVideo: async () => (await Promise.resolve({ video: null, texture: null })),
     hasMoreVideos: () => false,
   }
 }

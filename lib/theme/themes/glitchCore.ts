@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const glitchCoreTheme = createBaseTheme({
   name: 'glitch-core',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ff005c'),

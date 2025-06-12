@@ -13,12 +13,12 @@ import type { VideoBackgroundManager } from '@libgl/types.ts'
  * with 10% overflow to prevent edge artifacts. Integrates with the VideoCycle system for
  * automatic video loading, cycling, and texture management. Returns a manager that provides
  * update and disposal methods for the complete video background lifecycle.
- * Returns undefined if video backgrounds are disabled in configuration.
+ * Returns undefined if video bac kgrounds are disabled in configuration.
  */
-export const createVideoBackground = async (
+export const createVideoBackground = (
   THREE: typeof Three,
   scene: Three.Scene,
-): Promise<VideoBackgroundManager | undefined> => {
+): VideoBackgroundManager | undefined => {
   if (!videoCycleConfig.enabled) return undefined
 
   // Get baseline dimensions including video plane sizing
@@ -92,5 +92,6 @@ export const createVideoBackground = async (
       videoCycle.dispose()
     },
     mesh: frontBuffer.mesh,
+    handleResize,
   }
 }

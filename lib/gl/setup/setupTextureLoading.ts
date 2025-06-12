@@ -47,11 +47,12 @@ export const setupTextureLoading = async (
         reject(error)
       },
     )
-  }) // Ensure textures don't repeat
-  ;(stencilTexture as any).wrapS = THREE.ClampToEdgeWrapping
-  ;(stencilTexture as any).wrapT = THREE.ClampToEdgeWrapping
-  ;(outlineTexture as any).wrapS = THREE.ClampToEdgeWrapping
-  ;(outlineTexture as any).wrapT = THREE.ClampToEdgeWrapping
+  }) //
+   // Ensure textures don't repeat
+  ;(stencilTexture as Three.Texture).wrapS = THREE.ClampToEdgeWrapping
+  ;(stencilTexture as Three.Texture).wrapT = THREE.ClampToEdgeWrapping
+  ;(outlineTexture as Three.Texture).wrapS = THREE.ClampToEdgeWrapping
+  ;(outlineTexture as Three.Texture).wrapT = THREE.ClampToEdgeWrapping
 
   return { stencilTexture, outlineTexture }
 }

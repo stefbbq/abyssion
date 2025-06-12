@@ -1,4 +1,3 @@
-import * as Three from 'three'
 import { getStaticLogoLayers } from '../config.ts'
 import { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
@@ -6,7 +5,7 @@ import { createRandomLogoLayers } from './createRandomLogoLayers.ts'
 /**
  * Get all logo layers (static + random), sorted by z-position
  */
-export const getAllLogoLayers = (THREE: typeof Three): LogoLayer[] => {
+export const getAllLogoLayers = (): LogoLayer[] => {
   const staticLogoLayers = getStaticLogoLayers()
 
   // always keep the stencil layer from static layers
@@ -16,7 +15,7 @@ export const getAllLogoLayers = (THREE: typeof Three): LogoLayer[] => {
   const staticLayers = staticLogoLayers.filter((layer: LogoLayer) => !layer.isStencil)
 
   // Generate new random layers
-  const randomLayers = createRandomLogoLayers(THREE)
+  const randomLayers = createRandomLogoLayers()
 
   // Combine and sort all non-stencil layers by z-position
   const sortedNonStencilLayers = [...staticLayers, ...randomLayers]

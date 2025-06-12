@@ -41,7 +41,6 @@ Deno.test('easeOut - cubic ease-out function', async (test) => {
   await test.step('should provide smooth deceleration curve', () => {
     // Early values should change more rapidly than later values
     const early = easeOut(0.2)
-    const middle = easeOut(0.5)
     const late = easeOut(0.8)
 
     const earlyRate = early - easeOut(0.1) // Change from 0.1 to 0.2

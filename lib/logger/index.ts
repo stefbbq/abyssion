@@ -38,7 +38,7 @@ export const setMinLogLevel = (level: LogLevel) => {
 }
 
 // Context Filter
-const { disable: disableContext, enable: enableContext, focus: focusContext, clearFocus, reset: resetContexts, shouldLog } = contextFilter
+const { disable: disableContext, enable: enableContext, focus: focusContext, clearFocus, reset: resetContexts } = contextFilter
 disableContext(LogContext.GL_TEXTURES)
 
 /**

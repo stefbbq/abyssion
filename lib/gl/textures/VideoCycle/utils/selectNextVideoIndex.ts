@@ -8,7 +8,6 @@ export const selectNextVideoIndex = (
   currentIndex: number,
   recentIndices: readonly number[],
   totalVideos: number,
-  antiRepeat: number,
 ): number => {
   if (totalVideos <= 1) return 0
 

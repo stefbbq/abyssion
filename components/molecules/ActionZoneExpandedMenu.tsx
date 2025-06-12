@@ -1,8 +1,10 @@
 import type { MenuItem, NavButtonState, SocialLink } from '@data/types.ts'
 import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import * as SocialIcons from '@atoms/icons/index.ts'
+import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
 import type { UITheme } from '@libtheme/types.ts'
+
+type SocialIconKey = keyof SocialIconMap
 
 type Props = {
   currentPath: string
@@ -53,15 +55,15 @@ export const ActionZoneExpandedMenu = ({
     <div class='px-6 pb-6 space-y-6'>
       {/* social links */}
       <AnimatePresence>
-        {(
-          motion.div as any
-        )({
-          key: 'social-links',
-          initial: { opacity: 1 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-          className: 'flex items-center justify-center space-x-8 pt-2',
-          children: (socialLinks as unknown as Array<{ key: string; url: string; icon: string }>).map(({ key, url, icon }) => (
+        <motion.div
+          key='social-links'
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          // @ts-ignore - framer-motion types not fully compatible with Preact
+          className='flex items-center justify-center space-x-8 pt-2'
+        >
+          {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
             <a
               key={key}
               href={url}
@@ -72,14 +74,15 @@ export const ActionZoneExpandedMenu = ({
               f-client-nav={false}
             >
               {(() => {
-                const IconComponent = (SocialIcons as Record<string, any>)[icon]
+                const IconComponent = SocialIcons[icon]
+
                 return IconComponent
                   ? <IconComponent className='w-6 h-6 opacity-60' />
                   : <div class='w-6 h-6 rounded bg-current opacity-30' />
               })()}
             </a>
-          )),
-        })}
+          ))}
+        </motion.div>
       </AnimatePresence>
 
       {/* menu items */}

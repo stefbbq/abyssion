@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const neonGridOSTheme = createBaseTheme({
   name: 'neon-grid-os',
+  mode: 'light',
 
   // Original colors
   primary: hexStringToRGB('#ff2d55'),

@@ -1,14 +1,9 @@
-import { defineRoute, RouteConfig } from '$fresh/server.ts'
+import { defineRoute } from '$fresh/server.ts'
 import { Head } from '$fresh/runtime.ts'
 import { Button } from '@atoms/Button.tsx'
 import shows from '@data/content-shows.json' with { type: 'json' }
 import type { Show } from '@data/types.ts'
 import { getTheme } from '@lib/theme/index.ts'
-
-export const config: RouteConfig = {
-  skipAppWrapper: true,
-  skipInheritedLayouts: true,
-}
 
 export default defineRoute(() => {
   const theme = getTheme()

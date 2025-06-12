@@ -1,4 +1,4 @@
-import type { VideoLoader, VideoTexture } from '../VideoCycle.d.ts'
+import type { VideoLoader, VideoTexture } from '../types.ts'
 
 /**
  * Converts video loader results to VideoTexture array

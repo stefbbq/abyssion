@@ -45,6 +45,7 @@ export default function ThemeToggle() {
         e.currentTarget.style.opacity = '0.5'
       }}
       title={`Switch to ${currentMode === 'dark' ? 'light' : 'dark'} mode`}
+      type='button'
     >
       {currentMode === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>

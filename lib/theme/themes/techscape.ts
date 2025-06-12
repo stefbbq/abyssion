@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const techscapeTheme = createBaseTheme({
   name: 'techscape',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ffffff'),

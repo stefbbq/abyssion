@@ -24,7 +24,7 @@ type DebugSystemResult = {
 /**
  * Sets up the debug overlay system with DOF controls and regeneration
  */
-export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystemResult> => {
+export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult => {
   const { container, camera, scene, bokehPass, logoController, state, THREE } = config
   const { planeWidth, planeHeight } = configScene as ConfigScene
 
@@ -42,7 +42,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
       }
     },
   }) // Attach bokehPass to debugOverlay so controls always update the live pass
-  ;(debugOverlay as any).bokehPass = bokehPass
+  debugOverlay.bokehPass = bokehPass
 
   // Initialize DOF controls UI using the bokehPass reference
   if (bokehPass && bokehPass.materialBokeh && bokehPass.materialBokeh.uniforms) {
@@ -71,6 +71,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
     const alignFocusPlane = () => focusPlane.visible && focusPlane.quaternion.copy(camera.quaternion)
 
     if (typeof globalThis !== 'undefined') {
+      // deno-lint-ignore no-explicit-any
       ;(globalThis as any).alignFocusPlane = alignFocusPlane
     }
 
@@ -85,12 +86,11 @@ export const setupDebugSystem = (config: DebugSystemConfig): Promise<DebugSystem
       meta?: { eventType?: string },
     ) => {
       if (
-        (debugOverlay as any).bokehPass && (debugOverlay as any).bokehPass.materialBokeh &&
-        (debugOverlay as any).bokehPass.materialBokeh.uniforms
+        debugOverlay.bokehPass && debugOverlay.bokehPass.materialBokeh && debugOverlay.bokehPass.materialBokeh.uniforms
       ) {
-        ;(debugOverlay as any).bokehPass.materialBokeh.uniforms.focus.value = focus
-        ;(debugOverlay as any).bokehPass.materialBokeh.uniforms.aperture.value = aperture
-        ;(debugOverlay as any).bokehPass.materialBokeh.uniforms.maxblur.value = maxblur
+        debugOverlay.bokehPass.materialBokeh.uniforms.focus.value = focus
+        debugOverlay.bokehPass.materialBokeh.uniforms.aperture.value = aperture
+        debugOverlay.bokehPass.materialBokeh.uniforms.maxblur.value = maxblur
       }
       if (meta && meta.eventType) {
         if (meta.eventType === 'input') showFocusPlane(focus)

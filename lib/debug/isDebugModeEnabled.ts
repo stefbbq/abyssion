@@ -14,7 +14,7 @@ export const isDebugModeEnabled = (): boolean => {
   if (typeof window === 'undefined') return false
 
   // Check query parameter first (takes precedence)
-  const urlParams = new URLSearchParams(globalThis.window.location.search)
+  const urlParams = new URLSearchParams(globalThis.location.search)
   const debugParam = urlParams.get(DEBUG_QUERY_PARAM)
 
   if (debugParam !== null) {

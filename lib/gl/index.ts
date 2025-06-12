@@ -1,6 +1,6 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
-import type { ConfigScene } from './configScene.types.ts'
+import type { ConfigScene, RendererConfig } from './configScene.types.ts'
 import configScene from './configScene.json' with { type: 'json' }
 import animationConfig from './configAnimation.json' with { type: 'json' }
 import controlsConfig from './configControls.json' with { type: 'json' }
@@ -20,6 +20,7 @@ import {
   setupResponsiveHandling,
   setupTextureLoading,
 } from './setup/index.ts'
+import type { VideoBackgroundManager } from '@libgl/types.ts'
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 
@@ -38,7 +39,7 @@ export const initGL = async (options: InitOptions) => {
   const { scene, camera, renderer } = await setupCoreRendering(THREE, options)
 
   // Add video background
-  const videoBackground = await addVideoBackground(THREE, scene) as any
+  const videoBackground = await addVideoBackground(THREE, scene) as VideoBackgroundManager
 
   // Set up post-processing effects
   const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass } = await createPostProcessing(
@@ -61,7 +62,7 @@ export const initGL = async (options: InitOptions) => {
     composer,
     uiLayer,
     videoBackground,
-    rendererConfig,
+    rendererConfig: rendererConfig as RendererConfig,
   })
 
   // Add lens flares
@@ -88,7 +89,6 @@ export const initGL = async (options: InitOptions) => {
     camera,
     renderer,
     composer,
-    controls: null as any, // Will be set after controls creation
     bloomPass,
     finalPass,
     ditheringPass,

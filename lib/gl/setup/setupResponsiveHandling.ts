@@ -1,7 +1,8 @@
 import * as Three from 'three'
 import { getResponsiveCameraZ } from '../scene/utils/getResponsiveCameraZ.ts'
 import { debugMobileResponsiveness } from '../scene/utils/mobileDebugHelper.ts'
-import type { RendererState, UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
+import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
+import type { RendererConfig } from '@libgl/configScene.types.ts'
 
 type ResponsiveConfig = {
   container: HTMLDivElement
@@ -9,7 +10,7 @@ type ResponsiveConfig = {
   composer: Three.EffectComposer
   uiLayer: UIOverlay
   videoBackground?: VideoBackgroundManager
-  rendererConfig: RendererState
+  rendererConfig: RendererConfig
 }
 
 /**
@@ -44,9 +45,7 @@ export const setupResponsiveHandling = (config: ResponsiveConfig) => {
     ))
 
     // Update video background scaling with new camera position
-    if (videoBackground && typeof videoBackground === 'object' && 'handleResize' in videoBackground) {
-      ;(videoBackground as any).handleResize()
-    }
+    if (videoBackground?.handleResize) videoBackground.handleResize()
 
     // Debug the new responsive settings
     debugMobileResponsiveness()

@@ -1,4 +1,5 @@
-import { ComponentChildren, JSX } from 'preact'
+// deno-lint-ignore-file no-explicit-any
+import { ComponentChildren, JSX, Ref } from 'preact'
 import { IS_BROWSER } from '$fresh/runtime.ts'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
@@ -14,13 +15,13 @@ type BaseProps = {
 
 // Props specific to the <button> element, without 'href'
 type ButtonElementProps =
-  & Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'size' | 'class'>
-  & { href?: never }
+  & Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'size' | 'class' | 'href'>
+  & { href?: never; ref?: Ref<HTMLButtonElement> }
 
 // Props specific to the <a> element, requiring 'href'
 type AnchorElementProps =
   & Omit<JSX.HTMLAttributes<HTMLAnchorElement>, 'size' | 'class'>
-  & { href: string }
+  & { href: string; ref?: Ref<HTMLAnchorElement> }
 
 // Use a discriminated union type. Based on whether 'href' is provided,
 // TypeScript will enforce either Button-specific or Anchor-specific props.
@@ -56,11 +57,15 @@ export function Button({
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 
+  // Separate ref from props
+  const { ref, ...rest } = props as { ref?: any }
+
   if (props.href) {
     // TypeScript now knows these are AnchorElementProps
     return (
       <a
-        {...props}
+        {...rest}
+        ref={ref as any}
         class={classes}
         f-partial={`/partials${props.href === '/' ? '/home' : props.href}`}
       >
@@ -72,7 +77,8 @@ export function Button({
   // TypeScript knows these are ButtonElementProps
   return (
     <button
-      {...props}
+      {...rest}
+      ref={ref as any}
       class={classes}
       disabled={!IS_BROWSER || props.disabled}
     >

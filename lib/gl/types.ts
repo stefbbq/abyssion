@@ -2,12 +2,14 @@ import * as Three from 'three'
 import type { Camera, EffectComposer, Group, Mesh, OrbitControls, Scene, ShaderPass, UnrealBloomPass, WebGLRenderer } from 'three'
 import type { LogoLayer } from './layers/LogoLayer.ts'
 import type { LogoController } from './layers/LogoLayer.ts'
+import type { ShadowLayer } from './layers/ShadowLayer.ts'
 
 // Video background manager type
 export type VideoBackgroundManager = {
   update: (delta: number) => void
   dispose: () => void
   mesh: Mesh // The mesh containing the video texture
+  handleResize: () => void
 }
 
 // UI Overlay type
@@ -32,7 +34,7 @@ export type RendererState = {
   camera: Camera
   renderer: WebGLRenderer
   composer: EffectComposer
-  controls: OrbitControls | null
+  controls?: OrbitControls
   bloomPass: UnrealBloomPass
   finalPass: ShaderPass
   ditheringPass: ShaderPass
@@ -49,4 +51,5 @@ export type RendererState = {
   shapeLayer: Group
   videoBackground?: VideoBackgroundManager
   pixelationPass: ShaderPass
+  shadowLayer: ShadowLayer
 }

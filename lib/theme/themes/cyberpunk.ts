@@ -7,6 +7,7 @@ import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
  */
 export const cyberpunkTheme = createBaseTheme({
   name: 'cyberpunk',
+  mode: 'dark',
 
   // Original colors
   primary: hexStringToRGB('#ffffff'),

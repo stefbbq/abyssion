@@ -9,12 +9,9 @@ import PageContainer from '@islands/PageContainer.tsx'
 
 export default function App({ Component, url }: PageProps) {
   const pagePath = url.pathname
-  const isHomePage = pagePath === '/'
   const config = (pagesConfig as PagesConfig)[pagePath] || {}
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
-
-  console.log('isHomePage', isHomePage)
 
   return (
     <html>

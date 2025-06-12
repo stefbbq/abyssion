@@ -80,7 +80,9 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
    */
   const animate = (timestamp: number) => {
     // Align focus plane if present
+    // deno-lint-ignore no-explicit-any
     if (typeof window !== 'undefined' && typeof (window as any).alignFocusPlane === 'function') {
+      // deno-lint-ignore no-explicit-any
       ;(window as any).alignFocusPlane()
     }
 
@@ -95,7 +97,7 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
 
     // Apply shared behaviors
     shared.applyMouseRotation(state.scene)
-    shared.updateVideoBackground(state.videoBackground, animation.timeIncrement)
+    if (state.videoBackground) shared.updateVideoBackground(state.videoBackground, animation.timeIncrement)
 
     // Create context for orchestrators
     const context: AnimationContext = {

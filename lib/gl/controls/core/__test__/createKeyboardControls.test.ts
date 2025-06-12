@@ -178,8 +178,6 @@ Deno.test('createKeyboardControls', async (test) => {
     mockEventListeners.clear()
     const initialToggleCount = toggleRotationCalled
     const initialRegenerateCount = regenerateLayersCalled
-    const controls = createKeyboardControls(testConfig, testActions)
-    // Don't activate
 
     triggerKeyboardEvent(' ')
     triggerKeyboardEvent('r')

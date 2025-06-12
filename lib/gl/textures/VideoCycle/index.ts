@@ -56,7 +56,6 @@ export const createVideoCycle = (
         state.currentIndex,
         state.recentIndices,
         state.videos.length,
-        antiRepeat,
       )
 
       const nextVideo = state.videos[nextIndex]
@@ -205,7 +204,6 @@ export const createVideoCycle = (
           state.currentIndex,
           state.recentIndices,
           state.videos.length,
-          antiRepeat,
         )
 
         updatedRecentIndices = updateRecentIndices(state.recentIndices, nextIndex, antiRepeat)
@@ -309,5 +307,6 @@ export const createVideoCycle = (
     update,
     dispose,
     mesh: activeBuffer.mesh,
+    handleResize: () => {},
   }
 }
