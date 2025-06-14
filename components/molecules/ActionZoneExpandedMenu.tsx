@@ -1,5 +1,6 @@
 import type { MenuItem, NavButtonState, SocialLink } from '@data/types.ts'
 import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
+import { ActionZoneMenuButton } from '@molecules/ActionZoneMenuButton.tsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
 import type { UITheme } from '@libtheme/types.ts'
@@ -13,6 +14,16 @@ type Props = {
   onMenuClose: () => void
   onAnchorLink: (path: string) => void
   theme: UITheme
+}
+
+// Add these variants at the top of the file or inside the component
+const containerVariants = {
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
+  hidden: {},
+}
+const buttonVariants = {
+  visible: { opacity: 1 },
+  hidden: { opacity: 0 },
 }
 
 /**
@@ -57,21 +68,27 @@ export const ActionZoneExpandedMenu = ({
       <AnimatePresence>
         <motion.div
           key='social-links'
-          initial={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           // @ts-ignore - framer-motion types not fully compatible with Preact
           className='flex items-center justify-center space-x-8 pt-2'
         >
           {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
-            <a
+            <motion.a
               key={key}
               href={url}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               class='transition-colors'
               style={{ color: theme.colors.text.secondary }}
-              onMouseEnter={(e) => e.currentTarget.style.color = theme.colors.text.primary}
-              onMouseLeave={(e) => e.currentTarget.style.color = theme.colors.text.secondary}
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = theme.colors.text.primary}
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = theme.colors.text.secondary}
               f-client-nav={false}
+              as='a'
             >
               {(() => {
                 const IconComponent = SocialIcons[icon]
@@ -80,25 +97,24 @@ export const ActionZoneExpandedMenu = ({
                   ? <IconComponent className='w-6 h-6 opacity-60' />
                   : <div class='w-6 h-6 rounded bg-current opacity-30' />
               })()}
-            </a>
+            </motion.a>
           ))}
         </motion.div>
       </AnimatePresence>
 
       {/* menu items */}
-      <div class='space-y-1'>
+      <motion.div className='space-y-1' variants={containerVariants} initial='hidden' animate='visible'>
         {navButtons.map((button, idx) => (
-          <ActionZoneButton
-            key={button.id}
-            id={button.id}
-            state={button}
-            onAction={() => handleAction(button.action, menuItems[idx])}
-            style={getButtonStyle(button.isActive)}
-            onMouseEnter={() => {}}
-            onMouseLeave={() => {}}
-          />
+          <motion.div key={button.id} variants={buttonVariants} initial='hidden' animate='visible'>
+            <ActionZoneMenuButton
+              id={button.id}
+              label={button.content.label}
+              isActive={button.isActive}
+              onClick={() => handleAction(button.action, menuItems[idx])}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }

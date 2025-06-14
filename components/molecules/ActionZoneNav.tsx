@@ -46,6 +46,7 @@ export const ActionZoneNav = ({ buttons, onAction, theme }: CollapsedNavProps) =
           onMouseEnter={() => setHoveredButtonId(buttonState.id)}
           onMouseLeave={() => setHoveredButtonId(null)}
           flex={buttonState.role === 'action-button' || buttonState.role === 'back-button' ? '0 0 auto' : '1 1 0%'}
+          variant='outlined'
         />
       ))}
     </div>

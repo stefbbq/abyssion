@@ -1,4 +1,4 @@
-import type { ActionZoneAnimation, ActionZoneAnimationConfig } from '@data/types.ts'
+import type { ActionZoneAnimationConfig, ActionZoneAnimationLayout } from '@data/nav-actionZone-animation.ts'
 
 /**
  * matchRouteConfig
@@ -15,12 +15,13 @@ export const matchRouteConfig = (
   config: ActionZoneAnimationConfig,
   state: string,
   route: string,
-): ActionZoneAnimation | undefined => {
+): ActionZoneAnimationLayout | undefined => {
   const stateConfig = config[state as keyof typeof config]
   if (!stateConfig) return undefined
 
   // Try to find the most specific matching route key
   const routeKeys = Object.keys(stateConfig).filter((k) => k !== 'default')
+
   // Sort by length descending for most specific match
   routeKeys.sort((a, b) => b.length - a.length)
   const match = routeKeys.find((key) => route.startsWith(key))

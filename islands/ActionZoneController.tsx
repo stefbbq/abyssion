@@ -6,7 +6,8 @@ import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
 import actionZoneData from '@data/nav-actionZone-animation.ts'
 import ActionZone from '@organisms/ActionZone.tsx'
-import type { ActionZoneAnimation, MenuItem, NavButtonState } from '@data/types.ts'
+import type { MenuItem, NavButtonState } from '@data/types.ts'
+import type { ActionZoneAnimationLayout } from '@data/nav-actionZone-animation.ts'
 import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
 import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
 
@@ -76,7 +77,7 @@ export default function ActionZoneController({ currentPath }: Props) {
    */
   const getCollapsedButtons = () => {
     const state = 'collapsedDefault'
-    const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimation | undefined
+    const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
     if (!config || !Array.isArray(config.buttons)) return []
 
     // Patch in page title if needed
@@ -86,13 +87,14 @@ export default function ActionZoneController({ currentPath }: Props) {
         const label = button.content.label || page?.label || ''
         return { ...button, content: { ...button.content, label } }
       }
+
       return button
     })
   }
 
   // Determine the current ActionZone state
   const state = isMenuOpen ? 'expandedMenu' : 'collapsedDefault'
-  const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimation | undefined
+  const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
   const animationConfig = config?.animation || {}
   const layoutConfig = config?.layout || {}
 
