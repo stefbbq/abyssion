@@ -2,10 +2,12 @@ import type { NavButtonState } from '@data/types.ts'
 import { BackIcon, MenuIcon } from '@atoms/icons/index.ts'
 import { motion } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
+import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
+import type { ActionZoneAnimationButton } from '@organisms/actionZone.animation.ts'
 
 type Props = {
   id: string
-  state: NavButtonState
+  state: ActionZoneAnimationButton
   onAction: (action: NavButtonState['action']) => void
   style: CSSProperties
   onMouseEnter: () => void
@@ -23,8 +25,10 @@ type Props = {
 export const ActionZoneButton = (
   { id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin, variant = 'outlined' }: Props,
 ) => {
+  // tailwind's hover: and focus: utilities are safe for touch devices and pointer devices
+  // browsers will not trigger these on pure touch devices
   const getBaseClasses = () =>
-    'w-full h-full inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2'
+    `w-full h-full inline-flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2 nav-button transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0`
 
   const handleClick = () => {
     if (state.action.type !== 'none') onAction(state.action)
@@ -38,20 +42,23 @@ export const ActionZoneButton = (
     ? `1px solid #666` // theme color can be injected via style if needed
     : 'none'
 
+  // helper to get the correct animation variant for this button
+  const getButtonAnimation = () => state.animation || actionZoneAnimationConfig.buttonVariants
+
   return (
     <div style={{ flex: flex || '0 0 auto' }}>
       <motion.div
         layoutId={id}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.3 } }}
-        exit={{ opacity: 0, transition: { duration: 0.2 } }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        initial={getButtonAnimation().initial}
+        animate={getButtonAnimation().animate}
+        exit={getButtonAnimation().exit}
+        transition={undefined}
         style={{ width: '100%', height: '100%', transformOrigin: transformOrigin || 'center' }}
       >
         {isLink && (
           <a
             href={state.action.href}
-            className={`${getBaseClasses()} nav-button`}
+            className={`${state.buttonClassNames || getBaseClasses()} nav-button`}
             style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border }}
             aria-label={state.content.label}
             {...{ onMouseEnter, onMouseLeave }}
@@ -70,7 +77,7 @@ export const ActionZoneButton = (
         {!isLink && (
           <button
             onClick={handleClick}
-            className={`${getBaseClasses()} nav-button`}
+            className={`${state.buttonClassNames || getBaseClasses()} nav-button`}
             style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border }}
             disabled={state.action.type === 'none'}
             aria-label={state.content.label}

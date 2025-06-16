@@ -1,9 +1,10 @@
-import type { MenuItem, NavButtonState, SocialLink } from '@data/types.ts'
-import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
-import { ActionZoneMenuButton } from '@molecules/ActionZoneMenuButton.tsx'
+import type { MenuItem, SocialLink } from '@data/types.ts'
+import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
 import type { UITheme } from '@libtheme/types.ts'
+import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
+import type { ActionZoneAnimationButton, ActionZoneAnimationVariant } from '@organisms/actionZone.animation.ts'
 
 type SocialIconKey = keyof SocialIconMap
 
@@ -14,16 +15,6 @@ type Props = {
   onMenuClose: () => void
   onAnchorLink: (path: string) => void
   theme: UITheme
-}
-
-// Add these variants at the top of the file or inside the component
-const containerVariants = {
-  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
-  hidden: {},
-}
-const buttonVariants = {
-  visible: { opacity: 1 },
-  hidden: { opacity: 0 },
 }
 
 /**
@@ -38,29 +29,32 @@ export const ActionZoneExpandedMenu = ({
   onAnchorLink,
   theme,
 }: Props) => {
-  const getButtonStyle = (isActive = false) => ({
-    backgroundColor: isActive ? theme.colors.text.primary : 'transparent',
-    color: isActive ? theme.colors.background.primary : theme.colors.text.secondary,
-    borderRadius: '24px',
-    fontWeight: isActive ? '600' : '500',
-    border: 'none',
-  })
+  // get the current expanded menu layout from the animation config
+  const expandedMenuLayout = actionZoneAnimationConfig.expandedMenu[currentPath] || actionZoneAnimationConfig.expandedMenu.default
+  const navButtons: ActionZoneAnimationButton[] = expandedMenuLayout.buttons || []
 
-  // map MenuItem to NavButtonState for navigation
-  const navButtons: NavButtonState[] = menuItems.map((item) => ({
-    id: item.key,
-    key: item.key,
-    role: 'nav-item',
-    content: { label: item.label },
-    position: 'center',
-    action: item.path.startsWith('#') ? { type: 'none' } : { type: 'navigate', href: item.path },
-    isActive: currentPath === item.path,
-  }))
-
-  const handleAction = (action: NavButtonState['action'], item: MenuItem) => {
+  const handleAction = (action: ActionZoneAnimationButton['action'], item: MenuItem) => {
     if (item.path.startsWith('#')) onAnchorLink(item.path)
     else if (action.type === 'navigate') onMenuClose()
   }
+
+  // helper to get the correct animation variant for a menu button
+  const getMenuButtonAnimation = (button: ActionZoneAnimationButton) => {
+    return button.animation || actionZoneAnimationConfig.expandedMenuVariants.button
+  }
+
+  // helper to resolve the correct keys for motion props
+  const getMotionProps = (anim: ActionZoneAnimationVariant) => {
+    if ('hidden' in anim && 'visible' in anim) {
+      return { initial: anim.hidden, animate: anim.visible }
+    } else if ('initial' in anim && 'animate' in anim) {
+      return { initial: anim.initial, animate: anim.animate, exit: anim.exit, transition: anim.transition }
+    } else {
+      return {}
+    }
+  }
+
+  const socialLinksAnim: ActionZoneAnimationVariant = actionZoneAnimationConfig.expandedMenuVariants.socialLinks
 
   return (
     <div class='px-6 pb-6 space-y-6'>
@@ -68,25 +62,26 @@ export const ActionZoneExpandedMenu = ({
       <AnimatePresence>
         <motion.div
           key='social-links'
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          initial={socialLinksAnim.initial}
+          animate={socialLinksAnim.animate}
+          exit={socialLinksAnim.exit}
+          transition={socialLinksAnim.transition}
           // @ts-ignore - framer-motion types not fully compatible with Preact
           className='flex items-center justify-center space-x-8 pt-2'
         >
           {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
             <motion.a
               key={key}
+              // @ts-ignore - framer-motion types not fully compatible with Preact
               href={url}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              initial={socialLinksAnim.initial}
+              animate={socialLinksAnim.animate}
+              exit={socialLinksAnim.exit}
+              transition={socialLinksAnim.transition}
               class='transition-colors'
               style={{ color: theme.colors.text.secondary }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = theme.colors.text.primary}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = theme.colors.text.secondary}
+              onMouseEnter={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.primary}
+              onMouseLeave={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.secondary}
               f-client-nav={false}
               as='a'
             >
@@ -103,17 +98,27 @@ export const ActionZoneExpandedMenu = ({
       </AnimatePresence>
 
       {/* menu items */}
-      <motion.div className='space-y-1' variants={containerVariants} initial='hidden' animate='visible'>
-        {navButtons.map((button, idx) => (
-          <motion.div key={button.id} variants={buttonVariants} initial='hidden' animate='visible'>
-            <ActionZoneMenuButton
-              id={button.id}
-              label={button.content.label}
-              isActive={button.isActive}
-              onClick={() => handleAction(button.action, menuItems[idx])}
-            />
-          </motion.div>
-        ))}
+      <motion.div
+        // @ts-ignore - framer-motion types not fully compatible with Preact
+        className='space-y-1'
+        variants={actionZoneAnimationConfig.expandedMenuVariants.container}
+        initial='hidden'
+        animate='visible'
+      >
+        {navButtons.map((button: ActionZoneAnimationButton, idx: number) => {
+          const anim = getMenuButtonAnimation(button)
+          const motionProps = getMotionProps(anim)
+          return (
+            <motion.div key={button.id} {...motionProps}>
+              <ActionZoneMenuButton
+                id={button.id}
+                label={button.content.label}
+                isActive={button.isActive}
+                onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[idx])}
+              />
+            </motion.div>
+          )
+        })}
       </motion.div>
     </div>
   )

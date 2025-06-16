@@ -4,10 +4,10 @@ import { getTheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneData from '@data/nav-actionZone-animation.ts'
+import actionZoneData from '@organisms/actionZone.animation.ts'
 import ActionZone from '@organisms/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
-import type { ActionZoneAnimationLayout } from '@data/nav-actionZone-animation.ts'
+import type { ActionZoneAnimationLayout } from '@organisms/actionZone.animation.ts'
 import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
 import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
 

@@ -10,10 +10,9 @@ type Props = {
   collapsedChildren: ComponentChildren
   expandedChildren: ComponentChildren
   routeKey: string
-  /**
-   * animationConfig: settings for framer-motion transition, from config
-   */
+  // settings for framer-motion transition, from config
   animationConfig?: Record<string, unknown>
+  // settings for framer-motion layout, from config
   layoutConfig?: Record<string, unknown>
 }
 
@@ -22,6 +21,7 @@ const resolveConfigValue = (value: string | unknown) => {
     const fnName = value.replace('()', '')
     return (animationStyleFunctions as Record<string, (...args: unknown[]) => unknown>)[fnName]?.()
   }
+
   return value
 }
 

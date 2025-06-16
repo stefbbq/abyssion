@@ -1,15 +1,15 @@
 import { useState } from 'preact/hooks'
 import type { NavButtonState } from '@data/types.ts'
 import { UITheme } from '@lib/theme/types.ts'
-import { ActionZoneButton } from '@molecules/ActionZoneButton.tsx'
+import { ActionZoneButton } from '@atoms/ActionZoneButton.tsx'
 
-interface CollapsedNavProps {
+type Props = {
   buttons: NavButtonState[]
   onAction: (action: NavButtonState['action']) => void
   theme: UITheme
 }
 
-export const ActionZoneNav = ({ buttons, onAction, theme }: CollapsedNavProps) => {
+export const ActionZoneNav = ({ buttons, onAction, theme }: Props) => {
   const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null)
 
   const getButtonStyles = (state: NavButtonState, isHovered: boolean) => {
