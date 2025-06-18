@@ -11,6 +11,130 @@ Use this as a starting point before doing anything!
 - **Theme System**: A dual-theme system (`UITheme` and `GLTheme`) is generated from a single `BaseTheme`. See the "Theme System" section below for details.
 - **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic.
 
+## ActionZone System (Mobile Navigation)
+
+The ActionZone system is a fully config-driven, recursive, and type-safe architecture for mobile navigation and overlays. It is designed for maximum flexibility, maintainability, and animation control.
+
+### Key Concepts
+
+- **Config-Driven**: All layouts, buttons, and menu structures are defined in config files (`/components/organisms/ActionZone/configurations/`).
+- **Component Map**: The renderer uses a `componentMap` to map config node `type` strings to actual UI components (atoms, molecules, etc). This enables new UI types to be added with zero renderer changes.
+- **Recursive Rendering**: The renderer walks the config tree, rendering each node as the mapped component and passing down props, style, animation, and children.
+- **Runtime Injection**: Data such as theme, navigation, and social links are injected at runtime via `runtimeProps`.
+- **Animation**: All animation is config-driven and can be customized per node, per route, or per transition.
+
+### Directory Structure
+
+- `/components/organisms/ActionZone/configurations/`
+  - `collapsed.ts`, `collapsedPage.ts`, `expanded.ts`: Main config files for each layout state.
+  - `types.ts`: Centralized, minimal types for config nodes, grid layouts, and animation variants.
+  - `index.ts`: Barrel file exporting all configs and a single `actionZoneAnimationConfig` object.
+- `/components/organisms/ActionZone/componentMap.ts`: Maps config node `type` strings to UI components.
+- `/components/organisms/ActionZone/ActionZoneRenderer.tsx`: Recursive renderer for config nodes.
+- `/components/organisms/ActionZone/utils/`: Utility functions for config node resolution and animation variant lookup.
+- `/islands/ActionZoneController.tsx`: Main controller for runtime state, theme, and data injection.
+
+### Config Structure & Types
+
+Config files export objects matching the following recursive type:
+
+```ts
+export type ActionZoneConfigNode = {
+  type: string // e.g. 'container', 'button', 'menuButton', 'socialLinks'
+  style?: Record<string, unknown>
+  layout?: ActionZoneGridLayout
+  children?: Record<string, ActionZoneConfigNode>
+  props?: Record<string, unknown>
+  animation?: ActionZoneAnimationVariant
+}
+
+export type ActionZoneConfigRoot = Record<string, ActionZoneConfigNode>
+
+export type ActionZoneGridLayout = {
+  grid: string
+  slots: string[]
+  gridTemplateRows?: string
+  gridTemplateColumns?: string
+  gap?: string
+}
+
+export type ActionZoneAnimationVariant = {
+  initial: object
+  animate: object
+  exit?: object
+  transition?: object
+}
+```
+
+### Example Config (Collapsed Layout)
+
+```ts
+export const collapsed = {
+  '/*': {
+    type: 'container',
+    style: { height: ..., borderRadius: ... },
+    layout: {
+      grid: 'rows: 1; cols: 3',
+      slots: ['shows', 'contact', 'menu'],
+      gridTemplateRows: '1fr',
+      gridTemplateColumns: '1fr 1fr 1fr',
+      gap: '0.5rem',
+    },
+    children: {
+      shows: { type: 'button', props: { ... } },
+      contact: { type: 'button', props: { ... } },
+      menu: { type: 'button', props: { ... } },
+    },
+  },
+}
+```
+
+### Component Map
+
+The `componentMap` links config node `type` strings to actual UI components:
+
+```ts
+import { ActionZoneContainer } from '@atoms/ActionZoneContainer.tsx'
+import { ActionZoneButton } from '@atoms/ActionZoneButton.tsx'
+import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
+import { SocialLinks } from '@molecules/SocialLinks.tsx'
+import type { ComponentType } from 'preact'
+
+type ActionZoneComponentType = 'container' | 'button' | 'menuButton' | 'socialLinks'
+
+export const componentMap: Record<ActionZoneComponentType, ComponentType<any>> = {
+  container: ActionZoneContainer,
+  button: ActionZoneButton,
+  menuButton: ActionZoneMenuButton,
+  socialLinks: SocialLinks,
+}
+```
+
+### Rendering Pipeline
+
+- The controller (`ActionZoneController.tsx`) determines the current layout and resolves the config node for the current route.
+- The renderer (`ActionZoneRenderer.tsx`) recursively renders the config tree:
+  - Looks up the component for each node type in `componentMap`.
+  - Passes down `props`, `style`, `animation`, and `children`.
+  - Handles grid layouts and slot ordering.
+- Runtime data (theme, nav, social links) is injected via `runtimeProps` and merged into the config as needed.
+
+### Animation Helpers
+
+- `resolveActionZoneConfigNode`: Recursively resolves the most specific config node for a given route and key path.
+- `getRouteTransitionAnimation`: Resolves the most specific animation variant for a route transition.
+- `getChildTransitionAnimation`: Resolves the most specific animation variant for a child during a route transition.
+
+All helpers are in `/components/organisms/ActionZone/utils/`.
+
+### Extending the System
+
+- To add a new UI type, add a new component and register it in `componentMap.ts`.
+- To add a new layout or menu, update or add a config in `/configurations/`.
+- To add new animation variants, update the config or add new helpers in `/utils/`.
+
+---
+
 ## Theme System
 
 The system uses a `BaseTheme` (color palette + mode) to generate two distinct themes:
@@ -55,6 +179,7 @@ The system uses a `BaseTheme` (color palette + mode) to generate two distinct th
   - `/logger`: Structured logging system.
 
 - **`/utils`**: Shared utility functions.
+  - `filterNullishValues.ts`: Removes all keys from an object whose values are null or undefined. Useful for cleaning style objects and other data before passing to components or APIs.
 - **`/scene`, `/gl`, etc.**: All logic for the Three.js visualization.
 
 ## Main Entry
@@ -146,62 +271,39 @@ Component logic is organized using Atomic Design principles in `/components`
 
 ## Animation
 
-- `animation/index.ts` - Main animation exports
-- `animation/createLogoAnimator.ts` - `createLogoAnimator()`
-- `animation/core/createAnimationEngine.ts` - `createAnimationEngine()`
+- `components/organisms/actionZone.animation.ts` is the main config and type definition file for all ActionZone-related animations.
+- **Per-button, per-route, and per-transition animation is supported:**
+  - Each button can have its own animation variant and Tailwind class override via the config.
+  - The config supports a `transitions` object for route-to-route (from->to) animation variants.
+  - If a specific transition is not defined, sensible fallbacks are used (from->default, default->to, or a global default).
+- **Type definitions** for all animation variants, expanded menu variants, and route transitions are in the animation config file.
+- All animation logic is config-driven and can be updated without touching component code.
+
+### Example Transition Config
+
+```ts
+transitions: {
+  '/shows': {
+    '/contact': { /* custom animation for shows -> contact */ },
+    default: { /* fallback for shows -> any */ }
+  },
+  default: {
+    '/contact': { /* fallback for any -> contact */ }
+  }
+},
+defaultAnimationVariant: { initial: {...}, animate: {...}, exit: {...} }
+```
+
+### Usage
+
+- Use a helper to get the correct animation variant for a transition:
+
+```ts
+const animationVariant = getRouteTransitionAnimation(currentRoute, nextRoute, actionZoneAnimationConfig)
+```
+
+- Pass this variant to Framer Motion's `initial`, `animate`, `exit`, and `transition` props.
 
 ## Layers
 
-- `layers/index.ts` - Barrel exports
-- `layers/LogoLayer.ts` - `createLogoLayer()`
-- `layers/GeometricLayer.ts` - `createGeometricLayer()`
-- `layers/ShadowLayer.ts` - `createShadowLayer()`
-
-## Controls
-
-- `controls/index.ts` - `createControlsSystem()`
-- `controls/createControlsSystem.ts` - Main controls orchestrator
-- `controls/OrbitControlsSetup.ts` - `setupOrbitControls()`
-
-## Textures & Shaders
-
-- `textures/VideoCycle/index.ts` - `createVideoCycle()`
-- `shaders/index.ts` - Barrel exports for GLSL shaders
-- `shaders/ShadowShader.ts` - Gradient shadow shader for the logo layer
-
-## Debug & Logger Systems
-
-- `lib/debug/index.ts` - Debug mode detection and control
-- `lib/logger/index.ts` - Structured, color-coded logging system
-
-## Utils (Utility Functions)
-
-- `utils/index.ts` - Main utils barrel exports. **Note:** Navigation types are now in `data/types.ts`
-
-## Documentation
-
-- `THEME_SYSTEM.md` - Complete theme system architecture guide
-- `CODEX.md` - This file
-- `LLM_GUIDE.md` - LLM code styles and guidelines.
-
-## Core Architecture Summary
-
-- **Routing**: Fresh-based, with a partial-first approach. UI and access control are configured in `data/pages.json` and enforced by `_app.tsx` and `_middleware.ts`
-- **Data & Types**: All static content is in `/data`, with all corresponding TypeScript types co-located in `data/types.ts`
-- **State Management**: Primarily Preact Signals for UI state
-- **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic
-
-## Chromatic Aberration & Glitch Effects
-
-- The chromatic aberration (RGB split) and glitch effect is implemented in `lib/gl/shaders/ElectricShader.ts` as `finalPassFragmentShader`.
-- The effect can operate in two modes:
-  - Classic: Subtle, global chromatic aberration.
-  - Segmented/Flickery: Horizontal bands flicker and desync, with theme color pops (purple, blue, etc.) appearing in some bands. Bands and color pops are controlled by noise/hash for irregularity.
-- The mode and effect parameters are controlled by uniforms:
-  - `segmentedGlitchMode`: 0 = classic, 1 = segmented/flickery
-  - `glitchIntensity`: How strong the segmented effect is (tunable for animation)
-  - `flickerRate`: How fast bands flicker (tunable for animation)
-  - `colorPopIntensity`: How much theme color pops in (tunable for animation)
-  - `themePrimary`, `themeAccent`, `themeSecondary`: Theme colors used for color pops
-- All uniforms can be animated (e.g., for page transitions) by updating the values in the post-processing pipeline (`lib/gl/scene/createPostProcessing.ts`).
-- The effect is visible in the final post-processing pass (`finalPass`).
+- `layers/index.ts`

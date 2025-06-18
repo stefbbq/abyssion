@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useSignal } from '@preact/signals'
 import { getTheme } from '@lib/theme/index.ts'
-import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
-import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneData from '@organisms/actionZone.animation.ts'
-import ActionZone from '@organisms/ActionZone.tsx'
-import type { MenuItem, NavButtonState } from '@data/types.ts'
-import type { ActionZoneAnimationLayout } from '@organisms/actionZone.animation.ts'
-import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
+import { actionZoneAnimationConfig } from '@organisms/ActionZone/configurations/index.ts'
+import ActionZone from '@organisms/ActionZone/ActionZone.tsx'
 import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
+import { resolveActionZoneConfigNode } from '@organisms/ActionZone/utils/resolveActionZoneConfigNode.ts'
 
 type Props = {
   currentPath?: string
@@ -20,12 +16,13 @@ export default function ActionZoneController({ currentPath }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const theme = getTheme()
   const currentRoute = useSignal(currentPath || '/')
+  const previousRoute = useSignal(currentPath || '/')
 
   useEffect(() => {
     setIsMounted(true)
-
     const handleNavigate = () => {
       const newPath = globalThis.location.pathname
+      previousRoute.value = currentRoute.value
       currentRoute.value = newPath
     }
 
@@ -44,7 +41,7 @@ export default function ActionZoneController({ currentPath }: Props) {
     }
   }, [])
 
-  const handleAction = (action: NavButtonState['action']) => {
+  const handleAction = (action: any) => {
     switch (action.type) {
       case 'back':
         globalThis.history.back()
@@ -57,80 +54,43 @@ export default function ActionZoneController({ currentPath }: Props) {
     }
   }
 
-  const handleAnchorLink = (path: string) => {
-    if (path.startsWith('#')) {
-      const element = document.querySelector(path)
-      element?.scrollIntoView({ behavior: 'smooth' })
-      setIsMenuOpen(false)
-      return true
-    }
-
-    return false
-  }
-
   if (!isMounted) return null
 
-  /**
-   * getCollapsedButtons
-   * Returns the correct button array for the current route and state, using the config and route-matching utility.
-   * Uses 'collapsed-default' state for now.
-   */
-  const getCollapsedButtons = () => {
-    const state = 'collapsedDefault'
-    const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
-    if (!config || !Array.isArray(config.buttons)) return []
+  // Determine the current ActionZone layout type
+  let layoutType: 'collapsed' | 'collapsedPage' | 'expanded' = 'collapsed'
+  if (isMenuOpen) layoutType = 'expanded'
+  // TODO: add logic for collapsedPage if needed
 
-    // Patch in page title if needed
-    const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
-    return config.buttons.map((button: NavButtonState) => {
-      if (button.role === 'page-title') {
-        const label = button.content.label || page?.label || ''
-        return { ...button, content: { ...button.content, label } }
-      }
+  // Resolve the config node for the current route/layout
+  const configRoot = actionZoneAnimationConfig[layoutType]
+  const node = resolveActionZoneConfigNode(configRoot, currentRoute.value, [])
 
-      return button
-    })
+  if (!node) return null
+
+  // Prepare runtime props (theme, nav, social, etc)
+  const runtimeProps = {
+    theme,
+    menuItems: navData.mainNav,
+    socialLinks: navData.socialLinks,
   }
 
-  // Determine the current ActionZone state
-  const state = isMenuOpen ? 'expandedMenu' : 'collapsedDefault'
-  const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
-  const animationConfig = config?.animation || {}
-  const layoutConfig = config?.layout || {}
-
   return (
-    <>
-      <div className='md:hidden'>
-        <ActionZoneFadeout
-          height={160}
-          gradientStart={0}
-          gradientEnd={90}
-          color={theme.glass.background}
-          bottom={0}
-          zIndex={49}
-        />
-        <ActionZone
-          {...{ isMenuOpen, setIsMenuOpen, animationConfig, layoutConfig }}
-          routeKey={currentRoute.value}
-          collapsedChildren={
-            <ActionZoneNav
-              onAction={handleAction}
-              theme={theme}
-              buttons={getCollapsedButtons()}
-            />
-          }
-          expandedChildren={
-            <ActionZoneExpandedMenu
-              currentPath={currentRoute.value}
-              menuItems={navData.mainNav}
-              socialLinks={navData.socialLinks}
-              onMenuClose={() => setIsMenuOpen(false)}
-              onAnchorLink={handleAnchorLink}
-              theme={theme}
-            />
-          }
-        />
-      </div>
-    </>
+    <div className='md:hidden'>
+      <ActionZoneFadeout
+        height={160}
+        gradientStart={0}
+        gradientEnd={90}
+        color={theme.glass.background}
+        bottom={0}
+        zIndex={49}
+      />
+      <ActionZone
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        node={node}
+        onAction={handleAction}
+        runtimeProps={runtimeProps}
+      />
+    </div>
   )
 }

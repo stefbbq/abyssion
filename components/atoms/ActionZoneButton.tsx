@@ -2,14 +2,19 @@ import type { NavButtonState } from '@data/types.ts'
 import { BackIcon, MenuIcon } from '@atoms/icons/index.ts'
 import { motion } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
-import type { ActionZoneAnimationButton } from '@organisms/actionZone.animation.ts'
+// import type { ActionZoneAnimationButton } from '@organisms/ActionZone/configurations/types.ts'
 
+/**
+ * ActionZoneButton supports animation prop for config-driven variants.
+ *
+ * @example
+ * <ActionZoneButton animation={...} ... />
+ */
 type Props = {
-  id: string
-  state: ActionZoneAnimationButton
+  state: any // TODO: replace with correct type if available
   onAction: (action: NavButtonState['action']) => void
   style: CSSProperties
+  animation?: any
   onMouseEnter: () => void
   onMouseLeave: () => void
   flex?: string
@@ -23,43 +28,58 @@ type Props = {
  * Handles smooth morphing between different navigation roles
  */
 export const ActionZoneButton = (
-  { id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin, variant = 'outlined' }: Props,
+  { state, onAction, style, animation, onMouseEnter, onMouseLeave, flex, transformOrigin, variant = 'outlined' }: Props,
 ) => {
-  // tailwind's hover: and focus: utilities are safe for touch devices and pointer devices
-  // browsers will not trigger these on pure touch devices
-  const getBaseClasses = () =>
-    `w-full h-full inline-flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2 nav-button transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0`
-
-  const handleClick = () => {
-    if (state.action.type !== 'none') onAction(state.action)
-  }
-
+  const isActive = state.isActive || state.role === 'page-title'
+  const isNavItem = state.role === 'nav-item'
   const showText = state.role === 'nav-item' || state.role === 'page-title'
   const isLink = state.action.type === 'navigate'
+  const isButton = state.action.type !== 'navigate'
 
-  // border logic based on variant and role
-  const border = variant === 'outlined' && state.role === 'nav-item'
-    ? `1px solid #666` // theme color can be injected via style if needed
-    : 'none'
+  // merge style defaults with incoming style
+  const mergedStyle = {
+    height: '50px',
+    borderRadius: 25,
+    border: variant === 'outlined' && isNavItem ? '1px solid #666' : 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '14px',
+    backgroundColor: isActive ? '#fff' : 'transparent',
+    color: isActive ? '#000' : '#fff',
+    fontWeight: isActive ? 600 : 500,
+    cursor: state.action.type === 'none' ? 'default' : 'pointer',
+    ...style,
+  }
 
-  // helper to get the correct animation variant for this button
-  const getButtonAnimation = () => state.animation || actionZoneAnimationConfig.buttonVariants
+  const defaultButtonAnimation = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  }
+
+  const getButtonAnimation = () => animation || state.animation || defaultButtonAnimation
+
+  const onClick = () => {
+    if (state.action.type !== 'none') onAction(state.action)
+  }
 
   return (
     <div style={{ flex: flex || '0 0 auto' }}>
       <motion.div
-        layoutId={id}
-        initial={getButtonAnimation().initial}
-        animate={getButtonAnimation().animate}
-        exit={getButtonAnimation().exit}
-        transition={undefined}
+        {...(animation ? animation : {})}
+        initial={animation?.initial}
+        animate={animation?.animate}
+        exit={animation?.exit}
+        transition={animation?.transition}
         style={{ width: '100%', height: '100%', transformOrigin: transformOrigin || 'center' }}
       >
+        {/* Navigate */}
         {isLink && (
           <a
             href={state.action.href}
-            className={`${state.buttonClassNames || getBaseClasses()} nav-button`}
-            style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border }}
+            className='nav-button transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0'
+            style={mergedStyle}
             aria-label={state.content.label}
             {...{ onMouseEnter, onMouseLeave }}
             f-client-nav
@@ -74,14 +94,15 @@ export const ActionZoneButton = (
             {showText && <motion.span layout='position'>{state.content.label}</motion.span>}
           </a>
         )}
-        {!isLink && (
+
+        {/* Title */}
+        {isButton && (
           <button
-            onClick={handleClick}
-            className={`${state.buttonClassNames || getBaseClasses()} nav-button`}
-            style={{ ...style, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border }}
+            className='nav-button transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0'
+            style={mergedStyle}
             disabled={state.action.type === 'none'}
             aria-label={state.content.label}
-            {...{ onMouseEnter, onMouseLeave }}
+            {...{ onMouseEnter, onMouseLeave, onClick }}
           >
             {state.content.icon && (
               <motion.div layout='position'>

@@ -1,4 +1,4 @@
-import type { ActionZoneAnimationConfig, ActionZoneAnimationLayout } from '@organisms/actionZone.animation.ts'
+import type { ActionZoneAnimationConfig, ActionZoneAnimationLayout } from '@organisms/ActionZone/types.ts'
 
 /**
  * matchRouteConfig

@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion'
+import { motion, MotionStyle } from 'framer-motion'
 import { CSSProperties } from 'preact/compat'
-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
+import { filterNullishValues } from '@lib/utils/filterNullishValues.ts'
 
 type Props = {
   id: string
@@ -15,25 +15,31 @@ type Props = {
  * Dedicated button for expanded menu items (no border, no outline, fade-in)
  */
 export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, style = {} }: Props) => {
-  // filter out null/undefined values from style
-  const filteredStyle = Object.fromEntries(Object.entries(style).filter(([_, v]) => v != null))
+  // merge style defaults with incoming style
+  const mergedStyle = {
+    height: '48px',
+    borderRadius: 24,
+    backgroundColor: isActive ? '#fff' : 'transparent',
+    color: isActive ? '#000' : '#fff',
+    fontWeight: isActive ? 600 : 500,
+    border: 'none',
+    outline: 'none',
+    fontSize: '15px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...style,
+  }
+
+  // filter out null/undefined values from mergedStyle
+  const filteredStyle = filterNullishValues(mergedStyle) as MotionStyle
+
   return (
     <motion.button
       key={id}
-      initial={actionZoneAnimationConfig.menuButtonVariants.initial}
-      animate={actionZoneAnimationConfig.menuButtonVariants.animate}
-      exit={actionZoneAnimationConfig.menuButtonVariants.exit}
-      transition={undefined}
-      // @ts-ignore - framer-motion types not fully compatible with Preact
-      class='w-full h-12 flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
-      style={{
-        backgroundColor: isActive ? '#fff' : 'transparent',
-        color: isActive ? '#000' : '#fff',
-        fontWeight: isActive ? 600 : 500,
-        border: 'none',
-        outline: 'none',
-        ...filteredStyle,
-      }}
+      // @ts-ignore - Framer Motion types are not compatible with Tailwind CSS classes
+      className='w-full flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
+      style={filteredStyle}
       onClick={onClick}
       tabIndex={0}
     >

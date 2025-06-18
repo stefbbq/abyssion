@@ -1,0 +1,1043 @@
+diff --git a/components/atoms/ActionZoneButton.tsx b/components/atoms/ActionZoneButton.tsx
+index 35cf077..a9ff5f5 100644
+--- a/components/atoms/ActionZoneButton.tsx
++++ b/components/atoms/ActionZoneButton.tsx
+@@ -2,14 +2,20 @@ import type { NavButtonState } from '@data/types.ts'
+ import { BackIcon, MenuIcon } from '@atoms/icons/index.ts'
+ import { motion } from 'framer-motion'
+ import { CSSProperties } from 'preact/compat'
+-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
++import { actionZoneAnimationConfig } from '@organisms/actionZone.animation.ts'
+ import type { ActionZoneAnimationButton } from '@organisms/actionZone.animation.ts'
+ 
++/**
++ * ActionZoneButton supports animation prop for config-driven variants.
++ *
++ * @example
++ * <ActionZoneButton animation={...} ... />
++ */
+ type Props = {
+-  id: string
+   state: ActionZoneAnimationButton
+   onAction: (action: NavButtonState['action']) => void
+   style: CSSProperties
++  animation?: any
+   onMouseEnter: () => void
+   onMouseLeave: () => void
+   flex?: string
+@@ -23,7 +29,7 @@ type Props = {
+  * Handles smooth morphing between different navigation roles
+  */
+ export const ActionZoneButton = (
+-  { id, state, onAction, style, onMouseEnter, onMouseLeave, flex, transformOrigin, variant = 'outlined' }: Props,
++  { state, onAction, style, animation, onMouseEnter, onMouseLeave, flex, transformOrigin, variant = 'outlined' }: Props,
+ ) => {
+   // tailwind's hover: and focus: utilities are safe for touch devices and pointer devices
+   // browsers will not trigger these on pure touch devices
+@@ -42,17 +48,22 @@ export const ActionZoneButton = (
+     ? `1px solid #666` // theme color can be injected via style if needed
+     : 'none'
+ 
+-  // helper to get the correct animation variant for this button
+-  const getButtonAnimation = () => state.animation || actionZoneAnimationConfig.buttonVariants
++  const defaultButtonAnimation = {
++    initial: { opacity: 0 },
++    animate: { opacity: 1 },
++    exit: { opacity: 0 },
++  }
++
++  // Use animation prop if provided, else state.animation, else local default
++  const getButtonAnimation = () => animation || state.animation || defaultButtonAnimation
+ 
+   return (
+     <div style={{ flex: flex || '0 0 auto' }}>
+       <motion.div
+-        layoutId={id}
+         initial={getButtonAnimation().initial}
+         animate={getButtonAnimation().animate}
+         exit={getButtonAnimation().exit}
+-        transition={undefined}
++        transition={getButtonAnimation().transition}
+         style={{ width: '100%', height: '100%', transformOrigin: transformOrigin || 'center' }}
+       >
+         {isLink && (
+diff --git a/components/atoms/ActionZoneMenuButton.tsx b/components/atoms/ActionZoneMenuButton.tsx
+index 0c600d3..ae2993f 100644
+--- a/components/atoms/ActionZoneMenuButton.tsx
++++ b/components/atoms/ActionZoneMenuButton.tsx
+@@ -1,6 +1,5 @@
+ import { motion } from 'framer-motion'
+ import { CSSProperties } from 'preact/compat'
+-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
+ 
+ type Props = {
+   id: string
+@@ -20,11 +19,6 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
+   return (
+     <motion.button
+       key={id}
+-      initial={actionZoneAnimationConfig.menuButtonVariants.initial}
+-      animate={actionZoneAnimationConfig.menuButtonVariants.animate}
+-      exit={actionZoneAnimationConfig.menuButtonVariants.exit}
+-      transition={undefined}
+-      // @ts-ignore - framer-motion types not fully compatible with Preact
+       class='w-full h-12 flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
+       style={{
+         backgroundColor: isActive ? '#fff' : 'transparent',
+diff --git a/components/molecules/ActionZoneExpandedMenu.tsx b/components/molecules/ActionZoneExpandedMenu.tsx
+deleted file mode 100644
+index 3efdaa0..0000000
+--- a/components/molecules/ActionZoneExpandedMenu.tsx
++++ /dev/null
+@@ -1,125 +0,0 @@
+-import type { MenuItem, SocialLink } from '@data/types.ts'
+-import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
+-import { AnimatePresence, motion } from 'framer-motion'
+-import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
+-import type { UITheme } from '@libtheme/types.ts'
+-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
+-import type { ActionZoneAnimationButton, ActionZoneAnimationVariant } from '@organisms/actionZone.animation.ts'
+-
+-type SocialIconKey = keyof SocialIconMap
+-
+-type Props = {
+-  currentPath: string
+-  menuItems: MenuItem[]
+-  socialLinks: SocialLink[]
+-  onMenuClose: () => void
+-  onAnchorLink: (path: string) => void
+-  theme: UITheme
+-}
+-
+-/**
+- * ExpandedMenu organism
+- * Handles the expanded menu state with social links and navigation items
+- */
+-export const ActionZoneExpandedMenu = ({
+-  currentPath,
+-  menuItems,
+-  socialLinks,
+-  onMenuClose,
+-  onAnchorLink,
+-  theme,
+-}: Props) => {
+-  // get the current expanded menu layout from the animation config
+-  const expandedMenuLayout = actionZoneAnimationConfig.expandedMenu[currentPath] || actionZoneAnimationConfig.expandedMenu.default
+-  const navButtons: ActionZoneAnimationButton[] = expandedMenuLayout.buttons || []
+-
+-  const handleAction = (action: ActionZoneAnimationButton['action'], item: MenuItem) => {
+-    if (item.path.startsWith('#')) onAnchorLink(item.path)
+-    else if (action.type === 'navigate') onMenuClose()
+-  }
+-
+-  // helper to get the correct animation variant for a menu button
+-  const getMenuButtonAnimation = (button: ActionZoneAnimationButton) => {
+-    return button.animation || actionZoneAnimationConfig.expandedMenuVariants.button
+-  }
+-
+-  // helper to resolve the correct keys for motion props
+-  const getMotionProps = (anim: ActionZoneAnimationVariant) => {
+-    if ('hidden' in anim && 'visible' in anim) {
+-      return { initial: anim.hidden, animate: anim.visible }
+-    } else if ('initial' in anim && 'animate' in anim) {
+-      return { initial: anim.initial, animate: anim.animate, exit: anim.exit, transition: anim.transition }
+-    } else {
+-      return {}
+-    }
+-  }
+-
+-  const socialLinksAnim: ActionZoneAnimationVariant = actionZoneAnimationConfig.expandedMenuVariants.socialLinks
+-
+-  return (
+-    <div class='px-6 pb-6 space-y-6'>
+-      {/* social links */}
+-      <AnimatePresence>
+-        <motion.div
+-          key='social-links'
+-          initial={socialLinksAnim.initial}
+-          animate={socialLinksAnim.animate}
+-          exit={socialLinksAnim.exit}
+-          transition={socialLinksAnim.transition}
+-          // @ts-ignore - framer-motion types not fully compatible with Preact
+-          className='flex items-center justify-center space-x-8 pt-2'
+-        >
+-          {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
+-            <motion.a
+-              key={key}
+-              // @ts-ignore - framer-motion types not fully compatible with Preact
+-              href={url}
+-              initial={socialLinksAnim.initial}
+-              animate={socialLinksAnim.animate}
+-              exit={socialLinksAnim.exit}
+-              transition={socialLinksAnim.transition}
+-              class='transition-colors'
+-              style={{ color: theme.colors.text.secondary }}
+-              onMouseEnter={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.primary}
+-              onMouseLeave={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.secondary}
+-              f-client-nav={false}
+-              as='a'
+-            >
+-              {(() => {
+-                const IconComponent = SocialIcons[icon]
+-
+-                return IconComponent
+-                  ? <IconComponent className='w-6 h-6 opacity-60' />
+-                  : <div class='w-6 h-6 rounded bg-current opacity-30' />
+-              })()}
+-            </motion.a>
+-          ))}
+-        </motion.div>
+-      </AnimatePresence>
+-
+-      {/* menu items */}
+-      <motion.div
+-        // @ts-ignore - framer-motion types not fully compatible with Preact
+-        className='space-y-1'
+-        variants={actionZoneAnimationConfig.expandedMenuVariants.container}
+-        initial='hidden'
+-        animate='visible'
+-      >
+-        {navButtons.map((button: ActionZoneAnimationButton, idx: number) => {
+-          const anim = getMenuButtonAnimation(button)
+-          const motionProps = getMotionProps(anim)
+-          return (
+-            <motion.div key={button.id} {...motionProps}>
+-              <ActionZoneMenuButton
+-                id={button.id}
+-                label={button.content.label}
+-                isActive={button.isActive}
+-                onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[idx])}
+-              />
+-            </motion.div>
+-          )
+-        })}
+-      </motion.div>
+-    </div>
+-  )
+-}
+diff --git a/components/molecules/ActionZoneNav.tsx b/components/molecules/ActionZoneNav.tsx
+deleted file mode 100644
+index 62647e5..0000000
+--- a/components/molecules/ActionZoneNav.tsx
++++ /dev/null
+@@ -1,54 +0,0 @@
+-import { useState } from 'preact/hooks'
+-import type { NavButtonState } from '@data/types.ts'
+-import { UITheme } from '@lib/theme/types.ts'
+-import { ActionZoneButton } from '@atoms/ActionZoneButton.tsx'
+-
+-type Props = {
+-  buttons: NavButtonState[]
+-  onAction: (action: NavButtonState['action']) => void
+-  theme: UITheme
+-}
+-
+-export const ActionZoneNav = ({ buttons, onAction, theme }: Props) => {
+-  const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null)
+-
+-  const getButtonStyles = (state: NavButtonState, isHovered: boolean) => {
+-    const isActive = state.isActive || state.role === 'page-title'
+-    const isNavItem = state.role === 'nav-item'
+-    const baseColor = isActive ? theme.colors.text.primary : 'transparent'
+-    const textColor = isActive ? theme.colors.background.primary : theme.colors.text.secondary
+-    const hoverColor = theme.colors.interactive?.ghostHover || theme.colors.background.tertiary
+-
+-    return {
+-      height: '50px',
+-      borderRadius: '25px',
+-      border: isNavItem ? `1px solid ${theme.colors.text.tertiary || '#666'}` : 'none',
+-      display: 'flex',
+-      alignItems: 'center',
+-      justifyContent: 'center',
+-      fontSize: '14px',
+-      backgroundColor: isHovered && !isActive ? hoverColor : baseColor,
+-      color: isHovered && !isActive ? theme.colors.text.primary : textColor,
+-      fontWeight: isActive ? '600' : '500',
+-      cursor: state.action.type === 'none' ? 'default' : 'pointer',
+-    }
+-  }
+-
+-  return (
+-    <div class='w-full flex items-center gap-2 px-6 h-full'>
+-      {buttons.map((buttonState) => (
+-        <ActionZoneButton
+-          key={buttonState.id}
+-          id={buttonState.id}
+-          state={buttonState}
+-          onAction={onAction}
+-          style={getButtonStyles(buttonState, hoveredButtonId === buttonState.id)}
+-          onMouseEnter={() => setHoveredButtonId(buttonState.id)}
+-          onMouseLeave={() => setHoveredButtonId(null)}
+-          flex={buttonState.role === 'action-button' || buttonState.role === 'back-button' ? '0 0 auto' : '1 1 0%'}
+-          variant='outlined'
+-        />
+-      ))}
+-    </div>
+-  )
+-}
+diff --git a/components/organisms/ActionZone.tsx b/components/organisms/ActionZone.tsx
+index 542de65..33e328e 100644
+--- a/components/organisms/ActionZone.tsx
++++ b/components/organisms/ActionZone.tsx
+@@ -1,100 +1,41 @@
+ import { useRef } from 'preact/hooks'
+ import { getTheme } from '@lib/theme/index.ts'
+-import { ComponentChildren } from 'preact'
+-import { AnimatePresence, motion } from 'framer-motion'
+-import { animationStyleFunctions } from '@lib/utils/actionZoneAnimationStyles.ts'
++import { ActionZoneRenderer } from './ActionZone/ActionZoneRenderer.tsx'
++import { actionZoneAnimationConfig } from './actionZone.animation.ts'
+ 
++/**
++ * ActionZone component (refactored)
++ * Uses the recursive ActionZoneRenderer system for fully config-driven rendering and animation.
++ *
++ * @example
++ * <ActionZone isMenuOpen={...} setIsMenuOpen={...} routeKey={...} layoutType='collapsed' />
++ */
+ type Props = {
+   isMenuOpen: boolean
+   setIsMenuOpen: (isOpen: boolean) => void
+-  collapsedChildren: ComponentChildren
+-  expandedChildren: ComponentChildren
+-  routeKey: string
+-  // settings for framer-motion transition, from config
+-  animationConfig?: Record<string, unknown>
+-  // settings for framer-motion layout, from config
+-  layoutConfig?: Record<string, unknown>
+-}
+-
+-const resolveConfigValue = (value: string | unknown) => {
+-  if (typeof value === 'string' && value.endsWith('()')) {
+-    const fnName = value.replace('()', '')
+-    return (animationStyleFunctions as Record<string, (...args: unknown[]) => unknown>)[fnName]?.()
+-  }
+-
+-  return value
++  node: any // resolved config node for current state/route
++  onAction?: (action: any) => void
++  runtimeProps?: Record<string, any>
+ }
+ 
+-/**
+- * ActionZone component
+- *
+- * Main navigation coordinator that orchestrates collapsed and expanded states
+- * Delegates specific responsibilities to specialized organisms
+- */
+ export default function ActionZone({
+   isMenuOpen,
+   setIsMenuOpen,
+-  collapsedChildren,
+-  expandedChildren,
+-  routeKey,
+-  animationConfig = {},
+-  layoutConfig = {},
++  node,
++  onAction,
++  runtimeProps = {},
+ }: Props) {
+-  const navRef = useRef<HTMLElement>(null)
+-  const theme = getTheme()
+-  const showExpandedContent = isMenuOpen
+-  const height = resolveConfigValue(layoutConfig.height)
+-  const borderRadius = resolveConfigValue(layoutConfig.borderRadius)
+-
+   return (
+     <>
+       {/* overlay for expanded menu */}
+-      {showExpandedContent && (
++      {isMenuOpen && (
+         <div
+           className='fixed inset-0 bg-black/50 z-40 md:hidden'
+           onClick={() => setIsMenuOpen(false)}
+         />
+       )}
+-
+-      {/* bottom navigation container */}
+-      <motion.nav
+-        layout
+-        ref={navRef}
+-        // @ts-ignore - framer-motion types not fully compatible with Preact
+-        className={`fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden`}
+-        animate={{
+-          height,
+-          borderRadius,
+-        }}
+-        initial={false}
+-        transition={animationConfig}
+-        style={{
+-          backgroundColor: theme.glass.background,
+-          backdropFilter: 'blur(20px)',
+-          WebkitBackdropFilter: 'blur(20px)',
+-          boxShadow: '0 8px 32px 0 rgba(0,0,0,0.25)',
+-        }}
+-      >
+-        {/* drag handle for expanded menu */}
+-        {showExpandedContent && (
+-          <div className='flex justify-center pt-3 pb-2'>
+-            <div
+-              className='w-12 h-1 rounded-full'
+-              style={{ backgroundColor: theme.colors.text.tertiary }}
+-            />
+-          </div>
+-        )}
+-
+-        <AnimatePresence mode='popLayout'>
+-          <motion.div
+-            key={isMenuOpen ? 'expanded' : routeKey}
+-            // @ts-ignore - framer-motion types not fully compatible with Preact
+-            className='max-w-md mx-auto'
+-          >
+-            {showExpandedContent ? expandedChildren : collapsedChildren}
+-          </motion.div>
+-        </AnimatePresence>
+-      </motion.nav>
++      {/* main ActionZone container, fully config-driven */}
++      <ActionZoneRenderer node={node} keyPath={[]} onAction={onAction} {...runtimeProps} />
+     </>
+   )
+ }
+diff --git a/components/organisms/actionZone.animation.ts b/components/organisms/actionZone.animation.ts
+index f03f4e5..a07dfce 100644
+--- a/components/organisms/actionZone.animation.ts
++++ b/components/organisms/actionZone.animation.ts
+@@ -1,5 +1,6 @@
+-import { animationStyleFunctions, easeInEasing } from '@lib/utils/actionZoneAnimationStyles.ts'
+-import type { NavButtonState } from './types.ts'
++import { collapsed } from './ActionZone/collapsed.ts'
++import { collapsedPage } from './ActionZone/collapsedPage.ts'
++import { expanded } from './ActionZone/expanded.ts'
+ 
+ /**
+  * Defines the state of a button within the action zone for a specific animation variant.
+@@ -37,22 +38,31 @@ export type ActionZoneAnimationLayout = {
+   layout?: ActionZoneAnimationLayoutStyles
+ }
+ 
++/**
++ * Maps route transitions to animation variants.
++ * Example: { '/shows': { '/contact': variant, default: variant }, default: { '/contact': variant } }
++ */
++export type ActionZoneRouteTransitionMap = Record<string, Record<string, ActionZoneAnimationVariant>>
++
++/**
++ * Maps child keys to route-to-route animation variants.
++ * Example: { 'contact': { '/shows': { '/contact': variant } } }
++ */
++export type ActionZoneChildTransitionMap = Record<string, ActionZoneRouteTransitionMap>
++
+ /**
+  * Configuration object that defines all possible animation states for the Action Zone.
+  */
+ export type ActionZoneAnimationConfig = {
+-  // Animation variants for the "collapsed" state, used for default navigation.
+-  collapsedDefault: Record<string, ActionZoneAnimationLayout>
+-  // Animation variants for the "collapsed" state when a back button is present.
+-  collapsedBack: Record<string, ActionZoneAnimationLayout>
+-  // Animation variants for the "expanded" menu state.
+-  expandedMenu: Record<string, ActionZoneAnimationLayout>
+-  // Animation variants for ActionZoneButton (button fade in/out, etc)
+-  buttonVariants: ActionZoneAnimationVariant
+-  // Animation variants for ActionZoneMenuButton (expanded menu item fade in/out)
+-  menuButtonVariants: ActionZoneAnimationVariant
+-  // Animation variants for ActionZoneExpandedMenu container and children
+-  expandedMenuVariants: ActionZoneExpandedMenuVariants
++  collapsed: ActionZoneConfigRoot
++  collapsedPage: ActionZoneConfigRoot
++  expanded: ActionZoneConfigRoot
++  buttonVariants?: ActionZoneAnimationVariant
++  menuButtonVariants?: ActionZoneAnimationVariant
++  expandedMenuVariants?: ActionZoneExpandedMenuVariants
++  transitions?: ActionZoneRouteTransitionMap
++  defaultAnimationVariant?: ActionZoneAnimationVariant
++  childTransitions?: ActionZoneChildTransitionMap
+ }
+ 
+ /**
+@@ -101,202 +111,124 @@ export type AnimatedNavButtonState = NavButtonState & {
+   buttonClassNames?: string
+ }
+ 
+-const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
+-  collapsedDefault: {
+-    // default variant for the collapsed state
+-    default: {
+-      buttons: [
+-        {
+-          id: 'shows',
+-          key: 'shows',
+-          role: 'nav-item',
+-          content: { label: 'Shows' },
+-          position: 'left',
+-          action: { type: 'navigate', href: '/shows' },
+-        },
+-        {
+-          id: 'contact',
+-          key: 'contact',
+-          role: 'nav-item',
+-          content: { label: 'Contact' },
+-          position: 'center',
+-          action: { type: 'navigate', href: '/contact' },
+-        },
+-        {
+-          id: 'menu',
+-          key: 'menu',
+-          role: 'action-button',
+-          content: { label: 'Menu', icon: 'menu' },
+-          position: 'right',
+-          action: { type: 'menu' },
+-        },
+-      ],
+-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
+-      layout: {
+-        height: animationStyleFunctions.getCollapsedHeight,
+-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+-      },
+-    },
+-    // route matched variant for the collapsed state
+-    '/shows': {
+-      buttons: [
+-        {
+-          id: 'back-button',
+-          key: 'back',
+-          role: 'back-button',
+-          content: { label: 'Back', icon: 'back' },
+-          position: 'left',
+-          action: { type: 'back' },
+-          animation: {
+-            initial: { opacity: 0 },
+-            animate: { opacity: 1 },
+-            exit: { opacity: 0, duration: 0.1 },
+-          },
+-          buttonClassNames:
+-            'w-full h-full inline-flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2 nav-button transition focus:outline-none focus:ring-0 active:bg-transparent active:outline-none active:ring-0 hover:bg-transparent',
+-        },
+-        {
+-          id: 'shows',
+-          key: 'page-title',
+-          role: 'page-title',
+-          content: { label: 'Shows' },
+-          position: 'center',
+-          action: { type: 'none' },
+-        },
+-        {
+-          id: 'menu',
+-          key: 'menu',
+-          role: 'action-button',
+-          content: { label: 'Menu', icon: 'menu' },
+-          position: 'right',
+-          action: { type: 'menu' },
+-        },
+-      ],
+-      animation: { type: 'spring', duration: 0.2, easing: easeInEasing },
+-      layout: {
+-        height: animationStyleFunctions.getCollapsedHeight,
+-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+-      },
+-    },
+-    // route matched variant for the collapsed state
+-    '/contact': {
+-      buttons: [
+-        {
+-          id: 'back-button',
+-          key: 'back',
+-          role: 'back-button',
+-          content: { label: 'Back', icon: 'back' },
+-          position: 'left',
+-          action: { type: 'back' },
+-        },
+-        {
+-          id: 'contact',
+-          key: 'page-title',
+-          role: 'page-title',
+-          content: { label: 'Contact' },
+-          position: 'center',
+-          action: { type: 'none' },
+-        },
+-        {
+-          id: 'menu',
+-          key: 'menu',
+-          role: 'action-button',
+-          content: { label: 'Menu', icon: 'menu' },
+-          position: 'right',
+-          action: { type: 'menu' },
+-        },
+-      ],
+-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
+-      layout: {
+-        height: animationStyleFunctions.getCollapsedHeight,
+-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+-      },
+-    },
+-  },
+-  collapsedBack: {
+-    // default variant for the collapsed state with a back button
+-    default: {
+-      buttons: [
+-        {
+-          id: 'back-button',
+-          key: 'back',
+-          role: 'back-button',
+-          content: { label: 'Back', icon: 'back' },
+-          position: 'left',
+-          action: { type: 'back' },
+-        },
+-        {
+-          id: 'page-title',
+-          key: 'page-title',
+-          role: 'page-title',
+-          content: { label: '' },
+-          position: 'center',
+-          action: { type: 'none' },
+-        },
+-        {
+-          id: 'menu',
+-          key: 'menu',
+-          role: 'action-button',
+-          content: { label: 'Menu', icon: 'menu' },
+-          position: 'right',
+-          action: { type: 'menu' },
+-        },
+-      ],
+-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
+-      layout: {
+-        height: animationStyleFunctions.getCollapsedHeight,
+-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+-      },
+-    },
+-  },
+-  expandedMenu: {
+-    // default variant for the expanded menu state
+-    default: {
+-      animation: { type: 'tween', duration: .25, easing: 'easeInOut' },
+-      layout: {
+-        height: animationStyleFunctions.getExpandedHeight,
+-        borderRadius: animationStyleFunctions.getExpandedBorderRadius,
+-      },
+-    },
+-  },
+-  buttonVariants: {
+-    initial: { opacity: 0 },
+-    animate: { opacity: 1, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
+-    exit: { opacity: 0, transition: { duration: 0.2, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
+-  },
+-  menuButtonVariants: {
+-    initial: { opacity: 0 },
+-    animate: { opacity: 1, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
+-    exit: { opacity: 0, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
+-  },
+-  expandedMenuVariants: {
+-    container: {
+-      visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
+-      hidden: {},
+-    },
+-    button: {
+-      visible: { opacity: 1 },
+-      hidden: { opacity: 0 },
+-    },
+-    /**
+-     * Animation variants for social links in the expanded menu
+-     */
+-    socialLinks: {
+-      initial: { opacity: 0 },
+-      animate: { opacity: 1 },
+-      exit: { opacity: 0 },
+-      transition: { duration: 0.3 },
+-    },
+-    /**
+-     * Animation for the parent container <div> of the expanded menu
+-     */
+-    parentContainer: {
+-      initial: {},
+-      animate: {},
+-      exit: {},
+-      transition: {},
+-    },
+-  },
++/**
++ * Main ActionZoneAnimationConfig, composed from modular, fully recursive layout configs.
++ *
++ * @example
++ *   import actionZoneAnimationConfig from '@organisms/actionZone.animation'
++ *   // Add or edit config in ./ActionZone/*.ts for maintainability
++ */
++export const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
++  collapsed,
++  collapsedPage,
++  expanded,
++}
++
++/**
++ * Resolves the most specific animation variant for a route transition.
++ * Falls back to default keys or defaultAnimationVariant as needed.
++ *
++ * @param from - the current route (string)
++ * @param to - the next route (string)
++ * @param config - the ActionZoneAnimationConfig
++ * @returns the resolved ActionZoneAnimationVariant
++ *
++ * @example
++ *   const variant = getRouteTransitionAnimation('/shows', '/contact', actionZoneAnimationConfig)
++ *   // Use: <motion.div {...variant} />
++ */
++export const getRouteTransitionAnimation = (
++  from: string,
++  to: string,
++  config: ActionZoneAnimationConfig,
++): ActionZoneAnimationVariant => {
++  const transitions = config.transitions || {}
++  if (transitions[from] && transitions[from][to]) return transitions[from][to]
++  if (transitions[from] && transitions[from].default) return transitions[from].default
++  if (transitions.default && transitions.default[to]) return transitions.default[to]
++  if (config.defaultAnimationVariant) return config.defaultAnimationVariant
++  return { initial: {}, animate: {} }
++}
++
++/**
++ * Resolves the most specific animation variant for a child (button, title, etc.) for a route transition.
++ * @param childKey - unique key for the child
++ * @param from - previous route
++ * @param to - next route
++ * @param config - ActionZoneAnimationConfig
++ * @returns the resolved ActionZoneAnimationVariant or undefined
++ *
++ * @example
++ *   const anim = getChildTransitionAnimation('contact', '/shows', '/contact', actionZoneAnimationConfig)
++ *   // Use: <motion.div {...anim} />
++ */
++export const getChildTransitionAnimation = (
++  childKey: string,
++  from: string,
++  to: string,
++  config: ActionZoneAnimationConfig,
++): ActionZoneAnimationVariant | undefined => {
++  const childMap = config.childTransitions?.[childKey]
++  if (!childMap) return undefined
++  if (childMap[from] && childMap[from][to]) return childMap[from][to]
++  if (childMap[from] && childMap[from].default) return childMap[from].default
++  if (childMap.default && childMap.default[to]) return childMap.default[to]
++  return undefined
++}
++
++/**
++ * Recursively resolves the most specific config node for a given route, key, and selector path.
++ * Looks up in order: exact route, route-pair, selector, key, '*', '/*', and falls back to parent/default.
++ *
++ * @param config - the root config object (collapsed, collapsedPage, expanded, etc)
++ * @param route - the current route (e.g., '/shows')
++ * @param keyPath - array of keys/selectors from root to target child (e.g., ['contact', 'icon'])
++ * @returns the resolved config node (with animation/style/layout/children)
++ *
++ * @example
++ *   const node = resolveActionZoneConfigNode(collapsed, '/shows', ['contact', 'icon'])
++ *   // node.animation, node.style, node.layout, node.children
++ */
++export const resolveActionZoneConfigNode = (
++  config: any,
++  route: string,
++  keyPath: string[],
++): any => {
++  let node = config[route]
++  if (!node && route.includes('->')) node = config[route]
++  if (!node) node = config['/*']
++  if (!node) node = config['*']
++  if (!node) return undefined
++  if (!keyPath.length) return node
++  const [currentKey, ...rest] = keyPath
++  if (node.children && node.children[currentKey]) {
++    return resolveActionZoneConfigNode(node.children[currentKey], route, rest)
++  }
++  if (node.children) {
++    if (node.children['.' + currentKey]) return resolveActionZoneConfigNode(node.children['.' + currentKey], route, rest)
++    if (node.children['#' + currentKey]) return resolveActionZoneConfigNode(node.children['#' + currentKey], route, rest)
++    if (node.children['*']) return resolveActionZoneConfigNode(node.children['*'], route, rest)
++  }
++  return node
++}
++
++// --- Types for grid/slot-based ActionZone config ---
++
++export type ActionZoneGridLayout = {
++  grid: string
++  slots: string[]
++  gridTemplateRows?: string
++  gridTemplateColumns?: string
++  gap?: string
++}
++
++export type ActionZoneConfigNode = {
++  type: string
++  animation?: ActionZoneAnimationVariant
++  style?: Record<string, any>
++  layout?: ActionZoneGridLayout | string[]
++  children?: Record<string, ActionZoneConfigNode>
++  props?: Record<string, any>
+ }
+ 
+-export default actionZoneAnimationConfig
++export type ActionZoneConfigRoot = Record<string, ActionZoneConfigNode>
+diff --git a/docs/CODEX.md b/docs/CODEX.md
+index 777aa92..b0798f7 100644
+--- a/docs/CODEX.md
++++ b/docs/CODEX.md
+@@ -146,62 +146,39 @@ Component logic is organized using Atomic Design principles in `/components`
+ 
+ ## Animation
+ 
+-- `animation/index.ts` - Main animation exports
+-- `animation/createLogoAnimator.ts` - `createLogoAnimator()`
+-- `animation/core/createAnimationEngine.ts` - `createAnimationEngine()`
+-
+-## Layers
+-
+-- `layers/index.ts` - Barrel exports
+-- `layers/LogoLayer.ts` - `createLogoLayer()`
+-- `layers/GeometricLayer.ts` - `createGeometricLayer()`
+-- `layers/ShadowLayer.ts` - `createShadowLayer()`
+-
+-## Controls
+-
+-- `controls/index.ts` - `createControlsSystem()`
+-- `controls/createControlsSystem.ts` - Main controls orchestrator
+-- `controls/OrbitControlsSetup.ts` - `setupOrbitControls()`
+-
+-## Textures & Shaders
+-
+-- `textures/VideoCycle/index.ts` - `createVideoCycle()`
+-- `shaders/index.ts` - Barrel exports for GLSL shaders
+-- `shaders/ShadowShader.ts` - Gradient shadow shader for the logo layer
+-
+-## Debug & Logger Systems
+-
+-- `lib/debug/index.ts` - Debug mode detection and control
+-- `lib/logger/index.ts` - Structured, color-coded logging system
+-
+-## Utils (Utility Functions)
+-
+-- `utils/index.ts` - Main utils barrel exports. **Note:** Navigation types are now in `data/types.ts`
++- `components/organisms/actionZone.animation.ts` is the main config and type definition file for all ActionZone-related animations.
++- **Per-button, per-route, and per-transition animation is supported:**
++  - Each button can have its own animation variant and Tailwind class override via the config.
++  - The config supports a `transitions` object for route-to-route (from->to) animation variants.
++  - If a specific transition is not defined, sensible fallbacks are used (from->default, default->to, or a global default).
++- **Type definitions** for all animation variants, expanded menu variants, and route transitions are in the animation config file.
++- All animation logic is config-driven and can be updated without touching component code.
++
++### Example Transition Config
++
++```ts
++transitions: {
++  '/shows': {
++    '/contact': { /* custom animation for shows -> contact */ },
++    default: { /* fallback for shows -> any */ }
++  },
++  default: {
++    '/contact': { /* fallback for any -> contact */ }
++  }
++},
++defaultAnimationVariant: { initial: {...}, animate: {...}, exit: {...} }
++```
+ 
+-## Documentation
++### Usage
+ 
+-- `THEME_SYSTEM.md` - Complete theme system architecture guide
+-- `CODEX.md` - This file
+-- `LLM_GUIDE.md` - LLM code styles and guidelines.
++- Use a helper to get the correct animation variant for a transition:
+ 
+-## Core Architecture Summary
++```ts
++const animationVariant = getRouteTransitionAnimation(currentRoute, nextRoute, actionZoneAnimationConfig)
++```
+ 
+-- **Routing**: Fresh-based, with a partial-first approach. UI and access control are configured in `data/pages.json` and enforced by `_app.tsx` and `_middleware.ts`
+-- **Data & Types**: All static content is in `/data`, with all corresponding TypeScript types co-located in `data/types.ts`
+-- **State Management**: Primarily Preact Signals for UI state
+-- **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic
++- Pass this variant to Framer Motion's `initial`, `animate`, `exit`, and `transition` props.
+ 
+-## Chromatic Aberration & Glitch Effects
++## Layers
+ 
+-- The chromatic aberration (RGB split) and glitch effect is implemented in `lib/gl/shaders/ElectricShader.ts` as `finalPassFragmentShader`.
+-- The effect can operate in two modes:
+-  - Classic: Subtle, global chromatic aberration.
+-  - Segmented/Flickery: Horizontal bands flicker and desync, with theme color pops (purple, blue, etc.) appearing in some bands. Bands and color pops are controlled by noise/hash for irregularity.
+-- The mode and effect parameters are controlled by uniforms:
+-  - `segmentedGlitchMode`: 0 = classic, 1 = segmented/flickery
+-  - `glitchIntensity`: How strong the segmented effect is (tunable for animation)
+-  - `flickerRate`: How fast bands flicker (tunable for animation)
+-  - `colorPopIntensity`: How much theme color pops in (tunable for animation)
+-  - `themePrimary`, `themeAccent`, `themeSecondary`: Theme colors used for color pops
+-- All uniforms can be animated (e.g., for page transitions) by updating the values in the post-processing pipeline (`lib/gl/scene/createPostProcessing.ts`).
+-- The effect is visible in the final post-processing pass (`finalPass`).
++- `layers/index.ts`
+\ No newline at end of file
+diff --git a/islands/ActionZoneController.tsx b/islands/ActionZoneController.tsx
+index 80e6141..ea05866 100644
+--- a/islands/ActionZoneController.tsx
++++ b/islands/ActionZoneController.tsx
+@@ -1,14 +1,9 @@
+ import { useEffect, useState } from 'preact/hooks'
+ import { useSignal } from '@preact/signals'
+ import { getTheme } from '@lib/theme/index.ts'
+-import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
+-import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
+ import navData from '@data/nav.json' with { type: 'json' }
+-import actionZoneData from '@organisms/actionZone.animation.ts'
++import { actionZoneAnimationConfig, getRouteTransitionAnimation, resolveActionZoneConfigNode } from '@organisms/actionZone.animation.ts'
+ import ActionZone from '@organisms/ActionZone.tsx'
+-import type { MenuItem, NavButtonState } from '@data/types.ts'
+-import type { ActionZoneAnimationLayout } from '@organisms/actionZone.animation.ts'
+-import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
+ import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
+ 
+ type Props = {
+@@ -20,15 +15,15 @@ export default function ActionZoneController({ currentPath }: Props) {
+   const [isMenuOpen, setIsMenuOpen] = useState(false)
+   const theme = getTheme()
+   const currentRoute = useSignal(currentPath || '/')
++  const previousRoute = useSignal(currentPath || '/')
+ 
+   useEffect(() => {
+     setIsMounted(true)
+-
+     const handleNavigate = () => {
+       const newPath = globalThis.location.pathname
++      previousRoute.value = currentRoute.value
+       currentRoute.value = newPath
+     }
+-
+     document.addEventListener('DOMContentLoaded', handleNavigate)
+     globalThis.addEventListener('popstate', handleNavigate)
+     const originalPushState = history.pushState
+@@ -36,7 +31,6 @@ export default function ActionZoneController({ currentPath }: Props) {
+       originalPushState.apply(this, args)
+       handleNavigate()
+     }
+-
+     return () => {
+       document.removeEventListener('DOMContentLoaded', handleNavigate)
+       globalThis.addEventListener('popstate', handleNavigate)
+@@ -44,7 +38,7 @@ export default function ActionZoneController({ currentPath }: Props) {
+     }
+   }, [])
+ 
+-  const handleAction = (action: NavButtonState['action']) => {
++  const handleAction = (action: any) => {
+     switch (action.type) {
+       case 'back':
+         globalThis.history.back()
+@@ -57,80 +51,42 @@ export default function ActionZoneController({ currentPath }: Props) {
+     }
+   }
+ 
+-  const handleAnchorLink = (path: string) => {
+-    if (path.startsWith('#')) {
+-      const element = document.querySelector(path)
+-      element?.scrollIntoView({ behavior: 'smooth' })
+-      setIsMenuOpen(false)
+-      return true
+-    }
+-
+-    return false
+-  }
+-
+   if (!isMounted) return null
+ 
+-  /**
+-   * getCollapsedButtons
+-   * Returns the correct button array for the current route and state, using the config and route-matching utility.
+-   * Uses 'collapsed-default' state for now.
+-   */
+-  const getCollapsedButtons = () => {
+-    const state = 'collapsedDefault'
+-    const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
+-    if (!config || !Array.isArray(config.buttons)) return []
++  // Determine the current ActionZone layout type
++  let layoutType: 'collapsed' | 'collapsedPage' | 'expanded' = 'collapsed'
++  if (isMenuOpen) layoutType = 'expanded'
++  // TODO: add logic for collapsedPage if needed
+ 
+-    // Patch in page title if needed
+-    const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
+-    return config.buttons.map((button: NavButtonState) => {
+-      if (button.role === 'page-title') {
+-        const label = button.content.label || page?.label || ''
+-        return { ...button, content: { ...button.content, label } }
+-      }
++  // Resolve the config node for the current route/layout
++  const configRoot = actionZoneAnimationConfig[layoutType]
++  const node = resolveActionZoneConfigNode(configRoot, currentRoute.value, [])
+ 
+-      return button
+-    })
++  // Prepare runtime props (theme, nav, social, etc)
++  const runtimeProps = {
++    theme,
++    menuItems: navData.mainNav,
++    socialLinks: navData.socialLinks,
++    // Add more as needed
+   }
+ 
+-  // Determine the current ActionZone state
+-  const state = isMenuOpen ? 'expandedMenu' : 'collapsedDefault'
+-  const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
+-  const animationConfig = config?.animation || {}
+-  const layoutConfig = config?.layout || {}
+-
+   return (
+-    <>
+-      <div className='md:hidden'>
+-        <ActionZoneFadeout
+-          height={160}
+-          gradientStart={0}
+-          gradientEnd={90}
+-          color={theme.glass.background}
+-          bottom={0}
+-          zIndex={49}
+-        />
+-        <ActionZone
+-          {...{ isMenuOpen, setIsMenuOpen, animationConfig, layoutConfig }}
+-          routeKey={currentRoute.value}
+-          collapsedChildren={
+-            <ActionZoneNav
+-              onAction={handleAction}
+-              theme={theme}
+-              buttons={getCollapsedButtons()}
+-            />
+-          }
+-          expandedChildren={
+-            <ActionZoneExpandedMenu
+-              currentPath={currentRoute.value}
+-              menuItems={navData.mainNav}
+-              socialLinks={navData.socialLinks}
+-              onMenuClose={() => setIsMenuOpen(false)}
+-              onAnchorLink={handleAnchorLink}
+-              theme={theme}
+-            />
+-          }
+-        />
+-      </div>
+-    </>
++    <div className='md:hidden'>
++      <ActionZoneFadeout
++        height={160}
++        gradientStart={0}
++        gradientEnd={90}
++        color={theme.glass.background}
++        bottom={0}
++        zIndex={49}
++      />
++      <ActionZone
++        isMenuOpen={isMenuOpen}
++        setIsMenuOpen={setIsMenuOpen}
++        node={node}
++        onAction={handleAction}
++        runtimeProps={runtimeProps}
++      />
++    </div>
+   )
+ }
