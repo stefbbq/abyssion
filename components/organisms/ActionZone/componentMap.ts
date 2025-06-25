@@ -1,6 +1,6 @@
-import { ActionZoneContainer } from '@atoms/ActionZoneContainer.tsx'
-import { ActionZoneButton } from '@atoms/ActionZoneButton.tsx'
-import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
+import { ActionZoneContainer } from './ActionZoneContainer.tsx'
+import { ActionZoneButton } from './ActionZoneButton.tsx'
+import { ActionZoneMenuButton } from './ActionZoneMenuButton.tsx'
 import { SocialLinks } from '@molecules/SocialLinks.tsx'
 import type { ComponentType } from 'preact'
 

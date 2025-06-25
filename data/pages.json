@@ -1,5 +1,16 @@
 {
-  "/": {},
+  "/": {
+    "actionZoneLayout": "collapsed"
+  },
+  "/shows": {
+    "actionZoneLayout": "collapsedPage"
+  },
+  "/contact": {
+    "actionZoneLayout": "collapsedPage"
+  },
+  "/bio": {
+    "actionZoneLayout": "collapsedPage"
+  },
   "/theme": {
     "debugOnly": true,
     "showHeader": false,

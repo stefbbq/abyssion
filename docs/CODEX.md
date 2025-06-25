@@ -122,8 +122,9 @@ export const componentMap: Record<ActionZoneComponentType, ComponentType<any>> =
 ### Animation Helpers
 
 - `resolveActionZoneConfigNode`: Recursively resolves the most specific config node for a given route and key path.
-- `getRouteTransitionAnimation`: Resolves the most specific animation variant for a route transition.
-- `getChildTransitionAnimation`: Resolves the most specific animation variant for a child during a route transition.
+- `getLayoutForRoute`: Determines which ActionZone layout should be used for each route based on pages.json configuration.
+
+Layout transitions are now handled via `configurations/layoutTransitions.ts` which defines layout-to-layout transitions (e.g., collapsed → expanded).
 
 All helpers are in `/components/organisms/ActionZone/utils/`.
 
@@ -296,13 +297,12 @@ defaultAnimationVariant: { initial: {...}, animate: {...}, exit: {...} }
 
 ### Usage
 
-- Use a helper to get the correct animation variant for a transition:
+Layout transitions are automatically handled based on the current layout state. The system uses layout-to-layout transitions defined in `configurations/layoutTransitions.ts`.
 
-```ts
-const animationVariant = getRouteTransitionAnimation(currentRoute, nextRoute, actionZoneAnimationConfig)
-```
-
-- Pass this variant to Framer Motion's `initial`, `animate`, `exit`, and `transition` props.
+Example layout transition flow:
+- User clicks "Shows" → Layout transitions from `collapsed` to `collapsedPage`
+- User opens menu → Layout transitions to `expanded`
+- User closes menu → Layout transitions back to previous state
 
 ## Layers
 

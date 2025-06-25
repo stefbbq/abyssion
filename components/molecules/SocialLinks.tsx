@@ -1,4 +1,5 @@
 import { icons as SocialIcons } from '../atoms/icons/index.ts'
+import { motion } from 'framer-motion'
 
 /**
  * SocialLinks
@@ -16,12 +17,13 @@ type SocialLinksProps = {
     socialLinks: SocialLink[]
     theme?: any
   }
+  animation?: any
 }
 
-export const SocialLinks = ({ props }: SocialLinksProps) => {
+export const SocialLinks = ({ props, animation = {} }: SocialLinksProps) => {
   if (!props?.socialLinks) return null
   return (
-    <div class='flex items-center justify-center space-x-8 pt-2'>
+    <motion.div {...animation} class='flex items-center justify-center space-x-8 pt-2'>
       {props.socialLinks.map(({ key, url, icon }) => {
         const IconComponent = SocialIcons[icon as keyof typeof SocialIcons] || (() => <div class='w-6 h-6 rounded bg-current opacity-30' />)
         return (
@@ -39,6 +41,6 @@ export const SocialLinks = ({ props }: SocialLinksProps) => {
           </a>
         )
       })}
-    </div>
+    </motion.div>
   )
 }

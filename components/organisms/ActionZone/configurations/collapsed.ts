@@ -1,4 +1,4 @@
-import { animationStyleFunctions, easeInEasing } from '../utils/actionZoneAnimationStyles.ts'
+import { fadeInOutAnimation } from '../constants.ts'
 import type { ActionZoneConfigRoot } from './types.ts'
 
 /**
@@ -11,10 +11,6 @@ import type { ActionZoneConfigRoot } from './types.ts'
 export const collapsed: ActionZoneConfigRoot = {
   '/*': {
     type: 'container',
-    style: {
-      height: animationStyleFunctions.getCollapsedHeight(),
-      borderRadius: animationStyleFunctions.getCollapsedBorderRadius(),
-    },
     layout: {
       grid: 'rows: 1; cols: 3',
       slots: ['shows', 'contact', 'menu'],
@@ -27,6 +23,7 @@ export const collapsed: ActionZoneConfigRoot = {
     children: {
       shows: {
         type: 'button',
+        animation: fadeInOutAnimation,
         props: {
           key: 'shows',
           role: 'nav-item',
@@ -37,6 +34,7 @@ export const collapsed: ActionZoneConfigRoot = {
       },
       contact: {
         type: 'button',
+        animation: fadeInOutAnimation,
         props: {
           key: 'contact',
           role: 'nav-item',
@@ -49,6 +47,7 @@ export const collapsed: ActionZoneConfigRoot = {
         type: 'button',
         props: {
           key: 'menu',
+          layoutId: 'menu-button', // Enables morphing across layouts
           role: 'action-button',
           content: { label: 'Menu', icon: 'menu' },
           position: 'right',
@@ -56,24 +55,5 @@ export const collapsed: ActionZoneConfigRoot = {
         },
       },
     },
-    animation: {
-      initial: {
-        height: animationStyleFunctions.getExpandedHeight(),
-        borderRadius: animationStyleFunctions.getExpandedBorderRadius(),
-      },
-      animate: {
-        height: animationStyleFunctions.getCollapsedHeight(),
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius(),
-      },
-      exit: {
-        height: animationStyleFunctions.getExpandedHeight(),
-        borderRadius: animationStyleFunctions.getExpandedBorderRadius(),
-      },
-      transition: {
-        duration: 0.3,
-        ease: easeInEasing,
-      },
-    },
   },
-  // Add route-specific, selector-specific, or child-specific overrides as needed
 }

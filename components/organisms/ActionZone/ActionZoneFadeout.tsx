@@ -32,11 +32,10 @@ export const ActionZoneFadeout: FunctionalComponent<Props> = ({
       pointerEvents: 'none',
       zIndex,
       background: `
-        linear-gradient(to bottom, rgba(0,0,0,0) ${gradientStart}%, ${color} ${gradientEnd}%),
-        url('/noise.png')
+        linear-gradient(to bottom, rgba(0,0,0,0) ${gradientStart}%, ${color} ${gradientEnd}%)
       `,
-      backgroundSize: `100% 100%, 200px 200px`,
-      backgroundRepeat: `no-repeat, repeat`,
+      backgroundSize: `100% 100%`,
+      backgroundRepeat: `no-repeat`,
     }}
   />
 )

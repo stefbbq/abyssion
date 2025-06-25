@@ -16,6 +16,7 @@ const DARK_CONTEXT_COLORS: Record<LogContext, string> = {
   [LogContext.GL_SHADERS]: `${baseStyle} background: #87cefa; color: black;`,
   [LogContext.GL_TEXTURES]: `${baseStyle} background: #636363; color: white;`,
   [LogContext.PREACT]: `${baseStyle} background: #777; color: white;`,
+  [LogContext.ACTION_ZONE]: `${baseStyle} background: #555; color: white;`, // Darker gray
 }
 
 /**
@@ -31,6 +32,7 @@ const LIGHT_CONTEXT_COLORS: Record<LogContext, string> = {
   [LogContext.GL_SHADERS]: `${baseStyle} background: #4169e1; color: white;`, // Royal blue
   [LogContext.GL_TEXTURES]: `${baseStyle} background: #2f4f4f; color: white;`, // Dark slate gray
   [LogContext.PREACT]: `${baseStyle} background: #555; color: white;`, // Darker gray
+  [LogContext.ACTION_ZONE]: `${baseStyle} background: #555; color: white;`, // Darker gray
 }
 
 /**

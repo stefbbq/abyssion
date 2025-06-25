@@ -44,11 +44,7 @@ export default function App({ Component, url }: PageProps) {
         </PageContainer>
 
         {/* action zone */}
-        {showActionZone && (
-          <div class='relative z-20'>
-            <ActionZoneController currentPath={url.pathname} />
-          </div>
-        )}
+        {showActionZone && <ActionZoneController currentPath={url.pathname} />}
       </body>
     </html>
   )

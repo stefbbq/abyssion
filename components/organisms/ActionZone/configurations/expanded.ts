@@ -1,9 +1,10 @@
-import { animationStyleFunctions, easeInEasing } from '../utils/actionZoneAnimationStyles.ts'
+import { easeInOutEasing, socialLinksAnimation, staggeredContainerVariants, staggeredMenuAnimation } from '../constants.ts'
+import { collapsedBorderRadius, collapsedHeight, expandedBorderRadius, expandedHeight } from '../constants.ts'
 import type { ActionZoneConfigRoot } from './types.ts'
 
 /**
  * Expanded layout config for ActionZone
- * Fully recursive: animation, style, layout, and children (same structure at every level).
+ * Features staggered animations for menu items and improved timing
  *
  * @example
  * import { expanded } from './ActionZone/expanded'
@@ -11,28 +12,7 @@ import type { ActionZoneConfigRoot } from './types.ts'
 export const expanded: ActionZoneConfigRoot = {
   '/*': {
     type: 'container',
-    style: {
-      height: animationStyleFunctions.getCollapsedHeight(),
-      borderRadius: animationStyleFunctions.getExpandedBorderRadius(),
-    },
-    animation: {
-      initial: {
-        height: animationStyleFunctions.getCollapsedHeight(),
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius(),
-      },
-      animate: {
-        height: animationStyleFunctions.getExpandedHeight(),
-        borderRadius: animationStyleFunctions.getExpandedBorderRadius(),
-      },
-      exit: {
-        height: animationStyleFunctions.getCollapsedHeight(),
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius(),
-      },
-      transition: {
-        duration: 0.3,
-        ease: easeInEasing,
-      },
-    },
+    animation: staggeredContainerVariants,
     layout: {
       grid: 'rows: 2; cols: 1',
       slots: ['socialLinks', 'shows', 'contact', 'about'],
@@ -46,40 +26,23 @@ export const expanded: ActionZoneConfigRoot = {
         props: {
           // socialLinks: to be injected at runtime or via context/props
         },
-        animation: {
-          initial: { opacity: 1 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-        },
+        animation: socialLinksAnimation,
       },
       shows: {
         type: 'menuButton',
         props: { id: 'shows', label: 'Shows', isActive: false },
-        animation: {
-          initial: { opacity: 1 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-        },
+        animation: staggeredMenuAnimation,
       },
       contact: {
         type: 'menuButton',
         props: { id: 'contact', label: 'Contact', isActive: false },
-        animation: {
-          initial: { opacity: 1 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-        },
+        animation: staggeredMenuAnimation,
       },
       about: {
         type: 'menuButton',
         props: { id: 'about', label: 'About', isActive: false },
-        animation: {
-          initial: { opacity: 1 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-        },
+        animation: staggeredMenuAnimation,
       },
     },
   },
-  // Add route-specific, selector-specific, or child-specific overrides as needed
 }

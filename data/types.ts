@@ -8,6 +8,8 @@ export type PageConfig = {
   showHeader?: boolean
   /** If false, the mobile action zone will be hidden on this page. */
   showActionZone?: boolean
+  /** Specifies the ActionZone layout type for this page. Defaults to 'collapsedPage' for subpages. */
+  actionZoneLayout?: 'collapsed' | 'collapsedPage' | 'expanded'
 }
 
 /**

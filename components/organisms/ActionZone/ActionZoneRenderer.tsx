@@ -1,16 +1,18 @@
 import { motion } from 'framer-motion'
-import type { ActionZoneConfigNode } from './configurations/types.ts'
+import type { ActionZoneConfigNode, LayoutState } from './configurations/types.ts'
 import { componentMap } from './componentMap.ts'
-import { ActionZoneGrid } from '@molecules/ActionZoneGrid.tsx'
+import { ActionZoneContainer } from './ActionZoneContainer.tsx'
+import type { CSSProperties } from 'react'
+import { actionZoneLayoutTransitions } from './configurations/index.ts'
 
-/**
- * Props for ActionZoneRenderer
- */
-type ActionZoneRendererProps = {
+type Props = {
   node: ActionZoneConfigNode
   keyPath?: string[]
   onAction?: (action: any) => void
   runtimeProps?: Record<string, unknown>
+  layoutState?: LayoutState // Current layout state
+  previousLayoutState?: LayoutState // Previous layout state for transitions
+  onExitComplete?: () => void
 }
 
 /**
@@ -22,57 +24,144 @@ type ActionZoneRendererProps = {
  * <ActionZoneRenderer node={configNode} keyPath={[]} />
  */
 export const ActionZoneRenderer = (
-  { node, keyPath = [], onAction, runtimeProps = {} }: ActionZoneRendererProps,
+  {
+    node, //
+    keyPath = [],
+    onAction,
+    runtimeProps = {},
+    layoutState,
+    previousLayoutState,
+    onExitComplete,
+  }: Props,
 ) => {
-  if (!node) return null
-
   const Component = (componentMap as Record<string, any>)[node.type] || motion.div
 
-  // on grid
-  if (node.layout && typeof node.layout === 'object' && node.layout.grid && node.layout.slots) {
+  if (!node) return null
+
+  // Get layout transition-specific animation if transitioning
+  let animation = node.animation
+  if (previousLayoutState && layoutState && previousLayoutState !== layoutState && keyPath.length > 0) {
+    const transitionKey = `${previousLayoutState}->${layoutState}` as keyof typeof actionZoneLayoutTransitions
+    const layoutTransition = actionZoneLayoutTransitions[transitionKey]
+    const childKey = keyPath[keyPath.length - 1] // Get the current element's key
+
+    if (layoutTransition?.children && childKey in layoutTransition.children) {
+      animation = layoutTransition.children[childKey as keyof typeof layoutTransition.children]
+      console.log(`[ActionZoneRenderer] Using child transition for ${childKey}:`, animation)
+    }
+  }
+
+  // Handle container (grid/slot logic)
+  if (node.type === 'container') {
     return (
-      <ActionZoneGrid
-        node={node}
+      <ActionZoneContainer
+        style={{
+          ...node.style,
+          position: 'fixed',
+          bottom: '1rem',
+          left: '1rem',
+          right: '1rem',
+          zIndex: 50,
+          paddingTop: '0.75rem',
+          paddingBottom: '0.75rem',
+          // Don't override height if it exists in node.style
+        } as CSSProperties}
+        layout={node.layout}
+        childrenMap={node.children}
+        animation={animation}
         keyPath={keyPath}
         onAction={onAction}
         runtimeProps={runtimeProps}
+        layoutState={layoutState}
+        previousLayoutState={previousLayoutState}
+        onExitComplete={onExitComplete}
       />
     )
   }
 
-  // on button
+  // Handle button
   if (node.type === 'button') {
-    return (
-      <Component
-        key={keyPath.join('-') || node.type}
-        state={node.props}
-        onAction={onAction}
-      />
-    )
+    const buttonId = node.props?.key || node.props?.role || 'button'
+    console.log('[ActionZoneRenderer] Rendering button:', {
+      buttonId,
+      nodeProps: node.props,
+      keyPath,
+      animation,
+    })
+
+    const buttonProps = {
+      key: `${[...keyPath, 'button', buttonId].join('-')}`,
+      state: node.props,
+      ...animation,
+      onAction,
+      layoutId: node.props?.layoutId as string | undefined,
+    }
+
+    console.log('[ActionZoneRenderer] Button props:', buttonProps)
+    return <Component {...buttonProps} />
   }
 
-  // on container
+  // Handle menuButton (needs special props like button)
+  if (node.type === 'menuButton') {
+    const buttonId = node.props?.id || node.props?.label || 'menuButton'
+    console.log('[ActionZoneRenderer] Rendering menuButton:', {
+      buttonId,
+      nodeProps: node.props,
+      keyPath,
+      animation,
+    })
+
+    // Create onClick handler for menu button
+    const handleMenuButtonClick = (event: Event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      console.log('[ActionZoneRenderer] MenuButton clicked:', buttonId)
+
+      if (onAction && buttonId) {
+        onAction({
+          type: 'navigate',
+          href: `/${buttonId}`,
+          id: buttonId,
+        })
+      }
+    }
+
+    const menuButtonProps = {
+      key: `${[...keyPath, 'menuButton', buttonId].join('-')}`,
+      id: buttonId,
+      label: node.props?.label || buttonId,
+      isActive: node.props?.isActive || false,
+      onClick: handleMenuButtonClick,
+      ...animation,
+      layoutId: node.props?.layoutId as string | undefined,
+    }
+
+    console.log('[ActionZoneRenderer] MenuButton props:', menuButtonProps)
+    return <Component {...menuButtonProps} />
+  }
+
+  // Handle other components (socialLinks, etc.)
   return (
     <Component
       key={keyPath.join('-') || node.type}
-      {...(node.animation || {})}
+      {...(animation || {})}
       {...(node.props || {})}
       {...(node.type === 'button' ? { onAction } : {})}
     >
-      {node.layout && Array.isArray(node.layout.slots) &&
-        node.layout.slots.map((childKey: string) => {
-          const child = node.children?.[childKey]
-          if (!child) return null
-          return (
-            <ActionZoneRenderer
-              key={childKey}
-              node={child}
-              keyPath={[...keyPath, childKey]}
-              onAction={onAction}
-              runtimeProps={runtimeProps}
-            />
-          )
-        })}
+      {node.layout && Array.isArray(node.layout.slots) && node.layout.slots.map((childKey: string) => {
+        const child = node.children?.[childKey]
+        if (!child) return null
+
+        console.log('[ActionZoneRenderer] rendering child', { childKey, keyPath: [...keyPath, childKey], child })
+        return (
+          <ActionZoneRenderer
+            key={childKey}
+            node={child}
+            keyPath={[...keyPath, childKey]}
+            {...{ onAction, runtimeProps, layoutState, previousLayoutState }}
+          />
+        )
+      })}
     </Component>
   )
 }
