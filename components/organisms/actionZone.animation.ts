@@ -1,5 +1,5 @@
 import { animationStyleFunctions, easeInEasing } from '@lib/utils/actionZoneAnimationStyles.ts'
-import type { NavButtonState } from './types.ts'
+import type { NavButtonState } from '@data/types.ts'
 
 /**
  * Defines the state of a button within the action zone for a specific animation variant.
@@ -252,11 +252,37 @@ const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
   expandedMenu: {
     // default variant for the expanded menu state
     default: {
-      animation: { type: 'tween', duration: .25, easing: 'easeInOut' },
+      animation: { type: 'tween', duration: 0.4, easing: 'easeInOut' },
       layout: {
         height: animationStyleFunctions.getExpandedHeight,
         borderRadius: animationStyleFunctions.getExpandedBorderRadius,
       },
+      buttons: [
+        {
+          id: 'back-button',
+          key: 'back',
+          role: 'back-button',
+          content: { label: 'Home' },
+          position: 'left',
+          action: { type: 'back' },
+        },
+        {
+          id: 'page-title',
+          key: 'page-title',
+          role: 'page-title',
+          content: { label: 'Shows' },
+          position: 'center',
+          action: { type: 'none' },
+        },
+        {
+          id: 'menu',
+          key: 'menu',
+          role: 'action-button',
+          content: { label: 'Contact' },
+          position: 'right',
+          action: { type: 'menu' },
+        },
+      ],
     },
   },
   buttonVariants: {
@@ -272,7 +298,7 @@ const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
   expandedMenuVariants: {
     container: {
       visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
-      hidden: {},
+      hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
     },
     button: {
       visible: { opacity: 1 },
@@ -285,7 +311,7 @@ const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: 0.3 },
+      transition: { duration: 0.15 },
     },
     /**
      * Animation for the parent container <div> of the expanded menu

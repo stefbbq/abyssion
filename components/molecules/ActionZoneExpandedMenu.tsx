@@ -38,64 +38,42 @@ export const ActionZoneExpandedMenu = ({
     else if (action.type === 'navigate') onMenuClose()
   }
 
-  // helper to get the correct animation variant for a menu button
-  const getMenuButtonAnimation = (button: ActionZoneAnimationButton) => {
-    return button.animation || actionZoneAnimationConfig.expandedMenuVariants.button
-  }
-
-  // helper to resolve the correct keys for motion props
-  const getMotionProps = (anim: ActionZoneAnimationVariant) => {
-    if ('hidden' in anim && 'visible' in anim) {
-      return { initial: anim.hidden, animate: anim.visible }
-    } else if ('initial' in anim && 'animate' in anim) {
-      return { initial: anim.initial, animate: anim.animate, exit: anim.exit, transition: anim.transition }
-    } else {
-      return {}
-    }
-  }
-
   const socialLinksAnim: ActionZoneAnimationVariant = actionZoneAnimationConfig.expandedMenuVariants.socialLinks
 
   return (
     <div class='px-6 pb-6 space-y-6'>
       {/* social links */}
-      <AnimatePresence>
-        <motion.div
-          key='social-links'
-          initial={socialLinksAnim.initial}
-          animate={socialLinksAnim.animate}
-          exit={socialLinksAnim.exit}
-          transition={socialLinksAnim.transition}
-          // @ts-ignore - framer-motion types not fully compatible with Preact
-          className='flex items-center justify-center space-x-8 pt-2'
-        >
-          {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
-            <motion.a
-              key={key}
-              // @ts-ignore - framer-motion types not fully compatible with Preact
-              href={url}
-              initial={socialLinksAnim.initial}
-              animate={socialLinksAnim.animate}
-              exit={socialLinksAnim.exit}
-              transition={socialLinksAnim.transition}
-              class='transition-colors'
-              style={{ color: theme.colors.text.secondary }}
-              onMouseEnter={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.primary}
-              onMouseLeave={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.secondary}
-              f-client-nav={false}
-              as='a'
-            >
-              {(() => {
-                const IconComponent = SocialIcons[icon]
+      <motion.div
+        key='social-links'
+        // @ts-ignore - framer-motion types not fully compatible with Preact
+        className='flex items-center justify-center space-x-8 pt-2'
+        initial={socialLinksAnim.initial}
+        animate={socialLinksAnim.animate}
+        exit={socialLinksAnim.exit}
+        transition={socialLinksAnim.transition}
+      >
+        {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
+          <motion.a
+            key={key}
+            // @ts-ignore - framer-motion types not fully compatible with Preact
+            href={url}
+            class='transition-colors'
+            style={{ color: theme.colors.text.secondary }}
+            onMouseEnter={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.primary}
+            onMouseLeave={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.secondary}
+            f-client-nav={false}
+            as='a'
+          >
+            {(() => {
+              const IconComponent = SocialIcons[icon]
 
-                return IconComponent
-                  ? <IconComponent className='w-6 h-6 opacity-60' />
-                  : <div class='w-6 h-6 rounded bg-current opacity-30' />
-              })()}
-            </motion.a>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+              return IconComponent
+                ? <IconComponent className='w-6 h-6 opacity-60' />
+                : <div class='w-6 h-6 rounded bg-current opacity-30' />
+            })()}
+          </motion.a>
+        ))}
+      </motion.div>
 
       {/* menu items */}
       <motion.div
@@ -104,12 +82,14 @@ export const ActionZoneExpandedMenu = ({
         variants={actionZoneAnimationConfig.expandedMenuVariants.container}
         initial='hidden'
         animate='visible'
+        exit='hidden'
       >
         {navButtons.map((button: ActionZoneAnimationButton, idx: number) => {
-          const anim = getMenuButtonAnimation(button)
-          const motionProps = getMotionProps(anim)
           return (
-            <motion.div key={button.id} {...motionProps}>
+            <motion.div
+              key={button.id}
+              variants={actionZoneAnimationConfig.expandedMenuVariants.button}
+            >
               <ActionZoneMenuButton
                 id={button.id}
                 label={button.content.label}
