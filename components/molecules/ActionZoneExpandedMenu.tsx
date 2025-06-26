@@ -1,10 +1,9 @@
 import type { MenuItem, SocialLink } from '@data/types.ts'
 import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
-import { AnimatePresence, motion } from 'framer-motion'
 import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
-import type { UITheme } from '@libtheme/types.ts'
+import type { UITheme } from '@lib/theme/types.ts'
 import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
-import type { ActionZoneAnimationButton, ActionZoneAnimationVariant } from '@organisms/actionZone.animation.ts'
+import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
 
 type SocialIconKey = keyof SocialIconMap
 
@@ -29,33 +28,23 @@ export const ActionZoneExpandedMenu = ({
   onAnchorLink,
   theme,
 }: Props) => {
-  // get the current expanded menu layout from the animation config
-  const expandedMenuLayout = actionZoneAnimationConfig.expandedMenu[currentPath] || actionZoneAnimationConfig.expandedMenu.default
-  const navButtons: ActionZoneAnimationButton[] = expandedMenuLayout.buttons || []
+  const navButtons: ActionZoneButton[] = actionZoneAnimationConfig.expandedMenu.buttons || []
 
-  const handleAction = (action: ActionZoneAnimationButton['action'], item: MenuItem) => {
+  const handleAction = (action: ActionZoneButton['action'], item: MenuItem) => {
     if (item.path.startsWith('#')) onAnchorLink(item.path)
     else if (action.type === 'navigate') onMenuClose()
   }
 
-  const socialLinksAnim: ActionZoneAnimationVariant = actionZoneAnimationConfig.expandedMenuVariants.socialLinks
-
   return (
     <div class='px-6 pb-6 space-y-6'>
       {/* social links */}
-      <motion.div
+      <div
         key='social-links'
-        // @ts-ignore - framer-motion types not fully compatible with Preact
         className='flex items-center justify-center space-x-8 pt-2'
-        initial={socialLinksAnim.initial}
-        animate={socialLinksAnim.animate}
-        exit={socialLinksAnim.exit}
-        transition={socialLinksAnim.transition}
       >
         {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
-          <motion.a
+          <a
             key={key}
-            // @ts-ignore - framer-motion types not fully compatible with Preact
             href={url}
             class='transition-colors'
             style={{ color: theme.colors.text.secondary }}
@@ -66,40 +55,27 @@ export const ActionZoneExpandedMenu = ({
           >
             {(() => {
               const IconComponent = SocialIcons[icon]
-
               return IconComponent
                 ? <IconComponent className='w-6 h-6 opacity-60' />
                 : <div class='w-6 h-6 rounded bg-current opacity-30' />
             })()}
-          </motion.a>
+          </a>
         ))}
-      </motion.div>
+      </div>
 
       {/* menu items */}
-      <motion.div
-        // @ts-ignore - framer-motion types not fully compatible with Preact
-        className='space-y-1'
-        variants={actionZoneAnimationConfig.expandedMenuVariants.container}
-        initial='hidden'
-        animate='visible'
-        exit='hidden'
-      >
-        {navButtons.map((button: ActionZoneAnimationButton, idx: number) => {
-          return (
-            <motion.div
-              key={button.id}
-              variants={actionZoneAnimationConfig.expandedMenuVariants.button}
-            >
-              <ActionZoneMenuButton
-                id={button.id}
-                label={button.content.label}
-                isActive={button.isActive}
-                onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[idx])}
-              />
-            </motion.div>
-          )
-        })}
-      </motion.div>
+      <div className='space-y-1'>
+        {navButtons.map((button: ActionZoneButton) => (
+          <ActionZoneMenuButton
+            id={button.id}
+            label={button.content.label}
+            isActive={button.isActive}
+            onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[0])}
+            theme={theme}
+            action={button.action}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -1,8 +1,17 @@
 {
-  "/": {},
+  "/": {
+    "layout": "collapsed"
+  },
+  "/shows": {
+    "layout": "collapsedPage"
+  },
+  "/contact": {
+    "layout": "collapsedPage"
+  },
   "/theme": {
     "debugOnly": true,
     "showHeader": false,
-    "showActionZone": false
+    "showActionZone": false,
+    "layout": "collapsed"
   }
 }

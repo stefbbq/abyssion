@@ -4,12 +4,10 @@ import { getTheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneData from '@organisms/actionZone.animation.ts'
+import actionZoneConfig from '@organisms/actionZone.animation.ts'
 import ActionZone from '@organisms/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
-import type { ActionZoneAnimationLayout } from '@organisms/actionZone.animation.ts'
-import { matchRouteConfig } from '@lib/utils/matchRoute.ts'
-import { ActionZoneFadeout } from '@atoms/ActionZoneFadeout.tsx'
+import pages from '@data/pages.json' with { type: 'json' }
 
 type Props = {
   currentPath?: string
@@ -27,6 +25,7 @@ export default function ActionZoneController({ currentPath }: Props) {
     const handleNavigate = () => {
       const newPath = globalThis.location.pathname
       currentRoute.value = newPath
+      setIsMenuOpen(false)
     }
 
     document.addEventListener('DOMContentLoaded', handleNavigate)
@@ -70,53 +69,53 @@ export default function ActionZoneController({ currentPath }: Props) {
 
   if (!isMounted) return null
 
-  /**
-   * getCollapsedButtons
-   * Returns the correct button array for the current route and state, using the config and route-matching utility.
-   * Uses 'collapsed-default' state for now.
-   */
-  const getCollapsedButtons = () => {
-    const state = 'collapsedDefault'
-    const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
-    if (!config || !Array.isArray(config.buttons)) return []
+  // Get the layout type for the current route from pages.json
+  const routeConfig = Object.prototype.hasOwnProperty.call(pages, currentRoute.value)
+    ? (pages as Record<string, { layout?: string }>)[currentRoute.value]
+    : {}
+  const layoutType = routeConfig.layout || 'collapsed'
+
+  // Map layoutType to the correct state key in actionZoneConfig
+  // collapsed -> collapsedDefault, collapsedPage -> collapsedDefault (with route key), etc.
+  const getStateKey = () => {
+    if (isMenuOpen) return 'expandedMenu'
+    if (layoutType === 'collapsedPage') return 'collapsedPage'
+    return 'collapsed'
+  }
+
+  // For collapsedPage, use the route as the key to get the right button set
+  const getCollapsedConfig = () => {
+    const state = getStateKey()
+    // fallback: just use actionZoneConfig[state] directly
+    const config = actionZoneConfig[state] || { buttons: [], layout: {} }
+    if (!Array.isArray(config.buttons)) return { buttons: [], layout: {} }
 
     // Patch in page title if needed
     const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
-    return config.buttons.map((button: NavButtonState) => {
+    const buttons = config.buttons.map((button: NavButtonState) => {
       if (button.role === 'page-title') {
         const label = button.content.label || page?.label || ''
         return { ...button, content: { ...button.content, label } }
       }
-
       return button
     })
+    return { buttons, layout: config.layout }
   }
 
-  // Determine the current ActionZone state
-  const state = isMenuOpen ? 'expandedMenu' : 'collapsedDefault'
-  const config = matchRouteConfig(actionZoneData, state, currentRoute.value) as ActionZoneAnimationLayout | undefined
-  const animationConfig = config?.animation || {}
-  const layoutConfig = config?.layout || {}
+  const collapsedConfig = getCollapsedConfig()
 
   return (
     <>
       <div className='md:hidden'>
-        <ActionZoneFadeout
-          height={160}
-          gradientStart={0}
-          gradientEnd={90}
-          color={theme.glass.background}
-          bottom={0}
-          zIndex={49}
-        />
         <ActionZone
-          {...{ isMenuOpen, setIsMenuOpen, animationConfig, layoutConfig }}
-          routeKey={currentRoute.value}
+          isMenuOpen={isMenuOpen}
+          setIsMenuOpen={setIsMenuOpen}
+          layoutConfig={collapsedConfig.layout}
           collapsedChildren={
             <ActionZoneNav
               onAction={handleAction}
               theme={theme}
-              buttons={getCollapsedButtons()}
+              buttons={collapsedConfig.buttons}
             />
           }
           expandedChildren={

@@ -1,328 +1,219 @@
-import { animationStyleFunctions, easeInEasing } from '@lib/utils/actionZoneAnimationStyles.ts'
 import type { NavButtonState } from '@data/types.ts'
 
-/**
- * Defines the state of a button within the action zone for a specific animation variant.
- */
-export type ActionZoneAnimationButton = NavButtonState
+// Prebaked style mixins/constants for each button type
+export const navItemStyle = {
+  height: '50px',
+  borderRadius: '25px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '14px',
+  fontWeight: 500,
+  flex: '1 1 0%',
+  flexShrink: 1,
+}
+
+export const pageTitleStyle = {
+  height: '50px',
+  borderRadius: '25px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '14px',
+  fontWeight: 700,
+  flex: '1 1 0%',
+  flexShrink: 1,
+}
+
+export const actionButtonStyle = {
+  height: '50px',
+  borderRadius: '25px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '14px',
+  fontWeight: 500,
+  width: '56px',
+  flex: '0 0 56px',
+  flexShrink: 0,
+}
+
+export const backButtonStyle = {
+  height: '50px',
+  borderRadius: '25px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '14px',
+  fontWeight: 500,
+  width: '56px',
+  flex: '0 0 56px',
+  flexShrink: 0,
+}
+
+// Export the ActionZoneButton type for use in components
+export type ActionZoneButton = NavButtonState & {
+  flex?: string
+  style?: Record<string, string | number>
+}
 
 /**
  * Defines the dynamic layout properties for the action zone container.
  */
-export type ActionZoneAnimationLayoutStyles = {
-  // A function returning the height of the container.
+export type ActionZoneLayoutStyles = {
   height: () => number | string
-  // A function returning the border radius of the container.
   borderRadius: () => number | string
 }
 
 /**
- * Animation config for the main ActionZone container/layout (Framer Motion props)
+ * Layout config for a single action zone state (e.g., collapsed, expanded).
  */
-export type ActionZoneContainerAnimationConfig = {
-  type: 'spring' | 'tween'
-  duration: number
-  easing: string | number[] | ((t: number) => number)
+export type ActionZoneLayout = {
+  buttons?: ActionZoneButton[]
+  layout?: ActionZoneLayoutStyles
 }
+
+// height and border radius functions
+export const getCollapsedHeight = () => 80
+export const getCollapsedBorderRadius = () => 40
+export const getExpandedHeight = () => 'auto'
+export const getExpandedBorderRadius = () => 24
 
 /**
- * Animation config for a single action zone state (e.g., collapsed, expanded).
+ * Configuration object that defines all possible static states for the Action Zone.
  */
-export type ActionZoneAnimationLayout = {
-  // An array of button configurations to be rendered in this animation state.
-  buttons?: AnimatedNavButtonState[]
-  // Framer Motion animation properties (type, duration, easing).
-  animation?: ActionZoneContainerAnimationConfig
-  // Layout properties for the action zone container in this state.
-  layout?: ActionZoneAnimationLayoutStyles
+export type ActionZoneConfig = {
+  collapsed: { buttons: ActionZoneButton[]; layout: { height: () => number | string; borderRadius: () => number | string } }
+  collapsedPage: { buttons: ActionZoneButton[]; layout: { height: () => number | string; borderRadius: () => number | string } }
+  expandedMenu: { buttons: ActionZoneButton[]; layout: { height: () => number | string; borderRadius: () => number | string } }
 }
 
-/**
- * Configuration object that defines all possible animation states for the Action Zone.
- */
-export type ActionZoneAnimationConfig = {
-  // Animation variants for the "collapsed" state, used for default navigation.
-  collapsedDefault: Record<string, ActionZoneAnimationLayout>
-  // Animation variants for the "collapsed" state when a back button is present.
-  collapsedBack: Record<string, ActionZoneAnimationLayout>
-  // Animation variants for the "expanded" menu state.
-  expandedMenu: Record<string, ActionZoneAnimationLayout>
-  // Animation variants for ActionZoneButton (button fade in/out, etc)
-  buttonVariants: ActionZoneAnimationVariant
-  // Animation variants for ActionZoneMenuButton (expanded menu item fade in/out)
-  menuButtonVariants: ActionZoneAnimationVariant
-  // Animation variants for ActionZoneExpandedMenu container and children
-  expandedMenuVariants: ActionZoneExpandedMenuVariants
-}
-
-/**
- * Animation variant for a single element (button, social link, etc)
- */
-export type ActionZoneAnimationVariant = {
-  // Framer Motion animation for initial state (type, duration, easing).
-  initial: object
-  // Framer Motion animation for animate state (type, duration, easing).
-  animate: object
-  // Framer Motion animation for exit state (type, duration, easing).
-  exit?: object
-  // Framer Motion animation on exit (type, duration, easing).
-  transition?: object
-}
-
-/**
- * Animation variant for elements with visible/hidden states (e.g. container, button in expanded menu)
- */
-export type ActionZoneMotionVisibilityVariant = {
-  // Framer Motion animation for visible state (type, duration, easing).
-  visible: object
-  // Framer Motion animation for hidden state (type, duration, easing).
-  hidden: object
-}
-
-/**
- * Animation variant for expanded menu container and children
- */
-export type ActionZoneExpandedMenuVariants = {
-  container: ActionZoneMotionVisibilityVariant
-  button: ActionZoneMotionVisibilityVariant
-  socialLinks: ActionZoneAnimationVariant
-  parentContainer: ActionZoneAnimationVariant
-}
-
-/**
- * Extends NavButtonState to allow an optional animation property for per-button animation
- * and an optional buttonClassNames property for per-button Tailwind class overrides
- */
-export type AnimatedNavButtonState = NavButtonState & {
-  animation?: ActionZoneAnimationVariant
-  /**
-   * Optional: custom Tailwind class string for this button (overrides default)
-   */
-  buttonClassNames?: string
-}
-
-const actionZoneAnimationConfig: ActionZoneAnimationConfig = {
-  collapsedDefault: {
-    // default variant for the collapsed state
-    default: {
-      buttons: [
-        {
-          id: 'shows',
-          key: 'shows',
-          role: 'nav-item',
-          content: { label: 'Shows' },
-          position: 'left',
-          action: { type: 'navigate', href: '/shows' },
-        },
-        {
-          id: 'contact',
-          key: 'contact',
-          role: 'nav-item',
-          content: { label: 'Contact' },
-          position: 'center',
-          action: { type: 'navigate', href: '/contact' },
-        },
-        {
-          id: 'menu',
-          key: 'menu',
-          role: 'action-button',
-          content: { label: 'Menu', icon: 'menu' },
-          position: 'right',
-          action: { type: 'menu' },
-        },
-      ],
-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
-      layout: {
-        height: animationStyleFunctions.getCollapsedHeight,
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+const actionZoneConfig: ActionZoneConfig = {
+  collapsed: {
+    buttons: [
+      {
+        id: 'shows',
+        key: 'shows',
+        role: 'nav-item',
+        content: { label: 'Shows' },
+        position: 'left',
+        action: { type: 'navigate', href: '/shows' },
+        flex: '1 1 0%',
+        style: navItemStyle,
       },
-    },
-    // route matched variant for the collapsed state
-    '/shows': {
-      buttons: [
-        {
-          id: 'back-button',
-          key: 'back',
-          role: 'back-button',
-          content: { label: 'Back', icon: 'back' },
-          position: 'left',
-          action: { type: 'back' },
-          animation: {
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            exit: { opacity: 0, duration: 0.1 },
-          },
-          buttonClassNames:
-            'w-full h-full inline-flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2 nav-button transition focus:outline-none focus:ring-0 active:bg-transparent active:outline-none active:ring-0 hover:bg-transparent',
-        },
-        {
-          id: 'shows',
-          key: 'page-title',
-          role: 'page-title',
-          content: { label: 'Shows' },
-          position: 'center',
-          action: { type: 'none' },
-        },
-        {
-          id: 'menu',
-          key: 'menu',
-          role: 'action-button',
-          content: { label: 'Menu', icon: 'menu' },
-          position: 'right',
-          action: { type: 'menu' },
-        },
-      ],
-      animation: { type: 'spring', duration: 0.2, easing: easeInEasing },
-      layout: {
-        height: animationStyleFunctions.getCollapsedHeight,
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+      {
+        id: 'contact',
+        key: 'contact',
+        role: 'nav-item',
+        content: { label: 'Contact' },
+        position: 'center',
+        action: { type: 'navigate', href: '/contact' },
+        flex: '1 1 0%',
+        style: navItemStyle,
       },
-    },
-    // route matched variant for the collapsed state
-    '/contact': {
-      buttons: [
-        {
-          id: 'back-button',
-          key: 'back',
-          role: 'back-button',
-          content: { label: 'Back', icon: 'back' },
-          position: 'left',
-          action: { type: 'back' },
-        },
-        {
-          id: 'contact',
-          key: 'page-title',
-          role: 'page-title',
-          content: { label: 'Contact' },
-          position: 'center',
-          action: { type: 'none' },
-        },
-        {
-          id: 'menu',
-          key: 'menu',
-          role: 'action-button',
-          content: { label: 'Menu', icon: 'menu' },
-          position: 'right',
-          action: { type: 'menu' },
-        },
-      ],
-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
-      layout: {
-        height: animationStyleFunctions.getCollapsedHeight,
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+      {
+        id: 'menu',
+        key: 'menu',
+        role: 'action-button',
+        content: { label: 'Menu', icon: 'menu' },
+        position: 'right',
+        action: { type: 'menu' },
+        flex: '0 0 56px',
+        style: actionButtonStyle,
       },
+    ],
+    layout: {
+      height: getCollapsedHeight(),
+      borderRadius: getCollapsedBorderRadius(),
     },
   },
-  collapsedBack: {
-    // default variant for the collapsed state with a back button
-    default: {
-      buttons: [
-        {
-          id: 'back-button',
-          key: 'back',
-          role: 'back-button',
-          content: { label: 'Back', icon: 'back' },
-          position: 'left',
-          action: { type: 'back' },
-        },
-        {
-          id: 'page-title',
-          key: 'page-title',
-          role: 'page-title',
-          content: { label: '' },
-          position: 'center',
-          action: { type: 'none' },
-        },
-        {
-          id: 'menu',
-          key: 'menu',
-          role: 'action-button',
-          content: { label: 'Menu', icon: 'menu' },
-          position: 'right',
-          action: { type: 'menu' },
-        },
-      ],
-      animation: { type: 'spring', duration: 0.4, easing: easeInEasing },
-      layout: {
-        height: animationStyleFunctions.getCollapsedHeight,
-        borderRadius: animationStyleFunctions.getCollapsedBorderRadius,
+  collapsedPage: {
+    buttons: [
+      {
+        id: 'back-button',
+        key: 'back',
+        role: 'back-button',
+        content: { label: 'Back', icon: 'back' },
+        position: 'left',
+        action: { type: 'back' },
+        flex: '0 0 56px',
+        style: backButtonStyle,
       },
+      {
+        id: 'page-title',
+        key: 'page-title',
+        role: 'page-title',
+        content: { label: '' },
+        position: 'center',
+        action: { type: 'none' },
+        flex: '1 1 0%',
+        style: pageTitleStyle,
+      },
+      {
+        id: 'menu',
+        key: 'menu',
+        role: 'action-button',
+        content: { label: 'Menu', icon: 'menu' },
+        position: 'right',
+        action: { type: 'menu' },
+        flex: '0 0 56px',
+        style: actionButtonStyle,
+      },
+    ],
+    layout: {
+      height: getCollapsedHeight(),
+      borderRadius: getCollapsedBorderRadius(),
     },
   },
+
   expandedMenu: {
-    // default variant for the expanded menu state
-    default: {
-      animation: { type: 'tween', duration: 0.4, easing: 'easeInOut' },
-      layout: {
-        height: animationStyleFunctions.getExpandedHeight,
-        borderRadius: animationStyleFunctions.getExpandedBorderRadius,
+    buttons: [
+      {
+        id: 'home',
+        key: 'home',
+        role: 'nav-item',
+        content: { label: 'Home' },
+        position: 'left',
+        action: { type: 'navigate', href: '/' },
+        flex: '1 1 0%',
+        style: navItemStyle,
       },
-      buttons: [
-        {
-          id: 'back-button',
-          key: 'back',
-          role: 'back-button',
-          content: { label: 'Home' },
-          position: 'left',
-          action: { type: 'back' },
-        },
-        {
-          id: 'page-title',
-          key: 'page-title',
-          role: 'page-title',
-          content: { label: 'Shows' },
-          position: 'center',
-          action: { type: 'none' },
-        },
-        {
-          id: 'menu',
-          key: 'menu',
-          role: 'action-button',
-          content: { label: 'Contact' },
-          position: 'right',
-          action: { type: 'menu' },
-        },
-      ],
-    },
-  },
-  buttonVariants: {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
-    exit: { opacity: 0, transition: { duration: 0.2, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
-  },
-  menuButtonVariants: {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
-    exit: { opacity: 0, transition: { duration: 0.3, ease: animationStyleFunctions.springEasing || [0.22, 1, 0.36, 1] } },
-  },
-  expandedMenuVariants: {
-    container: {
-      visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
-      hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
-    },
-    button: {
-      visible: { opacity: 1 },
-      hidden: { opacity: 0 },
-    },
-    /**
-     * Animation variants for social links in the expanded menu
-     */
-    socialLinks: {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-      transition: { duration: 0.15 },
-    },
-    /**
-     * Animation for the parent container <div> of the expanded menu
-     */
-    parentContainer: {
-      initial: {},
-      animate: {},
-      exit: {},
-      transition: {},
+      {
+        id: 'shows',
+        key: 'shows',
+        role: 'nav-item',
+        content: { label: 'Shows' },
+        position: 'center',
+        action: { type: 'navigate', href: '/shows' },
+        flex: '1 1 0%',
+        style: navItemStyle,
+      },
+      {
+        id: 'bio',
+        key: 'bio',
+        role: 'nav-item',
+        content: { label: 'Bio' },
+        position: 'center',
+        action: { type: 'navigate', href: '/bio' },
+        flex: '1 1 0%',
+        style: navItemStyle,
+      },
+      {
+        id: 'contact',
+        key: 'contact',
+        role: 'nav-item',
+        content: { label: 'Contact' },
+        position: 'right',
+        action: { type: 'navigate', href: '/contact' },
+        flex: '1 1 0%',
+        style: navItemStyle,
+      },
+    ],
+    layout: {
+      height: getExpandedHeight(),
+      borderRadius: getExpandedBorderRadius(),
     },
   },
 }
 
-export default actionZoneAnimationConfig
+export default actionZoneConfig
