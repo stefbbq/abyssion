@@ -1,5 +1,6 @@
 import { getBooleanCookie, setBooleanCookie } from '@lib/utils/cookies.ts'
 import { DEBUG_COOKIE_NAME, DEBUG_QUERY_PARAM } from './constants.ts'
+import { getClientSearch } from '@lib/utils/clientLocation.ts'
 
 /**
  * Check if debug mode is enabled via query parameter or cookie
@@ -14,7 +15,7 @@ export const isDebugModeEnabled = (): boolean => {
   if (typeof window === 'undefined') return false
 
   // Check query parameter first (takes precedence)
-  const urlParams = new URLSearchParams(globalThis.location.search)
+  const urlParams = new URLSearchParams(getClientSearch())
   const debugParam = urlParams.get(DEBUG_QUERY_PARAM)
 
   if (debugParam !== null) {

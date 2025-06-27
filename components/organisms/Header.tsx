@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'preact/hooks'
 import { getTheme } from '@lib/theme/index.ts'
 import navData from '@data/nav.json' with { type: 'json' }
-import ThemeToggle from '@molecules/ThemeToggle.tsx'
+// import ThemeToggle from '@molecules/ThemeToggle.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
+import { useClientLocation } from '@lib/utils/clientLocation.ts'
 
 type SocialIconKey = keyof SocialIconMap
-
-export interface HeaderProps {
-  currentPath?: string
-}
 
 /**
  * Vercel-inspired header component with clean navigation
  * Hidden on mobile devices where BottomNav is used instead
  * Uses new theme system for automatic light/dark mode support
  */
-export default function Header({ currentPath }: HeaderProps) {
+export default function Header() {
+  const [currentPath] = useClientLocation()
   const theme = getTheme()
   const isActive = (path: string) => currentPath === path
   const isHomepage = currentPath === '/'
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
+
+  console.log('currentPath', currentPath)
 
   // Track keyboard vs mouse usage
   useEffect(() => {
@@ -44,20 +44,23 @@ export default function Header({ currentPath }: HeaderProps) {
     }
   }, [])
 
-  const getNavItemStyle = (path: string) => ({
-    backgroundColor: isActive(path)
-      ? theme.colors.interactive.ghostActive
-      : hoveredItem === path
-      ? theme.colors.interactive.ghostHover
-      : 'transparent',
-    color: theme.colors.text.primary,
-  })
+  const getNavItemStyle = (path: string) => {
+    let backgroundColor
+    if (isActive(path)) backgroundColor = theme.colors.interactive.ghostActive
+    else if (hoveredItem === path) backgroundColor = theme.colors.interactive.ghostHover
+    else backgroundColor = 'transparent'
+
+    return {
+      backgroundColor,
+      color: theme.colors.text.primary,
+    }
+  }
 
   const getFocusClass = () => isUsingKeyboard ? 'focus:outline-none focus:ring-2' : 'focus:outline-none'
 
   return (
     <header
-      class={`z-50 hidden md:block sticky top-0 ${isHomepage ? '' : 'border-b backdrop-blur-md'}`}
+      class={`top-0 left-0 right-0 z-50 hidden md:block sticky ${isHomepage ? '' : 'border-b backdrop-blur-md'}`}
       style={{
         backgroundColor: isHomepage ? 'transparent' : theme.glass.background,
         borderColor: isHomepage ? 'transparent' : theme.colors.border.primary,
@@ -129,7 +132,7 @@ export default function Header({ currentPath }: HeaderProps) {
                     </a>
                   )
                 })}
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
             </div>
           </div>
         </div>

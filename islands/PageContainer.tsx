@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect } from 'preact/hooks'
 import { getTheme } from '@lib/theme/index.ts'
 import { hexStringToRGB } from '@lib/theme/utils/hexStringToRGB.ts'
 import { rgbToCSS } from '@lib/theme/utils/rgbToCSS.ts'
@@ -6,6 +6,7 @@ import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient
 import { isDebugModeEnabled } from '@lib/debug/index.ts'
 import { resetContexts } from '@lib/logger/index.ts'
 import { getSceneOrchestrator } from '@lib/gl/index.ts'
+import { useClientLocation } from '@lib/utils/clientLocation.ts'
 
 /**
  * PageContainer wraps page content and manages the background color with a fade transition
@@ -16,49 +17,22 @@ import { getSceneOrchestrator } from '@lib/gl/index.ts'
 const PageContainer = ({ children }: { children: preact.ComponentChildren }) => {
   const theme = getTheme()
   const subpageBgColor = rgbToCSS(hexStringToRGB(theme.colors.background.primary), 0.8)
-  // deno-lint-ignore no-unused-vars
-  const [isHomePage, setIsHomePage] = useState(false)
-  const [bgColor, setBgColor] = useState('transparent')
+  const [currentPath] = useClientLocation()
+  const isHomePage = currentPath === '/'
+  const bgColor = isHomePage ? 'transparent' : subpageBgColor
 
   useEffect(() => {
     // Initialize logger client
     initializeLoggerClient()
     if (isDebugModeEnabled()) resetContexts()
 
-    // handle route change
-    const handleRouteChange = () => {
-      const home = globalThis.location.pathname === '/'
-      setIsHomePage(home)
-      setBgColor(home ? 'transparent' : subpageBgColor)
-
-      const sceneOrchestrator = getSceneOrchestrator()
-      if (sceneOrchestrator) {
-        const pageName = home ? 'logo-page' : 'content-page'
-        sceneOrchestrator.switchToPage(pageName)
-      } else console.warn('Scene orchestrator not found. GL system may not be initialized yet.')
-    }
-
-    // Monkey-patch history API to catch SPA navigation
-    const originalPushState = history.pushState
-    history.pushState = function (...args) {
-      originalPushState.apply(this, args)
-      handleRouteChange()
-    }
-    const originalReplaceState = history.replaceState
-    history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args)
-      handleRouteChange()
-    }
-    globalThis.addEventListener('popstate', handleRouteChange)
-
-    // initial setup
-    handleRouteChange()
-    return () => {
-      history.pushState = originalPushState
-      history.replaceState = originalReplaceState
-      globalThis.removeEventListener('popstate', handleRouteChange)
-    }
-  }, [subpageBgColor])
+    // update GL orchestrator on route change
+    const sceneOrchestrator = getSceneOrchestrator()
+    if (sceneOrchestrator) {
+      const pageName = isHomePage ? 'logo-page' : 'content-page'
+      sceneOrchestrator.switchToPage(pageName)
+    } else console.warn('Scene orchestrator not found. GL system may not be initialized yet.')
+  }, [isHomePage])
 
   return (
     <main class='min-h-screen relative z-10 transition-colors duration-300 ease-in-out' style={{ backgroundColor: bgColor }}>

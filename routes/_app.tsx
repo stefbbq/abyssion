@@ -13,6 +13,8 @@ export default function App({ Component, url }: PageProps) {
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
 
+  console.log('url', url)
+
   return (
     <html>
       <head>
@@ -30,11 +32,7 @@ export default function App({ Component, url }: PageProps) {
         </div>
 
         {/* header */}
-        {showHeader && (
-          <div class='absolute top-0 left-0 right-0 z-50'>
-            <Header currentPath={url.pathname} />
-          </div>
-        )}
+        {showHeader && <Header />}
 
         {/* main content */}
         <PageContainer>

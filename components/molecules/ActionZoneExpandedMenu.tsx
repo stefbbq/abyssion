@@ -8,7 +8,6 @@ import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
 type SocialIconKey = keyof SocialIconMap
 
 type Props = {
-  currentPath: string
   menuItems: MenuItem[]
   socialLinks: SocialLink[]
   onMenuClose: () => void
@@ -21,7 +20,6 @@ type Props = {
  * Handles the expanded menu state with social links and navigation items
  */
 export const ActionZoneExpandedMenu = ({
-  currentPath,
   menuItems,
   socialLinks,
   onMenuClose,

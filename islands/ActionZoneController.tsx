@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import { useSignal } from '@preact/signals'
+import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { getTheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
@@ -9,38 +9,14 @@ import ActionZone from '@organisms/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
 import pages from '@data/pages.json' with { type: 'json' }
 
-type Props = {
-  currentPath?: string
-}
-
-export default function ActionZoneController({ currentPath }: Props) {
+export default function ActionZoneController() {
   const [isMounted, setIsMounted] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const theme = getTheme()
-  const currentRoute = useSignal(currentPath || '/')
+  const [currentPath] = useClientLocation()
 
   useEffect(() => {
     setIsMounted(true)
-
-    const handleNavigate = () => {
-      const newPath = globalThis.location.pathname
-      currentRoute.value = newPath
-      setIsMenuOpen(false)
-    }
-
-    document.addEventListener('DOMContentLoaded', handleNavigate)
-    globalThis.addEventListener('popstate', handleNavigate)
-    const originalPushState = history.pushState
-    history.pushState = function (...args) {
-      originalPushState.apply(this, args)
-      handleNavigate()
-    }
-
-    return () => {
-      document.removeEventListener('DOMContentLoaded', handleNavigate)
-      globalThis.addEventListener('popstate', handleNavigate)
-      history.pushState = originalPushState
-    }
   }, [])
 
   const handleAction = (action: NavButtonState['action']) => {
@@ -63,20 +39,18 @@ export default function ActionZoneController({ currentPath }: Props) {
       setIsMenuOpen(false)
       return true
     }
-
     return false
   }
 
   if (!isMounted) return null
 
   // Get the layout type for the current route from pages.json
-  const routeConfig = Object.prototype.hasOwnProperty.call(pages, currentRoute.value)
-    ? (pages as Record<string, { layout?: string }>)[currentRoute.value]
+  const routeConfig = Object.prototype.hasOwnProperty.call(pages, currentPath)
+    ? (pages as Record<string, { layout?: string }>)[currentPath]
     : {}
   const layoutType = routeConfig.layout || 'collapsed'
 
   // Map layoutType to the correct state key in actionZoneConfig
-  // collapsed -> collapsedDefault, collapsedPage -> collapsedDefault (with route key), etc.
   const getStateKey = () => {
     if (isMenuOpen) return 'expandedMenu'
     if (layoutType === 'collapsedPage') return 'collapsedPage'
@@ -86,12 +60,11 @@ export default function ActionZoneController({ currentPath }: Props) {
   // For collapsedPage, use the route as the key to get the right button set
   const getCollapsedConfig = () => {
     const state = getStateKey()
-    // fallback: just use actionZoneConfig[state] directly
     const config = actionZoneConfig[state] || { buttons: [], layout: {} }
     if (!Array.isArray(config.buttons)) return { buttons: [], layout: {} }
 
     // Patch in page title if needed
-    const page = navData.mainNav.find((p: MenuItem) => p.path === currentRoute.value)
+    const page = navData.mainNav.find((p: MenuItem) => p.path === currentPath)
     const buttons = config.buttons.map((button: NavButtonState) => {
       if (button.role === 'page-title') {
         const label = button.content.label || page?.label || ''
@@ -120,7 +93,7 @@ export default function ActionZoneController({ currentPath }: Props) {
           }
           expandedChildren={
             <ActionZoneExpandedMenu
-              currentPath={currentRoute.value}
+              currentPath={currentPath}
               menuItems={navData.mainNav}
               socialLinks={navData.socialLinks}
               onMenuClose={() => setIsMenuOpen(false)}

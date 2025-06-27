@@ -13,14 +13,13 @@ export default defineRoute(() => {
   return (
     <>
       <Head>
-        <title>Shows | abyssion</title>
+        <title>shows | abyssion</title>
         <meta name='description' content='Upcoming and past shows by abyssion' />
       </Head>
 
       <div class='min-h-screen pb-20 md:pb-0 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24'>
         <div class='space-y-16'>
           <section class='text-center'>
-            <h1 class='text-5xl font-bold mb-6' style={{ color: theme.colors.text.primary }}>Shows</h1>
             <p class='text-xl max-w-2xl mx-auto' style={{ color: theme.colors.text.secondary }}>
               Experience abyssion live. Immerse yourself in our sonic landscapes.
             </p>

@@ -114,6 +114,7 @@ export const ActionZoneButton = (
       : (
         <button
           id={id}
+          type='button'
           onClick={handleClick}
           className={`nav-button ${baseClasses}`}
           style={{

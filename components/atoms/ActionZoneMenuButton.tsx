@@ -49,6 +49,7 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
       style={mergedStyle}
       onClick={onClick}
       tabIndex={0}
+      type='button'
     >
       {label}
     </button>
