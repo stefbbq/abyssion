@@ -1,7 +1,7 @@
-import { BackIcon, MenuIcon } from '@atoms/icons/index.ts'
+import { BackIcon, MenuIcon } from '@components/icons/index.ts'
 import { CSSProperties } from 'preact/compat'
 import type { UITheme } from '@lib/theme/types.ts'
-import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
+import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
 
 // Use a local type for the button prop
 export type ActionZoneButtonType = {

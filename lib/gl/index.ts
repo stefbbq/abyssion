@@ -29,8 +29,10 @@ let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createScen
  */
 export const initGL = async (options: InitOptions) => {
   const { rendererConfig, postProcessingConfig } = configScene as ConfigScene
-  const { width, height, outlineTexturePath, stencilTexturePath, container } = options
+  const { outlineTexturePath, stencilTexturePath, canvas } = options
   const THREE = await import('three')
+  const width = globalThis.innerWidth
+  const height = globalThis.innerHeight
 
   // Debug mobile responsiveness
   debugMobileResponsiveness()
@@ -57,7 +59,7 @@ export const initGL = async (options: InitOptions) => {
 
   // Set up responsive handling
   const responsiveCleanup = setupResponsiveHandling({
-    container,
+    canvas,
     camera,
     composer,
     uiLayer,
@@ -110,7 +112,7 @@ export const initGL = async (options: InitOptions) => {
 
   // Setup debug system to get the regeneration handler
   const { updateDebugInfo, handleRegenerateRandomLayers } = await setupDebugSystem({
-    container,
+    canvas,
     camera,
     scene,
     bokehPass,

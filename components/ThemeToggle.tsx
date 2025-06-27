@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { getTheme, getThemeMode, toggleThemeMode } from '@lib/theme/index.ts'
-import { MoonIcon, SunIcon } from '@atoms/icons/index.ts'
+import { MoonIcon, SunIcon } from '@components/icons/index.ts'
 
 /**
  * Simple theme toggle icon that switches between light and dark modes

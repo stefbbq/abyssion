@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import type { UITheme } from '@lib/theme/types.ts'
-import { ActionZoneButton as ActionZoneButtonComponent } from '@atoms/ActionZoneButton.tsx'
-import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
+import { ActionZoneButton as ActionZoneButtonComponent } from '@components/actionZone/ActionZoneButton.tsx'
+import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
 
 // Utility to merge style objects
 function mergeStyles(base: Record<string, string | number>, overrides: Record<string, string | number>) {

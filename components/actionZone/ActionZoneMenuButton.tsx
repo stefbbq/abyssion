@@ -1,6 +1,6 @@
 import { CSSProperties } from 'preact/compat'
 import type { UITheme } from '@lib/theme/types.ts'
-import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
+import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
 
 type Props = {
   id: string

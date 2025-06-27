@@ -19,16 +19,16 @@ export const setupCoreRendering = async (
   THREE: typeof Three,
   options: InitOptions,
 ): Promise<CoreRenderingResult> => {
-  const { container } = options
+  const { canvas } = options
 
   // Set up the core rendering elements
   const scene = await createScene(THREE)
   const camera = await createCamera(THREE)
-  const renderer = await createRenderer(THREE, container)
+  const renderer = await createRenderer(THREE, canvas)
 
   // Apply initial responsive camera positioning
-  const initialW = container.clientWidth || globalThis.innerWidth
-  const initialH = container.clientHeight || globalThis.innerHeight
+  const initialW = globalThis.innerWidth
+  const initialH = globalThis.innerHeight
   const initialAspect = initialW / initialH
 
   camera.position.z = getResponsiveCameraZ(initialAspect)

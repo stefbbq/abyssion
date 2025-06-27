@@ -1,1 +1,1 @@
-export { default } from '@organisms/Header.tsx'
+export { default } from '@components/Header.tsx'

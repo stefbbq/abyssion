@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks'
 import { getTheme } from '@lib/theme/index.ts'
 import navData from '@data/nav.json' with { type: 'json' }
 // import ThemeToggle from '@molecules/ThemeToggle.tsx'
-import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
+import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 
 type SocialIconKey = keyof SocialIconMap

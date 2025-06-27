@@ -1,6 +1,6 @@
 import { defineRoute } from '$fresh/server.ts'
 import { Head } from '$fresh/runtime.ts'
-import { Button } from '@atoms/Button.tsx'
+import { Button } from '@components/Button.tsx'
 import { getTheme } from '@lib/theme/index.ts'
 
 export default defineRoute(() => {

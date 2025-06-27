@@ -6,7 +6,7 @@ import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
 
 type DebugSystemConfig = {
-  container: HTMLDivElement
+  canvas: HTMLCanvasElement
   camera: Three.Camera
   scene: Three.Scene
   bokehPass: Three.Pass
@@ -25,11 +25,11 @@ type DebugSystemResult = {
  * Sets up the debug overlay system with DOF controls and regeneration
  */
 export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult => {
-  const { container, camera, scene, bokehPass, logoController, state, THREE } = config
+  const { canvas, camera, scene, bokehPass, logoController, state, THREE } = config
   const { planeWidth, planeHeight } = configScene as ConfigScene
 
   // Setup DebugOverlay
-  const debugOverlay = new DebugOverlay(container, {
+  const debugOverlay = new DebugOverlay(canvas, {
     forceDebug: false,
     onToggleDebug: () => {
       if (state.controls) state.controls.enabled = true

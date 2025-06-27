@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { getTheme } from '@lib/theme/index.ts'
-import { ActionZoneExpandedMenu } from '@molecules/ActionZoneExpandedMenu.tsx'
-import { ActionZoneNav } from '@molecules/ActionZoneNav.tsx'
+import { ActionZoneExpandedMenu } from '@components/actionZone/ActionZoneExpandedMenu.tsx'
+import { ActionZoneNav } from '@components/actionZone/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneConfig from '@organisms/actionZone.animation.ts'
-import ActionZone from '@organisms/ActionZone.tsx'
+import actionZoneConfig from '@components/actionZone/actionZone.animation.ts'
+import ActionZone from '@components/actionZone/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
 import pages from '@data/pages.json' with { type: 'json' }
 
@@ -19,7 +19,7 @@ export default function ActionZoneController() {
     setIsMounted(true)
   }, [])
 
-  const handleAction = (action: NavButtonState['action']) => {
+  const onAction = (action: NavButtonState['action']) => {
     switch (action.type) {
       case 'back':
         globalThis.history.back()
@@ -32,7 +32,7 @@ export default function ActionZoneController() {
     }
   }
 
-  const handleAnchorLink = (path: string) => {
+  const onAnchorLink = (path: string) => {
     if (path.startsWith('#')) {
       const element = document.querySelector(path)
       element?.scrollIntoView({ behavior: 'smooth' })
@@ -72,6 +72,7 @@ export default function ActionZoneController() {
       }
       return button
     })
+
     return { buttons, layout: config.layout }
   }
 
@@ -81,24 +82,20 @@ export default function ActionZoneController() {
     <>
       <div className='md:hidden'>
         <ActionZone
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
           layoutConfig={collapsedConfig.layout}
+          {...{ isMenuOpen, setIsMenuOpen }}
           collapsedChildren={
             <ActionZoneNav
-              onAction={handleAction}
-              theme={theme}
               buttons={collapsedConfig.buttons}
+              {...{ onAction, theme }}
             />
           }
           expandedChildren={
             <ActionZoneExpandedMenu
-              currentPath={currentPath}
               menuItems={navData.mainNav}
               socialLinks={navData.socialLinks}
               onMenuClose={() => setIsMenuOpen(false)}
-              onAnchorLink={handleAnchorLink}
-              theme={theme}
+              {...{ onAnchorLink, theme }}
             />
           }
         />

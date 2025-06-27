@@ -25,7 +25,7 @@
     },
     "film": {
       "noiseIntensity": 0.05,
-      "scanlineIntensity": 5,
+      "scanlineIntensity": 1.5,
       "scanlineCount": 2000,
       "grayscale": false
     },
@@ -34,7 +34,7 @@
       "ditherStrength": 10,
       "ditherFrequency": 1000.0,
       "ditherAnimation": 0.1,
-      "gain": 1.25
+      "gain": 1.4
     },
     "sharpening": {
       "strength": 0.2,

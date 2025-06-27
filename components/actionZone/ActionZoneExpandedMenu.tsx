@@ -1,9 +1,9 @@
 import type { MenuItem, SocialLink } from '@data/types.ts'
-import { ActionZoneMenuButton } from '@atoms/ActionZoneMenuButton.tsx'
-import { icons as SocialIcons, type SocialIconMap } from '@atoms/icons/index.ts'
+import { ActionZoneMenuButton } from '@components/actionZone/ActionZoneMenuButton.tsx'
+import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import type { UITheme } from '@lib/theme/types.ts'
-import actionZoneAnimationConfig from '@organisms/actionZone.animation.ts'
-import type { ActionZoneButton } from '@organisms/actionZone.animation.ts'
+import actionZoneAnimationConfig from '@components/actionZone/actionZone.animation.ts'
+import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
 
 type SocialIconKey = keyof SocialIconMap
 

@@ -13,24 +13,26 @@ import type { ConfigScene } from '@libgl/configScene.types.ts'
  */
 export const createRenderer = (
   THREE: typeof Three,
-  container: HTMLDivElement,
+  canvas: HTMLCanvasElement,
 ): Promise<Three.WebGLRenderer> => {
   const { rendererConfig } = configScene as ConfigScene
 
   const renderer = new THREE.WebGLRenderer({
+    canvas,
     antialias: rendererConfig.antialias,
     alpha: rendererConfig.alpha,
   })
 
   // enable ACES Filmic tone mapping for exposure control
   renderer.toneMapping = THREE.ACESFilmicToneMapping
+
   // set overall exposure (scene brightness) from config
   renderer.toneMappingExposure = rendererConfig.exposure
 
   const updateSize = () => {
     // Use actual viewport dimensions, not the initial width/height parameters
-    const w = container.clientWidth || globalThis.innerWidth
-    const h = container.clientHeight || globalThis.innerHeight
+    const w = globalThis.innerWidth
+    const h = globalThis.innerHeight
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(
       globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
@@ -41,23 +43,13 @@ export const createRenderer = (
   updateSize()
   globalThis.addEventListener('resize', updateSize)
 
-  // Set up the GL container
-  while (container.firstChild) container.removeChild(container.firstChild)
-  container.style.width = '100%'
-  container.style.height = '100%'
-  container.style.overflow = 'hidden'
-  container.style.position = 'relative'
-
   // Set up the HTML canvas
-  const canvas = renderer.domElement
   canvas.style.display = 'block'
-  canvas.style.position = 'absolute'
-  canvas.style.top = '50%'
-  canvas.style.left = '50%'
-  canvas.style.transform = 'translate(-50%, -50%)'
-  canvas.style.width = '100%'
-  canvas.style.height = '100%'
-  container.appendChild(canvas)
+  canvas.style.position = 'fixed'
+  canvas.style.inset = '0'
+  canvas.style.width = '100vw'
+  canvas.style.height = '100vh'
+  canvas.style.background = 'black'
 
   return renderer
 }

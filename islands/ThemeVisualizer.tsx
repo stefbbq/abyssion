@@ -15,7 +15,7 @@ import {
   techscapeTheme,
 } from '../lib/theme/index.ts'
 import type { BaseTheme, UITheme } from '../lib/theme/types.ts'
-import { Dropdown } from '../components/atoms/Dropdown.tsx'
+import { Dropdown } from '@components/Dropdown.tsx'
 import { ComponentChildren } from 'preact'
 import { JSX } from 'preact/jsx-runtime'
 

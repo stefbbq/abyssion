@@ -1,1 +1,1 @@
-export { default } from '@molecules/GLCanvas.tsx'
+export { default } from '@components/GLCanvas.tsx'

@@ -5,7 +5,6 @@ import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
 import type { RendererConfig } from '@libgl/configScene.types.ts'
 
 type ResponsiveConfig = {
-  container: HTMLDivElement
   camera: Three.Camera
   composer: Three.EffectComposer
   uiLayer: UIOverlay
@@ -17,12 +16,12 @@ type ResponsiveConfig = {
  * Creates a responsive resize handler that updates camera, composer, and UI elements
  */
 export const setupResponsiveHandling = (config: ResponsiveConfig) => {
-  const { container, camera, composer, uiLayer, videoBackground, rendererConfig } = config
+  const { camera, composer, uiLayer, videoBackground, rendererConfig } = config
 
   const handleResize = () => {
     // Use the same dimensions the renderer is using
-    const w = container.clientWidth || globalThis.innerWidth
-    const h = container.clientHeight || globalThis.innerHeight
+    const w = globalThis.innerWidth
+    const h = globalThis.innerHeight
     const aspect = w / h
 
     // Update camera aspect ratio to match renderer dimensions

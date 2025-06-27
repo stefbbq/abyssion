@@ -21,11 +21,9 @@ export type UIOverlay = {
 
 // Initialization options
 export type InitOptions = {
-  width: number
-  height: number
   outlineTexturePath: string
   stencilTexturePath: string
-  container: HTMLDivElement
+  canvas: HTMLCanvasElement
 }
 
 // Renderer state

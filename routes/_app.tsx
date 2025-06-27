@@ -13,8 +13,6 @@ export default function App({ Component, url }: PageProps) {
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
 
-  console.log('url', url)
-
   return (
     <html>
       <head>
@@ -25,11 +23,7 @@ export default function App({ Component, url }: PageProps) {
       </head>
       <body f-client-nav class='min-h-screen relative bg-black'>
         {/* gl canvas */}
-        <div class='fixed inset-0'>
-          <div class='w-full h-full flex items-center justify-center'>
-            <GLCanvas width={1400} height={896} />
-          </div>
-        </div>
+        <GLCanvas />
 
         {/* header */}
         {showHeader && <Header />}
@@ -42,11 +36,7 @@ export default function App({ Component, url }: PageProps) {
         </PageContainer>
 
         {/* action zone */}
-        {showActionZone && (
-          <div class='relative z-20'>
-            <ActionZoneController currentPath={url.pathname} />
-          </div>
-        )}
+        {showActionZone && <ActionZoneController />}
       </body>
     </html>
   )
