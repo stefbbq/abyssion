@@ -2,6 +2,7 @@ import type { RendererState } from '../types.ts'
 import type { AnimationContext, AnimationOrchestrator, SceneState } from './core/types.ts'
 import { createSharedBehaviors } from './core/createSharedBehaviors.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
+import { lc, log } from '@lib/logger/index.ts'
 
 const { animationConfig: animation } = animationConfig
 
@@ -39,7 +40,7 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
       const orchestrator = orchestratorFactory()
       sceneState.activeOrchestrators.set(orchestrator.name, orchestrator)
     } else {
-      console.warn(`Orchestrator with name "${name}" not found in registry.`)
+      log(lc.GL_ANIMATION, `Orchestrator with name "${name}" not found in registry.`)
     }
   }
 

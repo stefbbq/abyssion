@@ -13,10 +13,7 @@ import * as Three from 'three'
  */
 export const disposeLogoLayers = (scene: Three.Scene, planes: Three.Mesh[]) => {
   planes.forEach((plane) => {
-    // Only dispose the material, not the shared geometry
-    if (plane.material instanceof Three.Material) {
-      plane.material.dispose()
-    }
+    if (plane.material instanceof Three.Material) plane.material.dispose()
     scene.remove(plane)
   })
 }

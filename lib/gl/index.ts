@@ -21,6 +21,7 @@ import {
   setupTextureLoading,
 } from './setup/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
+import { isGLInitialized } from './state.ts'
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 
@@ -59,7 +60,6 @@ export const initGL = async (options: InitOptions) => {
 
   // Set up responsive handling
   const responsiveCleanup = setupResponsiveHandling({
-    canvas,
     camera,
     composer,
     uiLayer,
@@ -176,6 +176,9 @@ export const initGL = async (options: InitOptions) => {
 
   // Store the orchestrator on the glState
   glState = { ...state, sceneOrchestrator }
+
+  // Signal that GL initialization is complete
+  isGLInitialized.value = true
 
   // Create and return cleanup function
   const cleanup = createCleanupFunction({

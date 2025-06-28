@@ -7,9 +7,6 @@ import { LogContext } from '../constants.ts'
  */
 export const createServerLogger = () => (ctx: LogContext, ...args: unknown[]): void => {
   const prefix = `[${ctx}]`
-  if (args[0] && typeof args[0] === 'string') {
-    globalThis.console.log(`${prefix} ${args[0]}`, ...args.slice(1))
-  } else {
-    globalThis.console.log(prefix, ...args)
-  }
+  if (args[0] && typeof args[0] === 'string') console.log(`${prefix} ${args[0]}`, ...args.slice(1))
+  else console.log(prefix, ...args)
 }

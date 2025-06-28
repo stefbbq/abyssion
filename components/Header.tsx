@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'preact/hooks'
-import { getTheme } from '@lib/theme/index.ts'
 import navData from '@data/nav.json' with { type: 'json' }
 // import ThemeToggle from '@molecules/ThemeToggle.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
@@ -8,34 +7,40 @@ import { HeaderLink } from './HeaderLink.tsx'
 
 type SocialIconKey = keyof SocialIconMap
 
+// styles
+const headerBase = 'top-0 left-0 right-0 z-50 hidden md:block sticky transition-all duration-300 py-2'
+const headerScrolled = 'mx-4'
+const headerDefault = 'mx-2'
+const containerBase = 'max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4'
+const containerScrolled = 'backdrop-blur-lg bg-[var(--glass-background)] shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
+const containerDefault = 'bg-transparent shadow-none'
+const logo = 'flex items-center m-0'
+const logoText = 'text-xl font-semibold transition-colors'
+const navWrapper = 'flex items-center space-x-1'
+const navPages = 'flex items-center'
+const navSocial = 'flex items-center'
+
 /**
- * Vercel-inspired header component with clean navigation
- * Hidden on mobile devices where BottomNav is used instead
- * Uses new theme system for automatic light/dark mode support
+ * Desktop navigation bar for the app, styled with utility classes and CSS variables.
+ * Uses the same style composition approach as HeaderLink for consistency.
+ * Responsive, sticky, and theme-aware.
  */
-export default function Header() {
+export const Header = () => {
   const [currentPath] = useClientLocation()
-  const theme = getTheme()
-  const isHomepage = currentPath === '/'
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
 
   // Track scroll position
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    const handleScroll = () => setIsScrolled(globalThis.scrollY > 20)
+    globalThis.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll() // Check on initial load
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => globalThis.removeEventListener('scroll', handleScroll)
   }, [])
 
   // Track keyboard vs mouse usage
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') setIsUsingKeyboard(true)
-    }
-
+    const handleKeyDown = (e: KeyboardEvent) => e.key === 'Tab' && setIsUsingKeyboard(true)
     const handleMouseDown = () => setIsUsingKeyboard(false)
 
     document.addEventListener('keydown', handleKeyDown)
@@ -47,50 +52,28 @@ export default function Header() {
     }
   }, [])
 
+  // Focus ring utility
   const getFocusClass = () => isUsingKeyboard ? 'focus:outline-none focus:ring-2' : 'focus:outline-none'
 
+  // Compose header and container classes
   const headerClasses = [
-    'top-0',
-    'left-0',
-    'right-0',
-    'z-50',
-    'hidden',
-    'md:block',
-    'sticky',
-    'transition-all',
-    'duration-300',
-    'py-2',
-    isScrolled ? 'mx-4' : 'mx-2',
+    headerBase,
+    isScrolled ? headerScrolled : headerDefault,
   ].join(' ')
 
   const containerClasses = [
-    'max-w-7xl',
-    'mx-auto',
-    'flex',
-    'justify-between',
-    'items-center',
-    'h-16',
-    'transition-all',
-    'duration-300',
-    'rounded-full',
-    'px-4',
-    isScrolled ? 'backdrop-blur-lg' : '',
+    containerBase,
+    isScrolled ? containerScrolled : containerDefault,
   ].join(' ')
 
   return (
     <header class={headerClasses}>
-      <div
-        class={containerClasses}
-        style={{
-          backgroundColor: isScrolled ? 'var(--glass-background)' : 'transparent',
-          boxShadow: isScrolled ? '0 8px 32px 0 rgba(0,0,0,0.25)' : 'none',
-        }}
-      >
+      <div class={containerClasses}>
         {/* Logo */}
-        <h1 class='flex items-center m-0'>
+        <h1 class={logo}>
           <HeaderLink
             href='/'
-            className={`text-xl font-semibold transition-colors ${getFocusClass()}`}
+            className={`${logoText} ${getFocusClass()}`}
             ariaLabel='Abyssion home'
           >
             abyssion
@@ -98,9 +81,9 @@ export default function Header() {
         </h1>
 
         {/* Navigation */}
-        <nav class='flex items-center space-x-1'>
+        <nav class={navWrapper}>
           {/* Pages */}
-          <div class='flex items-center'>
+          <div class={navPages}>
             {navData.mainNav
               .filter((item) => !item.excludeFrom?.includes('header'))
               .map((item) => (
@@ -116,7 +99,7 @@ export default function Header() {
           </div>
 
           {/* Social Icons */}
-          <div class='flex items-center'>
+          <div class={navSocial}>
             {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: SocialIconKey }>)
               .map((item) => {
                 const IconComponent = SocialIcons[item.icon]

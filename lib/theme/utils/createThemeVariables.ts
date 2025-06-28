@@ -12,6 +12,8 @@ import type { UITheme } from '../types.ts'
  */
 export function createThemeVariables(theme: UITheme): string {
   let cssVariables = ''
+
+  // deno-lint-ignore no-explicit-any
   const flattenObject = (object: any, prefix = '') => {
     for (const key in object) {
       if (typeof object[key] === 'object' && object[key] !== null && !Array.isArray(object[key])) {
@@ -21,6 +23,7 @@ export function createThemeVariables(theme: UITheme): string {
       }
     }
   }
+
   flattenObject(theme)
   return cssVariables
 }

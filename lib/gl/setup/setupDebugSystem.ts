@@ -4,6 +4,7 @@ import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 type DebugSystemConfig = {
   canvas: HTMLCanvasElement
@@ -112,7 +113,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
   // Layer regeneration function
   const handleRegenerateRandomLayers = () => {
     if (!scene || !state.logoPlanes || !state.logoLayers || !state.planeGeometry || !state.outlineTexture || !state.stencilTexture) {
-      console.warn('Cannot regenerate layers: missing state')
+      log(lc.GL, 'Cannot regenerate layers: missing state')
       return
     }
 

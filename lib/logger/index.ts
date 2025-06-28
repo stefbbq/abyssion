@@ -34,7 +34,7 @@ const getMinLogLevelFn = () => minLogLevel
  */
 export const setMinLogLevel = (level: LogLevel) => {
   if (LOG_LEVELS.includes(level)) minLogLevel = level
-  else globalThis.console.warn(`[logger] Invalid log level: ${level}`)
+  else log(LogContext.PREACT, `[logger] Invalid log level: ${level}`)
 }
 
 // Context Filter

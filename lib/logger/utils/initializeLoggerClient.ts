@@ -21,16 +21,10 @@ export const initializeLoggerClient = (): void => {
   const logLevel = getMinLogLevel()
   setMinLogLevel(logLevel)
 
-  // Initial color setup
+  // Initial color setup & listen for theme changes
   refreshColors()
+  globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refreshColors)
 
-  // Listen for theme changes
-  globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    refreshColors()
-  })
-
-  // Use globalThis.console directly since logger isn't ready yet
-  if (logLevel !== 'off') {
-    globalThis.console.log(`🌐 Client logger initialized with level: ${logLevel}`)
-  }
+  // Use console directly since logger isn't ready yet
+  if (logLevel !== 'off') console.log(`🌐 Client logger initialized with level: ${logLevel}`)
 }

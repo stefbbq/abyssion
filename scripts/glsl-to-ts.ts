@@ -1,5 +1,6 @@
 // deno run --allow-read --allow-write scripts/glsl-to-ts.ts
 // Auto-generates .ts modules for each GLSL shader file in lib/gl/shaders/glsl/
+import { lc, log } from '../lib/logger/index.ts'
 
 const glslDir = './lib/gl/shaders/glsl'
 
@@ -14,5 +15,5 @@ for await (const entry of Deno.readDir(glslDir)) {
   const escaped = shaderSource.replace(/`/g, '\`')
   const tsContent = `// AUTO-GENERATED FROM ${entry.name}. DO NOT EDIT.\nexport default \`\n${escaped}\n\`\n`
   await Deno.writeTextFile(outputPath, tsContent)
-  console.log(`Generated: ${outputPath}`)
+  log(lc.GL_SHADERS, `Generated: ${outputPath}`)
 }

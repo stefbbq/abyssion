@@ -2,6 +2,7 @@ import * as Three from 'three'
 import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
 import type { EffectComposer, OrbitControls, WebGLRenderer } from 'three'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 type CleanupDependencies = {
   animationCleanup: () => void
@@ -79,7 +80,7 @@ export const createCleanupFunction = (dependencies: CleanupDependencies) => {
       if (renderer && typeof renderer.dispose === 'function') renderer.dispose()
       if (composer && typeof composer.dispose === 'function') composer.dispose()
     } catch (error) {
-      console.warn('GL cleanup error:', error)
+      log(lc.GL, 'GL cleanup error:', error)
     }
   }
 }

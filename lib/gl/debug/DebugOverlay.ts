@@ -59,7 +59,7 @@ export type DebugOverlayType = {
  * ```typescript
  * const debugOverlay = new DebugOverlay(containerElement, {
  *   initialDebug: false,
- *   onToggleDebug: (enabled) => console.log('Debug:', enabled),
+ *   onToggleDebug: (enabled) => log(lc.GL, 'Debug:', enabled),
  *   onChangeDOF: (params) => updateDOF(params)
  * })
  * ```
