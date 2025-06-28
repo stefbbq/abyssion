@@ -42,7 +42,7 @@ export default function ActionZone({
       {/* bottom navigation container */}
       <nav
         ref={navRef}
-        className={`fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden`}
+        className={`md:hidden fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden`}
         style={{
           height,
           borderRadius,

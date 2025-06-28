@@ -1,6 +1,7 @@
+import ms from 'ms'
 import { isMobileDevice } from './isMobileDevice.ts'
 import { getBaselineDimensions } from './getBaselineDimensions.ts'
-import { lc, log } from '../../../logger/index.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 let resizeTimeout: number | null = null
 
@@ -70,21 +71,11 @@ export const debugMobileResponsiveness = (): void => {
 
   // Visibility recommendations
   const recommendations = []
-  if (isMobile && responsive.scale < 0.9) {
-    recommendations.push('⚠️ Scale might be too small for mobile visibility')
-  }
-  if (responsive.cameraZ > 6) {
-    recommendations.push('⚠️ Camera might be too far back')
-  }
-  if (responsive.planeWidth < 6) {
-    recommendations.push('⚠️ Logo plane might be too small')
-  }
-
-  if (recommendations.length > 0) {
-    log.warn(lc.GL, '🚨 Potential Issues:', recommendations)
-  } else {
-    log.debug(lc.GL, '✅ Configuration looks good')
-  }
+  if (isMobile && responsive.scale < 0.9) recommendations.push('⚠️ Scale might be too small for mobile visibility')
+  if (responsive.cameraZ > 6) recommendations.push('⚠️ Camera might be too far back')
+  if (responsive.planeWidth < 6) recommendations.push('⚠️ Logo plane might be too small')
+  if (recommendations.length > 0) log.warn(lc.GL, '🚨 Potential Issues:', recommendations)
+  else log.debug(lc.GL, '✅ Configuration looks good')
 
   console.groupEnd()
 }
@@ -105,7 +96,7 @@ export const startMobileDebugMonitoring = (): () => void => {
     resizeTimeout = setTimeout(() => {
       log.debug(lc.GL, '📱 Window resized, checking responsiveness...')
       debugMobileResponsiveness()
-    }, 250)
+    }, ms('.25s'))
   }
 
   globalThis.addEventListener('resize', handleResize)

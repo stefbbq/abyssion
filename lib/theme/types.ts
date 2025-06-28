@@ -66,10 +66,6 @@ export type UITheme = {
 }
 
 /**
- * Base color types for shared theme system
- */
-
-/**
  * RGB color with normalized values for precise calculations
  */
 export type RGBColor = {

@@ -139,9 +139,7 @@ export const initGL = async (options: InitOptions) => {
   // Override the render method to include our overlay
   const origRender = composer.render
   composer.render = function () {
-    // Update debug info each frame
     updateDebugInfo()
-    // First render the 3D scene with post-processing
     origRender.apply(this, arguments)
 
     // Defensive check and debug logging for overlay rendering
@@ -151,13 +149,15 @@ export const initGL = async (options: InitOptions) => {
         scene: uiLayer?.scene,
         camera: uiLayer?.camera,
       })
+
       return
     }
     renderer.autoClear = false // Don't clear what we've rendered
+
     try {
       renderer.render(uiLayer.scene, uiLayer.camera)
     } catch (e) {
-      log.error(lc.GL, 'Error rendering UI overlay:', e, { uiLayer, scene: uiLayer.scene, camera: uiLayer.camera })
+      log.error(lc.GL, 'error rendering UI overlay:', e, { uiLayer, scene: uiLayer.scene, camera: uiLayer.camera })
     }
     renderer.autoClear = true // Restore default
   }

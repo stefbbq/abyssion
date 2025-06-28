@@ -4,6 +4,7 @@ import navData from '@data/nav.json' with { type: 'json' }
 // import ThemeToggle from '@molecules/ThemeToggle.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
+import { HeaderLink } from './HeaderLink.tsx'
 
 type SocialIconKey = keyof SocialIconMap
 
@@ -15,25 +16,27 @@ type SocialIconKey = keyof SocialIconMap
 export default function Header() {
   const [currentPath] = useClientLocation()
   const theme = getTheme()
-  const isActive = (path: string) => currentPath === path
   const isHomepage = currentPath === '/'
-
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
 
-  console.log('currentPath', currentPath)
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Check on initial load
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Track keyboard vs mouse usage
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
-        setIsUsingKeyboard(true)
-      }
+      if (e.key === 'Tab') setIsUsingKeyboard(true)
     }
 
-    const handleMouseDown = () => {
-      setIsUsingKeyboard(false)
-    }
+    const handleMouseDown = () => setIsUsingKeyboard(false)
 
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('mousedown', handleMouseDown)
@@ -44,98 +47,94 @@ export default function Header() {
     }
   }, [])
 
-  const getNavItemStyle = (path: string) => {
-    let backgroundColor
-    if (isActive(path)) backgroundColor = theme.colors.interactive.ghostActive
-    else if (hoveredItem === path) backgroundColor = theme.colors.interactive.ghostHover
-    else backgroundColor = 'transparent'
-
-    return {
-      backgroundColor,
-      color: theme.colors.text.primary,
-    }
-  }
-
   const getFocusClass = () => isUsingKeyboard ? 'focus:outline-none focus:ring-2' : 'focus:outline-none'
 
+  const headerClasses = [
+    'top-0',
+    'left-0',
+    'right-0',
+    'z-50',
+    'hidden',
+    'md:block',
+    'sticky',
+    'transition-all',
+    'duration-300',
+    'py-2',
+    isScrolled ? 'mx-4' : 'mx-2',
+  ].join(' ')
+
+  const containerClasses = [
+    'max-w-7xl',
+    'mx-auto',
+    'flex',
+    'justify-between',
+    'items-center',
+    'h-16',
+    'transition-all',
+    'duration-300',
+    'rounded-full',
+    'px-4',
+    isScrolled ? 'backdrop-blur-lg' : '',
+  ].join(' ')
+
   return (
-    <header
-      class={`top-0 left-0 right-0 z-50 hidden md:block sticky ${isHomepage ? '' : 'border-b backdrop-blur-md'}`}
-      style={{
-        backgroundColor: isHomepage ? 'transparent' : theme.glass.background,
-        borderColor: isHomepage ? 'transparent' : theme.colors.border.primary,
-      }}
-    >
-      <div class='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div class='flex justify-between items-center h-16'>
-          {/* Logo */}
+    <header class={headerClasses}>
+      <div
+        class={containerClasses}
+        style={{
+          backgroundColor: isScrolled ? 'var(--glass-background)' : 'transparent',
+          boxShadow: isScrolled ? '0 8px 32px 0 rgba(0,0,0,0.25)' : 'none',
+        }}
+      >
+        {/* Logo */}
+        <h1 class='flex items-center m-0'>
+          <HeaderLink
+            href='/'
+            className={`text-xl font-semibold transition-colors ${getFocusClass()}`}
+            ariaLabel='Abyssion home'
+          >
+            abyssion
+          </HeaderLink>
+        </h1>
+
+        {/* Navigation */}
+        <nav class='flex items-center space-x-1'>
+          {/* Pages */}
           <div class='flex items-center'>
-            <a
-              href='/'
-              class={`text-xl font-semibold transition-colors ${getFocusClass()}`}
-              style={{
-                color: theme.colors.text.primary,
-                '--tw-ring-color': isUsingKeyboard ? theme.colors.interactive.primary : 'transparent',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              abyssion
-            </a>
+            {navData.mainNav
+              .filter((item) => !item.excludeFrom?.includes('header'))
+              .map((item) => (
+                <HeaderLink
+                  key={item.key}
+                  href={item.path}
+                  className={getFocusClass()}
+                  isActive={item.path === currentPath}
+                >
+                  {item.label}
+                </HeaderLink>
+              ))}
           </div>
 
-          {/* Navigation and Social Icons */}
-          <div class='flex items-center space-x-4'>
-            {/* Main Navigation */}
-            <nav class='flex items-center space-x-1'>
-              {navData.mainNav
-                .filter((item) => !item.excludeFrom?.includes('header'))
-                .map((item) => (
-                  <a
+          {/* Social Icons */}
+          <div class='flex items-center'>
+            {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: SocialIconKey }>)
+              .map((item) => {
+                const IconComponent = SocialIcons[item.icon]
+                return (
+                  <HeaderLink
                     key={item.key}
-                    href={item.path}
-                    class={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${getFocusClass()}`}
-                    style={{
-                      ...getNavItemStyle(item.path),
-                      '--tw-ring-color': isUsingKeyboard ? theme.colors.interactive.primary : 'transparent',
-                    }}
-                    onMouseEnter={() => setHoveredItem(item.path)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    onFocus={() => setHoveredItem(item.path)}
-                    onBlur={() => setHoveredItem(null)}
+                    href={item.url}
+                    ariaLabel={item.label}
+                    className={`transition-colors focus:ring-offset-2 rounded ${getFocusClass()}`}
+                    compact
                   >
-                    {item.label}
-                  </a>
-                ))}
-            </nav>
-
-            {/* Social Icons */}
-            <div class='flex items-center space-x-3'>
-              {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: SocialIconKey }>)
-                .map((social) => {
-                  const IconComponent = SocialIcons[social.icon]
-
-                  return (
-                    <a
-                      key={social.key}
-                      href={social.url}
-                      aria-label={social.label}
-                      class={`transition-colors focus:ring-offset-2 rounded ${getFocusClass()}`}
-                      style={{
-                        color: theme.colors.text.secondary,
-                        '--tw-ring-color': isUsingKeyboard ? theme.colors.interactive.primary : 'transparent',
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = theme.colors.text.primary}
-                      onMouseLeave={(e) => e.currentTarget.style.color = theme.colors.text.secondary}
-                    >
-                      {IconComponent ? <IconComponent className='w-5 h-5 opacity-50' /> : <div class='w-5 h-5 bg-current opacity-50'></div>}
-                    </a>
-                  )
-                })}
-              {/* <ThemeToggle /> */}
-            </div>
+                    {IconComponent ? <IconComponent className='w-5 h-5' /> : <div class='w-5 h-5 bg-current' />}
+                  </HeaderLink>
+                )
+              })}
+            {/* <ThemeToggle /> */}
           </div>
-        </div>
+        </nav>
       </div>
     </header>
   )

@@ -1,3 +1,4 @@
+import { computed, signal } from '@preact/signals'
 import type { BaseTheme, UITheme } from './types.ts'
 import { deepSpaceHUDLightTheme, deepSpaceHUDTheme } from './themes/index.ts'
 import { hexToCSS } from './utils/hexToCSS.ts'
@@ -6,7 +7,19 @@ import { rgbToCSS } from './utils/rgbToCSS.ts'
 /**
  * Current theme mode - can be toggled
  */
-let currentThemeMode: 'light' | 'dark' = 'dark'
+const currentThemeMode = signal<'light' | 'dark'>('dark')
+
+/**
+ * A computed signal that holds the current base theme object.
+ * It automatically updates when the currentThemeMode signal changes.
+ */
+const currentBaseTheme = computed<BaseTheme>(() => currentThemeMode.value === 'dark' ? deepSpaceHUDTheme : deepSpaceHUDLightTheme)
+
+/**
+ * A computed signal that holds the fully-formed UITheme object.
+ * It automatically updates when the currentBaseTheme signal changes.
+ */
+export const currentTheme = computed<UITheme>(() => createTheme(currentBaseTheme.value))
 
 /**
  * Create UI theme from base theme with mode-aware contrast
@@ -78,33 +91,36 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
 
 /**
  * Get current base theme based on mode
+ * @deprecated Use the `currentBaseTheme` signal instead.
  */
-export const getCurrentBaseTheme = (): BaseTheme => currentThemeMode === 'dark' ? deepSpaceHUDTheme : deepSpaceHUDLightTheme
+export const getCurrentBaseTheme = (): BaseTheme => currentBaseTheme.value
 
 /**
  * Get current UI theme instance
+ * @deprecated Use the `currentTheme` signal instead.
  */
-export const getTheme = (): UITheme => createTheme(getCurrentBaseTheme())
+export const getTheme = (): UITheme => currentTheme.value
 
 /**
  * Toggle between light and dark themes
  */
 export const toggleThemeMode = (): 'light' | 'dark' => {
-  currentThemeMode = currentThemeMode === 'dark' ? 'light' : 'dark'
-  return currentThemeMode
+  currentThemeMode.value = currentThemeMode.value === 'dark' ? 'light' : 'dark'
+  return currentThemeMode.value
 }
 
 /**
  * Set specific theme mode
  */
 export const setThemeMode = (mode: 'light' | 'dark'): void => {
-  currentThemeMode = mode
+  currentThemeMode.value = mode
 }
 
 /**
  * Get current theme mode
+ * @deprecated Use the `currentThemeMode` signal for reads.
  */
-export const getThemeMode = (): 'light' | 'dark' => currentThemeMode
+export const getThemeMode = (): 'light' | 'dark' => currentThemeMode.value
 
 export { createBaseTheme } from '@libtheme/utils/createBaseTheme.ts'
 export { createRGB } from '@libtheme/utils/createRGB.ts'

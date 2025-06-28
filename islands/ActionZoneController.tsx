@@ -80,26 +80,24 @@ export default function ActionZoneController() {
 
   return (
     <>
-      <div className='md:hidden'>
-        <ActionZone
-          layoutConfig={collapsedConfig.layout}
-          {...{ isMenuOpen, setIsMenuOpen }}
-          collapsedChildren={
-            <ActionZoneNav
-              buttons={collapsedConfig.buttons}
-              {...{ onAction, theme }}
-            />
-          }
-          expandedChildren={
-            <ActionZoneExpandedMenu
-              menuItems={navData.mainNav}
-              socialLinks={navData.socialLinks}
-              onMenuClose={() => setIsMenuOpen(false)}
-              {...{ onAnchorLink, theme }}
-            />
-          }
-        />
-      </div>
+      <ActionZone
+        layoutConfig={collapsedConfig.layout}
+        {...{ isMenuOpen, setIsMenuOpen }}
+        collapsedChildren={
+          <ActionZoneNav
+            buttons={collapsedConfig.buttons}
+            {...{ onAction, theme }}
+          />
+        }
+        expandedChildren={
+          <ActionZoneExpandedMenu
+            menuItems={navData.mainNav}
+            socialLinks={navData.socialLinks}
+            onMenuClose={() => setIsMenuOpen(false)}
+            {...{ onAnchorLink, theme }}
+          />
+        }
+      />
     </>
   )
 }
