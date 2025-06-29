@@ -45,6 +45,12 @@ export type UITheme = {
     backdrop: string
     border: string
   }
+  // Frost morphism effects
+  frost: {
+    background: string
+    backdrop: string
+    border: string
+  }
   // Spacing and sizing
   spacing: {
     xs: string
@@ -142,4 +148,24 @@ export type BaseTheme = {
   foregroundLight: RGBColor
   border: HexColor
   surface: HexColor
+  typography?: Partial<BaseTypography>
+  spacing?: Partial<BaseSpacing>
+}
+
+export type BaseTypography = {
+  fontFamily: string
+  fontWeights: {
+    normal: number
+    medium: number
+    semibold: number
+    bold: number
+  }
+}
+
+export type BaseSpacing = {
+  xs: string
+  sm: string
+  md: string
+  lg: string
+  xl: string
 }

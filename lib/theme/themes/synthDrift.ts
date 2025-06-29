@@ -35,4 +35,7 @@ export const synthDriftTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#cccccc'),
   surface: hexStringToNumber('#ffffff'),
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
 })

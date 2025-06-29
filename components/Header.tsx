@@ -1,24 +1,11 @@
 import { useEffect, useState } from 'preact/hooks'
 import navData from '@data/nav.json' with { type: 'json' }
-// import ThemeToggle from '@molecules/ThemeToggle.tsx'
+import ThemeToggle from '@components/ThemeToggle.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { HeaderLink } from './HeaderLink.tsx'
 
 type SocialIconKey = keyof SocialIconMap
-
-// styles
-const headerBase = 'top-0 left-0 right-0 z-50 hidden md:block sticky transition-all duration-300 py-2'
-const headerScrolled = 'mx-4'
-const headerDefault = 'mx-2'
-const containerBase = 'max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4'
-const containerScrolled = 'backdrop-blur-lg bg-[var(--glass-background)] shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
-const containerDefault = 'bg-transparent shadow-none'
-const logo = 'flex items-center m-0'
-const logoText = 'text-xl font-semibold transition-colors'
-const navWrapper = 'flex items-center space-x-1'
-const navPages = 'flex items-center'
-const navSocial = 'flex items-center'
 
 /**
  * Desktop navigation bar for the app, styled with utility classes and CSS variables.
@@ -52,28 +39,21 @@ export const Header = () => {
     }
   }, [])
 
-  // Focus ring utility
+  // dynamic classes
   const getFocusClass = () => isUsingKeyboard ? 'focus:outline-none focus:ring-2' : 'focus:outline-none'
-
-  // Compose header and container classes
-  const headerClasses = [
-    headerBase,
-    isScrolled ? headerScrolled : headerDefault,
-  ].join(' ')
-
-  const containerClasses = [
-    containerBase,
-    isScrolled ? containerScrolled : containerDefault,
-  ].join(' ')
+  const headerClasses = isScrolled ? 'mx-4' : 'mx-2'
+  const containerClasses = isScrolled ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
 
   return (
-    <header class={headerClasses}>
-      <div class={containerClasses}>
+    <header class={`top-0 left-0 right-0 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
+      <div
+        class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4 ${containerClasses}`}
+      >
         {/* Logo */}
-        <h1 class={logo}>
+        <h1 class='flex items-center m-0'>
           <HeaderLink
             href='/'
-            className={`${logoText} ${getFocusClass()}`}
+            className={`text-xl font-semibold ${getFocusClass()}`}
             ariaLabel='Abyssion home'
           >
             abyssion
@@ -81,9 +61,9 @@ export const Header = () => {
         </h1>
 
         {/* Navigation */}
-        <nav class={navWrapper}>
+        <nav class='flex items-center space-x-1'>
           {/* Pages */}
-          <div class={navPages}>
+          <div class='flex items-center'>
             {navData.mainNav
               .filter((item) => !item.excludeFrom?.includes('header'))
               .map((item) => (
@@ -99,7 +79,7 @@ export const Header = () => {
           </div>
 
           {/* Social Icons */}
-          <div class={navSocial}>
+          <div class='flex items-center'>
             {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: SocialIconKey }>)
               .map((item) => {
                 const IconComponent = SocialIcons[item.icon]
@@ -115,7 +95,8 @@ export const Header = () => {
                   </HeaderLink>
                 )
               })}
-            {/* <ThemeToggle /> */}
+
+            <ThemeToggle />
           </div>
         </nav>
       </div>

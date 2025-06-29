@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.glass-effect {
+  @apply bg-glass border border-glass backdrop-blur-glass;
+}
+
+.frost-effect {
+  @apply bg-frost backdrop-blur-frost;
+}

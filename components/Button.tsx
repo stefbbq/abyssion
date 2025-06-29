@@ -25,35 +25,35 @@ type AnchorElementProps =
 
 // Use a discriminated union type. Based on whether 'href' is provided,
 // TypeScript will enforce either Button-specific or Anchor-specific props.
-export type ButtonProps = BaseProps & (ButtonElementProps | AnchorElementProps)
+type Props = BaseProps & (ButtonElementProps | AnchorElementProps)
+
+const variantClasses = {
+  primary: 'bg-interactive-primary text-text-inverse hover:bg-interactive-primaryHover border-transparent',
+  secondary: 'bg-interactive-secondary text-text-primary hover:bg-interactive-secondaryHover border-border-primary',
+  outline: 'bg-transparent text-text-primary hover:bg-interactive-ghostHover border-border-primary',
+  ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-interactive-ghostHover border-transparent',
+}
+
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-sm rounded-md',
+  md: 'px-4 py-2 text-sm rounded-md',
+  lg: 'px-6 py-3 text-base rounded-lg',
+}
 
 /**
  * A versatile button component that can render as a standard button
  * or as an anchor tag for navigation, with support for Fresh Partials.
  * It features multiple visual variants and sizes, inspired by Vercel's design system.
  */
-export function Button({
+export const Button = ({
   variant = 'primary',
   size = 'md',
   children,
   class: className,
   ...props
-}: ButtonProps) {
+}: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
-
-  const variantClasses = {
-    primary: 'bg-black text-white hover:bg-gray-800 focus:ring-gray-500 border border-transparent',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 border border-gray-200',
-    outline: 'bg-transparent text-gray-900 hover:bg-gray-50 focus:ring-gray-500 border border-gray-300',
-    ghost: 'bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-500 border border-transparent',
-  }
-
-  const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm rounded-md',
-    md: 'px-4 py-2 text-sm rounded-md',
-    lg: 'px-6 py-3 text-base rounded-lg',
-  }
+    'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border-focus disabled:opacity-50 disabled:cursor-not-allowed'
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 
@@ -61,7 +61,6 @@ export function Button({
   const { ref, ...rest } = props as { ref?: any }
 
   if (props.href) {
-    // TypeScript now knows these are AnchorElementProps
     return (
       <a
         {...rest}

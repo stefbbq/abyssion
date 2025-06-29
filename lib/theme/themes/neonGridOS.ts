@@ -35,4 +35,7 @@ export const neonGridOSTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#d8d8d8'),
   surface: hexStringToNumber('#ffffff'),
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
 })

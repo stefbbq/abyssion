@@ -1,5 +1,4 @@
 import { useRef } from 'preact/hooks'
-import { getTheme } from '@lib/theme/index.ts'
 import { ComponentChildren } from 'preact'
 
 type Props = {
@@ -24,7 +23,6 @@ export default function ActionZone({
   layoutConfig = {},
 }: Props) {
   const navRef = useRef<HTMLElement>(null)
-  const theme = getTheme()
   const showExpandedContent = isMenuOpen
   const height = typeof layoutConfig.height === 'function' ? layoutConfig.height() : undefined
   const borderRadius = typeof layoutConfig.borderRadius === 'function' ? layoutConfig.borderRadius() : undefined
@@ -42,14 +40,10 @@ export default function ActionZone({
       {/* bottom navigation container */}
       <nav
         ref={navRef}
-        className={`md:hidden fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden`}
+        className='md:hidden fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
         style={{
           height,
           borderRadius,
-          backgroundColor: theme.glass.background,
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 32px 0 rgba(0,0,0,0.25)',
         }}
       >
         <div className='max-w-md mx-auto'>

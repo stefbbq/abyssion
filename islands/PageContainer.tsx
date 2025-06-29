@@ -31,7 +31,7 @@ const PageContainer = ({ children }: { children: preact.ComponentChildren }) => 
   }, [isHomePage, isGLInitialized.value])
 
   return (
-    <main class='min-h-screen relative z-10'>
+    <main class='pb-20 md:pb-0 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 relative z-10'>
       {children}
     </main>
   )

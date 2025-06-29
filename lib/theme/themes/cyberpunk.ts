@@ -35,4 +35,7 @@ export const cyberpunkTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#2a2a2a'),
   surface: hexStringToNumber('#161616'),
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
 })

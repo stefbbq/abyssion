@@ -3,6 +3,7 @@ import type { BaseTheme, UITheme } from './types.ts'
 import { deepSpaceHUDLightTheme, deepSpaceHUDTheme } from './themes/index.ts'
 import { hexToCSS } from './utils/hexToCSS.ts'
 import { rgbToCSS } from './utils/rgbToCSS.ts'
+import { hexStringToRGB } from './utils/hexStringToRGB.ts'
 
 /**
  * Current theme mode - can be toggled
@@ -20,6 +21,8 @@ const currentBaseTheme = computed<BaseTheme>(() => currentThemeMode.value === 'd
  * It automatically updates when the currentBaseTheme signal changes.
  */
 export const currentTheme = computed<UITheme>(() => createTheme(currentBaseTheme.value))
+
+const numberToHexString = (num: number) => `#${num.toString(16).padStart(6, '0')}`
 
 /**
  * Create UI theme from base theme with mode-aware contrast
@@ -61,14 +64,17 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       },
     },
     glass: {
+      background: rgbToCSS(hexStringToRGB(numberToHexString(baseTheme.surface)), 0.3), // Lighter, based on surface color
+      backdrop: '12px',
+      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.2 : 0.1),
+    },
+    frost: {
       background: rgbToCSS(
-        isDarkMode
-          ? { r: 0, g: 0, b: 0 } // Pure black base for dark mode
-          : baseTheme.foreground, // Use foreground for light mode
-        isDarkMode ? 0.5 : 0.05, // Much more opaque in dark mode
+        hexStringToRGB(numberToHexString(baseTheme.background)),
+        isDarkMode ? 0.8 : 0.6,
       ),
-      backdrop: 'blur(12px)',
-      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.3 : 0.15), // Brighter glass border in dark mode
+      backdrop: '20px',
+      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.3 : 0.15),
     },
     spacing: {
       xs: '0.25rem',
@@ -76,6 +82,7 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       md: '1rem',
       lg: '1.5rem',
       xl: '2rem',
+      ...baseTheme.spacing,
     },
     typography: {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -85,6 +92,7 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
         semibold: 600,
         bold: 700,
       },
+      ...baseTheme.typography,
     },
   }
 }
@@ -125,3 +133,4 @@ export const getThemeMode = (): 'light' | 'dark' => currentThemeMode.value
 export { createBaseTheme } from '@libtheme/utils/createBaseTheme.ts'
 export { createRGB } from '@libtheme/utils/createRGB.ts'
 export * from '@libtheme/themes/index.ts'
+export { currentThemeMode }

@@ -35,4 +35,7 @@ export const techscapeTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#333333'),
   surface: hexStringToNumber('#202020'),
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
 })

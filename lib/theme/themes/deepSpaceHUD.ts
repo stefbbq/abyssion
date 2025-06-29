@@ -36,6 +36,9 @@ export const deepSpaceHUDTheme = createBaseTheme({
 
   // Dark mode borders - much brighter for visibility
   border: hexStringToNumber('#666666'), // Brighter gray borders
+  typography: {
+    fontFamily: '"Oxanium", sans-serif',
+  },
 })
 
 /**
@@ -72,4 +75,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
 
   // Light mode borders
   border: hexStringToNumber('#e0e0e0'), // Light gray borders
+  typography: {
+    fontFamily: '"Oxanium", sans-serif',
+  },
 })

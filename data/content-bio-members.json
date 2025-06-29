@@ -1,23 +1,30 @@
 [
   {
     "id": "1",
-    "name": "Lorem Ipsum",
-    "role": "Consectetur / Adipiscing",
+    "name": "Dan",
+    "role": "Bass",
     "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    "image": "/images/member1.jpg"
+    "image": "/images/dan.webp"
   },
   {
     "id": "2",
-    "name": "Dolor Amet",
-    "role": "Eiusmod / Tempor",
+    "name": "Klaus",
+    "role": "Guitar",
     "bio": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    "image": "/images/member2.jpg"
+    "image": "/images/klaus.webp"
   },
   {
     "id": "3",
-    "name": "Magna Aliqua",
-    "role": "Labore / Dolore",
+    "name": "Dez",
+    "role": "Guitar",
     "bio": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    "image": "/images/member3.jpg"
+    "image": "/images/dez.webp"
+  },
+  {
+    "id": "4",
+    "name": "Stef",
+    "role": "Drums",
+    "bio": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "image": ""
   }
 ]

@@ -35,4 +35,7 @@ export const glitchCoreTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#222222'),
   surface: hexStringToNumber('#12002b'),
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
 })

@@ -1,7 +1,6 @@
 import type { MenuItem, SocialLink } from '@data/types.ts'
 import { ActionZoneMenuButton } from '@components/actionZone/ActionZoneMenuButton.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
-import type { UITheme } from '@lib/theme/types.ts'
 import actionZoneAnimationConfig from '@components/actionZone/actionZone.animation.ts'
 import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
 
@@ -12,7 +11,6 @@ type Props = {
   socialLinks: SocialLink[]
   onMenuClose: () => void
   onAnchorLink: (path: string) => void
-  theme: UITheme
 }
 
 /**
@@ -24,7 +22,6 @@ export const ActionZoneExpandedMenu = ({
   socialLinks,
   onMenuClose,
   onAnchorLink,
-  theme,
 }: Props) => {
   const navButtons: ActionZoneButton[] = actionZoneAnimationConfig.expandedMenu.buttons || []
 
@@ -44,10 +41,7 @@ export const ActionZoneExpandedMenu = ({
           <a
             key={key}
             href={url}
-            class='transition-colors'
-            style={{ color: theme.colors.text.secondary }}
-            onMouseEnter={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.primary}
-            onMouseLeave={(e: MouseEvent) => (e.currentTarget as HTMLAnchorElement).style.color = theme.colors.text.secondary}
+            class='transition-colors text-text-secondary hover:text-text-primary'
             f-client-nav={false}
             as='a'
           >
@@ -69,7 +63,6 @@ export const ActionZoneExpandedMenu = ({
             label={button.content.label}
             isActive={button.isActive}
             onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[0])}
-            theme={theme}
             action={button.action}
           />
         ))}

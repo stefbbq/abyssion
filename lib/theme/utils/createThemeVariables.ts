@@ -1,29 +1,34 @@
-import type { UITheme } from '../types.ts'
+// deno-lint-ignore-file no-explicit-any
+import type { UITheme } from '@lib/theme/types.ts'
 
 /**
- * Flattens a nested theme object and converts it into a string of CSS variables.
- * @param theme - The UITheme object.
- * @returns A string of CSS variables to be injected into a <style> tag.
+ * Flattens a nested theme object and converts it into a string of CSS custom properties.
  *
  * @example
- * const theme = { colors: { text: { primary: '#fff' } } };
- * const cssVars = createThemeVariables(theme);
- * // returns "--color-text-primary: #fff;"
+ * // Input: { colors: { primary: '#fff' } }
+ * // Output: '--colors-primary: #fff;'
  */
-export function createThemeVariables(theme: UITheme): string {
-  let cssVariables = ''
-
-  // deno-lint-ignore no-explicit-any
-  const flattenObject = (object: any, prefix = '') => {
-    for (const key in object) {
-      if (typeof object[key] === 'object' && object[key] !== null && !Array.isArray(object[key])) {
-        flattenObject(object[key], `${prefix}${key}-`)
-      } else {
-        cssVariables += `--${prefix}${key}: ${object[key]};`
-      }
+const flattenThemeObject = (obj: Record<string, any>, prefix = ''): Record<string, string> => {
+  return Object.keys(obj).reduce((acc, k) => {
+    const pre = prefix.length ? prefix + '-' : ''
+    if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+      Object.assign(acc, flattenThemeObject(obj[k], pre + k))
+    } else {
+      acc[pre + k] = obj[k]
     }
-  }
+    return acc
+  }, {} as Record<string, string>)
+}
 
-  flattenObject(theme)
-  return cssVariables
+/**
+ * Creates a CSS string of custom properties from a UITheme object.
+ * This string can be injected into a <style> tag.
+ */
+export const createThemeVariables = (theme: UITheme): string => {
+  const flattenedTheme = flattenThemeObject(theme)
+  const variableString = Object.entries(flattenedTheme)
+    .map(([key, value]) => `--${key}: ${value};`)
+    .join('\n')
+
+  return `:root {\n${variableString}\n}`
 }
