@@ -24,7 +24,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
   accentDark: hexStringToRGB('#00bfa1'), // Darker cyan
 
   // Dark mode backgrounds
-  background: hexStringToNumber('#000000'), // True black
+  background: hexStringToNumber('#222222'), // True black
   backgroundAlt: hexStringToNumber('#0a0a0a'), // Near black
   backgroundDark: hexStringToNumber('#050505'), // Darker variant
   surface: hexStringToNumber('#0a0a0a'), // Elevated surfaces

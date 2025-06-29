@@ -1,5 +1,6 @@
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { useEffect, useRef, useState } from 'preact/hooks'
+import { currentThemeMode } from '@lib/theme/index.ts'
 
 const noiseImages = [
   '/images/noiseB.png',
@@ -22,7 +23,7 @@ const getRandomIndex = (exclude: number, length: number) => {
 const ThemedBackground = () => {
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
-
+  const isLight = currentThemeMode.value === 'light'
   const [noiseIndex, setNoiseIndex] = useState(0)
   const timeoutRef = useRef<number | null>(null)
 
@@ -52,23 +53,31 @@ const ThemedBackground = () => {
     }
   }, [])
 
-  // Define class variables
-  const baseClasses = 'fixed inset-0 pointer-events-none transition-opacity duration-400 bg-[var(--colors-background-primary)]'
-  const opacityClass = isHomePage ? 'opacity-0' : 'opacity-50'
-  const zIndexClass = 'z-10' // or 'z-0', adjust as needed
+  const baseClasses = 'fixed inset-0 pointer-events-none'
 
-  // Compose final className
-  const className = `${baseClasses} ${opacityClass} ${zIndexClass}`
+  const backgroundClasses = 'bg-[var(--colors-background-primary)]'
+  let backgroundOpacity = 'opacity-0'
+  if (!isHomePage && !isLight) backgroundOpacity = 'opacity-40'
+  if (!isHomePage && isLight) backgroundOpacity = 'opacity-60'
+
+  const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
+  const noiseOpacity = isHomePage ? 'opacity-0' : 'opacity-5'
+
+  const zIndexClass = 'z-10'
+  const transitionClass = 'transition-opacity duration-400'
 
   return (
-    <div className={className} aria-hidden='true'>
-      {/* Noise overlay */}
+    <>
       <div
-        className='absolute inset-0 pointer-events-none z-20 opacity-5 bg-repeat bg-[length:150px_75px]'
+        className={`${noiseClasses} ${noiseOpacity} ${zIndexClass}`}
         style={{ backgroundImage: `url(${noiseImages[noiseIndex]})` }}
         aria-hidden='true'
       />
-    </div>
+      <div
+        className={`${baseClasses} ${backgroundClasses} ${backgroundOpacity} ${zIndexClass} ${transitionClass}`}
+        aria-hidden='true'
+      />
+    </>
   )
 }
 

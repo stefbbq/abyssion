@@ -40,6 +40,7 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 - Tailwind is configured to use these variables, so you can use semantic classes like `bg-background-primary`, `text-text-secondary`, or arbitrary values like `bg-[var(--colors-background-primary)]`.
 - For alpha blending, set the variable to an `rgba` value in your theme system, or use inline style to convert a hex to `rgba` with the desired alpha.
 - **Example:**
+
   ```tsx
   <div className="bg-[var(--colors-background-primary)] text-[var(--colors-text-primary)]" />
   // or
@@ -55,20 +56,54 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 - **GL Theme System:** Located in `lib/gl/theme/`, this system extends `BaseTheme` for 3D rendering (Three.js). It provides additional colors for overlays, geometric elements, and lens flares.
 - **getGLTheme():** Returns a `GLTheme` object based on the current base theme, used for 3D scene rendering.
 
-### Notes
+## Animation System
 
-- All theme switching is instant and client-side, with no page reloads.
-- ThemedBackground and other components use CSS variables directly for dynamic backgrounds and transitions.
-- The theme system is designed for both UI and 3D/GL consistency.
+The animation system is designed for maximum modularity, testability, and functional purity.
 
-## Styling
+### Architecture
+
+- **/animation/core/**: Pure animation engine functions (e.g., createAnimationEngine, updateAnimationEngine)
+- **/animation/calculations/**: Pure calculation functions (e.g., calculateMouseRotation, calculateStaticLayerPosition)
+- **/animation/utils/**: Pure utility functions (e.g., smoothRotationInterpolation, getRandomInterval)
+- **/animation/createLogoAnimator.ts**: Main orchestrator (side effects isolated here)
+- **/animation/types.ts**: Type definitions
+
+### Core Principles
+
+- **Pure functions only**: All calculations are deterministic and side-effect free
+- **One function per file**: Each function lives in its own file for modularity
+- **Immutable data**: No mutation, always return new values
+- **Side effect isolation**: Only orchestrators perform DOM/Three.js mutations
+- **Composable**: Pure functions are easy to combine for new behaviors
+
+### Usage
+
+- Import orchestrators to run animation systems:
+
+  ```typescript
+  import { createLogoAnimator } from './animation'
+  const animator = createLogoAnimator(dependencies)
+  const cleanup = animator.start()
+  ```
+
+- Use pure calculation utilities for testable math:
+
+  ```typescript
+  import { calculateStaticLayerPosition } from './animation'
+  const position = calculateStaticLayerPosition(1000, 0, 5, false)
+  // Returns: { rotationX: 0, rotationY: 0, positionZ: 5.02 }
+  ```
+
+- Compose your own pure functions and use them in orchestrators for custom behaviors.
+
+### Styling
 
 Component styling is primarily handled by Tailwind CSS utility classes. The theme system exposes all theme values as CSS variables, which are consumed by Tailwind.
 
 In addition to standard utilities, two custom utility classes are available in `static/styles.css` for creating blurred, semi-transparent backgrounds:
 
--   **.glass-effect**: Used for primary content containers. It applies a lighter, more transparent blur.
--   **.frost-effect**: Used for primary navigation elements (`Header`, `ActionZone`). It applies a darker, more opaque blur for better readability.
+- **.glass-effect**: Used for primary content containers. It applies a lighter, more transparent blur.
+- **.frost-effect**: Used for primary navigation elements (`Header`, `ActionZone`). It applies a darker, more opaque blur for better readability.
 
 ## Directory Structure
 

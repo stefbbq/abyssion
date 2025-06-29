@@ -40,7 +40,7 @@ export default function ActionZone({
       {/* bottom navigation container */}
       <nav
         ref={navRef}
-        className='md:hidden fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
+        className='fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
         style={{
           height,
           borderRadius,

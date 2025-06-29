@@ -3,7 +3,6 @@
  * Scene orchestrator with composable page-specific animation systems
  */
 
-// Core scene orchestrator system
 export { createSceneOrchestrator } from './createSceneOrchestrator.ts'
 export { createSharedBehaviors } from './core/createSharedBehaviors.ts'
 export type { AnimationContext, AnimationOrchestrator, SceneState, TransitionState } from './core/types.ts'
@@ -12,7 +11,7 @@ export type { AnimationContext, AnimationOrchestrator, SceneState, TransitionSta
 export { createLogoPageOrchestrator } from './orchestrators/createLogoPageOrchestrator.ts'
 export { createContentPageOrchestrator } from './orchestrators/createContentPageOrchestrator.ts'
 
-// Pure calculation functions (reusable across orchestrators)
+// Pure calculation functions
 export { calculateStaticLayerPosition } from './calculations/calculateStaticLayerPosition.ts'
 export { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
 export { calculateShaderTime } from './calculations/calculateShaderTime.ts'
