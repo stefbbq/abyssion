@@ -22,15 +22,10 @@ export const ActionZoneNav = ({ buttons, onAction }: Props) => {
           const isActive = button.isActive || isPageTitle
 
           let buttonClasses = ''
-          if (isActive) {
-            buttonClasses += isPageTitle ? 'bg-text-primary text-background-primary' : 'bg-text-primary text-background-primary'
-          } else {
-            buttonClasses += 'bg-transparent text-text-secondary'
-          }
+          if (isActive || isPageTitle) buttonClasses = 'bg-text-primary text-background-primary'
+          else buttonClasses = 'bg-transparent text-text-secondary'
 
-          if (isHovered && !isActive) {
-            buttonClasses = 'bg-interactive-ghostHover text-text-primary'
-          }
+          if (isHovered && !isActive) buttonClasses = 'bg-interactive-ghostHover text-text-primary'
 
           return (
             <ActionZoneButtonComponent

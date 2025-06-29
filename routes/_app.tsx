@@ -8,6 +8,7 @@ import type { PagesConfig } from '@data/types.ts'
 import PageContainer from '@islands/PageContainer.tsx'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentTheme } from '@lib/theme/index.ts'
+import ThemedBackground from '@islands/ThemedBackground.tsx'
 
 export default function App({ Component, url }: PageProps) {
   const pagePath = url.pathname
@@ -24,19 +25,12 @@ export default function App({ Component, url }: PageProps) {
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <link rel='preconnect' href='https://fonts.googleapis.com' />
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
-        <link
-          href='https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&display=swap'
-          rel='stylesheet'
-        />
+        <link href='https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&display=swap' rel='stylesheet' />
         <link rel='stylesheet' href='/styles.css' />
       </Head>
-      <body
-        f-client-nav
-        class='min-h-screen relative bg-black'
-        style={{ fontFamily: theme.typography.fontFamily }}
-      >
+      <body f-client-nav class='min-h-screen relative bg-black' style={{ fontFamily: theme.typography.fontFamily }}>
+        <ThemedBackground />
         <ThemeProvider />
-        {/* gl canvas */}
         <GLCanvas />
 
         {/* header */}

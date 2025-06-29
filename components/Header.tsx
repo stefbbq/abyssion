@@ -45,7 +45,7 @@ export const Header = () => {
   const containerClasses = isScrolled ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
 
   return (
-    <header class={`top-0 left-0 right-0 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
+    <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
       <div
         class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4 ${containerClasses}`}
       >

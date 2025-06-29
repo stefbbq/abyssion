@@ -4,6 +4,7 @@ import { deepSpaceHUDLightTheme, deepSpaceHUDTheme } from './themes/index.ts'
 import { hexToCSS } from './utils/hexToCSS.ts'
 import { rgbToCSS } from './utils/rgbToCSS.ts'
 import { hexStringToRGB } from './utils/hexStringToRGB.ts'
+import { pipe } from '@lib/utils/pipe.ts'
 
 /**
  * Current theme mode - can be toggled
@@ -64,14 +65,21 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       },
     },
     glass: {
-      background: rgbToCSS(hexStringToRGB(numberToHexString(baseTheme.surface)), 0.3), // Lighter, based on surface color
-      backdrop: '12px',
-      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.2 : 0.1),
+      background: pipe(
+        baseTheme.surface,
+        numberToHexString,
+        hexStringToRGB,
+        (rgb) => rgbToCSS(rgb, 0.5),
+      ), // Lighter, based on surface color
+      backdrop: '16px',
+      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.08 : 0.1),
     },
     frost: {
-      background: rgbToCSS(
-        hexStringToRGB(numberToHexString(baseTheme.background)),
-        isDarkMode ? 0.8 : 0.6,
+      background: pipe(
+        baseTheme.background,
+        numberToHexString,
+        hexStringToRGB,
+        (rgb) => rgbToCSS(rgb, isDarkMode ? 0.8 : 0.6),
       ),
       backdrop: '20px',
       border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.3 : 0.15),
@@ -82,7 +90,6 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       md: '1rem',
       lg: '1.5rem',
       xl: '2rem',
-      ...baseTheme.spacing,
     },
     typography: {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -92,7 +99,6 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
         semibold: 600,
         bold: 700,
       },
-      ...baseTheme.typography,
     },
   }
 }

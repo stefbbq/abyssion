@@ -17,11 +17,13 @@ const PageContainer = ({ children }: { children: preact.ComponentChildren }) => 
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
 
+  // initialize logger and reset log contexts
   useEffect(() => {
     initializeLoggerClient()
     if (isDebugModeEnabled()) resetContexts()
   }, [])
 
+  // initialize GL scene orchestrator (decide if we're rendering the logo or not)
   useEffect(() => {
     if (!isGLInitialized.value) return
 
@@ -31,7 +33,7 @@ const PageContainer = ({ children }: { children: preact.ComponentChildren }) => 
   }, [isHomePage, isGLInitialized.value])
 
   return (
-    <main class='pb-20 md:pb-0 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 relative z-10'>
+    <main class='pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-4 relative z-10 space-y-8'>
       {children}
     </main>
   )

@@ -10,12 +10,13 @@ type Props = {
   action: ActionZoneButton['action']
 }
 
+const baseClass = 'w-full h-12 flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
+
 /**
  * ActionZoneMenuButton
  * Dedicated button for expanded menu items (no border, no outline, fade-in)
  */
 export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, style = {}, action }: Props) => {
-  const baseClass = 'w-full h-12 flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
   const activeClass = isActive ? 'bg-background-primary text-text-primary font-semibold' : 'bg-transparent text-text-secondary font-medium'
 
   if (action?.type === 'navigate' && action.href) {
@@ -24,9 +25,9 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
         key={id}
         href={action.href}
         className={`${baseClass} ${activeClass}`}
-        style={style}
         tabIndex={0}
         f-client-nav
+        {...{ style, onClick }}
       >
         {label}
       </a>
@@ -36,10 +37,9 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
     <button
       key={id}
       className={`${baseClass} ${activeClass}`}
-      style={style}
-      onClick={onClick}
       tabIndex={0}
       type='button'
+      {...{ style, onClick }}
     >
       {label}
     </button>

@@ -20,6 +20,7 @@ import * as $Header from './islands/Header.tsx'
 import * as $PageContainer from './islands/PageContainer.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
 import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
+import * as $ThemedBackground from './islands/ThemedBackground.tsx'
 import type { Manifest } from '$fresh/server.ts'
 
 const manifest = {
@@ -44,6 +45,7 @@ const manifest = {
     './islands/PageContainer.tsx': $PageContainer,
     './islands/ThemeProvider.tsx': $ThemeProvider,
     './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
+    './islands/ThemedBackground.tsx': $ThemedBackground,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest

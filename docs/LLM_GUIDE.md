@@ -104,7 +104,7 @@ users.push(newUser)
 // imperative loops (unless async needed)
 for (let i = 0; i < arr.length; i++) { }
 
-// nested ternaries
+// NEVER DO THIS!!: nested ternaries
 x ? y ? a : b : c
 ```
 
