@@ -3,9 +3,40 @@
 @tailwind utilities;
 
 .glass-effect {
-  @apply bg-glass border border-glass backdrop-blur-glass;
+  @apply bg-glass border border-glass shadow-lg backdrop-blur-glass;
 }
 
 .frost-effect {
-  @apply bg-frost backdrop-blur-frost;
+  @apply bg-frost border-frost shadow-lg backdrop-blur-frost;
+}
+
+p {
+  @apply font-sans text-base;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-heading font-bold;
+}
+
+blockquote {
+  @apply sm:pl-8;
+}
+
+blockquote p {
+  @apply font-quote my-1 italic text-2xl opacity-60 font-light tracking-wide;
+}
+
+.content-fade-top {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 80px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px);
+}
+
+.content-fade-bottom {
+  mask-image: linear-gradient(to top, transparent 0%, black 80px);
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, black 80px);
+}
+
+.content-fade-top.content-fade-bottom {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
 }

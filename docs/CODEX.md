@@ -56,6 +56,15 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 - **GL Theme System:** Located in `lib/gl/theme/`, this system extends `BaseTheme` for 3D rendering (Three.js). It provides additional colors for overlays, geometric elements, and lens flares.
 - **getGLTheme():** Returns a `GLTheme` object based on the current base theme, used for 3D scene rendering.
 
+### Font System
+
+- The theme supports custom font families via Tailwind's `fontFamily` extension in `tailwind.config.ts`.
+- **Lovecraftian font:** The `lovecraft` font family (UnifrakturCook, cursive) is available for use in blockquotes and special headings. Add `font-lovecraft` to any element to apply it.
+- **Best practices:**
+  - Use `font-sans` for most body text and paragraphs (`<p>`).
+  - Use `font-serif` or `font-lovecraft` for headings (`<h1>`, `<h2>`, etc.) or blockquotes for thematic effect.
+  - Blockquotes in Markdown are automatically styled with `font-lovecraft` via the `TextBlock` component.
+
 ## Animation System
 
 The animation system is designed for maximum modularity, testability, and functional purity.

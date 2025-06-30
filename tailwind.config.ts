@@ -1,12 +1,14 @@
 import { type Config } from 'tailwindcss'
 
 const themeColor = (variable: string) => `var(--colors-${variable})`
+const fontFamily = (variable: string) => `var(--typography-fontFamily-${variable})`
 const glass = (variable: string) => `var(--glass-${variable})`
 const frost = (variable: string) => `var(--frost-${variable})`
 
 export default {
   content: [
     '{routes,islands,components}/**/*.{ts,tsx,js,jsx}',
+    './static/styles.css',
   ],
   theme: {
     extend: {
@@ -67,6 +69,11 @@ export default {
       animation: {
         fadeIn: 'fadeIn 0.3s ease-in-out',
         fadeOut: 'fadeOut 0.3s ease-in-out',
+      },
+      fontFamily: {
+        heading: fontFamily('heading'),
+        sans: fontFamily('body'),
+        quote: fontFamily('quote'),
       },
     },
   },

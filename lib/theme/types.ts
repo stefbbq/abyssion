@@ -61,7 +61,12 @@ export type UITheme = {
   }
   // Typography
   typography: {
-    fontFamily: string
+    fontFamily: {
+      heading: string
+      body: string
+      quote: string
+    }
+    fontUrls?: string[]
     fontWeights: {
       normal: number
       medium: number
@@ -153,7 +158,12 @@ export type BaseTheme = {
 }
 
 export type BaseTypography = {
-  fontFamily: string
+  fontFamily: {
+    heading?: string
+    body?: string
+    quote?: string
+  }
+  fontUrls?: string[]
   fontWeights: {
     normal: number
     medium: number

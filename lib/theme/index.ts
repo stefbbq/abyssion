@@ -79,10 +79,10 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
         baseTheme.backgroundAlt,
         numberToHexString,
         hexStringToRGB,
-        (rgb) => rgbToCSS(rgb, isDarkMode ? 0.8 : 0.8),
+        (rgb) => rgbToCSS(rgb, isDarkMode ? 0.85 : 0.9),
       ),
       backdrop: '20px',
-      border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.3 : 0.15),
+      border: '0px',
     },
     spacing: {
       xs: '0.25rem',
@@ -92,7 +92,12 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       xl: '2rem',
     },
     typography: {
-      fontFamily: baseTheme?.typography?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily: {
+        heading: baseTheme?.typography?.fontFamily?.heading || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        body: baseTheme?.typography?.fontFamily?.body || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        quote: baseTheme?.typography?.fontFamily?.quote || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      },
+      fontUrls: baseTheme?.typography?.fontUrls,
       fontWeights: {
         normal: 400,
         medium: 500,

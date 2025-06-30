@@ -10,6 +10,7 @@ import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
  */
 export default function ThemeProvider() {
   const themeVariables = createThemeVariables(currentTheme.value)
+  const fontUrls = currentTheme.value.typography.fontUrls || []
 
   // This effect will run on the client side whenever the theme changes.
   useSignalEffect(() => {
@@ -17,12 +18,24 @@ export default function ThemeProvider() {
     styleElement.id = 'theme-variables'
     styleElement.innerHTML = createThemeVariables(currentTheme.value)
     document.head.appendChild(styleElement)
+
+    // Inject font links dynamically
+    fontUrls.forEach((url) => {
+      if (!document.querySelector(`link[data-theme-font="${url}"]`)) {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        link.setAttribute('data-theme-font', url)
+        document.head.appendChild(link)
+      }
+    })
   })
 
-  // During SSR, we inject the initial theme variables.
+  // During SSR, we inject the initial theme variables and font links.
   return (
     <Head>
       <style id='theme-variables' dangerouslySetInnerHTML={{ __html: themeVariables }} />
+      {fontUrls.map((url) => <link key={url} rel='stylesheet' href={url} data-theme-font={url} />)}
     </Head>
   )
 }

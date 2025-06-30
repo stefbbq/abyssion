@@ -25,7 +25,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
 
   // Dark mode backgrounds
   background: hexStringToNumber('#222222'), // True black
-  backgroundAlt: hexStringToNumber('#0a0a0a'), // Near black
+  backgroundAlt: hexStringToNumber('#060606'), // Near black
   backgroundDark: hexStringToNumber('#050505'), // Darker variant
   surface: hexStringToNumber('#0a0a0a'), // Elevated surfaces
 
@@ -37,7 +37,15 @@ export const deepSpaceHUDTheme = createBaseTheme({
   // Dark mode borders - much brighter for visibility
   border: hexStringToNumber('#666666'), // Brighter gray borders
   typography: {
-    fontFamily: '"Oxanium", sans-serif',
+    fontFamily: {
+      heading: '"Oxanium", sans-serif',
+      body: '"Oxanium", sans-serif',
+      quote: '"EB Garamond", serif',
+    },
+    fontUrls: [
+      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
+      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
+    ],
   },
 })
 
@@ -76,6 +84,14 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
   // Light mode borders
   border: hexStringToNumber('#e0e0e0'), // Light gray borders
   typography: {
-    fontFamily: '"Oxanium", sans-serif',
+    fontFamily: {
+      heading: '"Oxanium", sans-serif',
+      body: '"Oxanium", sans-serif',
+      quote: '"EB Garamond", serif',
+    },
+    fontUrls: [
+      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
+      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
+    ],
   },
 })

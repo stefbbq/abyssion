@@ -3,23 +3,23 @@
     {
       "key": "home",
       "path": "/",
-      "label": "Home",
+      "label": "home",
       "excludeFrom": ["header"]
     },
     {
       "key": "shows",
       "path": "/shows",
-      "label": "Shows"
+      "label": "shows"
     },
     {
       "key": "bio",
       "path": "/bio",
-      "label": "Bio"
+      "label": "bio"
     },
     {
       "key": "contact",
       "path": "/contact",
-      "label": "Contact"
+      "label": "contact"
     }
   ],
   "socialLinks": [
