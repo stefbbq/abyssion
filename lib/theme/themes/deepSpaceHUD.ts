@@ -23,11 +23,12 @@ export const deepSpaceHUDTheme = createBaseTheme({
   accentAlt: hexStringToRGB('#66ffe8'), // Lighter cyan
   accentDark: hexStringToRGB('#00bfa1'), // Darker cyan
 
-  // Dark mode backgrounds
-  background: hexStringToNumber('#222222'), // True black
-  backgroundAlt: hexStringToNumber('#060606'), // Near black
-  backgroundDark: hexStringToNumber('#050505'), // Darker variant
-  surface: hexStringToNumber('#0a0a0a'), // Elevated surfaces
+  // Dark mode backgrounds - warm undertones complement cool primary colors
+  background: hexStringToNumber('#0a0a0a'), // Warm off-black with subtle brown undertones
+  backgroundAlt: hexStringToNumber('#080808'), // Near black with warmth
+  backgroundDark: hexStringToNumber('#0a0a0a'), // Deeper warm dark
+  surface: hexStringToNumber('#0c0c0c'), // Elevated surfaces with warm tint
+  surfaceAlt: hexStringToNumber('#0d0d0d'), // Elevated surfaces with warm tint
 
   // Dark mode foregrounds - high contrast for readability
   foreground: hexStringToRGB('#ffffff'), // Pure white text
@@ -70,11 +71,12 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
   accentAlt: hexStringToRGB('#66ffe8'),
   accentDark: hexStringToRGB('#00bfa1'),
 
-  // Light mode backgrounds
-  background: hexStringToNumber('#ffffff'), // Pure white
-  backgroundAlt: hexStringToNumber('#f8f9fa'), // Light gray
-  backgroundDark: hexStringToNumber('#f1f3f4'), // Slightly darker
-  surface: hexStringToNumber('#ffffff'), // White surfaces
+  // Light mode backgrounds - warm off-white complements cool primary colors
+  background: hexStringToNumber('#faf8f5'), // Warm off-white with cream undertones
+  backgroundAlt: hexStringToNumber('#f5f2ee'), // Slightly darker warm tone
+  backgroundDark: hexStringToNumber('#f0ebe6'), // Deeper warm background
+  surface: hexStringToNumber('#ffffff'), // Pure white for elevated surfaces
+  surfaceAlt: hexStringToNumber('#faf8f5'),
 
   // Light mode foregrounds - dark text for contrast
   foreground: hexStringToRGB('#000000'), // Pure black text

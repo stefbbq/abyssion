@@ -5,14 +5,15 @@ import { calculateShaderTime } from '@libgl/animation/calculations/calculateShad
 import { calculateRegenerationTiming } from '@libgl/animation/calculations/calculateRegenerationTiming.ts'
 import { calculateBloomEffect } from '../calculations/calculateBloomEffect.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
-import configScene from '../../configScene.json' with { type: 'json' }
+import configScene from '@libgl/configScene.json' with { type: 'json' }
+import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
 import * as Three from 'three'
 import type { RendererState } from '@libgl/types.ts'
 
 const { animationConfig: animation } = animationConfig
-const { postProcessingConfig } = configScene
+const { postProcessingConfig } = configScene as ConfigScene
 
 /**
  * Logo page animation orchestrator
@@ -23,6 +24,9 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
   let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
   let bloomOverrideActive = false
   let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
+
+  // Track the main stencil plane
+  let mainStencilPlane: Three.Mesh | null = null
 
   const update = (context: AnimationContext) => {
     const { state, time } = context
@@ -78,7 +82,7 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
       plane.rotation.y = position.rotationY
 
       // Handle random layer burst effects
-      if (layer.isRandom && Math.random() < 0.004) {
+      if (layer.isRandom && Math.random() < 0.004 && !layer.isStencil) {
         const randomFactor = Math.sin(time * 2 + i * 0.5) * 0.3 + 0.7
         const burstIntensity = 0.2 * randomFactor * (i + 1) / state.logoLayers.length
 
@@ -91,7 +95,7 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
             plane.position.x = resetPosition.x
             plane.position.y = resetPosition.y
           }
-        }, ms('50ms') + Math.random() * ms('100ms'))
+        }, ms('0.05s') + Math.random() * ms('0.1s'))
       }
 
       // Handle opacity flickers for random layers
@@ -100,10 +104,8 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
         plane.material.uniforms.opacity.value *= Math.random() * 1.5 + 0.5
 
         setTimeout(() => {
-          if (plane?.material?.uniforms?.opacity) {
-            plane.material.uniforms.opacity.value = originalOpacity
-          }
-        }, ms('50ms') + Math.random() * ms('150ms'))
+          if (plane?.material?.uniforms?.opacity) plane.material.uniforms.opacity.value = originalOpacity
+        }, ms('0.05s') + Math.random() * ms('0.15s'))
       }
     })
 
@@ -140,28 +142,33 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
 
     // Bloom effect with override logic
     if (state.bloomPass) {
-      // Handle bloom override activation
-      if (!bloomOverrideActive && Math.random() < animation.bloomOverrideProbability) {
-        bloomOverrideActive = true
-        if (bloomOverrideTimeout) clearTimeout(bloomOverrideTimeout)
+      const bloomConfig = postProcessingConfig.bloom
+      const swellConfig = bloomConfig.bloomSwell || { enabled: false }
 
-        const duration = animation.bloomOverrideDurationMin +
-          Math.random() * (animation.bloomOverrideDurationMax - animation.bloomOverrideDurationMin)
+      if (swellConfig.enabled) {
+        // Handle bloom override activation
+        if (!bloomOverrideActive && Math.random() < swellConfig.overrideProbability) {
+          bloomOverrideActive = true
+          if (bloomOverrideTimeout) clearTimeout(bloomOverrideTimeout)
 
-        bloomOverrideTimeout = setTimeout(() => {
-          bloomOverrideActive = false
-        }, duration)
-      }
+          const duration = swellConfig.overrideDurationMin +
+            Math.random() * (swellConfig.overrideDurationMax - swellConfig.overrideDurationMin)
 
-      // Apply bloom effect
-      state.bloomPass.strength = calculateBloomEffect(
-        currentTime,
-        animation.bloomStrength,
-        animation.bloomPulseFrequency,
-        animation.bloomPulseIntensity,
-        bloomOverrideActive,
-        animation.bloomOverrideIntensity,
-      )
+          bloomOverrideTimeout = setTimeout(() => {
+            bloomOverrideActive = false
+          }, duration)
+        }
+
+        // Apply animated bloom effect
+        state.bloomPass.strength = calculateBloomEffect(
+          currentTime,
+          bloomConfig.bloomStrength,
+          swellConfig.pulseFrequency,
+          swellConfig.pulseIntensity,
+          bloomOverrideActive,
+          swellConfig.overrideIntensity,
+        )
+      } else state.bloomPass.strength = bloomConfig.bloomStrength
     }
 
     // Dithering pass
@@ -184,13 +191,13 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
     // Use the dedicated dispose method from the logoLayer instance
     logoController.dispose(state.scene, state.logoPlanes)
 
-    // Remove other layers from scene
-    if (state.shapeLayer?.parent) state.shapeLayer.parent.remove(state.shapeLayer)
-    if (state.shadowLayer?.parent) state.shadowLayer.parent.remove(state.shadowLayer)
+    // Don't remove shape/shadow layers - they should persist across page changes
+    // if (state.shapeLayer?.parent) state.shapeLayer.parent.remove(state.shapeLayer)
+    // if (state.shadowLayer?.parent) state.shadowLayer.parent.remove(state.shadowLayer)
 
     // Dispose of their resources if they have a dispose method
-    if (typeof state.shapeLayer?.dispose === 'function') state.shapeLayer.dispose()
-    if (typeof state.shadowLayer?.dispose === 'function') state.shadowLayer.dispose()
+    // if (typeof state.shapeLayer?.dispose === 'function') state.shapeLayer.dispose()
+    // if (typeof state.shadowLayer?.dispose === 'function') state.shadowLayer.dispose()
 
     // Clear arrays from state to prevent artifacts on re-navigation
     state.logoPlanes = []

@@ -1,7 +1,3 @@
-/**
- * Animation types
- */
-
 import type { RendererState } from '../types.ts'
 
 /**

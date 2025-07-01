@@ -9,6 +9,7 @@
     "alpha": true,
     "exposure": 1
   },
+  "postProcessingEnabled": true,
   "postProcessingConfig": {
     "bokeh": {
       "focus": 4.0,
@@ -16,12 +17,21 @@
       "maxblur": 1
     },
     "bloom": {
-      "bloomStrength": 0.3,
+      "bloomStrength": 0.1,
       "bloomThreshold": 0.2,
       "bloomRadius": 0.8,
       "bloomStrengthMultiplier": 3,
       "bloomThresholdMultiplier": 0.3,
-      "thresholdOverride": 0
+      "thresholdOverride": 0,
+      "bloomSwell": {
+        "enabled": false,
+        "pulseFrequency": 0.5,
+        "pulseIntensity": 0.2,
+        "overrideProbability": 0.01,
+        "overrideIntensity": 2.0,
+        "overrideDurationMin": 200,
+        "overrideDurationMax": 600
+      }
     },
     "film": {
       "noiseIntensity": 0.05,
@@ -34,7 +44,11 @@
       "ditherStrength": 10,
       "ditherFrequency": 1000.0,
       "ditherAnimation": 0.1,
-      "gain": 1.4
+      "gain": 1.5,
+      "toneMap": {
+        "enabled": false,
+        "blendAmount": 1
+      }
     },
     "sharpening": {
       "strength": 0.2,

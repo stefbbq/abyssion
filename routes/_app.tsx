@@ -9,6 +9,7 @@ import PageContainer from '@islands/PageContainer.tsx'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentTheme } from '@lib/theme/index.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
+import videoManifest from '../static/videos/manifest.json' with { type: 'json' }
 
 export default function App({ Component, url }: PageProps) {
   const pagePath = url.pathname
@@ -16,6 +17,9 @@ export default function App({ Component, url }: PageProps) {
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
   const theme = currentTheme.value
+
+  // Preload the first two videos from the manifest
+  const preloadVideos = (videoManifest as string[]).slice(0, 2)
 
   return (
     <html lang='en'>
@@ -26,6 +30,7 @@ export default function App({ Component, url }: PageProps) {
         <link rel='preconnect' href='https://fonts.googleapis.com' />
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
         <link rel='stylesheet' href='/styles.css' />
+        {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
       <body f-client-nav class='min-h-screen relative bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
         <ThemedBackground />

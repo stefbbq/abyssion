@@ -8,9 +8,9 @@ import { getMinLogLevel } from './getMinLogLevel.ts'
  * Theme setup must be done client-side.
  *
  * @example
- * initializeLoggerServer() // Call this in main.ts
+ * initializeServerLogger() // Call this in main.ts
  */
-export const initializeLoggerServer = (): void => {
+export const initializeServerLogger = (): void => {
   const envLogLevel = getMinLogLevel()
   setMinLogLevel(envLogLevel)
 

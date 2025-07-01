@@ -24,9 +24,7 @@ export const getMinLogLevel = (): LogLevel => {
   // Check debug mode via centralized debug system (browser only)
   if (typeof window !== 'undefined') {
     try {
-      if (isDebugModeEnabled()) {
-        return 'trace' // Enable maximum debugging when debug mode is on
-      }
+      if (isDebugModeEnabled()) return 'debug' // Enable maximum debugging when debug mode is on
     } catch {
       // Continue without debug system if it fails
     }

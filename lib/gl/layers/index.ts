@@ -1,5 +1,5 @@
 /**
- * Layers module index file
+ * @module Layers
  *
  * Re-exports all public elements from the layers folder files
  * to provide a single import point for consumers

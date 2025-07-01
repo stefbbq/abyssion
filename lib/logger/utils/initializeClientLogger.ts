@@ -1,5 +1,6 @@
 import { refreshColors } from '../colors.ts'
-import { setMinLogLevel } from '../index.ts'
+import { disableContext, setMinLogLevel } from '../index.ts'
+import { LogContext } from '../constants.ts'
 import { getMinLogLevel } from './getMinLogLevel.ts'
 
 /**
@@ -11,15 +12,15 @@ import { getMinLogLevel } from './getMinLogLevel.ts'
  * Call this from a client-side component/island.
  *
  * @example
- * initializeLoggerClient() // Call this in an island
- * initializeLoggerClient('debug') // Override with specific level
+ * initializeClientLogger() // Call this in an island
+ * initializeClientLogger('debug') // Override with specific level
  */
-export const initializeLoggerClient = (): void => {
+export const initializeClientLogger = (): void => {
   if (typeof globalThis.window === 'undefined') return
 
   // Use provided log level or fallback to environment detection
   const logLevel = getMinLogLevel()
-  setMinLogLevel(logLevel)
+  setMinLogLevel('trace')
 
   // Initial color setup & listen for theme changes
   refreshColors()

@@ -4,12 +4,13 @@ import { createLogoLayer } from '@libgl/layers/index.ts'
 import { createGeometricLayer } from '@libgl/layers/GeometricLayer.ts'
 import { createShadowLayer } from '@libgl/layers/ShadowLayer.ts'
 import type { LogoController, LogoLayer } from '@libgl/layers/LogoLayer.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 type LayerSystem = {
   logoController: LogoController
   logoPlanes: Three.Mesh[]
   logoLayers: LogoLayer[]
-  shapeLayer: Three.Mesh
+  shapeLayer: Three.Group
   shadowLayer: Three.Mesh
   planeGeometry: Three.PlaneGeometry
 }
@@ -37,7 +38,10 @@ export const setupLayerSystem = (
 
   // Geometric Layer
   const shapeLayer = createGeometricLayer(THREE, 2, 2, 0)
+  log(lc.GL_GEOMETRY, 'Geometric layer created:', shapeLayer)
+
   scene.add(shapeLayer)
+  log(lc.GL_GEOMETRY, 'Geometric layer added to scene. Children:', shapeLayer.children)
 
   // Shadow Layer
   const shadowLayer = createShadowLayer(THREE)

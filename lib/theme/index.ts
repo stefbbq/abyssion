@@ -40,7 +40,7 @@ export const createTheme = (baseTheme: BaseTheme = deepSpaceHUDTheme): UITheme =
       },
       surface: {
         primary: hexToCSS(baseTheme.surface),
-        secondary: hexToCSS(baseTheme.backgroundAlt),
+        secondary: hexToCSS(baseTheme.surfaceAlt),
         elevated: hexToCSS(baseTheme.backgroundDark),
       },
       text: {
@@ -143,5 +143,6 @@ export const getThemeMode = (): 'light' | 'dark' => currentThemeMode.value
 
 export { createBaseTheme } from '@libtheme/utils/createBaseTheme.ts'
 export { createRGB } from '@libtheme/utils/createRGB.ts'
+export { interpolateColors } from '@libtheme/utils/interpolateColors.ts'
 export * from '@libtheme/themes/index.ts'
 export { currentThemeMode }

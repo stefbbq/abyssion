@@ -12,7 +12,7 @@ type CleanupDependencies = {
   logoController: LogoController
   scene: Three.Scene
   logoPlanes: Three.Mesh[]
-  shapeLayer: Three.Mesh
+  shapeLayer: Three.Group
   shadowLayer?: Three.Mesh
   uiLayer: UIOverlay
   controls: OrbitControls | null

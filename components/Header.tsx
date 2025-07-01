@@ -47,6 +47,7 @@ export const Header = () => {
   return (
     <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
       <div
+        id='header-container'
         class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4 ${containerClasses}`}
       >
         {/* Logo */}
@@ -78,7 +79,7 @@ export const Header = () => {
               ))}
           </div>
 
-          {/* Social Icons */}
+          {/* Social Icons & theme toggle */}
           <div class='flex items-center'>
             {(navData.socialLinks as Array<{ key: string; url: string; label: string; icon: SocialIconKey }>)
               .map((item) => {
@@ -95,8 +96,9 @@ export const Header = () => {
                   </HeaderLink>
                 )
               })}
-
-            <ThemeToggle />
+            <span class='ml-2'>
+              <ThemeToggle />
+            </span>
           </div>
         </nav>
       </div>

@@ -24,7 +24,7 @@ import { type ContextFilter, createContextFilter } from './utils/createContextFi
 import { createServerLogger } from './utils/createServerLogger.ts'
 import { createClientLogger, type LogFunction } from './utils/createClientLogger.ts'
 
-let minLogLevel: LogLevel = 'warn'
+let minLogLevel: LogLevel = 'debug'
 const contextFilter: ContextFilter = createContextFilter()
 const getMinLogLevelFn = () => minLogLevel
 
@@ -39,7 +39,6 @@ export const setMinLogLevel = (level: LogLevel) => {
 
 // Context Filter
 const { disable: disableContext, enable: enableContext, focus: focusContext, clearFocus, reset: resetContexts } = contextFilter
-disableContext(LogContext.GL_TEXTURES)
 
 /**
  * Main log function with all level methods attached

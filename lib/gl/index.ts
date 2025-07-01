@@ -41,19 +41,58 @@ export const initGL = async (options: InitOptions) => {
   // Set up core rendering components
   const { scene, camera, renderer } = await setupCoreRendering(THREE, options)
 
+  // Debug: Test if renderer works at all
+  const testScene = new THREE.Scene()
+  const testGeometry = new THREE.BoxGeometry(1, 1, 1)
+  const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  const testMesh = new THREE.Mesh(testGeometry, testMaterial)
+  testScene.add(testMesh)
+
+  const testLineGeometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-1, -1, 0),
+    new THREE.Vector3(1, 1, 0),
+  ])
+  const testLineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 })
+  const testLine = new THREE.Line(testLineGeometry, testLineMaterial)
+  testScene.add(testLine)
+
+  renderer.render(testScene, camera)
+  log(lc.GL, 'Test render complete - you should see a red cube and green line')
+
+  // Wait a bit before continuing
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  log(lc.GL, 'Continuing initialization after test render...')
+
   // Add video background
   const videoBackground = await addVideoBackground(THREE, scene) as VideoBackgroundManager
+  log(lc.GL, 'Added video background')
 
   // Set up post-processing effects
-  const { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass } = await createPostProcessing(
-    THREE,
-    scene,
-    camera,
-    renderer,
-    width,
-    height,
-    postProcessingConfig,
-  )
+  let composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass
+  if (configScene.postProcessingEnabled) {
+    ;({ composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass } = await createPostProcessing(
+      THREE,
+      scene,
+      camera,
+      renderer,
+      width,
+      height,
+      postProcessingConfig,
+    ))
+  } else {
+    // Minimal composer-like object for compatibility
+    composer = {
+      render: () => renderer.render(scene, camera),
+    }
+
+    bokehPass = null
+    bloomPass = null
+    finalPass = null
+    ditheringPass = null
+    sharpeningPass = null
+    pixelationPass = null
+  }
 
   // Create the 2D UI overlay
   const uiLayer = createUILayer(THREE, width, height)
@@ -138,8 +177,17 @@ export const initGL = async (options: InitOptions) => {
 
   // Override the render method to include our overlay
   const origRender = composer.render
+  log(lc.GL, 'Setting up composer render override. Post-processing enabled:', configScene.postProcessingEnabled)
   composer.render = function () {
     updateDebugInfo()
+
+    // Save original autoClear settings
+    const originalAutoClear = renderer.autoClear
+    const originalAutoClearColor = renderer.autoClearColor
+    const originalAutoClearDepth = renderer.autoClearDepth
+    const originalAutoClearStencil = renderer.autoClearStencil
+
+    // Render main scene with original settings
     origRender.apply(this, arguments)
 
     // Defensive check and debug logging for overlay rendering
@@ -152,14 +200,24 @@ export const initGL = async (options: InitOptions) => {
 
       return
     }
-    renderer.autoClear = false // Don't clear what we've rendered
+
+    // Don't clear the color buffer when rendering UI overlay, but keep depth/stencil clearing
+    renderer.autoClear = false
+    renderer.autoClearColor = false
+    renderer.autoClearDepth = false
+    renderer.autoClearStencil = false
 
     try {
       renderer.render(uiLayer.scene, uiLayer.camera)
     } catch (e) {
       log.error(lc.GL, 'error rendering UI overlay:', e, { uiLayer, scene: uiLayer.scene, camera: uiLayer.camera })
     }
-    renderer.autoClear = true // Restore default
+
+    // Restore original autoClear settings
+    renderer.autoClear = originalAutoClear
+    renderer.autoClearColor = originalAutoClearColor
+    renderer.autoClearDepth = originalAutoClearDepth
+    renderer.autoClearStencil = originalAutoClearStencil
   }
 
   // Define the registry of page orchestrators

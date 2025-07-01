@@ -18,7 +18,7 @@ let resizeTimeout: number | null = null
  * especially when the logo is not visible or improperly sized.
  */
 export const debugMobileResponsiveness = (): void => {
-  console.group('🔍 Mobile Responsiveness Debug')
+  log.group(lc.GL, '🔍 Mobile Responsiveness Debug')
 
   // Device detection info
   const isMobile = isMobileDevice()

@@ -9,6 +9,19 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
   const pagePath = url.pathname
   const config = (pagesConfig as PagesConfig)[pagePath] || {}
 
+  // set long cache headers for static images and videos, and remove ETag to prevent revalidation
+  if (
+    url.pathname.startsWith('/images/') ||
+    url.pathname.startsWith('/static/images/') ||
+    url.pathname.startsWith('/videos/') ||
+    url.pathname.startsWith('/static/videos/')
+  ) {
+    const resp = await ctx.next()
+    resp.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+    resp.headers.delete('ETag')
+    return resp
+  }
+
   if (config.debugOnly) {
     const cookies = getCookies(req.headers)
     const hasDebugQuery = url.searchParams.has(DEBUG_QUERY_PARAM)

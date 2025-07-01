@@ -1,38 +1,20 @@
 [
   {
-    "id": "1",
-    "title": "Lorem Ipsum Dolor",
-    "date": "2024-08-15",
-    "venue": "Aenean Condimentum",
-    "location": "Vestibulum, Terra",
-    "ticketLink": "#",
-    "isPast": false
+    "date": "2025-07-11",
+    "venue": "Atria",
+    "location": "Oshawa, ON",
+    "ticketLink": "#"
   },
   {
-    "id": "2",
-    "title": "Sit Amet Consectetur",
-    "date": "2024-09-22",
-    "venue": "Praesent Mattis",
-    "location": "Pellentesque, Orbis",
-    "ticketLink": "#",
-    "isPast": false
+    "date": "2025-06-14",
+    "venue": "Red Papaya",
+    "location": "Guelph, ON",
+    "ticketLink": ""
   },
   {
-    "id": "3",
-    "title": "Adipiscing Elit",
-    "date": "2023-11-05",
-    "venue": "Cras Eu Metus",
-    "location": "Nullam, Mundus",
-    "ticketLink": "",
-    "isPast": true
-  },
-  {
-    "id": "4",
-    "title": "Sed Do Eiusmod",
-    "date": "2023-06-18",
-    "venue": "Duis Auctor",
-    "location": "Maecenas, Regnum",
-    "ticketLink": "",
-    "isPast": true
+    "date": "2025-06-16",
+    "venue": "Ten Gallon Bar and Grill",
+    "location": "Barrie, ON",
+    "ticketLink": ""
   }
 ]

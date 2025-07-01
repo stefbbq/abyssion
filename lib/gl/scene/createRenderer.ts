@@ -1,6 +1,7 @@
 import * as Three from 'three'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene } from '@libgl/configScene.types.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Creates and configures a WebGL renderer with responsive sizing and DOM integration.
@@ -23,6 +24,13 @@ export const createRenderer = (
     alpha: rendererConfig.alpha,
   })
 
+  // Debug: Check if WebGL context is available
+  const gl = renderer.getContext()
+  log(lc.GL, 'WebGL context:', gl)
+  log(lc.GL, 'WebGL version:', gl.getParameter(gl.VERSION))
+  log(lc.GL, 'WebGL vendor:', gl.getParameter(gl.VENDOR))
+  log(lc.GL, 'WebGL renderer:', gl.getParameter(gl.RENDERER))
+
   // enable ACES Filmic tone mapping for exposure control
   renderer.toneMapping = THREE.ACESFilmicToneMapping
 
@@ -38,6 +46,8 @@ export const createRenderer = (
       globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
       rendererConfig.pixelRatioMax,
     ))
+    canvas.style.width = `${w}px`
+    canvas.style.height = `${h}px`
   }
 
   updateSize()
@@ -47,8 +57,6 @@ export const createRenderer = (
   canvas.style.display = 'block'
   canvas.style.position = 'fixed'
   canvas.style.inset = '0'
-  canvas.style.width = '100vw'
-  canvas.style.height = '100vh'
   canvas.style.background = 'black'
 
   return renderer

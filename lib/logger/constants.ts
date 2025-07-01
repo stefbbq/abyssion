@@ -33,6 +33,7 @@ export type LogLevel = typeof LOG_LEVELS[number]
  * - GL_CONTROLS: User input, camera, or control events.
  * - GL_GEOMETRY: Geometry, mesh, or shape construction.
  * - GL_SHADERS: Shader compilation, linking, or usage.
+ * - GL_DEBUG: Debug overlay and debug system operations.
  * - PREACT: Preact/component frontend context.
  */
 export enum LogContext {
@@ -44,5 +45,6 @@ export enum LogContext {
   GL_GEOMETRY = 'gl/geometry',
   GL_SHADERS = 'gl/shaders',
   GL_TEXTURES = 'gl/textures',
+  GL_DEBUG = 'gl/debug',
   PREACT = 'preact',
 }

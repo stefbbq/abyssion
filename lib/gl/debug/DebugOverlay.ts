@@ -6,6 +6,7 @@
 
 import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
 import { isDebugModeEnabled, setDebugMode } from '@lib/debug/index.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Configuration options for the debug overlay
@@ -86,17 +87,30 @@ export class DebugOverlay implements DebugOverlayType {
    * @param options - Configuration options for the overlay
    */
   constructor(container: HTMLElement, options: DebugOverlayOptions = {}) {
+    log.debug(lc.GL_DEBUG, 'DebugOverlay constructor called with options:', options)
+
     this.container = container
     this.options = options
-    this.debugEnabled = options.forceDebug ?? isDebugModeEnabled()
+    this.debugEnabled = options.forceDebug !== undefined ? options.forceDebug : isDebugModeEnabled()
+
+    log.debug(lc.GL_DEBUG, 'DebugOverlay initialization:', {
+      forceDebug: options.forceDebug,
+      isDebugModeEnabled: isDebugModeEnabled(),
+      debugEnabled: this.debugEnabled,
+      shouldSetup: this.debugEnabled || options.forceDebug !== undefined,
+    })
+
     this.instructions = document.createElement('div')
     this.debugPanel = document.createElement('div')
 
     // Only set up the overlay if debug mode is enabled
     if (this.debugEnabled || options.forceDebug !== undefined) {
+      log.debug(lc.GL_DEBUG, 'DebugOverlay: calling setup() and setDebug()')
       this.setup()
       this.setDebug(this.debugEnabled)
       globalThis.addEventListener('keydown', this.handleKey)
+    } else {
+      log.debug(lc.GL_DEBUG, 'DebugOverlay: skipping setup because debug is not enabled')
     }
   }
 
@@ -148,10 +162,22 @@ export class DebugOverlay implements DebugOverlayType {
    * @public
    */
   public setDebug(enabled: boolean): void {
-    if (!this.isAvailable()) return
+    log.debug(lc.GL_DEBUG, 'setDebug called with:', {
+      enabled,
+      isAvailable: this.isAvailable(),
+      debugEnabled: this.debugEnabled,
+      forceDebug: this.options.forceDebug,
+    })
+
+    if (!this.isAvailable()) {
+      log.debug(lc.GL_DEBUG, 'setDebug: returning early because isAvailable() is false')
+      return
+    }
 
     this.debugEnabled = enabled
     this.debugPanel.style.display = enabled ? 'block' : 'none'
+    log.debug(lc.GL_DEBUG, 'setDebug: panel display set to:', enabled ? 'block' : 'none')
+
     if (this.options.onToggleDebug) this.options.onToggleDebug(enabled)
     setDebugMode(enabled)
   }
@@ -221,7 +247,7 @@ export class DebugOverlay implements DebugOverlayType {
           <label>Max Blur: <input type="range" min="0.001" max="2" step="0.001" value="${params.maxblur}" id="dof-maxblur"></label> <span id="dof-maxblur-val">${params.maxblur}</span><br>
         </div>
         <hr>
-        <div id="debug-extra"></div>
+        <div id="debug-extra" style="height: 100px; overflow-y: auto;"></div>
       </div>
     `
     // After setting innerHTML, set pointer-events:auto on interactive elements
@@ -318,5 +344,71 @@ export class DebugOverlay implements DebugOverlayType {
    */
   public isAvailable(): boolean {
     return this.debugEnabled || this.options.forceDebug !== undefined
+  }
+
+  /**
+   * Update the tone mapping controls in the debug panel
+   * Creates a separate section with a toggle, blend slider, and color swatches
+   *
+   * @param params - Current tone mapping parameter values
+   * @param themeColors - Current theme highlight and shadow colors as hex strings
+   * @param onChange - Callback function when parameters change
+   * @public
+   *
+   * @example
+   * ```typescript
+   * debugOverlay.updateToneMapControls(
+   *   { enabled: true, blendAmount: 0.7 },
+   *   { highlight: '#ff00ff', shadow: '#0000ff' },
+   *   (newParams) => applyToneMapSettings(newParams)
+   * )
+   * ```
+   */
+  public updateToneMapControls(
+    params: { enabled: boolean; blendAmount: number },
+    themeColors: { highlight: string; shadow: string },
+    onChange: (params: { enabled: boolean; blendAmount: number }) => void,
+  ): void {
+    // Find or create the tone map section
+    let toneMapSection = this.debugPanel.querySelector('#tone-map-section') as HTMLDivElement
+    if (!toneMapSection) {
+      toneMapSection = document.createElement('div')
+      toneMapSection.id = 'tone-map-section'
+      this.debugPanel.appendChild(toneMapSection)
+    }
+    toneMapSection.innerHTML = `
+      <hr style="margin:16px 0 8px 0;">
+      <div style="font-weight:bold; font-size:14px; margin-bottom:6px;">Tone Mapping</div>
+      <div style="pointer-events:auto;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="tone-map-enabled" ${params.enabled ? 'checked' : ''}>
+          Enable Tone Mapping
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          Blend Amount:
+          <input type="range" min="0" max="1" step="0.01" value="${params.blendAmount}" id="tone-map-blend">
+          <span id="tone-map-blend-val">${params.blendAmount}</span>
+        </label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <span>Highlight:</span>
+          <span style="width:24px;height:16px;display:inline-block;border-radius:3px;background:${themeColors.highlight};border:1px solid #fff;"></span>
+          <span style="margin-left:8px;">Shadow:</span>
+          <span style="width:24px;height:16px;display:inline-block;border-radius:3px;background:${themeColors.shadow};border:1px solid #fff;"></span>
+        </div>
+      </div>
+    `
+    // Enable pointer events for interactive elements
+    const enabledInput = toneMapSection.querySelector('#tone-map-enabled') as HTMLInputElement
+    if (enabledInput) enabledInput.style.pointerEvents = 'auto'
+    const blendInput = toneMapSection.querySelector('#tone-map-blend') as HTMLInputElement
+    if (blendInput) blendInput.style.pointerEvents = 'auto'
+    // Event listeners
+    enabledInput.onchange = () => {
+      onChange({ enabled: enabledInput.checked, blendAmount: parseFloat(blendInput.value) })
+    }
+    blendInput.oninput = () => {
+      toneMapSection.querySelector('#tone-map-blend-val')!.textContent = blendInput.value
+      onChange({ enabled: enabledInput.checked, blendAmount: parseFloat(blendInput.value) })
+    }
   }
 }

@@ -6,8 +6,20 @@ import type { Show } from '@data/types.ts'
 import { Shell } from '@components/Shell.tsx'
 
 export default defineRoute(() => {
-  const upcomingShows = shows.filter((show: Show) => !show.isPast)
-  const pastShows = shows.filter((show: Show) => show.isPast)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const upcomingShows = shows.filter((show: Show) => {
+    const showDate = new Date(show.date)
+    showDate.setHours(0, 0, 0, 0)
+    return showDate >= today
+  })
+
+  const pastShows = shows.filter((show: Show) => {
+    const showDate = new Date(show.date)
+    showDate.setHours(0, 0, 0, 0)
+    return showDate < today
+  })
 
   return (
     <>
@@ -18,7 +30,7 @@ export default defineRoute(() => {
 
       {/* Upcoming Shows */}
       <Shell>
-        <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>Upcoming Shows</h2>
+        <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>upcoming shows</h2>
         <div class='space-y-6'>
           {upcomingShows.map((show: Show) => (
             <div
@@ -44,12 +56,16 @@ export default defineRoute(() => {
 
       {/* Past Shows */}
       <Shell>
-        <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>Past Shows</h2>
+        <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>past shows</h2>
         <div class='space-y-4'>
           {pastShows.map((show: Show) => (
             <div
               key={show.id}
-              class='rounded-xl p-6 bg-[var(--colors-surface-secondary)] border border-[var(--colors-border-primary)]'
+              class='rounded-xl p-6 border border-dashed'
+              style={{
+                backgroundColor: 'rgba(var(--colors-surface-secondary-rgb), 0.5)',
+                borderColor: 'rgba(var(--colors-border-primary-rgb), 0.5)',
+              }}
             >
               <div class='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
                 <div class='space-y-2'>

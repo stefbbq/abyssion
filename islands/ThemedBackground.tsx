@@ -53,27 +53,31 @@ const ThemedBackground = () => {
     }
   }, [])
 
+  // shared classes
   const baseClasses = 'fixed inset-0 pointer-events-none'
-
-  const backgroundClasses = 'bg-[var(--colors-background-primary)]'
-  let backgroundOpacity = 'opacity-0'
-  if (!isHomePage && !isLight) backgroundOpacity = 'opacity-40'
-  if (!isHomePage && isLight) backgroundOpacity = 'opacity-60'
-
-  const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
-  const noiseOpacity = isHomePage ? 'opacity-0' : 'opacity-5'
-
   const zIndexClass = 'z-10'
   const transitionClass = 'transition-opacity duration-400'
+
+  // background
+  const backgroundClasses = 'bg-[var(--colors-background-primary)]'
+  let backgroundOpacity = 'opacity-0'
+  if (!isHomePage && !isLight) backgroundOpacity = 'opacity-60'
+  if (!isHomePage && isLight) backgroundOpacity = 'opacity-70'
+
+  // noise
+  const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
+  const noiseOpacity = isHomePage ? 'opacity-0' : 'opacity-5'
 
   return (
     <>
       <div
+        id='noise-background'
         className={`${noiseClasses} ${noiseOpacity} ${zIndexClass}`}
         style={{ backgroundImage: `url(${noiseImages[noiseIndex]})` }}
         aria-hidden='true'
       />
       <div
+        id='tint-background'
         className={`${baseClasses} ${backgroundClasses} ${backgroundOpacity} ${zIndexClass} ${transitionClass}`}
         aria-hidden='true'
       />

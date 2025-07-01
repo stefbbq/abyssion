@@ -1,4 +1,15 @@
 /** Parameters for controlling the bloom post-processing effect */
+export type BloomSwellParams = {
+  enabled: boolean
+  pulseFrequency: number
+  pulseIntensity: number
+  overrideProbability: number
+  overrideIntensity: number
+  overrideDurationMin: number
+  overrideDurationMax: number
+}
+
+/** Parameters for controlling the bloom post-processing effect */
 export type BloomParams = {
   /** Controls the intensity of the bloom glow effect */
   bloomStrength: number
@@ -12,6 +23,8 @@ export type BloomParams = {
   bloomThresholdMultiplier: number
   /** Override threshold value */
   thresholdOverride: number
+  /** Bloom swell animation parameters */
+  bloomSwell?: BloomSwellParams
 }
 
 /** Parameters for controlling the bokeh/depth of field effect */
@@ -96,6 +109,14 @@ export type PixelateParams = {
   pixelSize: number
 }
 
+/** Parameters for tone mapping (theme-based highlight/shadow color grading) */
+export type ToneMapParams = {
+  /** Whether the tone mapping effect is enabled */
+  enabled: boolean
+  /** Blend amount between original and mapped color (0 = no effect, 1 = full effect) */
+  blendAmount: number
+}
+
 /** Complete post-processing configuration */
 export type PostProcessingConfig = {
   /** Bokeh/depth of field parameters */
@@ -112,6 +133,8 @@ export type PostProcessingConfig = {
   pixelate?: PixelateParams
   /** Lens flare parameters */
   lensFlare: LensFlareParams
+  /** Tone mapping parameters (theme-based highlight/shadow color grading) */
+  toneMap?: ToneMapParams
 }
 
 /** Renderer configuration */
@@ -138,9 +161,11 @@ export type ConfigScene = {
   planeHeight: number
   /** Renderer configuration */
   rendererConfig: RendererConfig
+  /** Whether post-processing is enabled */
+  postProcessingEnabled?: boolean
   /** Post-processing configuration */
   postProcessingConfig: PostProcessingConfig
 }
 
 declare const configScene: ConfigScene
-export default configScene
+export default ConfigScene
