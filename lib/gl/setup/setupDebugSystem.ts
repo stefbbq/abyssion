@@ -5,6 +5,9 @@ import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
+import { getGLTheme } from '@lib/gl/theme/index.ts'
+import { rgbToHex } from '@libtheme/utils/rgbToHex.ts'
+import { hexToCSS } from '@libtheme/utils/hexToCSS.ts'
 
 type DebugSystemConfig = {
   canvas: HTMLCanvasElement
@@ -26,12 +29,13 @@ type DebugSystemResult = {
  * Sets up the debug overlay system with DOF controls and regeneration
  */
 export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult => {
+  log.debug(lc.GL_DEBUG, 'setupDebugSystem called with config:', config)
+
   const { canvas, camera, scene, bokehPass, logoController, state, THREE } = config
   const { planeWidth, planeHeight } = configScene as ConfigScene
 
   // Setup DebugOverlay
-  const debugOverlay = new DebugOverlay(canvas, {
-    forceDebug: false,
+  const debugOverlay = new DebugOverlay(canvas.parentElement || document.body, {
     onToggleDebug: () => {
       if (state.controls) state.controls.enabled = true
     },
@@ -98,6 +102,55 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         if (meta.eventType === 'change') hideFocusPlane()
       }
     })
+  }
+
+  // Initialize tone mapping controls if finalPass is available
+  if (state.finalPass && state.finalPass.uniforms) {
+    const glTheme = getGLTheme()
+
+    log.debug(lc.GL_DEBUG, 'Theme colors for tone mapping:', {
+      primary: glTheme.primary,
+      secondary: glTheme.secondary,
+      primaryHex: rgbToHex(glTheme.primary),
+      secondaryHex: rgbToHex(glTheme.secondary),
+      primaryCSS: hexToCSS(rgbToHex(glTheme.primary)),
+      secondaryCSS: hexToCSS(rgbToHex(glTheme.secondary)),
+    })
+
+    log.debug(lc.GL_DEBUG, 'Current finalPass uniforms:', {
+      toneMapEnabled: state.finalPass.uniforms.toneMapEnabled?.value,
+      toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount?.value,
+      toneMapHighlightColor: state.finalPass.uniforms.toneMapHighlightColor?.value,
+      toneMapShadowColor: state.finalPass.uniforms.toneMapShadowColor?.value,
+    })
+
+    debugOverlay.updateToneMapControls(
+      {
+        enabled: state.finalPass.uniforms.toneMapEnabled?.value === 1.0,
+        blendAmount: state.finalPass.uniforms.toneMapBlendAmount?.value || 1.0,
+      },
+      {
+        highlight: hexToCSS(rgbToHex(glTheme.primary)),
+        shadow: hexToCSS(rgbToHex(glTheme.secondary)),
+      },
+      ({ enabled, blendAmount }) => {
+        if (state.finalPass && state.finalPass.uniforms) {
+          state.finalPass.uniforms.toneMapEnabled.value = enabled ? 1.0 : 0.0
+          state.finalPass.uniforms.toneMapBlendAmount.value = blendAmount
+
+          log.debug(lc.GL_DEBUG, 'Tone mapping updated:', {
+            enabled,
+            blendAmount,
+            uniformsAfterUpdate: {
+              toneMapEnabled: state.finalPass.uniforms.toneMapEnabled.value,
+              toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount.value,
+              toneMapHighlightColor: state.finalPass.uniforms.toneMapHighlightColor?.value,
+              toneMapShadowColor: state.finalPass.uniforms.toneMapShadowColor?.value,
+            },
+          })
+        }
+      },
+    )
   }
 
   // Debug info updater function

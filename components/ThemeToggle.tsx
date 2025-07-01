@@ -20,7 +20,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      class='w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 text-text-secondary opacity-50 hover:text-text-primary hover:opacity-100'
+      class='w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 text-text-primary'
       title={`Switch to ${mode.value === 'dark' ? 'light' : 'dark'} mode`}
       type='button'
     >

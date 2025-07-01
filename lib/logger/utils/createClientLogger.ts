@@ -27,13 +27,15 @@ export const shouldLogWithDebugMode = (level: LogLevel, minLogLevel: LogLevel): 
  * Log function with level methods
  */
 export type LogFunction = {
-  (ctx: LogContext, ...args: unknown[]): void
-  trace: (ctx: LogContext, ...args: unknown[]) => void
-  debug: (ctx: LogContext, ...args: unknown[]) => void
-  info: (ctx: LogContext, ...args: unknown[]) => void
-  warn: (ctx: LogContext, ...args: unknown[]) => void
-  error: (ctx: LogContext, ...args: unknown[]) => void
-  critical: (ctx: LogContext, ...args: unknown[]) => void
+  (ctx: LogContext | null, ...args: unknown[]): void
+  trace: (ctx: LogContext | null, ...args: unknown[]) => void
+  debug: (ctx: LogContext | null, ...args: unknown[]) => void
+  info: (ctx: LogContext | null, ...args: unknown[]) => void
+  warn: (ctx: LogContext | null, ...args: unknown[]) => void
+  error: (ctx: LogContext | null, ...args: unknown[]) => void
+  critical: (ctx: LogContext | null, ...args: unknown[]) => void
+  group: (ctx: LogContext | null, ...args: unknown[]) => void
+  groupEnd: () => void
 }
 
 /**
@@ -52,12 +54,12 @@ export const createClientLogger = (
    * @param ctx Log context (prefix)
    * @param args Arguments to log
    */
-  const _log = (level: LogLevel, ctx: LogContext, ...args: unknown[]): void => {
+  const _log = (level: LogLevel, ctx: LogContext | null, ...args: unknown[]): void => {
     // Filter by env-configured log level and debug mode
     if (!shouldLogWithDebugMode(level, getMinLogLevel())) return
 
     // Filter by context
-    if (!contextFilter.shouldLog(ctx)) return
+    if (ctx && !contextFilter.shouldLog(ctx)) return
 
     const con = globalThis.console
 
@@ -70,9 +72,9 @@ export const createClientLogger = (
     if (typeof con[method] !== 'function') method = 'log'
 
     // Define style
-    const cStyle = CONTEXT_COLORS[ctx] || ''
+    const cStyle = ctx ? CONTEXT_COLORS[ctx] || '' : ''
     const lStyle = LOG_LEVEL_STYLES[level] || 'color: inherit;'
-    const prefix = `%c[${ctx}]%c`
+    const prefix = ctx ? `%c[${ctx}]%c` : ''
 
     // Output to console with proper typing
     const consoleMethod = con[method] as (...args: unknown[]) => void
@@ -86,15 +88,19 @@ export const createClientLogger = (
   /**
    * Log a message at the 'info' level with a given context
    */
-  const log = (ctx: LogContext, ...args: unknown[]): void => _log('info', ctx, ...args)
+  const log = (ctx: LogContext | null, ...args: unknown[]): void => _log('info', ctx, ...args)
 
   // Attach level methods
-  log.trace = (ctx: LogContext, ...args: unknown[]): void => _log('trace', ctx, ...args)
-  log.debug = (ctx: LogContext, ...args: unknown[]): void => _log('debug', ctx, ...args)
-  log.info = (ctx: LogContext, ...args: unknown[]): void => _log('info', ctx, ...args)
-  log.warn = (ctx: LogContext, ...args: unknown[]): void => _log('warn', ctx, ...args)
-  log.error = (ctx: LogContext, ...args: unknown[]): void => _log('error', ctx, ...args)
-  log.critical = (ctx: LogContext, ...args: unknown[]): void => _log('critical', ctx, ...args)
+  log.trace = (ctx: LogContext | null, ...args: unknown[]): void => _log('trace', ctx, ...args)
+  log.debug = (ctx: LogContext | null, ...args: unknown[]): void => _log('debug', ctx, ...args)
+  log.info = (ctx: LogContext | null, ...args: unknown[]): void => _log('info', ctx, ...args)
+  log.warn = (ctx: LogContext | null, ...args: unknown[]): void => _log('warn', ctx, ...args)
+  log.error = (ctx: LogContext | null, ...args: unknown[]): void => _log('error', ctx, ...args)
+  log.critical = (ctx: LogContext | null, ...args: unknown[]): void => _log('critical', ctx, ...args)
+
+  // Grouping methods
+  log.group = (ctx: LogContext | null, ...args: unknown[]): void => _log('debug', ctx, ...args)
+  log.groupEnd = (): void => globalThis.console.groupEnd()
 
   return log as LogFunction
 }

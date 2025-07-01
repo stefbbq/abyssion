@@ -5,7 +5,7 @@
 
 import * as Three from 'three'
 import { createShapeLayer } from './utils/createShapeLayer.ts'
-import { getShapeLayerConfig } from './config.ts'
+import { getDashedOrbitsConfig, getShapeLayerConfig } from './config.ts'
 import {
   createCelestialBodies,
   createConcentricRings,
@@ -15,6 +15,7 @@ import {
   createOrbitalParticles,
   createStarfield,
 } from './utils/index.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * common configuration options for geometric visual components
@@ -106,8 +107,8 @@ export const createGeometricLayer = (
   //   secondaryColor,
   //   rotationAngle,
   //   variationFactor: effectiveVariationFactor,
-  //   opacity: SHAPE_LAYER_CONFIG.OPACITY * opacityModifier,
-  //   thickness: 0.005, // Thinner lines
+  //   opacity: shapeConfig.opacity * opacityModifier,
+  //   thickness: 0.02,
   // }))
 
   // // Add chromatic aberration effect using slight offsets
@@ -141,7 +142,12 @@ export const createGeometricLayer = (
   //   shapeGroup.add(blueRings)
   // }
 
-  shapeGroup.add(createDashedOrbits(THREE))
+  // Debug log before creating dashed orbits
+  const dashedOrbits = createDashedOrbits(THREE)
+  log(lc.GL_GEOMETRY, 'Created dashed orbits with config:', getDashedOrbitsConfig())
+
+  shapeGroup.add(dashedOrbits)
+  log(lc.GL_GEOMETRY, 'Dashed orbits group:', dashedOrbits)
 
   // shapeGroup.add(createOrbitalGrids(THREE, {
   //   radius: geometricRadius * 1.2,

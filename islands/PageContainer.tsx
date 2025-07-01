@@ -1,7 +1,5 @@
 import { useEffect } from 'preact/hooks'
-import { initializeLoggerClient } from '@lib/logger/utils/initializeLoggerClient.ts'
-import { isDebugModeEnabled } from '@lib/debug/index.ts'
-import { resetContexts } from '@lib/logger/index.ts'
+import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import { getSceneOrchestrator } from '@lib/gl/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
@@ -19,8 +17,7 @@ const PageContainer = ({ children }: { children: preact.ComponentChildren }) => 
 
   // initialize logger and reset log contexts
   useEffect(() => {
-    initializeLoggerClient()
-    if (isDebugModeEnabled()) resetContexts()
+    initializeClientLogger()
   }, [])
 
   // initialize GL scene orchestrator (decide if we're rendering the logo or not)

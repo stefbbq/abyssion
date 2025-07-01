@@ -10,6 +10,7 @@ import {
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
 import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
+import { getGLTheme } from '@lib/gl/theme/index.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.
@@ -45,17 +46,13 @@ export const createPostProcessing = async (
   ])
 
   /**
-   * EffectComposer
-   * Manages the composition of multiple post-processing effects.
-   * It combines all the passes into a single render target.
+   * Creates an effect composer and adds a render pass to it.
+   *
+   * The effect composer is the container for all the post-processing effects.
+   * The render pass is the first pass in the chain.
+   * It renders the scene to a texture and is the first pass in the chain.
    */
   const composer = new EffectComposer(renderer)
-
-  /**
-   * RenderPass
-   * Renders the scene to a texture.
-   * This is the first pass in the chain.
-   */
   const renderPass = new RenderPass(scene, camera)
   composer.addPass(renderPass)
 
@@ -144,12 +141,16 @@ export const createPostProcessing = async (
    * Now supports segmented, flickery, theme-colored glitch bands.
    * All effect parameters are exposed as uniforms for animation control.
    */
-  const { finalPass: finalPassConfig } = postProcessingConfig
-  // get theme colors (example: from UITheme or BaseTheme)
-  // TODO: wire up actual theme color retrieval
-  const themePrimary = new THREE.Color(0xff005c)
-  const themeAccent = new THREE.Color(0x00ffe7)
-  const themeSecondary = new THREE.Color(0x6200ea)
+  const { finalPass: finalPassConfig, toneMap } = postProcessingConfig
+  const glTheme = getGLTheme()
+  const themePrimary = new THREE.Color(glTheme.primary)
+  const themeAccent = new THREE.Color(glTheme.accent)
+  const themeSecondary = new THREE.Color(glTheme.secondary)
+  const toneMapEnabled = toneMap?.enabled ? 1.0 : 0.0
+  const toneMapBlendAmount = toneMap?.blendAmount ?? 1.0
+  const highlightColor = new THREE.Color(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+  const shadowColor = new THREE.Color(glTheme.secondary.r, glTheme.secondary.g, glTheme.secondary.b)
+
   const finalPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
@@ -166,10 +167,16 @@ export const createPostProcessing = async (
       blockSize: { value: 48 }, // average block size (larger = fewer, bigger blocks)
       blockOnProbability: { value: 0.000 }, // probability a block is on (lower = cleaner signal)
       burstProbability: { value: 0.1 }, // probability of a global burst (lower = rarer bursts)
+      // tone mapping uniforms
+      toneMapEnabled: { value: toneMapEnabled },
+      toneMapBlendAmount: { value: toneMapBlendAmount },
+      toneMapHighlightColor: { value: highlightColor.toArray() },
+      toneMapShadowColor: { value: shadowColor.toArray() },
     },
     vertexShader: finalPassVertexShader,
     fragmentShader: finalPassFragmentShader,
   })
+
   finalPass.renderToScreen = true
   composer.addPass(finalPass)
 

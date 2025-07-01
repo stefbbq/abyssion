@@ -54,7 +54,7 @@ export const createUILayer = (
 
   // First create the base shape layer using the existing function
   const baseLayer = createShapeLayer(THREE, { radius: responsiveConfig.radius, variationFactor: 1.0 })
-  shapeGroup.add(baseLayer)
+  // shapeGroup.add(baseLayer)
 
   // Add additional tech shapes around the logo
   for (let i = 0; i < responsiveConfig.techShapesCount; i++) {
@@ -87,10 +87,10 @@ export const createUILayer = (
     shape.userData = { rotSpeed }
 
     // Add to the group
-    shapeGroup.add(shape)
+    // shapeGroup.add(shape)
   }
 
-  overlayScene.add(shapeGroup)
+  // overlayScene.add(shapeGroup)
 
   // Add a resize method
   function resize(newWidth: number, newHeight: number) {

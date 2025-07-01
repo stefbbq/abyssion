@@ -3,8 +3,7 @@ import '$std/dotenv/load.ts'
 import { start } from '$fresh/server.ts'
 import manifest from './fresh.gen.ts'
 import config from './fresh.config.ts'
-import { initializeLoggerServer } from './lib/logger/utils/initializeLoggerServer.ts'
+import { initializeServerLogger } from '@lib/logger/utils/initializeServerLogger.ts'
 
-initializeLoggerServer()
-
+initializeServerLogger()
 await start(manifest, config)

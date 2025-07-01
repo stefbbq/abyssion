@@ -7,6 +7,7 @@ import { registerOrchestrator } from './orchestrator/registerOrchestrator.ts'
 import { unregisterOrchestrator } from './orchestrator/unregisterOrchestrator.ts'
 import { switchToPage } from './orchestrator/switchToPage.ts'
 import { stepOrchestrators } from './orchestrator/stepOrchestrators.ts'
+import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
 
 const { animationConfig: animation } = animationConfig
 
@@ -20,6 +21,7 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
   let time = 0
   let lastTime = 0
   let animationId: number
+  let isPaused = false
 
   // Create shared behaviors that persist across page changes
   const shared = createSharedBehaviors()
@@ -45,12 +47,14 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
       // deno-lint-ignore no-explicit-any
       ;(window as any).alignFocusPlane()
     }
+
     animationId = requestAnimationFrame(animate)
     const deltaTime = timestamp - lastTime
     lastTime = timestamp
     time += animation.timeIncrement
     state.controls?.update()
-    shared.applyMouseRotation(state.scene)
+    if (!isMobileDevice()) shared.applyMouseRotation(state.scene)
+
     if (state.videoBackground) shared.updateVideoBackground(state.videoBackground, animation.timeIncrement)
     const context: AnimationContext = { state, shared, time, deltaTime }
     sceneState = stepOrchestrators(sceneState, context)
@@ -61,15 +65,19 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
   animate(0)
 
   // Pause/resume logic
-  let isPaused = false
   const pause = () => {
+    log(lc.GL_ANIMATION, 'pause() called, isPaused:', isPaused)
+
     if (!isPaused) {
       cancelAnimationFrame(animationId)
       isPaused = true
       log(lc.GL_ANIMATION, 'Paused animation loop (window not focused)')
     }
   }
+
   const resume = () => {
+    log(lc.GL_ANIMATION, 'resume() called, isPaused:', isPaused)
+    console
     if (isPaused) {
       isPaused = false
       lastTime = performance.now()
@@ -77,21 +85,32 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
       log(lc.GL_ANIMATION, 'Resumed animation loop (window focused)')
     }
   }
+
   const handleVisibilityChange = () => {
+    log(lc.GL_ANIMATION, 'handleVisibilityChange() called, document.hidden:', document.hidden)
     if (document.hidden) pause()
     else resume()
   }
-  const handleWindowBlur = pause
-  const handleWindowFocus = resume
+
+  const handleWindowBlur = () => {
+    log(lc.GL_ANIMATION, 'handleWindowBlur() called')
+    pause()
+  }
+
+  const handleWindowFocus = () => {
+    log(lc.GL_ANIMATION, 'handleWindowFocus() called')
+    resume()
+  }
+
   if (typeof document !== 'undefined') {
     document.addEventListener('visibilitychange', handleVisibilityChange)
   }
+
   if (typeof window !== 'undefined') {
     globalThis.addEventListener('blur', handleWindowBlur)
     globalThis.addEventListener('focus', handleWindowFocus)
   }
 
-  // Exposed API: all state transitions are pure
   return {
     registerOrchestrator: (name: string) => {
       sceneState = registerOrchestrator(sceneState, orchestratorRegistry, name)
@@ -111,6 +130,8 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
       const context: AnimationContext = { state, shared, time, deltaTime: 0 }
       sceneState.activeOrchestrators.forEach((orchestrator) => orchestrator.dispose(context))
       sceneState.activeOrchestrators.clear()
+
+      // remove event listeners
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibilityChange)
       }

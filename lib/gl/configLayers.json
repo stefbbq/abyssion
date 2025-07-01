@@ -6,7 +6,7 @@
       "maxRadius": 2,
       "height": 0.5,
       "rotationAngle": 0,
-      "minOpacity": 0.5,
+      "minOpacity": 0.8,
       "maxOpacity": 1,
       "variationFactor": 1,
       "linewidth": 1,
