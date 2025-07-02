@@ -44,3 +44,46 @@ export const hypertagTheme = createBaseTheme({
     },
   },
 })
+
+/**
+ * HyperTag theme - light theme with yellow/red/orange
+ */
+export const hypertagLightTheme = createBaseTheme({
+  name: 'hypertag-light',
+  mode: 'light',
+
+  // Adapted colors for light mode
+  primary: hexStringToRGB('#cc9900'),
+  secondary: hexStringToRGB('#cc0044'),
+  accent: hexStringToRGB('#cc7a00'),
+  background: hexStringToNumber('#fffcf5'),
+
+  // Color variants
+  primaryAlt: hexStringToRGB('#e6b300'),
+  primaryDark: hexStringToRGB('#996600'),
+  secondaryAlt: hexStringToRGB('#e6336b'),
+  secondaryDark: hexStringToRGB('#990033'),
+  accentAlt: hexStringToRGB('#e69500'),
+  accentDark: hexStringToRGB('#994d00'),
+
+  // Background variants
+  backgroundAlt: hexStringToNumber('#fff9e6'),
+  backgroundDark: hexStringToNumber('#fff2d9'),
+
+  // Foreground colors
+  foreground: hexStringToRGB('#1a1a00'),
+  foregroundAlt: hexStringToRGB('#333300'),
+  foregroundLight: hexStringToRGB('#666600'),
+
+  // Additional colors
+  border: hexStringToNumber('#e6d9b3'),
+  surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#fffef5'),
+  typography: {
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
+  },
+})

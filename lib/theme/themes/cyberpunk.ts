@@ -3,7 +3,7 @@ import { hexStringToRGB } from '../utils/hexStringToRGB.ts'
 import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
 
 /**
- * Cyberpunk theme with cyan and magenta accents
+ * Cyberpunk theme with cyan and magenta accents - dark mode
  */
 export const cyberpunkTheme = createBaseTheme({
   name: 'cyberpunk',
@@ -36,6 +36,49 @@ export const cyberpunkTheme = createBaseTheme({
   border: hexStringToNumber('#2a2a2a'),
   surface: hexStringToNumber('#161616'),
   surfaceAlt: hexStringToNumber('#1a1a1a'),
+  typography: {
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
+  },
+})
+
+/**
+ * Cyberpunk theme with cyan and magenta accents - light mode
+ */
+export const cyberpunkLightTheme = createBaseTheme({
+  name: 'cyberpunk-light',
+  mode: 'light',
+
+  // Same accent colors work in light mode
+  primary: hexStringToRGB('#001a1a'),
+  secondary: hexStringToRGB('#0066cc'),
+  accent: hexStringToRGB('#cc0099'),
+  background: hexStringToNumber('#f8f9fa'),
+
+  // Color variants
+  primaryAlt: hexStringToRGB('#003333'),
+  primaryDark: hexStringToRGB('#000000'),
+  secondaryAlt: hexStringToRGB('#3385d6'),
+  secondaryDark: hexStringToRGB('#004d99'),
+  accentAlt: hexStringToRGB('#d633a6'),
+  accentDark: hexStringToRGB('#990066'),
+
+  // Background variants
+  backgroundAlt: hexStringToNumber('#e9ecef'),
+  backgroundDark: hexStringToNumber('#dee2e6'),
+
+  // Foreground colors
+  foreground: hexStringToRGB('#000000'),
+  foregroundAlt: hexStringToRGB('#333333'),
+  foregroundLight: hexStringToRGB('#666666'),
+
+  // Additional colors
+  border: hexStringToNumber('#ced4da'),
+  surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#f8f9fa'),
   typography: {
     fontFamily: {
       heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

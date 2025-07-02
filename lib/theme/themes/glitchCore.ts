@@ -44,3 +44,46 @@ export const glitchCoreTheme = createBaseTheme({
     },
   },
 })
+
+/**
+ * Glitch Core theme - light purple theme
+ */
+export const glitchCoreLightTheme = createBaseTheme({
+  name: 'glitch-core-light',
+  mode: 'light',
+
+  // Adapted colors for light mode
+  primary: hexStringToRGB('#cc004a'),
+  secondary: hexStringToRGB('#4000aa'),
+  accent: hexStringToRGB('#00998a'),
+  background: hexStringToNumber('#faf8ff'),
+
+  // Color variants
+  primaryAlt: hexStringToRGB('#ff3380'),
+  primaryDark: hexStringToRGB('#990033'),
+  secondaryAlt: hexStringToRGB('#6633cc'),
+  secondaryDark: hexStringToRGB('#330066'),
+  accentAlt: hexStringToRGB('#00ccb3'),
+  accentDark: hexStringToRGB('#006659'),
+
+  // Background variants
+  backgroundAlt: hexStringToNumber('#f0eeff'),
+  backgroundDark: hexStringToNumber('#e6e0ff'),
+
+  // Foreground colors
+  foreground: hexStringToRGB('#1a0d33'),
+  foregroundAlt: hexStringToRGB('#331a4d'),
+  foregroundLight: hexStringToRGB('#4d3366'),
+
+  // Additional colors
+  border: hexStringToNumber('#d4ccf0'),
+  surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#f9f7ff'),
+  typography: {
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
+  },
+})

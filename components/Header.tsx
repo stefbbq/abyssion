@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'preact/hooks'
+import { useSignal, useSignalEffect } from '@preact/signals'
 import navData from '@data/nav.json' with { type: 'json' }
 import { ThemeToggle } from '@components/ThemeToggle.tsx'
+import { ThemeSwitcher } from '@components/ThemeSwitcher.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
+import { currentThemeMode } from '@lib/theme/index.ts'
 import { HeaderLink } from './HeaderLink.tsx'
 
 type SocialIconKey = keyof SocialIconMap
@@ -19,6 +22,12 @@ export const Header = () => {
   const [currentPath] = useClientLocation()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
+  const themeMode = useSignal(currentThemeMode.value)
+
+  // Track theme mode changes
+  useSignalEffect(() => {
+    themeMode.value = currentThemeMode.value
+  })
 
   // Track scroll position
   useEffect(() => {
@@ -45,7 +54,10 @@ export const Header = () => {
   // dynamic classes
   const getFocusClass = () => isUsingKeyboard ? 'focus:outline-none focus:ring-2' : 'focus:outline-none'
   const headerClasses = isScrolled ? 'mx-4' : 'mx-2'
-  const containerClasses = isScrolled ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
+
+  // in light mode, always show background for readability; in dark mode, show only when scrolled
+  const shouldShowBackground = isScrolled || themeMode.value === 'light'
+  const containerClasses = shouldShowBackground ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
 
   return (
     <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
@@ -62,6 +74,7 @@ export const Header = () => {
           >
             abyssion
           </HeaderLink>
+          <ThemeSwitcher />
         </h1>
 
         {/* Navigation */}
@@ -99,7 +112,7 @@ export const Header = () => {
                   </HeaderLink>
                 )
               })}
-            <span class='ml-2'>
+            <span class='ml-2 flex items-center space-x-2'>
               <ThemeToggle />
             </span>
           </div>

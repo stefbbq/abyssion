@@ -44,3 +44,46 @@ export const geomodAtlasTheme = createBaseTheme({
     },
   },
 })
+
+/**
+ * GeoMod Atlas theme - light theme with cyan/green
+ */
+export const geomodAtlasLightTheme = createBaseTheme({
+  name: 'geomod-atlas-light',
+  mode: 'light',
+
+  // Adapted colors for light mode
+  primary: hexStringToRGB('#006b73'),
+  secondary: hexStringToRGB('#00804d'),
+  accent: hexStringToRGB('#4d8000'),
+  background: hexStringToNumber('#f0fffe'),
+
+  // Color variants
+  primaryAlt: hexStringToRGB('#008a94'),
+  primaryDark: hexStringToRGB('#004d52'),
+  secondaryAlt: hexStringToRGB('#009966'),
+  secondaryDark: hexStringToRGB('#005c33'),
+  accentAlt: hexStringToRGB('#669900'),
+  accentDark: hexStringToRGB('#336600'),
+
+  // Background variants
+  backgroundAlt: hexStringToNumber('#e6fffe'),
+  backgroundDark: hexStringToNumber('#d9fffc'),
+
+  // Foreground colors
+  foreground: hexStringToRGB('#0d3330'),
+  foregroundAlt: hexStringToRGB('#1a4d47'),
+  foregroundLight: hexStringToRGB('#336661'),
+
+  // Additional colors
+  border: hexStringToNumber('#b3e6e0'),
+  surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#f5fffd'),
+  typography: {
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
+  },
+})

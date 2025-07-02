@@ -44,3 +44,46 @@ export const synthDriftTheme = createBaseTheme({
     },
   },
 })
+
+/**
+ * Synth Drift theme - dark theme with magenta/green/purple
+ */
+export const synthDriftDarkTheme = createBaseTheme({
+  name: 'synth-drift-dark',
+  mode: 'dark',
+
+  // Adapted colors for dark mode
+  primary: hexStringToRGB('#ff33d6'),
+  secondary: hexStringToRGB('#33ffaa'),
+  accent: hexStringToRGB('#9980ff'),
+  background: hexStringToNumber('#0f0f0f'),
+
+  // Color variants
+  primaryAlt: hexStringToRGB('#ff66e0'),
+  primaryDark: hexStringToRGB('#cc00a6'),
+  secondaryAlt: hexStringToRGB('#66ffbb'),
+  secondaryDark: hexStringToRGB('#00cc80'),
+  accentAlt: hexStringToRGB('#b399ff'),
+  accentDark: hexStringToRGB('#6600cc'),
+
+  // Background variants
+  backgroundAlt: hexStringToNumber('#1a1a1a'),
+  backgroundDark: hexStringToNumber('#262626'),
+
+  // Foreground colors
+  foreground: hexStringToRGB('#f0f0f0'),
+  foregroundAlt: hexStringToRGB('#cccccc'),
+  foregroundLight: hexStringToRGB('#999999'),
+
+  // Additional colors
+  border: hexStringToNumber('#333333'),
+  surface: hexStringToNumber('#1a1a1a'),
+  surfaceAlt: hexStringToNumber('#222222'),
+  typography: {
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
+  },
+})

@@ -80,3 +80,15 @@ export type BaseSpacing = {
   lg: string
   xl: string
 }
+
+/**
+ * Theme family definition containing both light and dark variants
+ */
+export type ThemeFamily = {
+  /** Theme family name */
+  name: string
+  /** Light theme variant */
+  light: BaseTheme
+  /** Dark theme variant */
+  dark: BaseTheme
+}

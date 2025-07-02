@@ -185,4 +185,4 @@ export type GLTheme = BaseTheme & {
   }
 }
 
-export type { BaseSpacing, BaseTheme, BaseTypography } from './themes/types.ts'
+export type { BaseSpacing, BaseTheme, BaseTypography, ThemeFamily } from './themes/types.ts'
