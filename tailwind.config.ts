@@ -4,6 +4,8 @@ const themeColor = (variable: string) => `var(--colors-${variable})`
 const fontFamily = (variable: string) => `var(--typography-fontFamily-${variable})`
 const glass = (variable: string) => `var(--glass-${variable})`
 const frost = (variable: string) => `var(--frost-${variable})`
+const borderRadius = (variable: string) => `var(--borderRadius-${variable})`
+const filter = (variable: string) => `var(--filters-${variable})`
 
 export default {
   content: [
@@ -55,6 +57,19 @@ export default {
       backdropBlur: {
         glass: glass('backdrop'),
         frost: frost('backdrop'),
+      },
+      borderRadius: {
+        'theme-none': borderRadius('none'),
+        'theme-sm': borderRadius('sm'),
+        'theme-md': borderRadius('md'),
+        'theme-lg': borderRadius('lg'),
+        'theme-xl': borderRadius('xl'),
+        'theme-full': borderRadius('full'),
+      },
+      filter: {
+        'main': filter('main'),
+        'header': filter('header'),
+        'nav': filter('nav'),
       },
       keyframes: {
         fadeIn: {

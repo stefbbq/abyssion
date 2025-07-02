@@ -7,12 +7,45 @@ import { pipe } from '@lib/utils/pipe.ts'
 const numberToHexString = (num: number) => `#${num.toString(16).padStart(6, '0')}`
 
 /**
+ * Default border radius values
+ */
+const defaultBorderRadius = {
+  none: '0',
+  sm: '0.125rem',
+  md: '0.375rem',
+  lg: '0.5rem',
+  xl: '0.75rem',
+  full: '9999px',
+}
+
+/**
+ * Default glass opacity values
+ */
+const defaultGlassOpacity = {
+  light: 0.4,
+  dark: 0.5,
+}
+
+/**
+ * Default frost opacity values
+ */
+const defaultFrostOpacity = {
+  light: 0.9,
+  dark: 0.85,
+}
+
+/**
  * Creates a UITheme object from a BaseTheme.
  * Handles all color, spacing, and typography logic for UI.
  * Used for generating CSS variables and theme-aware UI.
  */
 export const createTheme = (baseTheme: BaseTheme): UITheme => {
   const isDarkMode = baseTheme.mode === 'dark'
+
+  // Merge theme-specific values with defaults
+  const borderRadius = { ...defaultBorderRadius, ...baseTheme.borderRadius }
+  const glassOpacity = { ...defaultGlassOpacity, ...baseTheme.glassOpacity }
+  const frostOpacity = { ...defaultFrostOpacity, ...baseTheme.frostOpacity }
 
   return {
     colors: {
@@ -52,21 +85,25 @@ export const createTheme = (baseTheme: BaseTheme): UITheme => {
         baseTheme.surface,
         numberToHexString,
         hexStringToRGB,
-        (rgb) => rgbToCSS(rgb, 0.5),
+        (rgb) => rgbToCSS(rgb, isDarkMode ? glassOpacity.dark : glassOpacity.light),
       ),
       backdrop: '16px',
       border: rgbToCSS(baseTheme.foreground, isDarkMode ? 0.08 : 0.1),
+      opacity: glassOpacity,
     },
     frost: {
       background: pipe(
         baseTheme.backgroundAlt,
         numberToHexString,
         hexStringToRGB,
-        (rgb) => rgbToCSS(rgb, isDarkMode ? 0.85 : 0.9),
+        (rgb) => rgbToCSS(rgb, isDarkMode ? frostOpacity.dark : frostOpacity.light),
       ),
       backdrop: '20px',
       border: '0px',
+      opacity: frostOpacity,
     },
+    borderRadius,
+    filters: baseTheme.filters || {},
     spacing: {
       xs: '0.25rem',
       sm: '0.5rem',

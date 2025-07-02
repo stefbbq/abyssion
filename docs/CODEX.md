@@ -30,8 +30,10 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 ### Theme Signals & Switching
 
 - **currentTheme:** A computed signal holding the current `UITheme` object. Use this for theme-aware logic.
+- **currentBaseTheme:** A signal holding the current `BaseTheme` object. Used by components like `ThemeSwitcher` for reactive theme display.
 - **currentThemeMode:** A signal holding the current mode (`'light'` | `'dark'`).
 - **toggleThemeMode() / setThemeMode():** Functions to toggle or set the theme mode. Switching is instant and client-side.
+- **switchToNextThemeFamily():** Cycles through available theme families while preserving the current light/dark mode.
 - **ThemeProvider Island:** Injects and dynamically updates the theme's CSS variables in the document head. Listens for theme changes and enables instant toggling.
 
 ### CSS Variables & Tailwind Integration
@@ -55,7 +57,42 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 
 - **GL Theme System:** Located in `lib/gl/theme/`, this system extends `BaseTheme` for 3D rendering (Three.js). It provides additional colors for overlays, geometric elements, and lens flares.
 - **getGLTheme():** Returns a `GLTheme` object based on the current base theme, used for 3D scene rendering.
-- **Post-Processing Integration:** All post-processing effects (e.g., glitch, bloom, color grading) in the 3D pipeline now use dynamic theme colors from `getGLTheme()`. This means that visual effects in Three.js (such as the glitch bands, bloom highlights, and color grading passes) are fully theme-aware and update instantly with theme changes. The canonical way to access theme colors for any Three.js effect is to call `getGLTheme()` and use its fields (e.g., `primary`, `accent`, `secondary`, or any of the `ui`, `geometric`, or `lensFlare` colors). The theme system is fully reactive for both UI and GL layers, ensuring visual consistency across the app and 3D scene.
+- **Real-Time Theme Updates:** The GL system supports real-time theme switching without reloading. Video background selective colorization and other GL effects automatically update their colors when themes change.
+- **Selective Colorization:** The video background features advanced selective colorization that:
+  - Grayscales the video while preserving high brightness/saturation areas
+  - Uses dual theme colors (primary and accent) with flexible blending modes
+  - Supports configurable targeting (brightness-based, saturation-based, or mixed)
+  - Provides smooth transitions using `smoothstep` for natural blending
+  - Updates instantly when themes change via the shared animation behaviors
+- **Post-Processing Integration:** Visual effects in Three.js (such as glitch bands and bloom highlights) are fully theme-aware and update instantly with theme changes. The canonical way to access theme colors for any Three.js effect is to call `getGLTheme()` and use its fields (e.g., `primary`, `accent`, `secondary`, or any of the `ui`, `geometric`, or `lensFlare` colors).
+
+#### Selective Colorization Configuration
+
+The selective colorization system is configured via `configScene.json` under `postProcessingConfig.selectiveColorization`:
+
+```json
+{
+  "selectiveColorization": {
+    "enabled": true,
+    "useThemeColors": true,
+    "targeting": {
+      "brightnessWeight": 0.6,        // Weight for brightness detection (0.0-1.0)
+      "saturationWeight": 0.8,        // Weight for saturation detection (0.0-1.0)
+      "brightnessThreshold": 0.7,     // Brightness cutoff (0.0-1.0)
+      "saturationThreshold": 0.5,     // Saturation cutoff (0.0-1.0)
+      "blendSmoothness": 0.1          // Transition smoothness (0.01-0.5)
+    },
+    "colorBlending": {
+      "blendMode": "mixed",           // "brightness" | "saturation" | "mixed"
+      "blendBalance": 0.3             // Primary vs secondary color balance (0.0-1.0)
+    }
+  }
+}
+```
+
+- **Targeting Modes:** Control how areas are detected for colorization based on brightness and/or saturation
+- **Blending Modes:** Determine how primary and secondary theme colors are mixed
+- **Real-time Updates:** All settings are applied immediately and update with theme changes
 
 ### Font System
 
@@ -137,12 +174,15 @@ In addition to standard utilities, two custom utility classes are available in `
   - `Shell.tsx`: A generic container for content sections with the `.glass-effect`.
   - `Card.tsx`: A flexible card component, supporting images and custom content, with the `.glass-effect`.
   - `ListItem.tsx`: A generic component for list items.
+  - `ThemeSwitcher.tsx`: Displays current theme colors in a compact preview strip and cycles through available themes.
   - `Button.tsx`, `Dropdown.tsx`, etc.
 
 - **`/data`**: Content & Configuration
   - `types.ts`: **Centralized TypeScript definitions** for all JSON data.
   - `pages.json`: Site-wide page configuration (`debugOnly`, `showHeader`).
   - `*.json`: Static content for pages (navigation, shows, bio).
+
+- **`/lib/gl/configScene.types.ts`**: GL-specific type definitions including `PostProcessingConfig` and `SelectiveColorizationParams` for advanced video effects configuration.
 
 - **`/lib`**: Core Libraries
   - `/theme`: The core UI theme system. See "Theme System" section above.
@@ -152,6 +192,9 @@ In addition to standard utilities, two custom utility classes are available in `
 
 - **`/utils`**: Shared utility functions.
 - **`/scene`, `/gl`, etc.**: All logic for the Three.js visualization.
+  - `/gl/scene/`: Core scene setup including video background with selective colorization
+  - `/gl/shaders/`: Custom GLSL shaders including selective video background processing
+  - `/gl/textures/VideoCycle/`: Video texture management with shader material support
 
 ## Main Entry
 

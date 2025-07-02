@@ -41,17 +41,40 @@ export type UITheme = {
       ghostActive: string
     }
   }
-  // Glass morphism effects
+  // Glass morphism effects with opacity controls
   glass: {
     background: string
     backdrop: string
     border: string
+    opacity: {
+      light: number
+      dark: number
+    }
   }
-  // Frost morphism effects
+  // Frost morphism effects with opacity controls
   frost: {
     background: string
     backdrop: string
     border: string
+    opacity: {
+      light: number
+      dark: number
+    }
+  }
+  // Border radius scale
+  borderRadius: {
+    none: string
+    sm: string
+    md: string
+    lg: string
+    xl: string
+    full: string
+  }
+  // Filter effects for UI elements
+  filters: {
+    main?: string
+    header?: string
+    nav?: string
   }
   // Spacing and sizing
   spacing: {
@@ -185,4 +208,13 @@ export type GLTheme = BaseTheme & {
   }
 }
 
-export type { BaseSpacing, BaseTheme, BaseTypography, ThemeFamily } from './themes/types.ts'
+export type {
+  BaseBorderRadius,
+  BaseFilters,
+  BaseFrostOpacity,
+  BaseGlassOpacity,
+  BaseSpacing,
+  BaseTheme,
+  BaseTypography,
+  ThemeFamily,
+} from './themes/types.ts'

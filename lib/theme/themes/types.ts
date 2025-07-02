@@ -1,6 +1,56 @@
 import type { HexColor, RGBColor } from '../types.ts'
 
 /**
+ * Border radius scale for consistent rounded corners
+ */
+export type BaseBorderRadius = {
+  /** No radius - sharp corners */
+  none: string
+  /** Small radius for subtle rounding */
+  sm: string
+  /** Medium radius for standard rounding */
+  md: string
+  /** Large radius for prominent rounding */
+  lg: string
+  /** Extra large radius for very round elements */
+  xl: string
+  /** Full radius for circular elements */
+  full: string
+}
+
+/**
+ * Opacity overrides for glass morphism effects
+ */
+export type BaseGlassOpacity = {
+  /** Glass opacity in light mode */
+  light: number
+  /** Glass opacity in dark mode */
+  dark: number
+}
+
+/**
+ * Opacity overrides for frost morphism effects
+ */
+export type BaseFrostOpacity = {
+  /** Frost opacity in light mode */
+  light: number
+  /** Frost opacity in dark mode */
+  dark: number
+}
+
+/**
+ * Filter effects for different UI elements
+ */
+export type BaseFilters = {
+  /** Filter effects for main content area */
+  main?: string
+  /** Filter effects for header element */
+  header?: string
+  /** Filter effects for navigation/action zone */
+  nav?: string
+}
+
+/**
  * Canonical theme definition for all theme systems (UI and GL).
  * Contains all core color, background, and typography fields, plus variants for light/dark and hover states.
  * Used as the source for UITheme and GLTheme generation.
@@ -50,6 +100,14 @@ export type BaseTheme = {
   typography?: Partial<BaseTypography>
   /** Optional spacing scale (xs-xl) */
   spacing?: Partial<BaseSpacing>
+  /** Optional border radius scale (none-full) */
+  borderRadius?: Partial<BaseBorderRadius>
+  /** Optional glass morphism opacity overrides */
+  glassOpacity?: Partial<BaseGlassOpacity>
+  /** Optional frost morphism opacity overrides */
+  frostOpacity?: Partial<BaseFrostOpacity>
+  /** Optional filter effects for UI elements */
+  filters?: BaseFilters
 }
 
 /**

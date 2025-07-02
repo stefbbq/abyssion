@@ -37,6 +37,34 @@ export const deepSpaceHUDTheme = createBaseTheme({
 
   // Dark mode borders - much brighter for visibility
   border: hexStringToNumber('#666666'), // Brighter gray borders
+
+  // Custom border radius for space-tech aesthetic
+  borderRadius: {
+    sm: '0.25rem', // Slightly larger for tech look
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+  },
+
+  // Enhanced glass effect for HUD elements
+  glassOpacity: {
+    light: 0.3, // More transparent in light mode
+    dark: 0.6, // More opaque in dark mode for better contrast
+  },
+
+  // Enhanced frost effect for navigation
+  frostOpacity: {
+    light: 0.95,
+    dark: 0.9, // Slightly more transparent for depth
+  },
+
+  // Special filter effects for sci-fi aesthetic
+  filters: {
+    main: 'brightness(1.05) contrast(1.02)',
+    header: 'brightness(0.98) saturate(1.1) hue-rotate(2deg)',
+    nav: 'brightness(1.02) contrast(1.05) saturate(0.95)',
+  },
+
   typography: {
     fontFamily: {
       heading: '"Oxanium", sans-serif',
@@ -85,6 +113,34 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
 
   // Light mode borders
   border: hexStringToNumber('#e0e0e0'), // Light gray borders
+
+  // Same custom border radius for consistency
+  borderRadius: {
+    sm: '0.25rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+  },
+
+  // Adjusted glass effect for light mode
+  glassOpacity: {
+    light: 0.4, // Balanced opacity for light backgrounds
+    dark: 0.6,
+  },
+
+  // Adjusted frost effect for light mode
+  frostOpacity: {
+    light: 0.92, // High opacity to maintain readability
+    dark: 0.9,
+  },
+
+  // Subtle filter effects for light mode
+  filters: {
+    main: 'brightness(1.02) contrast(1.01)',
+    header: 'brightness(0.99) saturate(1.05) hue-rotate(1deg)',
+    nav: 'brightness(1.01) contrast(1.02) saturate(0.98)',
+  },
+
   typography: {
     fontFamily: {
       heading: '"Oxanium", sans-serif',

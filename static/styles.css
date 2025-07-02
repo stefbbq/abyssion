@@ -10,6 +10,44 @@
   @apply bg-frost border-frost shadow-lg backdrop-blur-frost;
 }
 
+/* Filter effect utilities for themed elements */
+.filter-main {
+  filter: var(--filters-main, none);
+}
+
+.filter-header {
+  filter: var(--filters-header, none);
+}
+
+.filter-nav {
+  filter: var(--filters-nav, none);
+}
+
+/* Border radius utilities using theme values */
+.rounded-theme-none {
+  border-radius: var(--borderRadius-none);
+}
+
+.rounded-theme-sm {
+  border-radius: var(--borderRadius-sm);
+}
+
+.rounded-theme-md {
+  border-radius: var(--borderRadius-md);
+}
+
+.rounded-theme-lg {
+  border-radius: var(--borderRadius-lg);
+}
+
+.rounded-theme-xl {
+  border-radius: var(--borderRadius-xl);
+}
+
+.rounded-theme-full {
+  border-radius: var(--borderRadius-full);
+}
+
 p {
   @apply font-sans text-base;
 }
