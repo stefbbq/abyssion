@@ -11,7 +11,6 @@ import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
 import * as Three from 'three'
 import type { RendererState } from '@libgl/types.ts'
-
 const { animationConfig: animation } = animationConfig
 const { postProcessingConfig } = configScene as ConfigScene
 

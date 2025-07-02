@@ -137,19 +137,15 @@ export const createPostProcessing = async (
 
   /**
    * FinalPass
-   * Applies final color grading and chromatic aberration (subtle color fringing on edges) to give the render a unique visual signature.
+   * Applies final color grading and chromatic aberration.
    * Now supports segmented, flickery, theme-colored glitch bands.
    * All effect parameters are exposed as uniforms for animation control.
    */
-  const { finalPass: finalPassConfig, toneMap } = postProcessingConfig
+  const { finalPass: finalPassConfig } = postProcessingConfig
   const glTheme = getGLTheme()
   const themePrimary = new THREE.Color(glTheme.primary)
   const themeAccent = new THREE.Color(glTheme.accent)
   const themeSecondary = new THREE.Color(glTheme.secondary)
-  const toneMapEnabled = toneMap?.enabled ? 1.0 : 0.0
-  const toneMapBlendAmount = toneMap?.blendAmount ?? 1.0
-  const highlightColor = new THREE.Color(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
-  const shadowColor = new THREE.Color(glTheme.secondary.r, glTheme.secondary.g, glTheme.secondary.b)
 
   const finalPass = new ShaderPass({
     uniforms: {
@@ -167,11 +163,6 @@ export const createPostProcessing = async (
       blockSize: { value: 48 }, // average block size (larger = fewer, bigger blocks)
       blockOnProbability: { value: 0.000 }, // probability a block is on (lower = cleaner signal)
       burstProbability: { value: 0.1 }, // probability of a global burst (lower = rarer bursts)
-      // tone mapping uniforms
-      toneMapEnabled: { value: toneMapEnabled },
-      toneMapBlendAmount: { value: toneMapBlendAmount },
-      toneMapHighlightColor: { value: highlightColor.toArray() },
-      toneMapShadowColor: { value: shadowColor.toArray() },
     },
     vertexShader: finalPassVertexShader,
     fragmentShader: finalPassFragmentShader,

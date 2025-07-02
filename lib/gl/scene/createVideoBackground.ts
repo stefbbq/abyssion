@@ -4,6 +4,12 @@ import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
 import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
+import {
+  selectiveVideoBackgroundFragmentShader,
+  selectiveVideoBackgroundVertexShader,
+} from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
+import configScene from '@libgl/configScene.json' with { type: 'json' }
 
 /**
  * Creates a dual-buffer video background system with seamless cycling and responsive scaling.
@@ -27,11 +33,50 @@ export const createVideoBackground = (
   // Create two video planes - one for active display, one for buffering
   const createPlane = (name: string) => {
     const geometry = new THREE.PlaneGeometry(videoPlaneWidth, videoPlaneHeight)
-    const material = new THREE.MeshBasicMaterial({
+
+    // Get selective colorization config and theme
+    const { selectiveColorization } = configScene.postProcessingConfig as any
+    const glTheme = getGLTheme()
+
+    // Determine colors based on configuration
+    const useThemeColors = selectiveColorization?.useThemeColors === true
+    const primaryColor = useThemeColors
+      ? new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+      : selectiveColorization?.primaryTargetColor
+      ? new THREE.Color(selectiveColorization.primaryTargetColor)
+      : new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+
+    const secondaryColor = useThemeColors
+      ? new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
+      : selectiveColorization?.secondaryTargetColor
+      ? new THREE.Color(selectiveColorization.secondaryTargetColor)
+      : new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
+
+    // Convert blend mode string to number
+    const blendModeMap: { [key: string]: number } = { brightness: 0, saturation: 1, mixed: 2 }
+    const blendModeValue = blendModeMap[selectiveColorization?.colorBlending?.blendMode] ?? 2
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        videoTexture: { value: null },
+        opacity: { value: 0 },
+        selectiveColorizationEnabled: { value: selectiveColorization?.enabled ? 1.0 : 0.0 },
+        selectivePrimaryColor: { value: primaryColor.toArray() },
+        selectiveSecondaryColor: { value: secondaryColor.toArray() },
+        selectiveBrightnessWeight: { value: selectiveColorization?.targeting?.brightnessWeight ?? 0.6 },
+        selectiveSaturationWeight: { value: selectiveColorization?.targeting?.saturationWeight ?? 0.8 },
+        selectiveBrightnessThreshold: { value: selectiveColorization?.targeting?.brightnessThreshold ?? 0.7 },
+        selectiveSaturationThreshold: { value: selectiveColorization?.targeting?.saturationThreshold ?? 0.5 },
+        selectiveBlendSmoothness: { value: selectiveColorization?.targeting?.blendSmoothness ?? 0.1 },
+        selectiveBlendMode: { value: blendModeValue },
+        selectiveBlendBalance: { value: selectiveColorization?.colorBlending?.blendBalance ?? 0.3 },
+      },
+      vertexShader: selectiveVideoBackgroundVertexShader,
+      fragmentShader: selectiveVideoBackgroundFragmentShader,
       transparent: true,
-      opacity: 0,
       side: THREE.FrontSide,
     })
+
     const mesh = new THREE.Mesh(geometry, material)
     mesh.name = name
     mesh.position.z = videoCycleConfig.position.z
@@ -42,6 +87,51 @@ export const createVideoBackground = (
 
   const frontBuffer = createPlane('VideoBackgroundFront')
   const backBuffer = createPlane('VideoBackgroundBack')
+
+  // Track previous theme colors for efficient updates
+  let lastThemeColors: { primary: string; accent: string } | null = null
+
+  // Update theme colors for selective colorization in real-time
+  const updateThemeColors = () => {
+    const { selectiveColorization } = configScene.postProcessingConfig as any
+    if (!selectiveColorization?.enabled) return
+
+    const useThemeColors = selectiveColorization?.useThemeColors === true
+    if (!useThemeColors) return // Only update if using theme colors
+
+    const glTheme = getGLTheme()
+
+    // Create color signature for comparison
+    const currentThemeColors = {
+      primary: `${glTheme.primary.r},${glTheme.primary.g},${glTheme.primary.b}`,
+      accent: `${glTheme.accent.r},${glTheme.accent.g},${glTheme.accent.b}`,
+    }
+
+    // Only update if colors have actually changed
+    if (
+      lastThemeColors &&
+      lastThemeColors.primary === currentThemeColors.primary &&
+      lastThemeColors.accent === currentThemeColors.accent
+    ) {
+      return
+    }
+
+    const primaryColor = new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+    const secondaryColor = new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
+
+    // Update uniforms for both materials
+    if ('uniforms' in frontBuffer.material) {
+      frontBuffer.material.uniforms.selectivePrimaryColor.value = primaryColor.toArray()
+      frontBuffer.material.uniforms.selectiveSecondaryColor.value = secondaryColor.toArray()
+    }
+    if ('uniforms' in backBuffer.material) {
+      backBuffer.material.uniforms.selectivePrimaryColor.value = primaryColor.toArray()
+      backBuffer.material.uniforms.selectiveSecondaryColor.value = secondaryColor.toArray()
+    }
+
+    // Update the last known colors
+    lastThemeColors = currentThemeColors
+  }
 
   // Handle resize to update plane scales
   const handleResize = () => {
@@ -94,5 +184,6 @@ export const createVideoBackground = (
     },
     mesh: frontBuffer.mesh,
     handleResize,
+    updateThemeColors,
   }
 }

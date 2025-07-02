@@ -44,10 +44,23 @@
       "ditherStrength": 10,
       "ditherFrequency": 1000.0,
       "ditherAnimation": 0.1,
-      "gain": 1.5,
-      "toneMap": {
-        "enabled": false,
-        "blendAmount": 1
+      "gain": 1.5
+    },
+    "selectiveColorization": {
+      "enabled": true,
+      "useThemeColors": true,
+      "primaryTargetColor": "#ff6600",
+      "secondaryTargetColor": "#0066ff",
+      "targeting": {
+        "brightnessWeight": 0.2,
+        "saturationWeight": 0.8,
+        "brightnessThreshold": 0.7,
+        "saturationThreshold": 0.25,
+        "blendSmoothness": 0.3
+      },
+      "colorBlending": {
+        "blendMode": "mixed",
+        "blendBalance": 0.3
       }
     },
     "sharpening": {

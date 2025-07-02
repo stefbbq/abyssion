@@ -109,12 +109,36 @@ export type PixelateParams = {
   pixelSize: number
 }
 
-/** Parameters for tone mapping (theme-based highlight/shadow color grading) */
-export type ToneMapParams = {
-  /** Whether the tone mapping effect is enabled */
+/** Parameters for selective colorization (grayscale with selective color preservation/remapping) */
+export type SelectiveColorizationParams = {
+  /** Whether the selective colorization effect is enabled */
   enabled: boolean
-  /** Blend amount between original and mapped color (0 = no effect, 1 = full effect) */
-  blendAmount: number
+  /** Use theme colors instead of custom colors */
+  useThemeColors?: boolean
+  /** Primary target color (hex string or color object) - defaults to theme primary */
+  primaryTargetColor?: string | { r: number; g: number; b: number }
+  /** Secondary target color (hex string or color object) - defaults to theme accent */
+  secondaryTargetColor?: string | { r: number; g: number; b: number }
+  /** Targeting mode configuration */
+  targeting: {
+    /** Weight for brightness-based targeting (0.0-1.0) */
+    brightnessWeight: number
+    /** Weight for saturation-based targeting (0.0-1.0) */
+    saturationWeight: number
+    /** Brightness threshold for colorization (0.0-1.0) */
+    brightnessThreshold: number
+    /** Saturation threshold for colorization (0.0-1.0) */
+    saturationThreshold: number
+    /** Smoothness of the blend transition (0.01-0.5) */
+    blendSmoothness: number
+  }
+  /** Color blending configuration */
+  colorBlending: {
+    /** How to blend between primary and secondary colors: 'brightness' | 'saturation' | 'mixed' */
+    blendMode: 'brightness' | 'saturation' | 'mixed'
+    /** Blend factor between colors (0.0 = all primary, 1.0 = all secondary) */
+    blendBalance: number
+  }
 }
 
 /** Complete post-processing configuration */
@@ -133,8 +157,8 @@ export type PostProcessingConfig = {
   pixelate?: PixelateParams
   /** Lens flare parameters */
   lensFlare: LensFlareParams
-  /** Tone mapping parameters (theme-based highlight/shadow color grading) */
-  toneMap?: ToneMapParams
+  /** Selective colorization parameters (grayscale with selective color preservation/remapping) */
+  selectiveColorization?: SelectiveColorizationParams
 }
 
 /** Renderer configuration */

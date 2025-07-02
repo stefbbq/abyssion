@@ -15,12 +15,6 @@ uniform float burstProbability; // chance of global burst
 uniform vec3 themePrimary;
 uniform vec3 themeAccent;
 uniform vec3 themeSecondary;
-
-// Tone mapping uniforms (optional, for theme-based highlight/shadow mapping)
-uniform float toneMapEnabled; // 0.0 = off, 1.0 = on
-uniform float toneMapBlendAmount; // 0.0 = no effect, 1.0 = full effect
-uniform vec3 toneMapHighlightColor; // highlight color (default: themePrimary)
-uniform vec3 toneMapShadowColor; // shadow color (default: themeSecondary)
 varying vec2 vUv;
 
 // Hash for randomness. See: https://en.wikipedia.org/wiki/Hash_function
@@ -56,30 +50,6 @@ void main() {
     float vig = uv.x * uv.y * 15.0;
     vig = pow(vig, 0.25);
     color *= vec4(vig, vig, vig, 1.0);
-
-    // Optional theme-based color grading (hot colors to primary, cool colors to secondary)
-    if (toneMapEnabled > 0.5) {
-      // Convert to HSV to better identify "hot" colors
-      float maxVal = max(max(color.r, color.g), color.b);
-      float minVal = min(min(color.r, color.g), color.b);
-      float delta = maxVal - minVal;
-      
-      // Calculate brightness and saturation
-      float brightness = maxVal;
-      float saturation = maxVal > 0.0 ? delta / maxVal : 0.0;
-      
-      // Determine "hotness" based on brightness and saturation
-      float hotness = brightness * saturation;
-      
-      // Hot colors get mapped to primary, cool colors to secondary
-      vec3 targetColor = mix(toneMapShadowColor, toneMapHighlightColor, smoothstep(0.3, 0.8, hotness));
-      
-      // Preserve the original brightness while applying the color grading
-      float originalBrightness = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-      vec3 gradedColor = targetColor * originalBrightness;
-      
-      color.rgb = mix(color.rgb, gradedColor, toneMapBlendAmount);
-    }
 
     gl_FragColor = color * gain;
     return;
@@ -124,30 +94,6 @@ void main() {
   float vig = uv.x * uv.y * 15.0;
   vig = pow(vig, 0.25);
   color *= vec4(vig, vig, vig, 1.0);
-
-  // Optional theme-based color grading (hot colors to primary, cool colors to secondary)
-  if (toneMapEnabled > 0.5) {
-    // Convert to HSV to better identify "hot" colors
-    float maxVal = max(max(color.r, color.g), color.b);
-    float minVal = min(min(color.r, color.g), color.b);
-    float delta = maxVal - minVal;
-    
-    // Calculate brightness and saturation
-    float brightness = maxVal;
-    float saturation = maxVal > 0.0 ? delta / maxVal : 0.0;
-    
-    // Determine "hotness" based on brightness and saturation
-    float hotness = brightness * saturation;
-    
-    // Hot colors get mapped to primary, cool colors to secondary
-    vec3 targetColor = mix(toneMapShadowColor, toneMapHighlightColor, smoothstep(0.3, 0.8, hotness));
-    
-    // Preserve the original brightness while applying the color grading
-    float originalBrightness = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-    vec3 gradedColor = targetColor * originalBrightness;
-    
-    color.rgb = mix(color.rgb, gradedColor, toneMapBlendAmount);
-  }
 
   gl_FragColor = color * gain;
 } 

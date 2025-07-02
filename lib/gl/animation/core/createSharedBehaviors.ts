@@ -2,7 +2,7 @@ import { createMouseTracking } from '@libgl/controls/index.ts'
 import { calculateRotationInterpolation } from '../calculations/calculateRotationInterpolation.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import * as Three from 'three'
-import type { VideoBackgroundManager } from '@libgl/types.ts'
+import type { RendererState, VideoBackgroundManager } from '@libgl/types.ts'
 
 /**
  * Shared behaviors available to all animation orchestrators
@@ -32,7 +32,13 @@ export const createSharedBehaviors = (): SharedBehaviors => {
   }
 
   const updateVideoBackground = (videoBackground: VideoBackgroundManager, deltaTime: number) => {
-    if (videoBackground) videoBackground.update(deltaTime)
+    if (videoBackground) {
+      videoBackground.update(deltaTime)
+      // Update theme colors if method exists (for selective colorization)
+      if (videoBackground.updateThemeColors) {
+        videoBackground.updateThemeColors()
+      }
+    }
   }
 
   return {

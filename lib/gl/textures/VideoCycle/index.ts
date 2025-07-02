@@ -78,8 +78,15 @@ export const createVideoCycle = (
       }
 
       // Set up hidden buffer with next video
-      hiddenBuffer.material.map = nextVideo.texture
-      hiddenBuffer.material.opacity = 0 // Keep hidden initially
+      if ('uniforms' in hiddenBuffer.material) {
+        // ShaderMaterial
+        hiddenBuffer.material.uniforms.videoTexture.value = nextVideo.texture
+        hiddenBuffer.material.uniforms.opacity.value = 0 // Keep hidden initially
+      } else {
+        // Fallback for MeshBasicMaterial
+        hiddenBuffer.material.map = nextVideo.texture
+        hiddenBuffer.material.opacity = 0
+      }
       hiddenBuffer.material.needsUpdate = true
 
       // Prepare video timing
@@ -131,7 +138,15 @@ export const createVideoCycle = (
         })
       }
 
-      activeBuffer.material.map = current.texture
+      if ('uniforms' in activeBuffer.material) {
+        // ShaderMaterial
+        activeBuffer.material.uniforms.videoTexture.value = current.texture
+        activeBuffer.material.uniforms.opacity.value = opacity
+      } else {
+        // Fallback for MeshBasicMaterial
+        activeBuffer.material.map = current.texture
+        activeBuffer.material.opacity = opacity
+      }
       activeBuffer.material.needsUpdate = true
 
       const result = await getNewStartTimeAndDuration(current.video, minVideoLength, maxVideoLength)
@@ -190,8 +205,15 @@ export const createVideoCycle = (
         activeBuffer = hiddenBuffer
         hiddenBuffer = temp
 
-        activeBuffer.material.opacity = opacity
-        hiddenBuffer.material.opacity = 0
+        if ('uniforms' in activeBuffer.material && 'uniforms' in hiddenBuffer.material) {
+          // ShaderMaterial
+          activeBuffer.material.uniforms.opacity.value = opacity
+          hiddenBuffer.material.uniforms.opacity.value = 0
+        } else {
+          // Fallback for MeshBasicMaterial
+          activeBuffer.material.opacity = opacity
+          hiddenBuffer.material.opacity = 0
+        }
         activeBuffer.material.needsUpdate = true
         hiddenBuffer.material.needsUpdate = true
 
@@ -215,9 +237,17 @@ export const createVideoCycle = (
 
         // Set up new video
         const next = state.videos[nextIndex]
-        activeBuffer.material.map = next.texture
-        activeBuffer.material.opacity = opacity
-        hiddenBuffer.material.opacity = 0
+        if ('uniforms' in activeBuffer.material && 'uniforms' in hiddenBuffer.material) {
+          // ShaderMaterial
+          activeBuffer.material.uniforms.videoTexture.value = next.texture
+          activeBuffer.material.uniforms.opacity.value = opacity
+          hiddenBuffer.material.uniforms.opacity.value = 0
+        } else {
+          // Fallback for MeshBasicMaterial
+          activeBuffer.material.map = next.texture
+          activeBuffer.material.opacity = opacity
+          hiddenBuffer.material.opacity = 0
+        }
         activeBuffer.material.needsUpdate = true
         hiddenBuffer.material.needsUpdate = true
 

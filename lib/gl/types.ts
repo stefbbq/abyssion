@@ -10,6 +10,7 @@ export type VideoBackgroundManager = {
   dispose: () => void
   mesh: Mesh // The mesh containing the video texture
   handleResize: () => void
+  updateThemeColors?: () => void // Update theme colors in real-time
 }
 
 // UI Overlay type
