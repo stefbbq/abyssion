@@ -3,6 +3,7 @@ import { Head, Partial } from '$fresh/runtime.ts'
 import Header from '@islands/Header.tsx'
 import ActionZoneController from '@islands/ActionZoneController.tsx'
 import GLCanvas from '@islands/GLCanvas.tsx'
+import { DebugPanels } from '@islands/DebugPanels.tsx'
 import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
 import PageContainer from '@islands/PageContainer.tsx'
@@ -36,6 +37,7 @@ export default function App({ Component, url }: PageProps) {
         <ThemedBackground />
         <ThemeProvider />
         <GLCanvas />
+        <DebugPanels />
 
         {/* header */}
         {showHeader && <Header />}

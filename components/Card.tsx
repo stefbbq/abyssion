@@ -1,17 +1,24 @@
 import { ComponentChildren } from 'preact'
 
 type Props = {
-  children: ComponentChildren
-  className?: string
-  imageUrl?: string
-  imageAlt?: string
-  fallbackAvatarText?: string
+  children: ComponentChildren // card content
+  className?: string // additional class names
+  imageUrl?: string // optional image URL for the card top
+  imageAlt?: string // alt text for the image
+  fallbackAvatarText?: string // text to show if image fails
 }
 
 /**
  * Card component
  * Renders a flexible card with optional image and fallback avatar, using theme-aware background and text colors.
  * Applies .glass-effect and surface-primary background for dark/light mode support.
+ *
+ * - If imageUrl is provided, shows image at top; on error, shows fallbackAvatarText if given
+ * - If no imageUrl, shows gradient background and fallback text if given
+ * - Content is always rendered below image/gradient
+ *
+ * @example
+ *   <Card imageUrl='/foo.png' fallbackAvatarText='A'>Hello</Card>
  */
 export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarText }: Props) => {
   const handleError = (e: Event) => {

@@ -5,7 +5,9 @@ import { IS_BROWSER } from '$fresh/runtime.ts'
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-// Base props common to both button and anchor variations
+/**
+ * Base props shared by both button and anchor variants
+ */
 type BaseProps = {
   variant?: ButtonVariant
   size?: ButtonSize
@@ -13,18 +15,27 @@ type BaseProps = {
   class?: string
 }
 
-// Props specific to the <button> element, without 'href'
+/**
+ * Props for <button> element (no href)
+ * @see Button
+ */
 type ButtonElementProps =
   & Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'size' | 'class' | 'href'>
   & { href?: never; ref?: Ref<HTMLButtonElement> }
 
-// Props specific to the <a> element, requiring 'href'
+/**
+ * Props for <a> element (requires href)
+ * @see Button
+ */
 type AnchorElementProps =
   & Omit<JSX.HTMLAttributes<HTMLAnchorElement>, 'size' | 'class'>
   & { href: string; ref?: Ref<HTMLAnchorElement> }
 
-// Use a discriminated union type. Based on whether 'href' is provided,
-// TypeScript will enforce either Button-specific or Anchor-specific props.
+/**
+ * Button Props
+ * Discriminated union: if href is present, renders <a>; otherwise <button>.
+ * TypeScript enforces correct prop usage.
+ */
 type Props = BaseProps & (ButtonElementProps | AnchorElementProps)
 
 const variantClasses = {
@@ -43,7 +54,16 @@ const sizeClasses = {
 /**
  * A versatile button component that can render as a standard button
  * or as an anchor tag for navigation, with support for Fresh Partials.
- * It features multiple visual variants and sizes, inspired by Vercel's design system.
+ * Features multiple visual variants and sizes, inspired by Vercel's design system.
+ *
+ * - Use `variant` for style: 'primary', 'secondary', 'outline', 'ghost'
+ * - Use `size` for sizing: 'sm', 'md', 'lg'
+ * - If `href` is provided, renders as <a> and enables Fresh partial navigation
+ * - All theme classes are applied via CSS variables
+ *
+ * @example
+ *   <Button variant='primary' size='md'>Click me</Button>
+ *   <Button href='/about' variant='outline'>About</Button>
  */
 export const Button = ({
   variant = 'primary',
@@ -53,9 +73,9 @@ export const Button = ({
   ...props
 }: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border-focus disabled:opacity-50 disabled:cursor-not-allowed'
-
-  const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
+    'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border-focus disabled:opacity-50 disabled:cursor-not-allowed'
+  const transitionClasses = 'transition-all duration-200'
+  const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 
   // Separate ref from props
   const { ref, ...rest } = props as { ref?: any }

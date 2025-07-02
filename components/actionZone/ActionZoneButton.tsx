@@ -1,8 +1,7 @@
 import { BackIcon, MenuIcon } from '@components/icons/index.ts'
 import { CSSProperties } from 'preact/compat'
-import type { ActionZoneButton as ActionZoneButtonConfig } from '@components/actionZone/actionZone.animation.ts'
+import type { ActionZoneButton as ActionZoneButtonConfig } from './types.ts'
 
-// Use a local type for the button prop
 export type ActionZoneButtonType = {
   id: string
   key: string
@@ -33,6 +32,38 @@ type Props = {
  * Combines Icon and BaseButton atoms with animation state management
  * Handles smooth morphing between different navigation roles
  */
+// role style configuration type
+type RoleStyle = {
+  base: string
+  hover?: string
+  colors?: string
+  border: string
+}
+
+// role-based styling configurations
+const roleStyles: Record<string, RoleStyle> = {
+  'nav-item': {
+    base: 'h-10 px-3 py-1.5 text-sm font-medium rounded-full',
+    hover: 'hover:bg-interactive-ghostHover',
+    border: 'border border-text-tertiary',
+  },
+  'page-title': {
+    base: 'h-10 px-3 py-1.5 text-sm font-normal lowercase rounded-full',
+    colors: 'bg-foreground text-background',
+    border: 'border-none',
+  },
+  'action-button': {
+    base: 'h-10 w-10 p-0 rounded-full',
+    hover: 'hover:bg-interactive-ghostHover',
+    border: 'border-none',
+  },
+  'back-button': {
+    base: 'h-10 w-10 p-0 rounded-full',
+    hover: 'hover:bg-interactive-ghostHover',
+    border: 'border-none',
+  },
+}
+
 export const ActionZoneButton = (
   {
     id,
@@ -47,21 +78,26 @@ export const ActionZoneButton = (
     variant = 'outlined',
   }: Props,
 ) => {
-  // tailwind's hover: and focus: utilities are safe for touch devices and pointer devices
-  // browsers will not trigger these on pure touch devices
+  const { action: { type }, role, content: { label, icon } } = state
+
+  // base classes shared by all buttons
   const baseClasses =
-    'w-full h-full inline-flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm rounded-md gap-2 nav-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0'
+    'inline-flex items-center justify-center disabled:cursor-not-allowed gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0'
 
-  const handleClick = () => {
-    if (state.action.type !== 'none') onAction(state.action)
-  }
+  // get role-specific styling
+  const roleStyle = roleStyles[role] || roleStyles['nav-item']
+  const showText = role === 'nav-item' || role === 'page-title'
+  const isLink = type === 'navigate'
 
-  const showText = state.role === 'nav-item' || state.role === 'page-title'
-  const isLink = state.action.type === 'navigate'
-  const { icon, label } = state?.content
+  // build complete class string
+  const borderClass = (variant === 'outlined' && role === 'nav-item') ? roleStyle.border : 'border-none'
+  const colorClass = role === 'page-title' ? roleStyle.colors || '' : ''
+  const hoverClass = roleStyle.hover || ''
 
-  const borderClass = (variant === 'outlined' && state.role === 'nav-item') ? 'border border-text-tertiary' : 'border-none'
+  // only call onAction if the action is not 'none'
+  const handleClick = () => type !== 'none' && onAction(state.action)
 
+  // get the icon and label for the button
   const getIconAndLabel = () => (
     <>
       {icon && (
@@ -76,14 +112,10 @@ export const ActionZoneButton = (
 
   const commonProps = {
     id,
-    className: `${baseClasses} ${borderClass} ${className || ''}`,
+    className: `${baseClasses} ${roleStyle.base} ${borderClass} ${colorClass} ${hoverClass} ${className || ''}`,
     style: {
       ...style,
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flex: flex || '0 0 auto',
+      flex: flex || (role === 'page-title' ? '1 1 0%' : '0 0 auto'),
       transformOrigin: transformOrigin || 'center',
     },
     onMouseEnter,

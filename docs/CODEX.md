@@ -86,7 +86,7 @@ The animation system is designed for maximum modularity, testability, and functi
 - **Side effect isolation**: Only orchestrators perform DOM/Three.js mutations
 - **Composable**: Pure functions are easy to combine for new behaviors
 
-### Usage
+### API Usage
 
 - Import orchestrators to run animation systems:
 
@@ -129,6 +129,9 @@ In addition to standard utilities, two custom utility classes are available in `
   - `ThemeVisualizer.tsx`: UI for visualizing themes.
   - `Header.tsx`, `GLCanvas.tsx` Other major interactive components.
   - `ThemedBackground.tsx`: Dynamic background overlay that uses the current theme's CSS variable for background color and fades in/out based on route. Uses direct CSS variable access for background and Tailwind for layout/opacity transitions.
+  - `DebugPanels.tsx`: Main debug overlay island. Manages debug state and renders `DebugControls` and `DebugInfo`.
+  - `DebugControls.tsx`: UI for DOF/tone mapping controls and hotkey info (top-left).
+  - `DebugInfo.tsx`: UI for debug info (bottom-left).
 
 - **`/components`**: Reusable UI Components
   - `Shell.tsx`: A generic container for content sections with the `.glass-effect`.
@@ -155,12 +158,12 @@ In addition to standard utilities, two custom utility classes are available in `
 - `index.ts` - `initGL()`, `InitOptions`, `RendererState`
 - `types.ts` - Core GL types
 
-## Theme System (New Architecture)
+## Theme System
 
 ### Core Theme System (`lib/theme/`)
 
-- `index.ts` - `getTheme()`, `toggleThemeMode()`, `setThemeMode()`
-- `types.ts` - `BaseTheme`, `UITheme`, theme type definitions
+- `types.ts` - `UITheme`, `GLTheme`, and re-exports of theme shape types
+- `themes/types.ts` - `BaseTheme`, `BaseTypography`, `BaseSpacing` (theme shape types, colocated with theme definitions)
 - `themes/index.ts` - Theme exports barrel
 - `utils/createBaseTheme.ts` - `createBaseTheme()`
 - `utils/hexToCSS.ts` - `hexToCSS()`
@@ -171,7 +174,7 @@ The theme system exposes all theme values as CSS variables (e.g., `--colors-back
 
 ThemedBackground uses the CSS variable directly for its background and applies opacity transitions using Tailwind classes. This ensures the background always matches the current theme and transitions smoothly during navigation.
 
-### GL Theme System (`lib/gl/theme/`)
+### GL Theme System (`lib/theme/`)
 
 - `index.ts` - `getGLTheme()`, `createGLTheme()`
 - `types.ts` - `GLTheme`
@@ -183,12 +186,14 @@ The codebase uses a structured, color-coded logger utility for all diagnostic an
 ### Usage
 
 - Import the logger and log context enum:
+
   ```ts
   import { log, lc } from '@lib/logger/index.ts'
   log(lc.GL, 'Hello GL!')
   log.warn(lc.PREACT, 'Warning from preact!')
   log.error(lc.GL_ANIMATION, 'Animation error:', error)
   ```
+
 - Log levels are available as methods: `log.trace`, `log.debug`, `log.info`, `log.warn`, `log.error`, `log.critical`.
 - Contexts (imported as `lc`) group logs by subsystem (e.g., `lc.GL`, `lc.GL_ANIMATION`, `lc.PREACT`).
 
@@ -222,9 +227,9 @@ The codebase uses a structured, color-coded logger utility for all diagnostic an
 - Use log levels to control verbosity in development vs. production.
 - Use context filtering to focus on specific subsystems during debugging.
 
-# Animation System
+## Animation System
 
-## Overview
+### Overview
 
 The animation system has been refactored following strict functional programming principles:
 
@@ -233,7 +238,7 @@ The animation system has been refactored following strict functional programming
 - **Immutable data structures** throughout
 - **Clear separation** between pure calculations and necessary side effects
 
-## Architecture
+### Architecture
 
 ```
 /animation/
@@ -258,6 +263,7 @@ The animation system has been refactored following strict functional programming
 ## Core Principles
 
 ### Pure Calculations
+
 All math and position calculations are pure functions:
 
 ```typescript
@@ -266,6 +272,7 @@ const position = calculateStaticLayerPosition(time, index, baseZPos, isStencil)
 ```
 
 ### Side Effect Isolation
+
 Side effects (DOM mutations, Three.js updates) are isolated to the main orchestrator:
 
 ```typescript
@@ -274,6 +281,7 @@ plane.position.x = position.positionX // Necessary side effect
 ```
 
 ### One Function Per File
+
 Each function has its own file for maximum modularity:
 
 ```typescript
@@ -287,6 +295,7 @@ export const calculateMouseRotation = (mouseX, mouseY, coefficient) => ({
 ## Usage
 
 ### Basic Setup
+
 ```typescript
 import { createLogoAnimator } from './animation'
 
@@ -295,6 +304,7 @@ const cleanup = animator.start()
 ```
 
 ### Pure Calculations (Testable)
+
 ```typescript
 import { calculateStaticLayerPosition } from './animation'
 
@@ -304,6 +314,7 @@ const position = calculateStaticLayerPosition(1000, 0, 5, false)
 ```
 
 ### Custom Calculations
+
 ```typescript
 // Create your own pure calculation
 const calculateCustomPosition = (time, factor) => ({
@@ -333,4 +344,16 @@ Following the guide's "one function per file" principle:
 - Each core function is a separate file
 - Main orchestrator combines them all
 
-This makes the codebase highly modular and follows pure FP principles while keeping the necessary side effects (Three.js mutations) clearly isolated. 
+This makes the codebase highly modular and follows pure FP principles while keeping the necessary side effects (Three.js mutations) clearly isolated.
+
+> **Note:** All theme shape types (`BaseTheme`, `BaseTypography`, `BaseSpacing`) are now defined in `lib/theme/themes/types.ts` alongside the theme objects themselves. They are re-exported from `lib/theme/types.ts` for convenience. This keeps type definitions close to the data and supports feature-based organization.
+
+## Debug Overlay
+
+The debug UI is now implemented as Preact components for maintainability and composability.
+
+- **DebugPanels Island**: The main interactive debug UI, located at `islands/DebugPanels.tsx`. It manages debug state, keyboard shortcuts, and renders the controls/info panels.
+- **DebugControls Component**: Renders DOF and tone mapping controls, hotkey info, and lives at the top-left. Located at `components/debug/DebugControls.tsx`.
+- **DebugInfo Component**: Renders debug information (e.g., camera Z, plane positions) at the bottom-left. Located at `components/debug/DebugInfo.tsx`.
+- The debug system is now fully reactive, theme-aware, and integrated with the rest of the app via signals and props.
+- To use the debug UI, `<DebugPanels />` is rendered in `_app.tsx` after `<GLCanvas />`.

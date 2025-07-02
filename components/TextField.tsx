@@ -2,22 +2,38 @@ import { useRef, useState } from 'preact/hooks'
 import type { JSX } from 'preact'
 
 type Props = {
+  // field label (floating)
   label: string
+  // field name/ID
   name: string
+  // input type (default: 'text')
   type?: string
+  // placeholder text
   placeholder?: string
+  // controlled value
   value?: string
+  // change handler
   onChange?: (value: string) => void
+  // validation function (returns error string or null)
   validate?: (value: string) => string | null
+  // whether the field is required
   required?: boolean
+  // additional class names
   className?: string
+  // if true, renders a <textarea> instead of <input>
   textarea?: boolean
+  // number of rows for textarea
   rows?: number
 }
 
 /**
- * Modern, accessible text field with animated floating label and validation
- * Label starts full-size inside, animates to top-left, shrinks, and fades on focus or filled
+ * Modern, accessible text field with animated floating label and validation.
+ * Label starts full-size inside, animates to top-left, shrinks, and fades on focus or filled.
+ * Supports both <input> and <textarea> modes, with theme-aware styling.
+ *
+ * @example
+ *   <TextField label='Name' name='name' required />
+ *   <TextField label='Message' name='msg' textarea rows={6} />
  */
 export const TextField = ({
   label,
@@ -47,6 +63,7 @@ export const TextField = ({
   }
 
   const handleFocus = () => setIsFocused(true)
+
   const handleBlur = () => {
     setIsFocused(false)
     setTouched(true)
@@ -75,21 +92,23 @@ export const TextField = ({
 
   return (
     <div class={`relative ${className}`}>
-      {textarea
-        ? (
-          <textarea
-            {...sharedProps}
-            ref={textareaRef}
-            rows={rows}
-          />
-        )
-        : (
-          <input
-            {...sharedProps}
-            ref={inputRef}
-            type={type}
-          />
-        )}
+      {/* textarea */}
+      {textarea && (
+        <textarea
+          {...{ ...sharedProps, rows }}
+          ref={textareaRef}
+        />
+      )}
+
+      {/* input */}
+      {!textarea && (
+        <input
+          {...{ ...sharedProps, type }}
+          ref={inputRef}
+        />
+      )}
+
+      {/* label */}
       <label
         for={name}
         class={`absolute transition-all duration-200 ease-in-out origin-top-left
@@ -107,6 +126,8 @@ export const TextField = ({
       >
         {label}
       </label>
+
+      {/* on error */}
       {error && touched && (
         <span id={`${name}-error`} class='text-xs text-red-500 mt-1 block'>
           {error}

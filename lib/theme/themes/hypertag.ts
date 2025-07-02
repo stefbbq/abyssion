@@ -35,7 +35,12 @@ export const hypertagTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#1e1e1e'),
   surface: hexStringToNumber('#0a0a0a'),
+  surfaceAlt: hexStringToNumber('#1a1a1a'),
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
   },
 })

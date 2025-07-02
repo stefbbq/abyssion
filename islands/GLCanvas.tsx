@@ -1,1 +1,1 @@
-export { default } from '@components/GLCanvas.tsx'
+export { GLCanvas as default } from '@components/GLCanvas.tsx'

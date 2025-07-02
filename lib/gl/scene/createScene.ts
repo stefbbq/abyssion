@@ -1,5 +1,5 @@
 import * as Three from 'three'
-import { getGLTheme } from '@libgl/theme/index.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
 
 /**
  * Create and initialize the basic 3D scene

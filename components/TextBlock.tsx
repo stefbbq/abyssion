@@ -1,20 +1,22 @@
 import { render } from 'https://deno.land/x/gfm@0.2.4/mod.ts'
 
+type Props = {
+  // the Markdown string to render
+  children: string
+  // the color variant (default: 'secondary')
+  variant?: 'primary' | 'secondary' | 'tertiary'
+  // additional class names for the container
+  className?: string
+}
+
 /**
  * TextBlock component
  * Renders a block of Markdown text with theme-aware color and spacing.
  * Use for paragraphs, prose, or any text content that needs consistent theming.
  *
- * @param children - The Markdown string to render
- * @param variant - The color variant: 'primary' | 'secondary' | 'tertiary' (default: 'secondary')
- * @param className - Additional class names for the container
+ * @example
+ *   <TextBlock variant='primary'># Hello</TextBlock>
  */
-type Props = {
-  children: string
-  variant?: 'primary' | 'secondary' | 'tertiary'
-  className?: string
-}
-
 export const TextBlock = ({ children, variant = 'secondary', className }: Props) => {
   const colorMap = {
     primary: 'text-[var(--colors-text-primary)]',

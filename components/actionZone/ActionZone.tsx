@@ -11,17 +11,16 @@ type Props = {
 
 /**
  * ActionZone component
- *
- * Main navigation coordinator that orchestrates collapsed and expanded states
- * Delegates specific responsibilities to specialized organisms
+ * Main navigation coordinator that orchestrates collapsed and expanded states.
+ * Delegates specific responsibilities to specialized organisms.
  */
-export default function ActionZone({
+export const ActionZone = ({
   isMenuOpen,
   setIsMenuOpen,
   collapsedChildren,
   expandedChildren,
   layoutConfig = {},
-}: Props) {
+}: Props) => {
   const navRef = useRef<HTMLElement>(null)
   const showExpandedContent = isMenuOpen
   const height = typeof layoutConfig.height === 'function' ? layoutConfig.height() : undefined
@@ -40,13 +39,13 @@ export default function ActionZone({
       {/* bottom navigation container */}
       <nav
         ref={navRef}
-        className='fixed bottom-4 left-4 right-4 z-50 py-3 rounded-[40px] md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
+        className='fixed bottom-4 left-4 right-4 z-50 py-2 rounded-[40px] md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
         style={{
           height,
           borderRadius,
         }}
       >
-        <div className='max-w-md mx-auto'>
+        <div className='max-w-sm mx-auto'>
           {showExpandedContent ? expandedChildren : collapsedChildren}
         </div>
       </nav>

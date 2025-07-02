@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
-import { getTheme } from '@lib/theme/index.ts'
+import { currentTheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@components/actionZone/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@components/actionZone/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
-import actionZoneConfig from '@components/actionZone/actionZone.animation.ts'
-import ActionZone from '@components/actionZone/ActionZone.tsx'
+import actionZoneConfig from '@components/actionZone/config/index.ts'
+import { ActionZone } from '@components/actionZone/ActionZone.tsx'
 import type { MenuItem, NavButtonState } from '@data/types.ts'
 import pages from '@data/pages.json' with { type: 'json' }
 
 export default function ActionZoneController() {
   const [isMounted, setIsMounted] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const theme = getTheme()
+  const theme = currentTheme.value
   const [currentPath] = useClientLocation()
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function ActionZoneController() {
       setIsMenuOpen(false)
       return true
     }
+
     return false
   }
 
@@ -70,6 +71,7 @@ export default function ActionZoneController() {
         const label = button.content.label || page?.label || ''
         return { ...button, content: { ...button.content, label } }
       }
+
       return button
     })
 

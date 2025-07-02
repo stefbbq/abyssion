@@ -20,6 +20,7 @@ export const createStarfield = (
 
   const particleCount = 250
   const particles = new THREE.Group()
+  particles.name = 'StarfieldGroup'
 
   // FIXED ROTATION: Apply rotation to the entire group
   particles.rotation.x = rotationAngle
@@ -59,7 +60,7 @@ export const createStarfield = (
         opacity: opacity - 0.2 + Math.random() * 0.6,
       }),
     )
-
+    particle.name = `StarfieldParticle_${i}`
     // Position directly without additional rotation manipulation
     particle.position.set(x, y, z)
     particles.add(particle)

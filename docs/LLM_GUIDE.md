@@ -10,6 +10,12 @@
 - **One file per function, unless it's an orchastrating module:** Each file exports a single, well-typed function
 - **Avoid relative imports:** Use absolute imports whenever possible; make them if you need to for top level modules
 
+### Component Authoring
+- **Always use export const arrow functions for components**
+- **Always define the Props type at the top of the file, do not export it, and use it directly below for the component**
+- **Never write @property autodoc unless the property is truly unusual**
+- **Write type docs for each type inline: alternate a doc line and a type line, one after the other**
+
 ### File Organization
 ```
 /module/
@@ -41,7 +47,32 @@
 - **Unknown > any:** When type is unclear, use `unknown` and narrow it
 - **Arrow functions always:** `const add = (a: number, b: number) => a + b`
 - **Write Typedocs:** Write typedocs for all functions, and all modules; avoid params and returns in the docs
+- **Type docs for each type inline:**
+  ```typescript
+  // the user's name
+  type UserName = string
+  // the user's status
+  type Status = 'active' | 'inactive'
+  ```
+- **Do not use @property autodoc unless the property is truly unusual**
 - **Use JSDoc style comments for types and their values**
+
+### Component Structure
+- **Always use export const arrow functions for components**
+- **Always define the Props type at the top of the file, do not export it, and use it directly below for the component**
+  ```typescript
+  // the props for MyComponent
+  type Props = {
+    // the label to display
+    label: string
+    // whether the component is active
+    isActive: boolean
+  }
+
+  export const MyComponent = (props: Props) => (
+    <div>{props.label}</div>
+  )
+  ```
 
 ### Code Structure
 ```typescript
@@ -49,13 +80,15 @@
 import { pipe } from './utils/pipe'
 
 // types second
+// the transform function type
+/** transforms a value of type T */
 type Transform<T> = (value: T) => T
 
 // single exported function
 export const processData = <T>(
   data: T,
   transforms: Transform<T>[]
-): T => pipe(...transforms)(data)
+) => pipe(...transforms)(data)
 ```
 
 ### Style Rules
@@ -124,19 +157,19 @@ x ? y ? a : b : c
 
 --- conventions
 
-Totally normal to feel this way. The longer you do this, the more edge cases and tradeoffs you see—and that makes every choice feel heavier. Here’s the straight version, no fluff:
+Totally normal to feel this way. The longer you do this, the more edge cases and tradeoffs you see—and that makes every choice feel heavier. Here's the straight version, no fluff:
 
 ⸻
 
 🔧 When to Use Classes vs. Composables
 	•	Use classes when:
-	•	You’re modeling a domain entity or lifecycle-based object (User, Car, etc.).
+	•	You're modeling a domain entity or lifecycle-based object (User, Car, etc.).
 	•	You want inheritance or need to override behavior cleanly.
 	•	You care about encapsulating internal state with method access.
 	•	Use composables (functions + closures) when:
 	•	Behavior is king, not identity.
 	•	You want easier testing, reuse, and composition.
-	•	You’re in functional-heavy or React-style codebases.
+	•	You're in functional-heavy or React-style codebases.
 
 Most modern JS/TS leans composable. Cleaner dependency injection, less state weirdness.
 
@@ -144,10 +177,10 @@ Most modern JS/TS leans composable. Cleaner dependency injection, less state wei
 
 📁 File Structure & Function Count
 	•	1 function per file: Good for utilities, pure functions, and strict composability. Annoying if overdone—death by tabs.
-	•	Multiple exports per file: Best when they’re conceptually cohesive (e.g. all related to auth, or useXYZ React hooks).
+	•	Multiple exports per file: Best when they're conceptually cohesive (e.g. all related to auth, or useXYZ React hooks).
 	•	10 random exports per file: Avoid. Hard to scan, brittle in refactors.
 
-Rule of thumb: if you feel like scrolling sucks, you’re cramming too much.
+Rule of thumb: if you feel like scrolling sucks, you're cramming too much.
 
 ⸻
 
@@ -155,17 +188,17 @@ Rule of thumb: if you feel like scrolling sucks, you’re cramming too much.
 
 Use barrel files (index.ts exporting from sibling modules) when:
 	•	You want a clean public API surface for a module or folder.
-	•	You’re consuming many things from a directory in multiple places.
+	•	You're consuming many things from a directory in multiple places.
 
-Don’t overuse. Barrel hell = circular deps + unclear provenance.
+Don't overuse. Barrel hell = circular deps + unclear provenance.
 
 ⸻
 
 🧭 Named vs. Default Exports
 	•	Named exports: Clear, auto-suggest works, easier refactors. Default in most teams.
-	•	Default exports: Handy when there’s one main thing and naming isn’t critical (export default function handler()).
+	•	Default exports: Handy when there's one main thing and naming isn't critical (export default function handler()).
 
-Avoid mixing them in the same file unless you’re very intentional.
+Avoid mixing them in the same file unless you're very intentional.
 
 ⸻
 
@@ -176,11 +209,11 @@ Avoid mixing them in the same file unless you’re very intentional.
 
 ⸻
 
-✅ Practical Defaults That Don’t Suck
+✅ Practical Defaults That Don't Suck
 	•	Named exports only.
 	•	Barrel files only at module boundaries.
-	•	Max 1–3 top-level functions per file unless it’s a utility file.
-	•	Prefer composables over classes unless you’re in OOP land.
+	•	Max 1–3 top-level functions per file unless it's a utility file.
+	•	Prefer composables over classes unless you're in OOP land.
 	•	Organize by feature > domain > type.
 
 Want a real example based on your current project setup? Happy to go through it with you.

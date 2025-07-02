@@ -35,7 +35,12 @@ export const synthDriftTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#cccccc'),
   surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#f2f2f2'),
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
   },
 })

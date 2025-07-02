@@ -21,6 +21,7 @@ export const createOrbitalParticles = (
   } = options
 
   const particleGroup = new THREE.Group()
+  particleGroup.name = 'OrbitalParticlesGroup'
   const orbitCount = 5
 
   for (let i = 0; i < orbitCount; i++) {
@@ -29,6 +30,7 @@ export const createOrbitalParticles = (
 
     // Create a group for this orbital path
     const orbitParticleGroup = new THREE.Group()
+    orbitParticleGroup.name = `OrbitalParticleOrbit_${i}`
 
     // Create particles with different densities along the orbit
     for (let j = 0; j < particleCount; j++) {
@@ -65,7 +67,7 @@ export const createOrbitalParticles = (
           opacity: opacity + Math.random() * 0.4,
         }),
       )
-
+      particle.name = `OrbitalParticle_${i}_${j}`
       particle.position.set(x, y, z)
       orbitParticleGroup.add(particle)
     }

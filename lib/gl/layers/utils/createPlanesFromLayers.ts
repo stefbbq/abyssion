@@ -39,9 +39,11 @@ export const createPlanesFromLayers = (
       // For stencil layers, we'll just use a regular plane now
       // A proper 3D model will be implemented separately later
       mesh = new THREE.Mesh(planeGeometry, material)
+      mesh.name = `LogoPlane_Stencil_${sortedLayers.indexOf(layer)}`
     } else {
       // Use normal plane for non-stencil layers
       mesh = new THREE.Mesh(planeGeometry, material)
+      mesh.name = `LogoPlane_${sortedLayers.indexOf(layer)}`
     }
 
     mesh.position.z = layer.zPos

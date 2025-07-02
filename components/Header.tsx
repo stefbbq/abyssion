@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import navData from '@data/nav.json' with { type: 'json' }
-import ThemeToggle from '@components/ThemeToggle.tsx'
+import { ThemeToggle } from '@components/ThemeToggle.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { HeaderLink } from './HeaderLink.tsx'
@@ -9,8 +9,11 @@ type SocialIconKey = keyof SocialIconMap
 
 /**
  * Desktop navigation bar for the app, styled with utility classes and CSS variables.
- * Uses the same style composition approach as HeaderLink for consistency.
- * Responsive, sticky, and theme-aware.
+ * Responsive, sticky, and theme-aware. Includes logo, navigation links, social icons, and theme toggle.
+ * Uses navData for navigation structure and adapts to scroll/keyboard state.
+ *
+ * @example
+ *   <Header />
  */
 export const Header = () => {
   const [currentPath] = useClientLocation()

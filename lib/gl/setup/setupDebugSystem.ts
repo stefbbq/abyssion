@@ -1,11 +1,11 @@
 import * as Three from 'three'
-import { DebugOverlay } from '@libgl/debug/DebugOverlay.ts'
+import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
-import { getGLTheme } from '@lib/gl/theme/index.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@libtheme/utils/rgbToHex.ts'
 import { hexToCSS } from '@libtheme/utils/hexToCSS.ts'
 
@@ -20,91 +20,103 @@ type DebugSystemConfig = {
 }
 
 type DebugSystemResult = {
-  debugOverlay: DebugOverlay
   updateDebugInfo: () => void
   handleRegenerateRandomLayers: () => void
 }
 
 /**
- * Sets up the debug overlay system with DOF controls and regeneration
+ * Sets up the debug system with DOF controls and regeneration
+ * Now uses Preact components instead of DOM manipulation
  */
 export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult => {
   log.debug(lc.GL_DEBUG, 'setupDebugSystem called with config:', config)
 
-  const { canvas, camera, scene, bokehPass, logoController, state, THREE } = config
+  const { camera, scene, bokehPass, logoController, state, THREE } = config
   const { planeWidth, planeHeight } = configScene as ConfigScene
 
-  // Setup DebugOverlay
-  const debugOverlay = new DebugOverlay(canvas.parentElement || document.body, {
+  // Initialize focus plane for DOF visualization
+  let focusPlane: Three.Mesh | null = null
+
+  // Set up callbacks for the debug panels
+  debugPanelsAPI.setCallbacks({
     onToggleDebug: () => {
       if (state.controls) state.controls.enabled = true
     },
-    onChangeDOF: ({ focus, aperture, maxblur }) => {
+    onDOFChange: ({ focus, aperture, maxblur }, meta) => {
       if (bokehPass && bokehPass.materialBokeh && bokehPass.materialBokeh.uniforms) {
         bokehPass.materialBokeh.uniforms.focus.value = focus
         bokehPass.materialBokeh.uniforms.aperture.value = aperture
         bokehPass.materialBokeh.uniforms.maxblur.value = maxblur
+
+        // Handle focus plane visualization
+        if (meta && meta.eventType) {
+          if (meta.eventType === 'input' && focusPlane) {
+            // Show focus plane during adjustment
+            camera.updateMatrixWorld()
+            const camDir = new Three.Vector3()
+            camera.getWorldDirection(camDir)
+            const camPos = camera.getWorldPosition(new Three.Vector3())
+            focusPlane.position.copy(camPos).add(camDir.multiplyScalar(focus))
+            focusPlane.quaternion.copy(camera.quaternion)
+            focusPlane.visible = true
+          } else if (meta.eventType === 'change' && focusPlane) {
+            // Hide focus plane when adjustment complete
+            focusPlane.visible = false
+          }
+        }
       }
     },
-  }) // Attach bokehPass to debugOverlay so controls always update the live pass
-  debugOverlay.bokehPass = bokehPass
+    onToneMapChange: ({ enabled, blendAmount }) => {
+      if (state.finalPass && state.finalPass.uniforms) {
+        state.finalPass.uniforms.toneMapEnabled.value = enabled ? 1.0 : 0.0
+        state.finalPass.uniforms.toneMapBlendAmount.value = blendAmount
+        log.debug(lc.GL_DEBUG, 'Tone mapping updated:', {
+          enabled,
+          blendAmount,
+          uniformsAfterUpdate: {
+            toneMapEnabled: state.finalPass.uniforms.toneMapEnabled.value,
+            toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount.value,
+          },
+        })
+      }
+    },
+  })
 
-  // Initialize DOF controls UI using the bokehPass reference
+  // Initialize DOF parameters
   if (bokehPass && bokehPass.materialBokeh && bokehPass.materialBokeh.uniforms) {
+    // Create focus plane for visualization
     const focusPlaneMaterial = new THREE.MeshBasicMaterial({
       color: 0xff69b4,
       transparent: true,
       opacity: 0.4,
       side: THREE.DoubleSide,
     })
-    const focusPlane = new THREE.Mesh(new THREE.PlaneGeometry(planeWidth, planeHeight), focusPlaneMaterial)
+    focusPlane = new THREE.Mesh(new THREE.PlaneGeometry(planeWidth, planeHeight), focusPlaneMaterial)
+    focusPlane.name = 'DebugFocusPlane'
     focusPlane.visible = false
     scene.add(focusPlane)
 
-    const showFocusPlane = (focusDistance: number) => {
-      // Place plane at 'focusDistance' in front of the camera
-      camera.updateMatrixWorld()
-      const camDir = new THREE.Vector3()
-      camera.getWorldDirection(camDir)
-      const camPos = camera.getWorldPosition(new THREE.Vector3())
-      focusPlane.position.copy(camPos).add(camDir.multiplyScalar(focusDistance))
-      focusPlane.quaternion.copy(camera.quaternion)
-      focusPlane.visible = true
-    }
-
     // Keep the focus plane facing the camera while visible
-    const alignFocusPlane = () => focusPlane.visible && focusPlane.quaternion.copy(camera.quaternion)
+    const alignFocusPlane = () => {
+      if (focusPlane && focusPlane.visible) {
+        focusPlane.quaternion.copy(camera.quaternion)
+      }
+    }
 
     if (typeof globalThis !== 'undefined') {
       // deno-lint-ignore no-explicit-any
       ;(globalThis as any).alignFocusPlane = alignFocusPlane
     }
 
-    const hideFocusPlane = () => focusPlane.visible = false
-
-    debugOverlay.updateDOFControls({
+    // Update the debug panels with initial DOF values
+    debugPanelsAPI.updateDOFParams({
       focus: bokehPass.materialBokeh.uniforms.focus.value,
       aperture: bokehPass.materialBokeh.uniforms.aperture.value,
       maxblur: bokehPass.materialBokeh.uniforms.maxblur.value,
-    }, (
-      { focus, aperture, maxblur }: { focus: number; aperture: number; maxblur: number },
-      meta?: { eventType?: string },
-    ) => {
-      if (
-        debugOverlay.bokehPass && debugOverlay.bokehPass.materialBokeh && debugOverlay.bokehPass.materialBokeh.uniforms
-      ) {
-        debugOverlay.bokehPass.materialBokeh.uniforms.focus.value = focus
-        debugOverlay.bokehPass.materialBokeh.uniforms.aperture.value = aperture
-        debugOverlay.bokehPass.materialBokeh.uniforms.maxblur.value = maxblur
-      }
-      if (meta && meta.eventType) {
-        if (meta.eventType === 'input') showFocusPlane(focus)
-        if (meta.eventType === 'change') hideFocusPlane()
-      }
     })
   }
 
-  // Initialize tone mapping controls if finalPass is available
+  // Initialize tone mapping parameters
   if (state.finalPass && state.finalPass.uniforms) {
     const glTheme = getGLTheme()
 
@@ -117,14 +129,8 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       secondaryCSS: hexToCSS(rgbToHex(glTheme.secondary)),
     })
 
-    log.debug(lc.GL_DEBUG, 'Current finalPass uniforms:', {
-      toneMapEnabled: state.finalPass.uniforms.toneMapEnabled?.value,
-      toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount?.value,
-      toneMapHighlightColor: state.finalPass.uniforms.toneMapHighlightColor?.value,
-      toneMapShadowColor: state.finalPass.uniforms.toneMapShadowColor?.value,
-    })
-
-    debugOverlay.updateToneMapControls(
+    // Update the debug panels with initial tone map values
+    debugPanelsAPI.updateToneMapParams(
       {
         enabled: state.finalPass.uniforms.toneMapEnabled?.value === 1.0,
         blendAmount: state.finalPass.uniforms.toneMapBlendAmount?.value || 1.0,
@@ -133,34 +139,37 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         highlight: hexToCSS(rgbToHex(glTheme.primary)),
         shadow: hexToCSS(rgbToHex(glTheme.secondary)),
       },
-      ({ enabled, blendAmount }) => {
-        if (state.finalPass && state.finalPass.uniforms) {
-          state.finalPass.uniforms.toneMapEnabled.value = enabled ? 1.0 : 0.0
-          state.finalPass.uniforms.toneMapBlendAmount.value = blendAmount
-
-          log.debug(lc.GL_DEBUG, 'Tone mapping updated:', {
-            enabled,
-            blendAmount,
-            uniformsAfterUpdate: {
-              toneMapEnabled: state.finalPass.uniforms.toneMapEnabled.value,
-              toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount.value,
-              toneMapHighlightColor: state.finalPass.uniforms.toneMapHighlightColor?.value,
-              toneMapShadowColor: state.finalPass.uniforms.toneMapShadowColor?.value,
-            },
-          })
-        }
-      },
     )
   }
 
   // Debug info updater function
   const updateDebugInfo = () => {
-    const planesZ = state.logoPlanes
-      ? state.logoPlanes.map((p: Three.Mesh, i: number) => `Plane ${i}: z=${p.position.z.toFixed(3)}`).join('<br>')
-      : ''
-    debugOverlay?.setDebugInfo(
-      `<b>Camera Z:</b> ${camera.position.z.toFixed(3)}<br>${planesZ}`,
-    )
+    // Camera information
+    const cameraFOV = (camera as Three.PerspectiveCamera).fov || 'N/A'
+    const cameraInfo = [
+      `<b>Camera Position:</b> x=${camera.position.x.toFixed(3)} y=${camera.position.y.toFixed(3)} z=${camera.position.z.toFixed(3)}`,
+      `<b>Camera Rotation:</b> x=${camera.rotation.x.toFixed(3)} y=${camera.rotation.y.toFixed(3)} z=${camera.rotation.z.toFixed(3)}`,
+      `<b>Camera FOV:</b> ${cameraFOV}°`,
+    ].join('<br>')
+
+    // Scene elements information
+    const sceneElements = scene.children
+      .map((child: Three.Object3D, index: number) => {
+        const type = child.type
+        const name = child.name || `unnamed_${type}_${index}`
+        const position = `(${child.position.x.toFixed(2)}, ${child.position.y.toFixed(2)}, ${child.position.z.toFixed(2)})`
+        const visible = child.visible ? '✓' : '✗'
+        return `${visible} ${name}: ${type} ${position}`
+      })
+      .join('<br>')
+
+    const debugContent = [
+      cameraInfo,
+      '<br/><b>Scene Elements:</b>',
+      sceneElements || 'No scene elements',
+    ].join('<br>')
+
+    debugPanelsAPI.setDebugInfo(debugContent)
   }
 
   // Layer regeneration function
@@ -183,7 +192,6 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
   }
 
   return {
-    debugOverlay,
     updateDebugInfo,
     handleRegenerateRandomLayers,
   }

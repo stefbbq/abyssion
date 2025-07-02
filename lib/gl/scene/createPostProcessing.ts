@@ -10,7 +10,7 @@ import {
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
 import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
-import { getGLTheme } from '@lib/gl/theme/index.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.

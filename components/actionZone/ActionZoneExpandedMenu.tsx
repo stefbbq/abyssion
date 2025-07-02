@@ -1,8 +1,8 @@
 import type { MenuItem, SocialLink } from '@data/types.ts'
 import { ActionZoneMenuButton } from '@components/actionZone/ActionZoneMenuButton.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
-import actionZoneAnimationConfig from '@components/actionZone/actionZone.animation.ts'
-import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
+import actionZoneAnimationConfig from '@components/actionZone/config/index.ts'
+import type { ActionZoneButton } from '@components/actionZone/types.ts'
 
 type SocialIconKey = keyof SocialIconMap
 
@@ -31,11 +31,11 @@ export const ActionZoneExpandedMenu = ({
   }
 
   return (
-    <div class='px-6 pb-6 space-y-6'>
+    <div class='px-4 pb-4 space-y-4'>
       {/* social links */}
       <div
         key='social-links'
-        className='flex items-center justify-center space-x-8 pt-2'
+        className='flex items-center justify-center space-x-6 pt-1'
       >
         {(socialLinks as unknown as Array<{ key: string; url: string; icon: SocialIconKey }>).map(({ key, url, icon }) => (
           <a
@@ -56,7 +56,7 @@ export const ActionZoneExpandedMenu = ({
       </div>
 
       {/* menu items */}
-      <div className='space-y-1'>
+      <div className='space-y-0.5'>
         {navButtons.map((button: ActionZoneButton) => (
           <ActionZoneMenuButton
             id={button.id}

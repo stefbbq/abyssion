@@ -2,19 +2,27 @@ import { ComponentChildren } from 'preact'
 import { JSX } from 'preact/jsx-runtime'
 import { forwardRef } from 'preact/compat'
 
+/** dropdown option value and label */
 export type Option = {
   value: string
   label: string
 }
 
-export type DropdownProps = {
-  options: Option[]
-  value?: string
-  onChange: (event: JSX.TargetedEvent<HTMLSelectElement>) => void
-  children?: ComponentChildren
+type Props = {
+  options: Option[] // list of options
+  value?: string // selected value
+  onChange: (event: JSX.TargetedEvent<HTMLSelectElement>) => void // change handler
+  children?: ComponentChildren // optional custom option elements
 }
 
-export const Dropdown = forwardRef<HTMLSelectElement, DropdownProps>(
+/**
+ * A theme-aware dropdown/select component with custom options and ref support.
+ * Theming is handled via CSS variables.
+ *
+ * @example
+ *   <Dropdown options={[{ value: 'a', label: 'A' }]} value='a' onChange={...} />
+ */
+export const Dropdown = forwardRef<HTMLSelectElement, Props>(
   ({ options, value, onChange, children, ...props }, ref) => {
     return (
       <div class='relative w-full'>

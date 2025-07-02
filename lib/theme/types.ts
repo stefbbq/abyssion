@@ -1,3 +1,5 @@
+import type { BaseTheme } from './themes/types.ts'
+
 /**
  * UI-specific theme extensions
  */
@@ -130,52 +132,57 @@ export type ForegroundColors = {
 }
 
 /**
- * Simple base theme with original properties plus variants
- * Backward compatible with all existing code
+ * GL-specific theme extension for GL visualization
+ * Extends base theme with rendering layer specific colors
  */
-export type BaseTheme = {
-  name: string
-  mode: 'light' | 'dark'
-  primary: RGBColor
-  primaryAlt: RGBColor
-  primaryDark: RGBColor
-  secondary: RGBColor
-  secondaryAlt: RGBColor
-  secondaryDark: RGBColor
-  accent: RGBColor
-  accentAlt: RGBColor
-  accentDark: RGBColor
-  background: HexColor
-  backgroundAlt: HexColor
-  backgroundDark: HexColor
-  foreground: RGBColor
-  foregroundAlt: RGBColor
-  foregroundLight: RGBColor
-  border: HexColor
-  surface: HexColor
-  typography?: Partial<BaseTypography>
-  spacing?: Partial<BaseSpacing>
+export type GLTheme = BaseTheme & {
+  /** Base stencil mask color for logo rendering */
+  stencilColor: RGBColor
+  /** Solid base layer underneath logo outlines */
+  baseLayerColor: RGBColor
+  /** Main logo outline color */
+  outlineColor: RGBColor
+  /** Ghosting effect colors for depth and dimension */
+  ghostingColors: {
+    /** Cyan ghosting layer for cool highlights */
+    cyan: RGBColor
+    /** Magenta ghosting layer for warm highlights */
+    magenta: RGBColor
+  }
+
+  /** UI overlay element colors for HUD and interface */
+  ui: {
+    /** Primary UI accent color for interactive elements */
+    accentColor1: HexColor
+    /** Secondary UI accent color for state changes */
+    accentColor2: HexColor
+    /** Hexagonal grid overlay color */
+    hexagonColor: HexColor
+    /** Central targeting circle color */
+    centralCircleColor: HexColor
+    /** Crosshair reticle color */
+    centerCrosshairColor: HexColor
+    /** Background grid line color */
+    gridColor: HexColor
+  }
+
+  /** Geometric decoration layer colors for 3D shapes */
+  geometric: {
+    /** Primary color for orbital rings and paths */
+    primaryColor: HexColor
+    /** Secondary color for particles and markers */
+    secondaryColor: HexColor
+  }
+
+  /** Lens flare effect colors for atmospheric lighting */
+  lensFlare: {
+    /** Main bright flare color at light source */
+    mainFlareColor: HexColor
+    /** Secondary flare rings and halos */
+    secondaryFlareColor: HexColor
+    /** Outer atmospheric glow color */
+    tertiaryFlareColor: HexColor
+  }
 }
 
-export type BaseTypography = {
-  fontFamily: {
-    heading?: string
-    body?: string
-    quote?: string
-  }
-  fontUrls?: string[]
-  fontWeights: {
-    normal: number
-    medium: number
-    semibold: number
-    bold: number
-  }
-}
-
-export type BaseSpacing = {
-  xs: string
-  sm: string
-  md: string
-  lg: string
-  xl: string
-}
+export type { BaseSpacing, BaseTheme, BaseTypography } from './themes/types.ts'

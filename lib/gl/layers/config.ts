@@ -1,5 +1,5 @@
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
-import { getGLTheme } from '@libgl/theme/index.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
 import type { GeometricOptions } from './GeometricLayer.ts'
 import layersConfig from '@libgl/configLayers.json' with { type: 'json' }
 
@@ -115,9 +115,6 @@ const getThemeBasedUIConfig = () => {
   }
 }
 
-/**
- * configuration for ui overlay elements including colors, sizes, and positions
- */
 export const getUIOverlayConfig = () => getThemeBasedUIConfig()
 
 // helper function to get theme-based shape layer config

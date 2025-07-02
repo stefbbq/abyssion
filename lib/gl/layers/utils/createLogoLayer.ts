@@ -3,7 +3,7 @@ import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { randomLayerConfig } from '@libgl/layers/config.ts'
 import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
 import { getRandomColor } from './getRandomColor.ts'
-import { getGLTheme } from '@libgl/theme/index.ts'
+import { getGLTheme } from '@lib/theme/index.ts'
 
 /**
  * Generate a random layer with position based on index

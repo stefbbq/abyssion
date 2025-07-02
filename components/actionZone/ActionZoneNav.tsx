@@ -1,12 +1,16 @@
 import { useState } from 'preact/hooks'
 import { ActionZoneButton as ActionZoneButtonComponent } from '@components/actionZone/ActionZoneButton.tsx'
-import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
+import type { ActionZoneButton } from '@components/actionZone/types.ts'
 
 type Props = {
   buttons: ActionZoneButton[]
   onAction: (action: ActionZoneButton['action']) => void
 }
 
+/**
+ * ActionZoneNav component
+ * Renders navigation buttons for the ActionZone, handling hover and active state.
+ */
 export const ActionZoneNav = ({ buttons, onAction }: Props) => {
   const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null)
 
@@ -14,7 +18,7 @@ export const ActionZoneNav = ({ buttons, onAction }: Props) => {
   const slotButtons = slots.map((slot) => buttons.find((b) => b.position === slot))
 
   return (
-    <div class='w-full flex items-center gap-2 px-6 h-full'>
+    <div class='w-full flex items-center gap-1 px-4 h-full'>
       {slotButtons.map((button, idx) => {
         if (button) {
           const isPageTitle = button.role === 'page-title'

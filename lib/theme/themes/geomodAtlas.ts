@@ -35,7 +35,12 @@ export const geomodAtlasTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#252525'),
   surface: hexStringToNumber('#202020'),
+  surfaceAlt: hexStringToNumber('#252525'),
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
   },
 })

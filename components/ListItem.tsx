@@ -1,12 +1,24 @@
 import { ComponentChildren } from 'preact'
 
 type Props = {
+  // optional left-aligned content (icon, avatar, etc.)
   leftSection?: ComponentChildren
+  // main content (required)
   mainSection: ComponentChildren
+  // optional right-aligned content (badge, action, etc.)
   rightSection?: ComponentChildren
+  // additional class names
   className?: string
 }
 
+/**
+ * ListItem component
+ * Renders a flexible row with optional left and right sections, and a main section.
+ * Theming and layout are handled via CSS variables and utility classes.
+ *
+ * @example
+ *   <ListItem leftSection={<Icon />} mainSection='Title' rightSection='Badge' />
+ */
 export const ListItem = ({ leftSection, mainSection, rightSection, className }: Props) => {
   return (
     <div

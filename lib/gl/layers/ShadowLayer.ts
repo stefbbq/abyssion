@@ -43,6 +43,7 @@ export const createShadowLayer = (THREE: typeof Three, logoWidth?: number, logoH
   })
 
   const shadowMesh = new THREE.Mesh(geometry, material)
+  shadowMesh.name = 'ShadowLayer'
   shadowMesh.position.z = -0.1
 
   return {

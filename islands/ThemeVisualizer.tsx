@@ -137,9 +137,9 @@ const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
 
       <ThemeSection title='Typography'>
         <div class='space-y-4'>
-          <p style={{ fontFamily: typography.fontFamily }}>Default Font Family: {typography.fontFamily}</p>
+          <p style={{ fontFamily: typography.fontFamily.body }}>Default Font Family: {typography.fontFamily.body}</p>
           {Object.entries(typography.fontWeights).map(([key, value]) => (
-            <p style={{ fontFamily: typography.fontFamily, fontWeight: value }}>
+            <p style={{ fontFamily: typography.fontFamily.body, fontWeight: value }}>
               {key.charAt(0).toUpperCase() + key.slice(1)} - Font Weight {value}
             </p>
           ))}

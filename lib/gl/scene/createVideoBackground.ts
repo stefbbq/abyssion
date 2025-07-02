@@ -25,7 +25,7 @@ export const createVideoBackground = (
   const { videoPlaneWidth, videoPlaneHeight } = getBaselineDimensions()
 
   // Create two video planes - one for active display, one for buffering
-  const createPlane = () => {
+  const createPlane = (name: string) => {
     const geometry = new THREE.PlaneGeometry(videoPlaneWidth, videoPlaneHeight)
     const material = new THREE.MeshBasicMaterial({
       transparent: true,
@@ -33,14 +33,15 @@ export const createVideoBackground = (
       side: THREE.FrontSide,
     })
     const mesh = new THREE.Mesh(geometry, material)
+    mesh.name = name
     mesh.position.z = videoCycleConfig.position.z
     scene.add(mesh)
 
     return { mesh, material, geometry }
   }
 
-  const frontBuffer = createPlane()
-  const backBuffer = createPlane()
+  const frontBuffer = createPlane('VideoBackgroundFront')
+  const backBuffer = createPlane('VideoBackgroundBack')
 
   // Handle resize to update plane scales
   const handleResize = () => {

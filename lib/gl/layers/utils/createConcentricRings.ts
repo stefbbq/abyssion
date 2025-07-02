@@ -25,6 +25,7 @@ export const createConcentricRings = (
   } = options
 
   const ringGroup = new THREE.Group()
+  ringGroup.name = 'ConcentricRingsGroup'
   const ringCount = 6
 
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -49,6 +50,7 @@ export const createConcentricRings = (
       side: THREE.DoubleSide,
     })
     const ring = new THREE.Mesh(ringGeometry, ringMaterial)
+    ring.name = `ConcentricRing_${i}`
     ring.rotation.x = 0 + rotationAngle
     ring.rotation.z = variationFactor * (Math.PI * 0.05 * i * 0.3)
     ringGroup.add(ring)

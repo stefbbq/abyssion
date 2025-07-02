@@ -24,6 +24,7 @@ export const createShapeLayer = (
 
   // Create a group to hold all shape elements
   const shapeGroup = new THREE.Group()
+  shapeGroup.name = 'ShapeLayerGroup'
 
   // Apply rotation to the entire group
   shapeGroup.rotation.x = rotationAngle
@@ -37,6 +38,7 @@ export const createShapeLayer = (
       opacity,
     }),
   )
+  mainCircle.name = 'ShapeLayer_MainCircle'
   shapeGroup.add(mainCircle)
 
   // Add hexagons around the circle
@@ -65,7 +67,7 @@ export const createShapeLayer = (
         opacity: 0.3 + Math.random() * 0.3,
       }),
     )
-
+    hexagon.name = `ShapeLayer_Hexagon_${i}`
     hexagon.position.set(x, y, z)
     shapeGroup.add(hexagon)
   }
@@ -100,7 +102,7 @@ export const createShapeLayer = (
         opacity: 0.4 + Math.random() * 0.3,
       }),
     )
-
+    arc.name = `ShapeLayer_Arc_${i}`
     arc.position.set(x, y, z)
     // Random rotation
     arc.rotation.z = Math.random() * Math.PI * 2

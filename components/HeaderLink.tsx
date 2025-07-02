@@ -1,17 +1,17 @@
 import { JSX } from 'preact'
 
 type Props = {
-  href: string
-  children: preact.ComponentChildren
-  ariaLabel?: string
-  className?: string
-  isActive?: boolean
+  href: string // link destination
+  children: preact.ComponentChildren // link content (text, icon, or both)
+  ariaLabel?: string // accessibility label
+  className?: string // additional class names
+  isActive?: boolean // whether the link is currently active
   compact?: boolean // for icon-only (social) links
-  style?: JSX.CSSProperties
+  style?: JSX.CSSProperties // inline styles
 }
 
-const baseClasses =
-  'rounded-md transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-focus'
+const baseClasses = 'rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-focus'
+const transitionClasses = 'transition-all duration-200'
 const textClasses = 'font-medium text-sm text-text-primary'
 const hoverClasses = 'hover:bg-interactive-ghostHover'
 const activeStateClasses = 'active:bg-interactive-ghostActive active:text-text-inverse'
@@ -21,6 +21,10 @@ const paddingClasses = 'p-2'
  * Flexible nav link for the header, supporting text, icon, or both.
  * Applies consistent hover/focus/active styles for both page and social links
  * by referencing CSS variables provided by a parent theme context.
+ *
+ * @example
+ *   <HeaderLink href='/about'>About</HeaderLink>
+ *   <HeaderLink href='https://x.com' compact><XIcon /></HeaderLink>
  */
 export const HeaderLink = ({
   href,
@@ -38,7 +42,7 @@ export const HeaderLink = ({
   return (
     <a
       aria-label={ariaLabel}
-      class={`${baseClasses} ${textClasses} ${hoverClasses} ${activeStateClasses} ${margin} ${paddingClasses} ${activeClass} ${className}`}
+      class={`${baseClasses} ${transitionClasses} ${textClasses} ${hoverClasses} ${activeStateClasses} ${margin} ${paddingClasses} ${activeClass} ${className}`}
       {...{ style, href }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { CSSProperties } from 'preact/compat'
-import type { ActionZoneButton } from '@components/actionZone/actionZone.animation.ts'
+import type { ActionZoneButton } from './types.ts'
 
 type Props = {
   id: string
@@ -10,7 +10,7 @@ type Props = {
   action: ActionZoneButton['action']
 }
 
-const baseClass = 'w-full h-12 flex items-center justify-center rounded-[24px] font-medium text-sm transition-colors'
+const baseClass = 'w-full h-10 flex items-center justify-center rounded-[20px] font-medium text-sm transition-colors'
 
 /**
  * ActionZoneMenuButton

@@ -35,7 +35,12 @@ export const monochromeTheme = createBaseTheme({
   // Additional colors
   border: hexStringToNumber('#333333'),
   surface: hexStringToNumber('#1a1a1a'),
+  surfaceAlt: hexStringToNumber('#222222'),
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: {
+      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    },
   },
 })
