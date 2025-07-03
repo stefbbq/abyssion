@@ -36,8 +36,8 @@ const themes: Record<string, BaseTheme> = {
 const themeOptions = Object.keys(themes).map((key) => ({ value: key, label: key }))
 
 const ColorSwatch = ({ color, name, hex }: { color: string; name: string; hex: string }) => (
-  <div class='flex items-center gap-4 p-2 rounded-md' style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
-    <div class='w-12 h-12 rounded-md border' style={{ backgroundColor: color }}></div>
+  <div class='flex items-center gap-4 p-2 rounded-theme-md' style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
+    <div class='w-12 h-12 rounded-theme-md border' style={{ backgroundColor: color }}></div>
     <div>
       <div class='font-semibold'>{name}</div>
       <div class='opacity-80 text-sm'>{color}</div>
@@ -54,10 +54,10 @@ const ThemeSection = ({ title, children }: { title: string; children: ComponentC
 )
 
 const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
-  const { colors, glass, spacing, typography } = theme
+  const { colors, glass, frost, backgroundOpacity, borderRadius, filters, spacing, typography } = theme
 
   return (
-    <div class='p-8 rounded-lg' style={{ backgroundColor: colors.background.primary, color: colors.text.primary }}>
+    <div class='p-8 rounded-theme-lg' style={{ backgroundColor: colors.background.primary, color: colors.text.primary }}>
       <ThemeSection title='Background Colors'>
         <ColorSwatch color={colors.background.primary} name='Primary' hex={colors.background.primary} />
         <ColorSwatch color={colors.background.secondary} name='Secondary' hex={colors.background.secondary} />
@@ -97,18 +97,87 @@ const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
         <ColorSwatch color={colors.interactive.ghostActive} name='Ghost Active' hex={colors.interactive.ghostActive} />
       </ThemeSection>
 
+      <ThemeSection title='Border Radius'>
+        {Object.entries(borderRadius).map(([key, value]) => (
+          <div class='flex items-center gap-4 p-3 bg-surface-secondary rounded-theme-md'>
+            <div class='w-24 font-semibold'>{key.toUpperCase()}</div>
+            <div class='text-lg'>{value}</div>
+            <div class='w-16 h-16 bg-interactive-primary' style={{ borderRadius: value }}></div>
+          </div>
+        ))}
+      </ThemeSection>
+
+      <ThemeSection title='Filter Effects'>
+        {Object.entries(filters).map(([key, value]) =>
+          value && (
+            <div class='flex flex-col gap-2 p-3 bg-surface-secondary rounded-theme-md'>
+              <div class='font-semibold'>{key.toUpperCase()}</div>
+              <div class='text-sm opacity-80'>{value}</div>
+              <div
+                class='w-full h-16 bg-gradient-to-r from-interactive-primary to-interactive-secondary rounded-theme-sm'
+                style={{ filter: value }}
+              >
+                <div class='w-full h-full flex items-center justify-center text-white font-bold'>Filter Preview</div>
+              </div>
+            </div>
+          )
+        )}
+      </ThemeSection>
+
+      <ThemeSection title='Background Opacity'>
+        <div class='flex flex-col gap-4 p-3 bg-surface-secondary rounded-theme-md'>
+          <div class='font-semibold'>Themed Background Overlay</div>
+          <div class='flex gap-4'>
+            <div class='flex-1'>
+              <div class='text-sm mb-2'>Light Mode: {backgroundOpacity.light}</div>
+              <div class='w-full h-16 relative rounded-theme-sm overflow-hidden'>
+                <div class='absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400'></div>
+                <div
+                  class='absolute inset-0'
+                  style={{
+                    backgroundColor: colors.background.primary,
+                    opacity: backgroundOpacity.light,
+                  }}
+                >
+                </div>
+                <div class='absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-white'>
+                  Light Background
+                </div>
+              </div>
+            </div>
+            <div class='flex-1'>
+              <div class='text-sm mb-2'>Dark Mode: {backgroundOpacity.dark}</div>
+              <div class='w-full h-16 relative rounded-theme-sm overflow-hidden'>
+                <div class='absolute inset-0 bg-gradient-to-r from-pink-400 to-orange-400'></div>
+                <div
+                  class='absolute inset-0'
+                  style={{
+                    backgroundColor: colors.background.primary,
+                    opacity: backgroundOpacity.dark,
+                  }}
+                >
+                </div>
+                <div class='absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-white'>
+                  Dark Background
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ThemeSection>
+
       <ThemeSection title='Glass Effect'>
         <div
-          class='p-8 rounded-lg flex items-center justify-center'
+          class='p-8 rounded-theme-lg flex items-center justify-center'
           style={{
             backgroundImage: 'linear-gradient(45deg, #ff00ff, #00ffff)',
           }}
         >
           <div
-            class='w-full h-32 rounded-lg border flex items-center justify-center text-center p-4'
+            class='w-full h-32 rounded-theme-lg border flex items-center justify-center text-center p-4'
             style={{
               background: glass.background,
-              backdropFilter: glass.backdrop,
+              backdropFilter: `blur(${glass.backdrop})`,
               borderColor: glass.border,
             }}
           >
@@ -116,9 +185,37 @@ const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
               Glass Effect
               <br />
               <small>
-                BG: {glass.background}
+                Light: {glass.opacity.light} | Dark: {glass.opacity.dark}
                 <br />
-                Border: {glass.border}
+                Blur: {glass.backdrop}
+              </small>
+            </span>
+          </div>
+        </div>
+      </ThemeSection>
+
+      <ThemeSection title='Frost Effect'>
+        <div
+          class='p-8 rounded-theme-lg flex items-center justify-center'
+          style={{
+            backgroundImage: 'linear-gradient(135deg, #667eea, #764ba2)',
+          }}
+        >
+          <div
+            class='w-full h-32 rounded-theme-lg border flex items-center justify-center text-center p-4'
+            style={{
+              background: frost.background,
+              backdropFilter: `blur(${frost.backdrop})`,
+              borderColor: frost.border,
+            }}
+          >
+            <span style={{ color: colors.text.primary }}>
+              Frost Effect
+              <br />
+              <small>
+                Light: {frost.opacity.light} | Dark: {frost.opacity.dark}
+                <br />
+                Blur: {frost.backdrop}
               </small>
             </span>
           </div>
@@ -130,7 +227,7 @@ const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
           <div class='flex items-center gap-4'>
             <div class='w-24 font-semibold'>{key.toUpperCase()}</div>
             <div class='text-lg'>{value}</div>
-            <div class='h-8 rounded-full' style={{ width: value, backgroundColor: colors.interactive.primary }}></div>
+            <div class='h-8 rounded-theme-full' style={{ width: value, backgroundColor: colors.interactive.primary }}></div>
           </div>
         ))}
       </ThemeSection>
@@ -149,6 +246,11 @@ const ThemeShowcase = ({ theme }: { theme: UITheme }) => {
   )
 }
 
+/**
+ * ThemeVisualizer island component
+ * Interactive theme preview and testing interface
+ * Features comprehensive display of all theme properties including new extensions
+ */
 export default function ThemeVisualizer() {
   const selectedTheme = useSignal<string>('deepSpaceHUD')
 

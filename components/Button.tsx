@@ -46,9 +46,9 @@ const variantClasses = {
 }
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm rounded-md',
-  md: 'px-4 py-2 text-sm rounded-md',
-  lg: 'px-6 py-3 text-base rounded-lg',
+  sm: 'px-3 py-1.5 text-sm rounded-theme-sm',
+  md: 'px-4 py-2 text-sm rounded-theme-md',
+  lg: 'px-6 py-3 text-base rounded-theme-lg',
 }
 
 /**
@@ -60,6 +60,7 @@ const sizeClasses = {
  * - Use `size` for sizing: 'sm', 'md', 'lg'
  * - If `href` is provided, renders as <a> and enables Fresh partial navigation
  * - All theme classes are applied via CSS variables
+ * - Border radius uses theme-aware utilities
  *
  * @example
  *   <Button variant='primary' size='md'>Click me</Button>

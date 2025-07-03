@@ -10,11 +10,12 @@ type Props = {
   action: ActionZoneButton['action']
 }
 
-const baseClass = 'w-full h-10 flex items-center justify-center rounded-[20px] font-medium text-sm transition-colors'
+const baseClass = 'w-full h-10 flex items-center justify-center rounded-theme-xl font-medium text-sm transition-colors'
 
 /**
  * ActionZoneMenuButton
  * Dedicated button for expanded menu items (no border, no outline, fade-in)
+ * Uses theme-aware border radius for consistent styling
  */
 export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, style = {}, action }: Props) => {
   const activeClass = isActive ? 'bg-background-primary text-text-primary font-semibold' : 'bg-transparent text-text-secondary font-medium'

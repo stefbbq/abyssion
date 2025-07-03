@@ -11,6 +11,7 @@ type Props = {
  * Shell component
  * Provides a rounded, glass-effect section container for content.
  * Theming and layout are handled via CSS variables and utility classes.
+ * Uses theme-aware border radius for consistent styling.
  *
  * @example
  *   <Shell>Content</Shell>
@@ -18,7 +19,7 @@ type Props = {
 
 export const Shell = ({ children, className }: Props) => {
   return (
-    <section class={`rounded-2xl shadow-lg p-8 glass-effect ${className || ''}`}>
+    <section class={`rounded-theme-xl shadow-lg p-8 glass-effect ${className || ''}`}>
       {children}
     </section>
   )

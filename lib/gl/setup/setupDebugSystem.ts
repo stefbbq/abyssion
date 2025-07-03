@@ -6,8 +6,8 @@ import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import { getGLTheme } from '@lib/theme/index.ts'
-import { rgbToHex } from '@libtheme/utils/rgbToHex.ts'
-import { hexToCSS } from '@libtheme/utils/hexToCSS.ts'
+import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
+import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
 
 type DebugSystemConfig = {
   canvas: HTMLCanvasElement

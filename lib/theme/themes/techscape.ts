@@ -1,6 +1,6 @@
 import { createBaseTheme } from '../utils/createBaseTheme.ts'
-import { hexStringToRGB } from '../utils/hexStringToRGB.ts'
-import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
+import { hexStringToRGB } from '../colorUtils/hexStringToRGB.ts'
+import { hexStringToNumber } from '../colorUtils/hexStringToNumber.ts'
 
 /**
  * Techscape theme with teal and green topographic highlights - dark mode

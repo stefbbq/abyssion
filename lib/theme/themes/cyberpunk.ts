@@ -1,6 +1,6 @@
 import { createBaseTheme } from '../utils/createBaseTheme.ts'
-import { hexStringToRGB } from '../utils/hexStringToRGB.ts'
-import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
+import { hexStringToRGB } from '../colorUtils/hexStringToRGB.ts'
+import { hexStringToNumber } from '../colorUtils/hexStringToNumber.ts'
 
 /**
  * Cyberpunk theme with cyan and magenta accents - dark mode

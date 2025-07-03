@@ -3,7 +3,7 @@ import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
 import { getDashedOrbitsConfig } from '@libgl/layers/config.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import { createThickDashedLine } from '@libgl/geometry/createThickDashedLine.ts'
-import { interpolateColors } from '@libtheme/utils/interpolateColors.ts'
+import { interpolateColors } from '@lib/theme/colorUtils/interpolateColors.ts'
 
 /**
  * Creates dashed orbit lines with varying patterns

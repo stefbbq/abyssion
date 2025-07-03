@@ -13,7 +13,7 @@ Use this as a starting point before doing anything!
 
 ## Theme System
 
-The application uses a reactive, CSS-variable-driven theme system that supports dynamic switching between light and dark modes without page reloads.
+The application uses a reactive, CSS-variable-driven theme system that supports dynamic switching between light and dark modes without page reloads. Theme preferences are automatically saved to cookies for persistent user experience.
 
 ### Theme Definitions
 
@@ -36,6 +36,14 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 - **switchToNextThemeFamily():** Cycles through available theme families while preserving the current light/dark mode.
 - **ThemeProvider Island:** Injects and dynamically updates the theme's CSS variables in the document head. Listens for theme changes and enables instant toggling.
 
+### Cookie Persistence
+
+Theme preferences are automatically saved to browser cookies with 1-year expiration:
+- **Theme Family:** Saved as `abyssion-theme-family` cookie when switching between theme families
+- **Light/Dark Mode:** Saved as `abyssion-theme-mode` cookie when toggling between light and dark modes
+- **Auto-Loading:** Preferences are automatically restored on page load and browser sessions
+- **SSR Safe:** Cookie reading is safely handled during server-side rendering
+
 ### CSS Variables & Tailwind Integration
 
 - All theme values (backgrounds, surfaces, text, borders, interactive states) are exposed as CSS variables (e.g., `--colors-background-primary`).
@@ -52,6 +60,14 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 ### Theme Visualizer
 
 - **ThemeVisualizer Island:** An interactive UI for previewing and switching between all available themes. Located at `/theme` route. Uses the same theme system and signals as the rest of the app.
+
+### Themed Background System
+
+- **ThemedBackground Island:** Manages the dynamic background overlay that appears on content pages (not homepage)
+- **Theme-Aware Opacity:** Uses `backgroundOpacity.light` and `backgroundOpacity.dark` values from the current theme
+- **Route-Dependent:** Automatically hides on homepage to show GL canvas, appears with theme opacity on content pages
+- **Real-Time Updates:** Opacity updates instantly when switching themes or toggling light/dark mode
+- **Noise Animation:** Includes subtle animated noise texture overlay for visual interest
 
 ### 3D/GL Theme System
 
@@ -96,7 +112,7 @@ The selective colorization system is configured via `configScene.json` under `po
 
 ### Font System
 
-- The theme supports custom font families via Tailwind's `fontFamily` extensiwn in `tailwind.config.ts`.
+- The theme supports custom font families via Tailwind's `fontFamily` extension in `tailwind.config.ts`.
 - **Lovecraftian font:** The `lovecraft` font family (UnifrakturCook, cursive) is available for use in blockquotes and special headings. Add `font-lovecraft` to any element to apply it.
 - **Best practices:**
   - Use `font-sans` for most body text and paragraphs (`<p>`).
@@ -396,7 +412,41 @@ This makes the codebase highly modular and follows pure FP principles while keep
 The debug UI is now implemented as Preact components for maintainability and composability.
 
 - **DebugPanels Island**: The main interactive debug UI, located at `islands/DebugPanels.tsx`. It manages debug state, keyboard shortcuts, and renders the controls/info panels.
-- **DebugControls Component**: Renders DOF and tone mapping controls, hotkey info, and lives at the top-left. Located at `components/debug/DebugControls.tsx`.
+- **DebugControls Component**: Renders DOF and tone mapping controls, theme selector, hotkey info, and lives at the top-left. Located at `components/debug/DebugControls.tsx`.
 - **DebugInfo Component**: Renders debug information (e.g., camera Z, plane positions) at the bottom-left. Located at `components/debug/DebugInfo.tsx`.
 - The debug system is now fully reactive, theme-aware, and integrated with the rest of the app via signals and props.
 - To use the debug UI, `<DebugPanels />` is rendered in `_app.tsx` after `<GLCanvas />`.
+
+### Debug Features
+
+**Theme Switching**: The debug panel includes a live theme selector that allows switching between all available theme families by name. This includes:
+
+- Dropdown with all 10 theme families (Deep Space HUD, Neon Grid OS, Glitch Core, etc.)
+- Real-time theme switching without page reload
+- Current theme name display with proper formatting
+- Maintains current light/dark mode when switching families
+
+**DOF Controls**: Interactive sliders for depth of field parameters:
+
+- Focus distance (0.1 - 20.0)
+- Aperture size (0.001 - 0.2)
+- Maximum blur amount (0.001 - 2.0)
+
+**Tone Mapping**: Controls for post-processing effects:
+
+- Enable/disable toggle
+- Blend amount slider (0.0 - 1.0)
+- Live theme color preview swatches
+
+**Keyboard Shortcuts**: All debug hotkeys are displayed and remain active:
+
+- **D**: Toggle debug panel visibility
+- **R**: Toggle auto-rotation
+- **G**: Regenerate layers
+
+**Visual Integration**: All debug components use theme-aware styling:
+
+- Glass morphism effects with theme-specific opacity
+- Theme-aware border radius for consistent UI
+- Live color updates when themes change
+- Proper contrast and readability in all theme modes

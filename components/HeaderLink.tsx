@@ -10,7 +10,7 @@ type Props = {
   style?: JSX.CSSProperties // inline styles
 }
 
-const baseClasses = 'rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-focus'
+const baseClasses = 'rounded-theme-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-focus'
 const transitionClasses = 'transition-all duration-200'
 const textClasses = 'font-medium text-sm text-text-primary'
 const hoverClasses = 'hover:bg-interactive-ghostHover'
@@ -21,6 +21,7 @@ const paddingClasses = 'p-2'
  * Flexible nav link for the header, supporting text, icon, or both.
  * Applies consistent hover/focus/active styles for both page and social links
  * by referencing CSS variables provided by a parent theme context.
+ * Uses theme-aware border radius for consistent styling.
  *
  * @example
  *   <HeaderLink href='/about'>About</HeaderLink>

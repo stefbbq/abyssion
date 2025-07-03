@@ -46,5 +46,6 @@ export enum LogContext {
   GL_SHADERS = 'gl/shaders',
   GL_TEXTURES = 'gl/textures',
   GL_DEBUG = 'gl/debug',
+  THEME = 'theme',
   PREACT = 'preact',
 }

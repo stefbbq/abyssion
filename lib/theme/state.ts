@@ -1,23 +1,54 @@
 /**
  * Theme state and mode management for the theme system
  * Manages theme families where each family has both light and dark variants
+ * Includes cookie persistence for user preferences
  */
-import { computed, signal } from '@preact/signals'
+import { computed, effect, signal } from '@preact/signals'
 import type { BaseTheme, ThemeFamily } from './types.ts'
 import { themeFamilies } from './themes/index.ts'
 import { getNextThemeFamily } from './utils/themeFamilyUtils.ts'
+import { getCookie, setCookie } from '@lib/utils/cookies.ts'
+
+const THEME_FAMILY_COOKIE = 'abyssion-theme-family'
+const THEME_MODE_COOKIE = 'abyssion-theme-mode'
+
+/**
+ * Get initial theme family from cookie or default
+ */
+const getInitialThemeFamily = (): string => {
+  if (typeof document === 'undefined') return 'deep-space-hud'
+
+  const cookieValue = getCookie(THEME_FAMILY_COOKIE)
+  if (cookieValue && themeFamilies.some((family) => family.name === cookieValue)) {
+    return cookieValue
+  }
+  return 'deep-space-hud'
+}
+
+/**
+ * Get initial theme mode from cookie or default
+ */
+const getInitialThemeMode = (): 'light' | 'dark' => {
+  if (typeof document === 'undefined') return 'dark'
+
+  const cookieValue = getCookie(THEME_MODE_COOKIE)
+  if (cookieValue === 'light' || cookieValue === 'dark') {
+    return cookieValue
+  }
+  return 'dark'
+}
 
 /**
  * Reactive signal for the current theme mode ('light' | 'dark')
  * Use to read or set the active mode
  */
-export const currentThemeMode = signal<'light' | 'dark'>('dark')
+export const currentThemeMode = signal<'light' | 'dark'>(getInitialThemeMode())
 
 /**
  * Reactive signal for the current theme family name
  * Used to switch between different theme families
  */
-export const currentThemeFamilyName = signal<string>('deep-space-hud')
+export const currentThemeFamilyName = signal<string>(getInitialThemeFamily())
 
 /**
  * Computed signal for the current BaseTheme object
@@ -27,6 +58,21 @@ export const currentBaseTheme = computed<BaseTheme>(() => {
   const family = themeFamilies.find((f) => f.name === currentThemeFamilyName.value) || themeFamilies[0]
   return currentThemeMode.value === 'dark' ? family.dark : family.light
 })
+
+/**
+ * Set up cookie persistence effects
+ */
+if (typeof document !== 'undefined') {
+  // Save theme family to cookie when it changes
+  effect(() => {
+    setCookie(THEME_FAMILY_COOKIE, currentThemeFamilyName.value, 365) // 1 year expiration
+  })
+
+  // Save theme mode to cookie when it changes
+  effect(() => {
+    setCookie(THEME_MODE_COOKIE, currentThemeMode.value, 365) // 1 year expiration
+  })
+}
 
 /**
  * Switches to the next theme family in the cycle

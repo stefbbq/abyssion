@@ -1,6 +1,6 @@
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { currentThemeMode } from '@lib/theme/index.ts'
+import { currentThemeMode, currentUITheme } from '@lib/theme/index.ts'
 
 const noiseImages = [
   '/images/noiseB.png',
@@ -24,6 +24,7 @@ const ThemedBackground = () => {
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
   const isLight = currentThemeMode.value === 'light'
+  const theme = currentUITheme.value
   const [noiseIndex, setNoiseIndex] = useState(0)
   const timeoutRef = useRef<number | null>(null)
 
@@ -60,9 +61,15 @@ const ThemedBackground = () => {
 
   // background
   const backgroundClasses = 'bg-[var(--colors-background-primary)]'
+
+  // Use theme-specific background opacity values
   let backgroundOpacity = 'opacity-0'
-  if (!isHomePage && !isLight) backgroundOpacity = 'opacity-60'
-  if (!isHomePage && isLight) backgroundOpacity = 'opacity-70'
+  if (!isHomePage) {
+    const themeOpacity = isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark
+    // Convert decimal to percentage for CSS class
+    const opacityPercent = Math.round(themeOpacity * 100)
+    backgroundOpacity = `opacity-[${themeOpacity}]`
+  }
 
   // noise
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
@@ -78,7 +85,10 @@ const ThemedBackground = () => {
       />
       <div
         id='tint-background'
-        className={`${baseClasses} ${backgroundClasses} ${backgroundOpacity} ${zIndexClass} ${transitionClass}`}
+        className={`${baseClasses} ${backgroundClasses} ${zIndexClass} ${transitionClass}`}
+        style={{
+          opacity: isHomePage ? 0 : (isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark),
+        }}
         aria-hidden='true'
       />
     </>

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import type { UITheme } from '@lib/theme/types.ts'
-import { hexStringToCSSRGB } from './hexStringToCSSRGB.ts'
+import { hexStringToCSSRGB } from '../colorUtils/hexStringToCSSRGB.ts'
 
 /**
  * Flattens a nested theme object and converts it into a string of CSS custom properties.

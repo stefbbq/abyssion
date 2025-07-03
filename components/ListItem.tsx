@@ -15,6 +15,7 @@ type Props = {
  * ListItem component
  * Renders a flexible row with optional left and right sections, and a main section.
  * Theming and layout are handled via CSS variables and utility classes.
+ * Uses theme-aware border radius for consistent styling.
  *
  * @example
  *   <ListItem leftSection={<Icon />} mainSection='Title' rightSection='Badge' />
@@ -22,7 +23,7 @@ type Props = {
 export const ListItem = ({ leftSection, mainSection, rightSection, className }: Props) => {
   return (
     <div
-      class={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg transition-colors hover:bg-background-secondary ${
+      class={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-theme-lg transition-colors hover:bg-background-secondary ${
         className || ''
       }`}
     >
@@ -35,7 +36,7 @@ export const ListItem = ({ leftSection, mainSection, rightSection, className }: 
         {mainSection}
       </div>
       {rightSection && (
-        <div class='text-sm px-3 py-1 rounded-full text-text-tertiary bg-background-secondary'>
+        <div class='text-sm px-3 py-1 rounded-theme-full text-text-tertiary bg-background-secondary'>
           {rightSection}
         </div>
       )}

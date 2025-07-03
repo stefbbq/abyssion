@@ -12,6 +12,7 @@ type Props = {
  * Card component
  * Renders a flexible card with optional image and fallback avatar, using theme-aware background and text colors.
  * Applies .glass-effect and surface-primary background for dark/light mode support.
+ * Uses theme-aware border radius for consistent styling.
  *
  * - If imageUrl is provided, shows image at top; on error, shows fallbackAvatarText if given
  * - If no imageUrl, shows gradient background and fallback text if given
@@ -55,7 +56,9 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
   }
 
   return (
-    <div class={`rounded-2xl shadow-lg glass-effect overflow-hidden flex flex-col bg-[var(--colors-surface-primary)] ${className || ''}`}>
+    <div
+      class={`rounded-theme-xl shadow-lg glass-effect overflow-hidden flex flex-col bg-[var(--colors-surface-primary)] ${className || ''}`}
+    >
       <ImageSection />
       <div class='p-6 text-center text-[var(--colors-text-primary)]'>
         {children}

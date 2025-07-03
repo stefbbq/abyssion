@@ -31,6 +31,7 @@ type Props = {
  * ActionZoneButton molecule component
  * Combines Icon and BaseButton atoms with animation state management
  * Handles smooth morphing between different navigation roles
+ * Uses theme-aware border radius for consistent styling
  */
 // role style configuration type
 type RoleStyle = {
@@ -43,22 +44,22 @@ type RoleStyle = {
 // role-based styling configurations
 const roleStyles: Record<string, RoleStyle> = {
   'nav-item': {
-    base: 'h-10 px-3 py-1.5 text-sm font-medium rounded-full',
+    base: 'h-10 px-3 py-1.5 text-sm font-medium rounded-theme-full',
     hover: 'hover:bg-interactive-ghostHover',
     border: 'border border-text-tertiary',
   },
   'page-title': {
-    base: 'h-10 px-3 py-1.5 text-sm font-normal lowercase rounded-full',
+    base: 'h-10 px-3 py-1.5 text-sm font-normal lowercase rounded-theme-full',
     colors: 'bg-foreground text-background',
     border: 'border-none',
   },
   'action-button': {
-    base: 'h-10 w-10 p-0 rounded-full',
+    base: 'h-10 w-10 p-0 rounded-theme-full',
     hover: 'hover:bg-interactive-ghostHover',
     border: 'border-none',
   },
   'back-button': {
-    base: 'h-10 w-10 p-0 rounded-full',
+    base: 'h-10 w-10 p-0 rounded-theme-full',
     hover: 'hover:bg-interactive-ghostHover',
     border: 'border-none',
   },

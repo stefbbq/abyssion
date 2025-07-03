@@ -30,6 +30,7 @@ type Props = {
  * Modern, accessible text field with animated floating label and validation.
  * Label starts full-size inside, animates to top-left, shrinks, and fades on focus or filled.
  * Supports both <input> and <textarea> modes, with theme-aware styling.
+ * Uses theme-aware border radius for consistent styling.
  *
  * @example
  *   <TextField label='Name' name='name' required />
@@ -85,7 +86,7 @@ export const TextField = ({
     'aria-invalid': !!error,
     'aria-describedby': error ? `${name}-error` : undefined,
     class:
-      `block w-full px-3.5 pt-6 pb-2 text-base text-[var(--colors-text-primary)] bg-[var(--colors-surface-primary)] border border-[var(--colors-border-primary)] rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[var(--colors-interactive-primary)] focus:border-transparent transition-all duration-200 ${
+      `block w-full px-3.5 pt-6 pb-2 text-base text-[var(--colors-text-primary)] bg-[var(--colors-surface-primary)] border border-[var(--colors-border-primary)] rounded-theme-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[var(--colors-interactive-primary)] focus:border-transparent transition-all duration-200 ${
         error ? 'border-red-500' : ''
       } ${className}`,
   }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
-import { currentTheme } from '@lib/theme/index.ts'
+import { currentUITheme } from '@lib/theme/index.ts'
 import { ActionZoneExpandedMenu } from '@components/actionZone/ActionZoneExpandedMenu.tsx'
 import { ActionZoneNav } from '@components/actionZone/ActionZoneNav.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
@@ -12,7 +12,7 @@ import pages from '@data/pages.json' with { type: 'json' }
 export default function ActionZoneController() {
   const [isMounted, setIsMounted] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const theme = currentTheme.value
+  const theme = currentUITheme.value
   const [currentPath] = useClientLocation()
 
   useEffect(() => {

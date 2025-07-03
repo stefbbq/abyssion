@@ -10,6 +10,7 @@ import { lc, log } from '@lib/logger/index.ts'
  * depending on whether the current route is the homepage. It listens for route changes
  * and updates the background accordingly. Place all page content as children.
  * Also initializes logger and GL scene orchestrator on the client.
+ * Features theme-aware filter effects for the main content area.
  */
 const PageContainer = ({ children }: { children: preact.ComponentChildren }) => {
   const [currentPath] = useClientLocation()
@@ -30,7 +31,7 @@ const PageContainer = ({ children }: { children: preact.ComponentChildren }) => 
   }, [isHomePage, isGLInitialized.value])
 
   return (
-    <main class='pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 sm:pt-5 relative z-10 space-y-8'>
+    <main class='pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 sm:pt-5 relative z-10 space-y-8 filter-main'>
       {children}
     </main>
   )

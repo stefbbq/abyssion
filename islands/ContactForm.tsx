@@ -11,6 +11,11 @@ const validateRequired = (label: string) => (value: string) => {
   return null
 }
 
+/**
+ * ContactForm island component
+ * Interactive contact form with validation and theme-aware styling
+ * All form elements use theme-aware border radius and styling
+ */
 export default function ContactForm() {
   // Optionally, manage form state here if you want to handle submission
   // For now, just render the fields

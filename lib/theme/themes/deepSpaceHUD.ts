@@ -1,6 +1,6 @@
 import { createBaseTheme } from '../utils/createBaseTheme.ts'
-import { hexStringToRGB } from '../utils/hexStringToRGB.ts'
-import { hexStringToNumber } from '../utils/hexStringToNumber.ts'
+import { hexStringToRGB } from '../colorUtils/hexStringToRGB.ts'
+import { hexStringToNumber } from '../colorUtils/hexStringToNumber.ts'
 
 /**
  * Deep Space HUD theme - dark mode color palette
@@ -56,6 +56,12 @@ export const deepSpaceHUDTheme = createBaseTheme({
   frostOpacity: {
     light: 0.95,
     dark: 0.9, // Slightly more transparent for depth
+  },
+
+  // Themed background opacity for space-tech feel
+  backgroundOpacity: {
+    light: 0.75, // More opaque in light mode for contrast
+    dark: 0.55, // Slightly transparent in dark mode for depth
   },
 
   // Special filter effects for sci-fi aesthetic
@@ -132,6 +138,12 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
   frostOpacity: {
     light: 0.92, // High opacity to maintain readability
     dark: 0.9,
+  },
+
+  // Background opacity for light mode space-tech feel
+  backgroundOpacity: {
+    light: 0.8, // Higher opacity in light mode for better contrast
+    dark: 0.55, // Consistent with dark theme
   },
 
   // Subtle filter effects for light mode

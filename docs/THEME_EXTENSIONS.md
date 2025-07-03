@@ -1,6 +1,6 @@
 # Theme System Extensions
 
-This document covers the new extensions to the theme system, including border radius customization, glass/frost opacity overrides, and filter effects for UI elements.
+This document covers the new extensions to the theme system, including border radius customization, glass/frost opacity overrides, themed background opacity controls, and filter effects for UI elements.
 
 ## Border Radius
 
@@ -88,6 +88,54 @@ import { currentTheme } from '@lib/theme/state.ts'
 const glassOpacity = currentTheme.value.glass.opacity.dark
 const frostOpacity = currentTheme.value.frost.opacity.light
 ```
+
+## Themed Background Opacity
+
+### Theme Definition
+
+Control the opacity of the themed background overlay for both light and dark modes:
+
+```typescript
+export const myTheme = createBaseTheme({
+  // ... other theme properties
+  
+  // Themed background overlay opacity
+  backgroundOpacity: {
+    light: 0.8,  // Background overlay opacity in light mode
+    dark: 0.6,   // Background overlay opacity in dark mode
+  },
+})
+```
+
+### Usage
+
+The themed background opacity is automatically applied by the `ThemedBackground` island:
+
+```tsx
+// Access background opacity values in TypeScript
+import { currentTheme } from '@lib/theme/state.ts'
+
+const backgroundOpacity = currentTheme.value.backgroundOpacity
+const lightOpacity = backgroundOpacity.light
+const darkOpacity = backgroundOpacity.dark
+
+// Use in custom components with theme-aware opacity
+<div 
+  style={{ 
+    backgroundColor: 'var(--colors-background-primary)',
+    opacity: theme.backgroundOpacity.light 
+  }}
+>
+  Custom background with theme opacity
+</div>
+```
+
+### Background Behavior
+
+- **Homepage**: Background overlay is hidden (opacity 0) to show GL canvas
+- **Content Pages**: Background overlay uses theme-specific opacity values
+- **Mode Switching**: Opacity automatically updates when switching between light/dark modes
+- **Theme Switching**: Opacity values update instantly when changing theme families
 
 ## Filter Effects
 
@@ -179,6 +227,11 @@ export const advancedTheme = createBaseTheme({
     dark: 0.9,
   },
   
+  backgroundOpacity: {
+    light: 0.8,
+    dark: 0.6,
+  },
+  
   filters: {
     main: 'brightness(1.05) contrast(1.02)',
     header: 'brightness(0.98) saturate(1.1) hue-rotate(2deg)',
@@ -225,11 +278,13 @@ All new theme properties are exposed as CSS variables:
 - `--filters-header`
 - `--filters-nav`
 
-### Glass/Frost Opacity (accessible in theme object)
+### Opacity Controls (accessible in theme object)
 - `theme.glass.opacity.light`
 - `theme.glass.opacity.dark`
 - `theme.frost.opacity.light`
 - `theme.frost.opacity.dark`
+- `theme.backgroundOpacity.light`
+- `theme.backgroundOpacity.dark`
 
 ## Migration Guide
 
@@ -237,7 +292,8 @@ If you have existing themes, they will continue to work without changes. The new
 
 - **Border Radius**: Uses standard Tailwind values if not specified
 - **Glass Opacity**: `{ light: 0.4, dark: 0.5 }` by default
-- **Frost Opacity**: `{ light: 0.9, dark: 0.85 }` by default  
+- **Frost Opacity**: `{ light: 0.9, dark: 0.85 }` by default
+- **Background Opacity**: `{ light: 0.7, dark: 0.6 }` by default
 - **Filters**: No filters applied if not specified
 
 To adopt the new features, simply add the optional properties to your theme definitions as needed. 

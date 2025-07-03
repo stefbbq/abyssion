@@ -17,7 +17,7 @@ type Props = {
 
 /**
  * A theme-aware dropdown/select component with custom options and ref support.
- * Theming is handled via CSS variables.
+ * Theming is handled via CSS variables, with theme-aware border radius.
  *
  * @example
  *   <Dropdown options={[{ value: 'a', label: 'A' }]} value='a' onChange={...} />
@@ -30,7 +30,7 @@ export const Dropdown = forwardRef<HTMLSelectElement, Props>(
           ref={ref}
           value={value}
           onChange={onChange}
-          class='w-full appearance-none bg-transparent pl-3 pr-8 py-2 border rounded-md'
+          class='w-full appearance-none bg-transparent pl-3 pr-8 py-2 border rounded-theme-md'
           {...props}
         >
           {children}

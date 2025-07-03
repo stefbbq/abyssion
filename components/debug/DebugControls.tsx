@@ -1,4 +1,5 @@
 import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
+import { currentThemeFamilyName, getAllThemeFamilies, setThemeFamily } from '@lib/theme/index.ts'
 
 type DOFParams = {
   focus: number
@@ -35,10 +36,13 @@ type Props = {
 
 /**
  * debug controls component
- * renders controls for DOF, tone mapping, and hotkey info
+ * renders controls for DOF, tone mapping, theme switching, and hotkey info
  */
 export const DebugControls = (props: Props) => {
   if (!props.visible) return null
+
+  const availableThemes = getAllThemeFamilies()
+  const currentTheme = currentThemeFamilyName.value
 
   const handleDOFInput = (field: keyof DOFParams) => (e: Event) => {
     const target = e.target as HTMLInputElement
@@ -74,8 +78,16 @@ export const DebugControls = (props: Props) => {
     })
   }
 
+  const handleThemeChange = (e: Event) => {
+    const target = e.target as HTMLSelectElement
+    setThemeFamily(target.value)
+  }
+
   return (
-    <div className='fixed top-4 left-4 glass-effect rounded-lg p-3 font-mono text-xs text-text-primary max-w-xs z-50'>
+    <div
+      className='fixed top-4 left-4 glass-effect rounded-theme-lg p-3 font-mono text-xs text-text-primary max-w-xs'
+      style={{ zIndex: 2000 }}
+    >
       {/* header */}
       <div className='flex items-center justify-between mb-2'>
         <span className='font-bold text-sm tracking-wider'>Debug Mode</span>
@@ -110,8 +122,33 @@ export const DebugControls = (props: Props) => {
         </ul>
       </div>
 
+      {/* theme selector */}
+      <div className='space-y-2 mb-3'>
+        <p className='font-bold text-sm mb-2'>Theme Selector</p>
+        <div className='flex items-center gap-2'>
+          <label className='flex-1'>Theme:</label>
+          <select
+            value={currentTheme}
+            onChange={handleThemeChange}
+            className='flex-1 bg-surface-primary border border-border-primary rounded-theme-sm px-2 py-1 text-xs text-text-primary'
+          >
+            {availableThemes.map((theme) => (
+              <option key={theme.name} value={theme.name}>
+                {theme.name.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className='text-text-tertiary text-xs'>
+          Current: <span className='font-semibold'>{currentTheme.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</span>
+        </div>
+      </div>
+
+      <hr className='border-border-subtle my-3' />
+
       {/* DOF controls */}
       <div className='space-y-2 mb-3'>
+        <p className='font-bold text-sm mb-2'>Depth of Field</p>
         <div className='flex items-center gap-2'>
           <label className='flex-1'>Focus:</label>
           <input
@@ -186,12 +223,12 @@ export const DebugControls = (props: Props) => {
         <div className='flex items-center gap-3 mt-2'>
           <span>Highlight:</span>
           <span
-            className='w-6 h-4 inline-block rounded border border-border-primary'
+            className='w-6 h-4 inline-block rounded-theme-sm border border-border-primary'
             style={{ backgroundColor: props.themeColors.highlight }}
           />
           <span className='ml-2'>Shadow:</span>
           <span
-            className='w-6 h-4 inline-block rounded border border-border-primary'
+            className='w-6 h-4 inline-block rounded-theme-sm border border-border-primary'
             style={{ backgroundColor: props.themeColors.shadow }}
           />
         </div>

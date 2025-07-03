@@ -14,6 +14,7 @@ type SocialIconKey = keyof SocialIconMap
  * Desktop navigation bar for the app, styled with utility classes and CSS variables.
  * Responsive, sticky, and theme-aware. Includes logo, navigation links, social icons, and theme toggle.
  * Uses navData for navigation structure and adapts to scroll/keyboard state.
+ * Features theme-aware filter effects and border radius.
  *
  * @example
  *   <Header />
@@ -60,10 +61,10 @@ export const Header = () => {
   const containerClasses = shouldShowBackground ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
 
   return (
-    <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
+    <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 filter-header ${headerClasses}`}>
       <div
         id='header-container'
-        class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-full px-4 ${containerClasses}`}
+        class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-theme-full px-4 ${containerClasses}`}
       >
         {/* Logo */}
         <h1 class='flex items-center m-0'>
@@ -105,7 +106,7 @@ export const Header = () => {
                     key={item.key}
                     href={item.url}
                     ariaLabel={item.label}
-                    className={`transition-colors focus:ring-offset-2 rounded ${getFocusClass()}`}
+                    className={`transition-colors focus:ring-offset-2 rounded-theme-sm ${getFocusClass()}`}
                     compact
                   >
                     {IconComponent ? <IconComponent className='w-5 h-5' /> : <div class='w-5 h-5 bg-current' />}

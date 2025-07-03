@@ -1,7 +1,7 @@
 // deno-lint-ignore-file react-no-danger
 import { Head } from '$fresh/runtime.ts'
 import { useSignalEffect } from '@preact/signals'
-import { currentTheme } from '@lib/theme/index.ts'
+import { currentUITheme } from '@lib/theme/index.ts'
 import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
 
 /**
@@ -9,14 +9,14 @@ import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
  * It automatically updates whenever the theme changes.
  */
 export default function ThemeProvider() {
-  const themeVariables = createThemeVariables(currentTheme.value)
-  const fontUrls = currentTheme.value.typography.fontUrls || []
+  const themeVariables = createThemeVariables(currentUITheme.value)
+  const fontUrls = currentUITheme.value.typography.fontUrls || []
 
   // This effect will run on the client side whenever the theme changes.
   useSignalEffect(() => {
     const styleElement = document.getElementById('theme-variables') || document.createElement('style')
     styleElement.id = 'theme-variables'
-    styleElement.innerHTML = createThemeVariables(currentTheme.value)
+    styleElement.innerHTML = createThemeVariables(currentUITheme.value)
     document.head.appendChild(styleElement)
 
     // Inject font links dynamically

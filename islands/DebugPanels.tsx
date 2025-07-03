@@ -1,5 +1,6 @@
 /**
  * interactive debug panels island for GL scene debugging
+ * Features theme-aware styling and filter effects
  */
 
 import { useEffect, useRef } from 'preact/hooks'
@@ -52,6 +53,7 @@ type Props = {
 /**
  * debug panels island component
  * manages debug state and renders debug controls/info
+ * uses theme-aware styling throughout
  */
 export const DebugPanels = (props: Props) => {
   const hasInitialized = useRef(false)

@@ -1,4 +1,72 @@
-import type { BaseTheme } from './themes/types.ts'
+import type { BaseSurfaces, BaseTheme } from './themes/types.ts'
+
+/**
+ * Surface configuration for UI rendering
+ */
+export type UISurface = {
+  /** Background color as CSS value with opacity */
+  background: string
+  /** Base background color without opacity for Tailwind variables */
+  backgroundColor: string
+  /** Border color for Tailwind variables */
+  borderColor: string
+  /** Border radius as CSS value */
+  borderRadius: string
+  /** Opacity for light/dark modes */
+  opacity: {
+    light: number
+    dark: number
+  }
+  /** Border configuration */
+  border: {
+    width: string
+    style: string
+    color: string
+  }
+
+  // Flattened effect properties for Tailwind variable compatibility
+  /** CSS blur filter */
+  blur?: string
+  /** CSS backdrop-blur filter */
+  backdropBlur?: string
+  /** CSS filter effects */
+  filter?: string
+  /** Box shadow effects */
+  boxShadow?: string
+  /** CSS transform effects */
+  transform?: string
+
+  /** Legacy effects object for backward compatibility */
+  effects: {
+    blur?: string
+    backdropBlur?: string
+    filter?: string
+    boxShadow?: string
+    transform?: string
+  }
+}
+
+/**
+ * Surface system for UI components
+ */
+export type UISurfaces = {
+  /** Main content surface */
+  main: UISurface
+  /** Alternative surface for secondary content */
+  alt: UISurface
+  /** Header surface */
+  header: UISurface
+  /** Navigation/action zone surface */
+  nav: UISurface
+  /** Card surface */
+  card: UISurface
+  /** Input/form surface */
+  input: UISurface
+  /** Button surface */
+  button: UISurface
+  /** Dropdown/modal surface */
+  dropdown: UISurface
+}
 
 /**
  * UI-specific theme extensions
@@ -10,12 +78,6 @@ export type UITheme = {
       primary: string
       secondary: string
       tertiary: string
-    }
-    // Surface colors
-    surface: {
-      primary: string
-      secondary: string
-      elevated: string
     }
     // Text colors
     text: {
@@ -41,40 +103,12 @@ export type UITheme = {
       ghostActive: string
     }
   }
-  // Glass morphism effects with opacity controls
-  glass: {
-    background: string
-    backdrop: string
-    border: string
-    opacity: {
-      light: number
-      dark: number
-    }
-  }
-  // Frost morphism effects with opacity controls
-  frost: {
-    background: string
-    backdrop: string
-    border: string
-    opacity: {
-      light: number
-      dark: number
-    }
-  }
-  // Border radius scale
-  borderRadius: {
-    none: string
-    sm: string
-    md: string
-    lg: string
-    xl: string
-    full: string
-  }
-  // Filter effects for UI elements
-  filters: {
-    main?: string
-    header?: string
-    nav?: string
+  // Surface system configuration
+  surfaces: UISurfaces
+  // Themed background opacity controls
+  backgroundOpacity: {
+    light: number
+    dark: number
   }
   // Spacing and sizing
   spacing: {
@@ -98,6 +132,49 @@ export type UITheme = {
       semibold: number
       bold: number
     }
+  }
+
+  // Legacy support (deprecated)
+  /** @deprecated Use surfaces instead */
+  surface?: {
+    primary: string
+    secondary: string
+    elevated: string
+  }
+  /** @deprecated Use surfaces instead */
+  glass?: {
+    background: string
+    backdrop: string
+    border: string
+    opacity: {
+      light: number
+      dark: number
+    }
+  }
+  /** @deprecated Use surfaces instead */
+  frost?: {
+    background: string
+    backdrop: string
+    border: string
+    opacity: {
+      light: number
+      dark: number
+    }
+  }
+  /** @deprecated Use surfaces instead */
+  borderRadius?: {
+    none: string
+    sm: string
+    md: string
+    lg: string
+    xl: string
+    full: string
+  }
+  /** @deprecated Use surfaces instead */
+  filters?: {
+    main?: string
+    header?: string
+    nav?: string
   }
 }
 
@@ -209,6 +286,7 @@ export type GLTheme = BaseTheme & {
 }
 
 export type {
+  BaseBackgroundOpacity,
   BaseBorderRadius,
   BaseFilters,
   BaseFrostOpacity,

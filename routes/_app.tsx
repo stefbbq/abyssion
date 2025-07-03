@@ -8,7 +8,7 @@ import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
 import PageContainer from '@islands/PageContainer.tsx'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
-import { currentTheme } from '@lib/theme/index.ts'
+import { currentUITheme } from '@lib/theme/index.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
 import videoManifest from '../static/videos/manifest.json' with { type: 'json' }
 
@@ -17,7 +17,7 @@ export default function App({ Component, url }: PageProps) {
   const config = (pagesConfig as PagesConfig)[pagePath] || {}
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
-  const theme = currentTheme.value
+  const theme = currentUITheme.value
 
   // Preload the first two videos from the manifest
   const preloadVideos = (videoManifest as string[]).slice(0, 2)
