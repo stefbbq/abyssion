@@ -1,55 +1,32 @@
-import type { ColorPalette, ColorRoles } from '../themes/types.ts'
-import type { HexColor } from '../types.ts'
+import type { ColorPalette, HexColor } from '../index.types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Resolves a color reference string to the actual color value from the palette
  *
- * @param reference - Color reference string (e.g., 'primary.500', 'surface.primary', 'neutral.200')
+ * @param reference - Color reference string (e.g., 'primary.500', 'background.200')
  * @param palette - The color palette containing primitive colors
- * @param colorRoles - The semantic color roles mapping
  * @returns The resolved hex color value
  *
  * @example
- * resolveColorReference('primary.500', palette, colorRoles) // Returns palette.primary[500]
- * resolveColorReference('surface.primary', palette, colorRoles) // Returns palette[colorRoles.surface.primary]
+ * resolveColorReference('primary.500', palette) // Returns palette.primary[500]
  */
 export const resolveColorReference = (
   reference: string,
   palette: ColorPalette | undefined,
-  colorRoles: ColorRoles | undefined,
 ): HexColor => {
-  // Handle undefined palette/colorRoles gracefully
-  if (!palette || !colorRoles) {
-    console.warn(`Cannot resolve color reference "${reference}" - palette or colorRoles is undefined`)
+  if (!palette) {
+    console.warn(`Cannot resolve color reference "${reference}" - palette is undefined`)
     return 0x4263eb // fallback to a reasonable default color
   }
 
-  // Handle direct palette references (e.g., 'primary.500', 'neutral.100')
+  // Handle direct palette references (e.g., 'primary.500', 'background.100')
   if (reference.includes('.')) {
     const [category, shade] = reference.split('.')
-
-    // Check if it's a direct palette reference
     if (category in palette) {
       const categoryColors = palette[category as keyof ColorPalette]
-
       if (typeof categoryColors === 'object' && shade in categoryColors) {
         return categoryColors[shade as keyof typeof categoryColors] as HexColor
-      }
-
-      // Handle semantic colors (success, warning, error, info)
-      if (category === 'semantic' && 'semantic' in palette) {
-        return palette.semantic[shade as keyof typeof palette.semantic]
-      }
-    }
-
-    // Handle semantic role references (e.g., 'surface.primary', 'border.focus')
-    if (category in colorRoles) {
-      const roleCategory = colorRoles[category as keyof ColorRoles]
-
-      if (typeof roleCategory === 'object' && shade in roleCategory) {
-        const roleReference = roleCategory[shade as keyof typeof roleCategory]
-        return resolveColorReference(roleReference, palette, colorRoles)
       }
     }
   }
@@ -66,7 +43,7 @@ export const resolveColorReference = (
   log(
     lc.THEME,
     `Could not resolve color reference "${reference}". ` +
-      `Valid formats: 'primary.500', 'neutral.200', 'surface.primary', etc. Using fallback color.`,
+      `Valid formats: 'primary.500', 'background.200', etc. Using fallback color.`,
   )
   return 0x4263eb // fallback to a reasonable default color
 }
@@ -76,20 +53,16 @@ export const resolveColorReference = (
  *
  * @param references - Object with color reference strings as values
  * @param palette - The color palette
- * @param colorRoles - The semantic color roles
  * @returns Object with resolved hex color values
  */
 export const resolveColorReferences = <T extends Record<string, string>>(
   references: T,
   palette: ColorPalette,
-  colorRoles: ColorRoles,
 ): Record<keyof T, HexColor> => {
   const resolved = {} as Record<keyof T, HexColor>
-
   for (const [key, reference] of Object.entries(references)) {
-    resolved[key as keyof T] = resolveColorReference(reference, palette, colorRoles)
+    resolved[key as keyof T] = resolveColorReference(reference, palette)
   }
-
   return resolved
 }
 

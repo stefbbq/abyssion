@@ -4,7 +4,7 @@
  * Includes cookie persistence for user preferences
  */
 import { computed, effect, signal } from '@preact/signals'
-import type { BaseTheme, ThemeFamily } from './types.ts'
+import type { BaseTheme, ThemeFamily } from './index.types.ts'
 import { themeFamilies } from './themes/index.ts'
 import { getNextThemeFamily } from './utils/themeFamilyUtils.ts'
 import { getCookie, setCookie } from '@lib/utils/cookies.ts'
@@ -22,7 +22,7 @@ const getInitialThemeFamily = (): string => {
   if (cookieValue && themeFamilies.some((family) => family.name === cookieValue)) {
     return cookieValue
   }
-  return 'deep-space-hud'
+  return 'Neon Grid OS'
 }
 
 /**

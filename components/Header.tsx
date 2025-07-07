@@ -58,13 +58,13 @@ export const Header = () => {
 
   // in light mode, always show background for readability; in dark mode, show only when scrolled
   const shouldShowBackground = isScrolled || themeMode.value === 'light'
-  const containerClasses = shouldShowBackground ? 'frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]' : 'bg-transparent shadow-none'
+  const containerClasses = shouldShowBackground ? 'surface-header' : 'bg-transparent'
 
   return (
-    <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 filter-header ${headerClasses}`}>
+    <header class={`top-2 z-50 hidden md:block sticky transition-all duration-300 py-2 ${headerClasses}`}>
       <div
         id='header-container'
-        class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 rounded-theme-full px-4 ${containerClasses}`}
+        class={`max-w-7xl mx-auto flex justify-between items-center h-16 transition-all duration-300 px-4 ${containerClasses}`}
       >
         {/* Logo */}
         <h1 class='flex items-center m-0'>

@@ -2,7 +2,7 @@ import { type PageProps } from '$fresh/server.ts'
 import { Head, Partial } from '$fresh/runtime.ts'
 import Header from '@islands/Header.tsx'
 import ActionZoneController from '@islands/ActionZoneController.tsx'
-import GLCanvas from '@islands/GLCanvas.tsx'
+import GLCanvasController from '@islands/GLCanvasController.tsx'
 import { DebugPanels } from '@islands/DebugPanels.tsx'
 import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
@@ -18,8 +18,6 @@ export default function App({ Component, url }: PageProps) {
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
   const theme = currentUITheme.value
-
-  // Preload the first two videos from the manifest
   const preloadVideos = (videoManifest as string[]).slice(0, 2)
 
   return (
@@ -33,23 +31,23 @@ export default function App({ Component, url }: PageProps) {
         <link rel='stylesheet' href='/styles.css' />
         {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
-      <body f-client-nav class='min-h-screen relative bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
+      <body f-client-nav class='min-h-screen relative text-foreground' style={{ fontFamily: theme.typography.fontFamily.body }}>
         <ThemedBackground />
+
         <ThemeProvider />
-        <GLCanvas />
+
+        <GLCanvasController />
+
         <DebugPanels />
 
-        {/* header */}
         {showHeader && <Header />}
 
-        {/* main content */}
         <PageContainer>
           <Partial name='page-content'>
             <Component />
           </Partial>
         </PageContainer>
 
-        {/* action zone */}
         {showActionZone && <ActionZoneController />}
       </body>
     </html>

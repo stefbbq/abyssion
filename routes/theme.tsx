@@ -1,5 +1,6 @@
-import ThemeVisualizer from '../islands/ThemeVisualizer.tsx'
+// import ThemeVisualizer from '../islands/ThemeVisualizer.tsx'
 
 export default function ThemePage() {
-  return <ThemeVisualizer />
+  // return <ThemeVisualizer />
+  return <div>Theme</div>
 }

@@ -3,6 +3,7 @@ import { initGL, type InitOptions } from '@lib/gl/index.ts'
 
 /**
  * GLCanvas component with electrical effects and interactivity
+ * Only renders if GL is not disabled (debug signal)
  */
 export const GLCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)

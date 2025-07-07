@@ -3,7 +3,7 @@ import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { randomLayerConfig } from '@libgl/layers/config.ts'
 import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
 import { getRandomColor } from './getRandomColor.ts'
-import { getGLTheme } from '@lib/theme/index.ts'
+import { currentGLTheme } from '@lib/theme/index.ts'
 
 /**
  * Generate a random layer with position based on index
@@ -19,7 +19,7 @@ export const createLogoLayer = (): LogoLayer => {
     frontBias,
   } = randomLayerConfig
 
-  const theme = getGLTheme()
+  const theme = currentGLTheme.value
 
   // decide if this should be a cyan-ish, magenta-ish, or white-ish layer
   const colorType = Math.random()

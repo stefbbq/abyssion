@@ -16,8 +16,9 @@ import * as $shows from './routes/shows.tsx'
 import * as $theme from './routes/theme.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
+import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
-import * as $GLCanvas from './islands/GLCanvas.tsx'
+import * as $GLCanvasController from './islands/GLCanvasController.tsx'
 import * as $Header from './islands/Header.tsx'
 import * as $PageContainer from './islands/PageContainer.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
@@ -43,8 +44,9 @@ const manifest = {
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
     './islands/ContactForm.tsx': $ContactForm,
+    './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
-    './islands/GLCanvas.tsx': $GLCanvas,
+    './islands/GLCanvasController.tsx': $GLCanvasController,
     './islands/Header.tsx': $Header,
     './islands/PageContainer.tsx': $PageContainer,
     './islands/ThemeProvider.tsx': $ThemeProvider,

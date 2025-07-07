@@ -57,7 +57,7 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
 
   return (
     <div
-      class={`rounded-theme-xl shadow-lg glass-effect overflow-hidden flex flex-col bg-[var(--colors-surface-primary)] ${className || ''}`}
+      class={`surface-shell overflow-hidden flex flex-col ${className || ''}`}
     >
       <ImageSection />
       <div class='p-6 text-center text-[var(--colors-text-primary)]'>

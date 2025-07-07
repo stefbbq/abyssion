@@ -8,69 +8,37 @@ import { hexStringToNumber } from '../colorUtils/hexStringToNumber.ts'
  */
 export const deepSpaceHUDTheme = createBaseTheme({
   name: 'deep-space-hud',
-  mode: 'dark', // explicit mode declaration
+  mode: 'dark',
 
-  // Core brand colors - consistent across GL and UI
+  // Core brand colors
   primary: hexStringToRGB('#4263eb'), // Electric blue
   secondary: hexStringToRGB('#7c3aed'), // Purple
-  accent: hexStringToRGB('#00ffe1'), // Cyan accent
+  accent: hexStringToRGB('#ff2d55'), // Magenta accent (matches logo/theme switcher)
 
-  // Color variants for different states
-  primaryAlt: hexStringToRGB('#5a78f0'), // Lighter blue
-  primaryDark: hexStringToRGB('#2a49b5'), // Darker blue
-  secondaryAlt: hexStringToRGB('#9960f5'), // Lighter purple
-  secondaryDark: hexStringToRGB('#5d24a0'), // Darker purple
-  accentAlt: hexStringToRGB('#66ffe8'), // Lighter cyan
-  accentDark: hexStringToRGB('#00bfa1'), // Darker cyan
+  // Color variants
+  primaryAlt: hexStringToRGB('#5a78f0'),
+  primaryDark: hexStringToRGB('#2a49b5'),
+  secondaryAlt: hexStringToRGB('#9960f5'),
+  secondaryDark: hexStringToRGB('#5d24a0'),
+  accentAlt: hexStringToRGB('#ff5e99'),
+  accentDark: hexStringToRGB('#b8003a'),
 
-  // Dark mode backgrounds - warm undertones complement cool primary colors
-  background: hexStringToNumber('#0a0a0a'), // Warm off-black with subtle brown undertones
-  backgroundAlt: hexStringToNumber('#080808'), // Near black with warmth
-  backgroundDark: hexStringToNumber('#0a0a0a'), // Deeper warm dark
-  surface: hexStringToNumber('#0c0c0c'), // Elevated surfaces with warm tint
-  surfaceAlt: hexStringToNumber('#0d0d0d'), // Elevated surfaces with warm tint
+  // Backgrounds
+  background: hexStringToNumber('#0a0a0c'), // Slightly warmer black
+  backgroundAlt: hexStringToNumber('#18141c'), // Subtle purple tint
+  backgroundDark: hexStringToNumber('#08080a'),
+  surface: hexStringToNumber('#18141c'), // Card/nav surface (matches screenshot)
+  surfaceAlt: hexStringToNumber('#221c2a'),
 
-  // Dark mode foregrounds - high contrast for readability
-  foreground: hexStringToRGB('#ffffff'), // Pure white text
-  foregroundAlt: hexStringToRGB('#e5e5e5'), // Secondary text
-  foregroundLight: hexStringToRGB('#999999'), // Tertiary text
+  // Foregrounds
+  foreground: hexStringToRGB('#ffffff'),
+  foregroundAlt: hexStringToRGB('#e5e5e5'),
+  foregroundLight: hexStringToRGB('#bdbdbd'),
 
-  // Dark mode borders - much brighter for visibility
-  border: hexStringToNumber('#666666'), // Brighter gray borders
+  // Borders
+  border: hexStringToNumber('#3a2a4d'), // Muted purple-gray
 
-  // Custom border radius for space-tech aesthetic
-  borderRadius: {
-    sm: '0.25rem', // Slightly larger for tech look
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-  },
-
-  // Enhanced glass effect for HUD elements
-  glassOpacity: {
-    light: 0.3, // More transparent in light mode
-    dark: 0.6, // More opaque in dark mode for better contrast
-  },
-
-  // Enhanced frost effect for navigation
-  frostOpacity: {
-    light: 0.95,
-    dark: 0.9, // Slightly more transparent for depth
-  },
-
-  // Themed background opacity for space-tech feel
-  backgroundOpacity: {
-    light: 0.75, // More opaque in light mode for contrast
-    dark: 0.55, // Slightly transparent in dark mode for depth
-  },
-
-  // Special filter effects for sci-fi aesthetic
-  filters: {
-    main: 'brightness(1.05) contrast(1.02)',
-    header: 'brightness(0.98) saturate(1.1) hue-rotate(2deg)',
-    nav: 'brightness(1.02) contrast(1.05) saturate(0.95)',
-  },
-
+  // Typography
   typography: {
     fontFamily: {
       heading: '"Oxanium", sans-serif',
@@ -81,6 +49,107 @@ export const deepSpaceHUDTheme = createBaseTheme({
       'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
       'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
     ],
+  },
+
+  // Theme Extensions (SURFACE_SYSTEM, THEME_EXTENSIONS)
+  borderRadius: {
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+  },
+  glassOpacity: {
+    light: 0.4,
+    dark: 0.6,
+  },
+  frostOpacity: {
+    light: 0.5,
+    dark: 0.5,
+  },
+  backgroundOpacity: {
+    light: 0.7,
+    dark: 0.5, // Strong overlay in dark mode
+  },
+  filters: {
+    main: 'brightness(1.02) contrast(1.05)',
+    header: 'brightness(1.01) saturate(1.1)',
+    nav: 'brightness(1.03) saturate(1.1)',
+  },
+  surfaces: {
+    main: {
+      color: 'background.primary',
+      opacity: { light: 0.4, dark: 0.4 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '12px',
+        filter: 'brightness(1.02) contrast(1.05)',
+        boxShadow: '0 0 16px 0 rgba(255,45,85,0.18)',
+      },
+    },
+    alt: {
+      color: 'background.secondary',
+      opacity: { light: 0.3, dark: 0.8 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '12px',
+        filter: 'brightness(1.01) contrast(1.03)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.12)',
+      },
+    },
+    card: {
+      color: 'surface.primary',
+      opacity: { light: 0.4, dark: 0.88 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        boxShadow: '0 0 24px 0 rgba(255,45,85,0.22)',
+      },
+    },
+    header: {
+      color: 'background.primary',
+      opacity: { light: 0.4, dark: 0.92 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        filter: 'brightness(1.01) saturate(1.1)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.12)',
+      },
+    },
+    nav: {
+      color: 'background.secondary',
+      opacity: { light: 0.4, dark: 0.92 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        filter: 'brightness(1.03) saturate(1.1)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.12)',
+      },
+    },
   },
 })
 
@@ -92,67 +161,28 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
   name: 'deep-space-hud-light',
   mode: 'light',
 
-  // Same brand colors work in both modes
   primary: hexStringToRGB('#4263eb'),
   secondary: hexStringToRGB('#7c3aed'),
-  accent: hexStringToRGB('#00ffe1'),
+  accent: hexStringToRGB('#ff2d55'),
 
-  // Color variants
   primaryAlt: hexStringToRGB('#5a78f0'),
   primaryDark: hexStringToRGB('#2a49b5'),
   secondaryAlt: hexStringToRGB('#9960f5'),
   secondaryDark: hexStringToRGB('#5d24a0'),
-  accentAlt: hexStringToRGB('#66ffe8'),
-  accentDark: hexStringToRGB('#00bfa1'),
+  accentAlt: hexStringToRGB('#ff5e99'),
+  accentDark: hexStringToRGB('#b8003a'),
 
-  // Light mode backgrounds - warm off-white complements cool primary colors
-  background: hexStringToNumber('#faf8f5'), // Warm off-white with cream undertones
-  backgroundAlt: hexStringToNumber('#f5f2ee'), // Slightly darker warm tone
-  backgroundDark: hexStringToNumber('#f0ebe6'), // Deeper warm background
-  surface: hexStringToNumber('#ffffff'), // Pure white for elevated surfaces
-  surfaceAlt: hexStringToNumber('#faf8f5'),
+  background: hexStringToNumber('#faf8f5'), // Warm off-white
+  backgroundAlt: hexStringToNumber('#f5f2ee'),
+  backgroundDark: hexStringToNumber('#f0ebe6'),
+  surface: hexStringToNumber('#ffffff'),
+  surfaceAlt: hexStringToNumber('#f5f2ee'),
 
-  // Light mode foregrounds - dark text for contrast
-  foreground: hexStringToRGB('#000000'), // Pure black text
-  foregroundAlt: hexStringToRGB('#333333'), // Dark gray
-  foregroundLight: hexStringToRGB('#666666'), // Medium gray
+  foreground: hexStringToRGB('#000000'),
+  foregroundAlt: hexStringToRGB('#333333'),
+  foregroundLight: hexStringToRGB('#666666'),
 
-  // Light mode borders
-  border: hexStringToNumber('#e0e0e0'), // Light gray borders
-
-  // Same custom border radius for consistency
-  borderRadius: {
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-  },
-
-  // Adjusted glass effect for light mode
-  glassOpacity: {
-    light: 0.4, // Balanced opacity for light backgrounds
-    dark: 0.6,
-  },
-
-  // Adjusted frost effect for light mode
-  frostOpacity: {
-    light: 0.92, // High opacity to maintain readability
-    dark: 0.9,
-  },
-
-  // Background opacity for light mode space-tech feel
-  backgroundOpacity: {
-    light: 0.8, // Higher opacity in light mode for better contrast
-    dark: 0.55, // Consistent with dark theme
-  },
-
-  // Subtle filter effects for light mode
-  filters: {
-    main: 'brightness(1.02) contrast(1.01)',
-    header: 'brightness(0.99) saturate(1.05) hue-rotate(1deg)',
-    nav: 'brightness(1.01) contrast(1.02) saturate(0.98)',
-  },
-
+  border: hexStringToNumber('#e0e0e0'),
   typography: {
     fontFamily: {
       heading: '"Oxanium", sans-serif',
@@ -163,5 +193,104 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
       'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
       'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
     ],
+  },
+  borderRadius: {
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+  },
+  glassOpacity: {
+    light: 0.92, // High opacity for glass effect in light mode
+    dark: 0.85,
+  },
+  frostOpacity: {
+    light: 0.92,
+    dark: 0.92,
+  },
+  backgroundOpacity: {
+    light: 0.92, // Strong overlay in light mode
+    dark: 0.85,
+  },
+  filters: {
+    main: 'brightness(1.01) contrast(1.01)',
+    header: 'brightness(1.01) saturate(1.1)',
+    nav: 'brightness(1.01) saturate(1.1)',
+  },
+  surfaces: {
+    main: {
+      color: 'background.primary',
+      opacity: { light: 0.92, dark: 0.85 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '12px',
+        filter: 'brightness(1.01) contrast(1.01)',
+        boxShadow: '0 0 16px 0 rgba(255,45,85,0.10)',
+      },
+    },
+    alt: {
+      color: 'background.secondary',
+      opacity: { light: 0.85, dark: 0.8 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '12px',
+        filter: 'brightness(1.01) contrast(1.01)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.08)',
+      },
+    },
+    card: {
+      color: 'surface.primary',
+      opacity: { light: 0.95, dark: 0.88 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        boxShadow: '0 0 24px 0 rgba(255,45,85,0.12)',
+      },
+    },
+    header: {
+      color: 'background.primary',
+      opacity: { light: 0.92, dark: 0.85 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        filter: 'brightness(1.01) saturate(1.1)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.08)',
+      },
+    },
+    nav: {
+      color: 'background.secondary',
+      opacity: { light: 0.92, dark: 0.85 },
+      borderRadius: '1rem',
+      border: {
+        width: '2px',
+        style: 'solid',
+        color: 'border.primary',
+      },
+      effects: {
+        backdropBlur: '16px',
+        filter: 'brightness(1.01) saturate(1.1)',
+        boxShadow: '0 0 12px 0 rgba(255,45,85,0.08)',
+      },
+    },
   },
 })

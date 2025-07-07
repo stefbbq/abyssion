@@ -10,7 +10,7 @@ import {
   sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
 import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
-import { getGLTheme } from '@lib/theme/index.ts'
+import { currentGLTheme } from '@lib/theme/index.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.
@@ -142,7 +142,7 @@ export const createPostProcessing = async (
    * All effect parameters are exposed as uniforms for animation control.
    */
   const { finalPass: finalPassConfig } = postProcessingConfig
-  const glTheme = getGLTheme()
+  const glTheme = currentGLTheme.value
   const themePrimary = new THREE.Color(glTheme.primary)
   const themeAccent = new THREE.Color(glTheme.accent)
   const themeSecondary = new THREE.Color(glTheme.secondary)

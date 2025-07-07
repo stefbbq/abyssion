@@ -21,7 +21,7 @@ import {
   setupTextureLoading,
 } from './setup/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
-import { isGLInitialized } from './state.ts'
+import { isGLInitialized } from '@lib/gl/state.ts'
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 

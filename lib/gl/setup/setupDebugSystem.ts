@@ -1,11 +1,11 @@
 import * as Three from 'three'
 import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
-import type { ConfigScene } from '@libgl/configScene.types.ts'
+import type { ConfigScene, SelectiveColorizationParams } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
-import { getGLTheme } from '@lib/theme/index.ts'
+import { currentGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
 import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
 
@@ -66,16 +66,49 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         }
       }
     },
-    onToneMapChange: ({ enabled, blendAmount }) => {
+    onSelectiveColorizationChange: (params) => {
+      // Update video background selective colorization uniforms
+      if (state.videoBackground && state.videoBackground.mesh) {
+        const material = state.videoBackground.mesh.material as Three.ShaderMaterial
+        if (material && material.uniforms) {
+          material.uniforms.selectiveColorizationEnabled.value = params.enabled ? 1.0 : 0.0
+          material.uniforms.selectiveBrightnessWeight.value = params.targeting.brightnessWeight
+          material.uniforms.selectiveSaturationWeight.value = params.targeting.saturationWeight
+          material.uniforms.selectiveBrightnessThreshold.value = params.targeting.brightnessThreshold
+          material.uniforms.selectiveSaturationThreshold.value = params.targeting.saturationThreshold
+          material.uniforms.selectiveBlendSmoothness.value = params.targeting.blendSmoothness
+          material.uniforms.selectiveBlendBalance.value = params.colorBlending.blendBalance
+
+          // Update blend mode
+          const blendModeMap: { [key: string]: number } = { brightness: 0, saturation: 1, mixed: 2 }
+          material.uniforms.selectiveBlendMode.value = blendModeMap[params.colorBlending.blendMode] ?? 2
+
+          // Update colors if not using theme colors
+          if (!params.useThemeColors) {
+            if (params.primaryTargetColor) {
+              const primaryColor = new THREE.Color(params.primaryTargetColor)
+              material.uniforms.selectivePrimaryColor.value = primaryColor.toArray()
+            }
+            if (params.secondaryTargetColor) {
+              const secondaryColor = new THREE.Color(params.secondaryTargetColor)
+              material.uniforms.selectiveSecondaryColor.value = secondaryColor.toArray()
+            }
+          }
+        }
+      }
+
+      // Update final pass glitch effect uniforms
       if (state.finalPass && state.finalPass.uniforms) {
-        state.finalPass.uniforms.toneMapEnabled.value = enabled ? 1.0 : 0.0
-        state.finalPass.uniforms.toneMapBlendAmount.value = blendAmount
-        log.debug(lc.GL_DEBUG, 'Tone mapping updated:', {
-          enabled,
-          blendAmount,
+        // Use segmentedGlitchMode to enable/disable the effect
+        state.finalPass.uniforms.segmentedGlitchMode.value = params.enabled ? 1.0 : 0.0
+        state.finalPass.uniforms.colorPopIntensity.value = params.colorBlending.blendBalance
+
+        log.debug(lc.GL_DEBUG, 'Selective colorization updated:', {
+          enabled: params.enabled,
+          blendBalance: params.colorBlending.blendBalance,
           uniformsAfterUpdate: {
-            toneMapEnabled: state.finalPass.uniforms.toneMapEnabled.value,
-            toneMapBlendAmount: state.finalPass.uniforms.toneMapBlendAmount.value,
+            segmentedGlitchMode: state.finalPass.uniforms.segmentedGlitchMode.value,
+            colorPopIntensity: state.finalPass.uniforms.colorPopIntensity.value,
           },
         })
       }
@@ -116,11 +149,11 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
     })
   }
 
-  // Initialize tone mapping parameters
+  // Initialize selective colorization parameters
   if (state.finalPass && state.finalPass.uniforms) {
-    const glTheme = getGLTheme()
+    const glTheme = currentGLTheme.value
 
-    log.debug(lc.GL_DEBUG, 'Theme colors for tone mapping:', {
+    log.debug(lc.GL_DEBUG, 'Theme colors for selective colorization:', {
       primary: glTheme.primary,
       secondary: glTheme.secondary,
       primaryHex: rgbToHex(glTheme.primary),
@@ -129,11 +162,24 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       secondaryCSS: hexToCSS(rgbToHex(glTheme.secondary)),
     })
 
-    // Update the debug panels with initial tone map values
-    debugPanelsAPI.updateToneMapParams(
+    // Update the debug panels with initial selective colorization values
+    debugPanelsAPI.updateSelectiveColorizationParams(
       {
-        enabled: state.finalPass.uniforms.toneMapEnabled?.value === 1.0,
-        blendAmount: state.finalPass.uniforms.toneMapBlendAmount?.value || 1.0,
+        enabled: state.finalPass.uniforms.segmentedGlitchMode?.value === 1.0,
+        useThemeColors: true,
+        primaryTargetColor: hexToCSS(rgbToHex(glTheme.primary)),
+        secondaryTargetColor: hexToCSS(rgbToHex(glTheme.secondary)),
+        targeting: {
+          brightnessWeight: 0.5,
+          saturationWeight: 0.5,
+          brightnessThreshold: 0.5,
+          saturationThreshold: 0.5,
+          blendSmoothness: 0.1,
+        },
+        colorBlending: {
+          blendMode: 'mixed',
+          blendBalance: state.finalPass.uniforms.colorPopIntensity?.value || 1.0,
+        },
       },
       {
         highlight: hexToCSS(rgbToHex(glTheme.primary)),

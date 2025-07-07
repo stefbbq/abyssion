@@ -2,25 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-.glass-effect {
-  @apply bg-glass border border-glass shadow-lg backdrop-blur-glass;
+/* Background utilities */
+.background {
+  background-color: var(--colors-background);
 }
 
-.frost-effect {
-  @apply bg-frost border-frost shadow-lg backdrop-blur-frost;
+/* Surface utilities */
+.surface-main {
+  background-color: var(--surfaces-main-background);
+  border-width: var(--surfaces-main-border-width);
+  border-style: var(--surfaces-main-border-style);
+  border-color: var(--surfaces-main-border-color);
+  border-radius: var(--surfaces-main-borderRadius);
+  backdrop-filter: var(--surfaces-main-backdropBlur);
+  box-shadow: var(--surfaces-main-boxShadow);
+  filter: var(--surfaces-main-filter);
 }
 
-/* Filter effect utilities for themed elements */
-.filter-main {
-  filter: var(--filters-main, none);
+.surface-shell {
+  background-color: var(--surfaces-shell-background);
+  border-width: var(--surfaces-shell-border-width);
+  border-style: var(--surfaces-shell-border-style);
+  border-color: var(--surfaces-shell-border-color);
+  border-radius: var(--surfaces-shell-borderRadius);
+  backdrop-filter: var(--surfaces-shell-backdropBlur);
+  box-shadow: var(--surfaces-shell-boxShadow);
+  filter: var(--surfaces-shell-filter);
 }
 
-.filter-header {
-  filter: var(--filters-header, none);
+.surface-header {
+  background-color: var(--surfaces-header-background);
+  border-width: var(--surfaces-header-border-width);
+  border-style: var(--surfaces-header-border-style);
+  border-color: var(--surfaces-header-border-color);
+  border-radius: var(--surfaces-header-borderRadius);
+  backdrop-filter: var(--surfaces-header-backdropBlur);
+  box-shadow: var(--surfaces-header-boxShadow);
+  filter: var(--surfaces-header-filter);
 }
 
-.filter-nav {
-  filter: var(--filters-nav, none);
+/* Interactive element utilities */
+.interactable {
+  background-color: var(--colors-primary);
+  color: var(--colors-foreground);
+  border: 1px solid var(--colors-surface);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.interactable:hover {
+  background-color: var(--colors-primary);
+  filter: brightness(1.1);
+}
+
+.interactable:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--colors-primary);
+}
+
+.interactable:active {
+  filter: brightness(0.9);
+}
+
+.interactable:disabled,
+.interactable[aria-disabled="true"] {
+  background-color: var(--colors-surface);
+  color: var(--colors-foreground);
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Border radius utilities using theme values */
@@ -62,19 +110,4 @@ blockquote {
 
 blockquote p {
   @apply font-quote my-1 italic text-2xl opacity-60 font-light tracking-wide;
-}
-
-.content-fade-top {
-  mask-image: linear-gradient(to bottom, transparent 0%, black 80px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px);
-}
-
-.content-fade-bottom {
-  mask-image: linear-gradient(to top, transparent 0%, black 80px);
-  -webkit-mask-image: linear-gradient(to top, transparent 0%, black 80px);
-}
-
-.content-fade-top.content-fade-bottom {
-  mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
 }

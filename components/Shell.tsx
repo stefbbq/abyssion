@@ -19,7 +19,7 @@ type Props = {
 
 export const Shell = ({ children, className }: Props) => {
   return (
-    <section class={`rounded-theme-xl shadow-lg p-8 glass-effect ${className || ''}`}>
+    <section class={`surface-shell p-8 ${className || ''}`}>
       {children}
     </section>
   )

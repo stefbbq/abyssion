@@ -1,5 +1,4 @@
-import type { BaseSurface, BaseSurfaces, ColorPalette, ColorRoles } from '../themes/types.ts'
-import type { UISurface, UISurfaces } from '../types.ts'
+import type { BaseSurface, BaseSurfaces, ColorPalette, UISurface, UISurfaces } from '../index.types.ts'
 import { hexToCSS } from '../colorUtils/hexToCSS.ts'
 import { rgbToCSS } from '../colorUtils/rgbToCSS.ts'
 import { hexStringToRGB } from '../colorUtils/hexStringToRGB.ts'
@@ -9,11 +8,11 @@ import { pipe } from '@lib/utils/pipe.ts'
 const numberToHexString = (num: number) => `#${num.toString(16).padStart(6, '0')}`
 
 /**
- * Default surface configurations using semantic color references
+ * Default surface configurations using palette references
  */
 export const createDefaultSurfaces = (): BaseSurfaces => ({
   main: {
-    color: 'surface.primary',
+    color: 'surface.500',
     opacity: {
       light: 0.4,
       dark: 0.5,
@@ -22,14 +21,14 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
     border: {
       width: '1px',
       style: 'solid',
-      color: 'border.primary',
+      color: 'surface.700',
     },
     effects: {
       backdropBlur: '16px',
     },
   },
-  alt: {
-    color: 'surface.secondary',
+  shell: {
+    color: 'surface.200',
     opacity: {
       light: 0.9,
       dark: 0.85,
@@ -38,13 +37,38 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
     border: {
       width: '1px',
       style: 'solid',
-      color: 'border.primary',
+      color: 'surface.700',
     },
     effects: {
       backdropBlur: '20px',
     },
   },
+  header: {
+    color: 'surface.100',
+    opacity: {
+      light: 0.95,
+      dark: 0.9,
+    },
+    borderRadius: '0.5rem',
+    border: {
+      width: '1px',
+      style: 'solid',
+      color: 'surface.700',
+    },
+    effects: {
+      backdropBlur: '24px',
+    },
+  },
 })
+
+// Utility: replace palette references in a string with resolved CSS color
+const replacePaletteRefs = (value: string, palette: ColorPalette): string => {
+  // Match palette references like 'primary.400', 'background.900', etc.
+  return value.replace(/([a-zA-Z]+\.[0-9]+)/g, (match) => {
+    const color = resolveColorReference(match, palette)
+    return hexToCSS(color)
+  })
+}
 
 /**
  * Converts a BaseSurface to a UISurface with proper CSS values
@@ -52,22 +76,41 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
 const convertToUISurface = (
   surface: BaseSurface,
   palette: ColorPalette,
-  colorRoles: ColorRoles,
   mode: 'light' | 'dark',
 ): UISurface => {
   // Resolve color reference to actual hex color
-  const resolvedColor = resolveColorReference(surface.color, palette, colorRoles)
+  const resolvedColor = resolveColorReference(surface.color, palette)
 
   // Resolve border color if specified
   const borderColor = surface.border?.color
-    ? resolveColorReference(surface.border.color, palette, colorRoles)
-    : resolveColorReference('border.primary', palette, colorRoles)
+    ? resolveColorReference(surface.border.color, palette)
+    : resolveColorReference('surface.700', palette)
+
+  // Handle border opacity by converting to rgba if needed
+  const borderOpacity = surface.border?.opacity || 1
+  const borderColorCSS = borderOpacity < 1
+    ? pipe(
+      borderColor,
+      numberToHexString,
+      hexStringToRGB,
+      (rgb) => rgbToCSS(rgb, borderOpacity),
+    )
+    : hexToCSS(borderColor)
 
   // Get opacity for current mode
   const currentOpacity = mode === 'dark' ? (surface.opacity?.dark || 0.5) : (surface.opacity?.light || 0.4)
 
+  // Helper to parse and replace palette refs in a string
+  const parse = (val: string | undefined) => val ? replacePaletteRefs(val, palette) : undefined
+
+  // Helper to wrap backdrop blur values in blur() function
+  const parseBackdropBlur = (val: string | undefined) => {
+    if (!val) return undefined
+    const parsed = replacePaletteRefs(val, palette)
+    return parsed.includes('blur(') ? parsed : `blur(${parsed})`
+  }
+
   return {
-    // Background colors for Tailwind compatibility
     background: pipe(
       resolvedColor,
       numberToHexString,
@@ -75,32 +118,19 @@ const convertToUISurface = (
       (rgb) => rgbToCSS(rgb, currentOpacity),
     ),
     backgroundColor: hexToCSS(resolvedColor),
-    borderColor: hexToCSS(borderColor),
+    borderColor: borderColorCSS,
     borderRadius: surface.borderRadius || '0.375rem',
-    opacity: surface.opacity || { light: 0.4, dark: 0.5 },
-
-    // Border configuration (kept for legacy compatibility)
     border: {
       width: surface.border?.width || '1px',
       style: surface.border?.style || 'solid',
-      color: hexToCSS(borderColor),
+      color: borderColorCSS,
+      opacity: surface.border?.opacity || 1,
     },
-
-    // Effects flattened to top level for Tailwind variable compatibility
-    blur: surface.effects?.blur,
-    backdropBlur: surface.effects?.backdropBlur ? `blur(${surface.effects.backdropBlur})` : undefined,
-    filter: surface.effects?.filter,
-    boxShadow: surface.effects?.boxShadow,
-    transform: surface.effects?.transform,
-
-    // Legacy effects object for backward compatibility
-    effects: {
-      blur: surface.effects?.blur,
-      backdropBlur: surface.effects?.backdropBlur ? `blur(${surface.effects.backdropBlur})` : undefined,
-      filter: surface.effects?.filter,
-      boxShadow: surface.effects?.boxShadow,
-      transform: surface.effects?.transform,
-    },
+    blur: parse(surface.effects?.blur),
+    backdropBlur: parseBackdropBlur(surface.effects?.backdropBlur),
+    filter: parse(surface.effects?.filter),
+    boxShadow: parse(surface.effects?.boxShadow),
+    transform: parse(surface.effects?.transform),
   }
 }
 
@@ -110,20 +140,12 @@ const convertToUISurface = (
 export const createUISurfaces = (
   baseSurfaces: BaseSurfaces,
   palette: ColorPalette,
-  colorRoles: ColorRoles,
+  _colorRoles: undefined, // unused, for compatibility
   mode: 'light' | 'dark',
 ): UISurfaces => {
-  const main = convertToUISurface(baseSurfaces.main, palette, colorRoles, mode)
-  const alt = convertToUISurface(baseSurfaces.alt, palette, colorRoles, mode)
-
   return {
-    main,
-    alt,
-    header: baseSurfaces.header ? convertToUISurface(baseSurfaces.header, palette, colorRoles, mode) : main,
-    nav: baseSurfaces.nav ? convertToUISurface(baseSurfaces.nav, palette, colorRoles, mode) : main,
-    card: baseSurfaces.card ? convertToUISurface(baseSurfaces.card, palette, colorRoles, mode) : alt,
-    input: baseSurfaces.input ? convertToUISurface(baseSurfaces.input, palette, colorRoles, mode) : alt,
-    button: baseSurfaces.button ? convertToUISurface(baseSurfaces.button, palette, colorRoles, mode) : main,
-    dropdown: baseSurfaces.dropdown ? convertToUISurface(baseSurfaces.dropdown, palette, colorRoles, mode) : alt,
+    main: convertToUISurface(baseSurfaces.main, palette, mode),
+    shell: convertToUISurface(baseSurfaces.shell, palette, mode),
+    header: convertToUISurface(baseSurfaces.header, palette, mode),
   }
 }

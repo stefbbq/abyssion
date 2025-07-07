@@ -8,7 +8,7 @@ import {
   selectiveVideoBackgroundFragmentShader,
   selectiveVideoBackgroundVertexShader,
 } from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
-import { getGLTheme } from '@lib/theme/index.ts'
+import { currentGLTheme } from '@lib/theme/index.ts'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 
 /**
@@ -36,7 +36,7 @@ export const createVideoBackground = (
 
     // Get selective colorization config and theme
     const { selectiveColorization } = configScene.postProcessingConfig as any
-    const glTheme = getGLTheme()
+    const glTheme = currentGLTheme.value
 
     // Determine colors based on configuration
     const useThemeColors = selectiveColorization?.useThemeColors === true
@@ -99,7 +99,7 @@ export const createVideoBackground = (
     const useThemeColors = selectiveColorization?.useThemeColors === true
     if (!useThemeColors) return // Only update if using theme colors
 
-    const glTheme = getGLTheme()
+    const glTheme = currentGLTheme.value
 
     // Create color signature for comparison
     const currentThemeColors = {

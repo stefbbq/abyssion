@@ -1,9 +1,5 @@
 import { useEffect } from 'preact/hooks'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
-import { getSceneOrchestrator } from '@lib/gl/index.ts'
-import { useClientLocation } from '@lib/utils/clientLocation.ts'
-import { isGLInitialized } from '@lib/gl/state.ts'
-import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * PageContainer wraps page content and manages the background color with a fade transition
@@ -13,25 +9,13 @@ import { lc, log } from '@lib/logger/index.ts'
  * Features theme-aware filter effects for the main content area.
  */
 const PageContainer = ({ children }: { children: preact.ComponentChildren }) => {
-  const [currentPath] = useClientLocation()
-  const isHomePage = currentPath === '/'
-
   // initialize logger and reset log contexts
   useEffect(() => {
     initializeClientLogger()
   }, [])
 
-  // initialize GL scene orchestrator (decide if we're rendering the logo or not)
-  useEffect(() => {
-    if (!isGLInitialized.value) return
-
-    const sceneOrchestrator = getSceneOrchestrator()
-    if (sceneOrchestrator) sceneOrchestrator.switchToPage(isHomePage ? 'logo-page' : 'content-page')
-    else log(lc.GL, 'Scene orchestrator not found despite GL being initialized.')
-  }, [isHomePage, isGLInitialized.value])
-
   return (
-    <main class='pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 sm:pt-5 relative z-10 space-y-8 filter-main'>
+    <main class='pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 pt-8 sm:pt-5 relative z-10 space-y-6'>
       {children}
     </main>
   )

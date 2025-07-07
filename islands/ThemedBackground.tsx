@@ -60,16 +60,9 @@ const ThemedBackground = () => {
   const transitionClass = 'transition-opacity duration-400'
 
   // background
-  const backgroundClasses = 'bg-[var(--colors-background-primary)]'
-
-  // Use theme-specific background opacity values
-  let backgroundOpacity = 'opacity-0'
-  if (!isHomePage) {
-    const themeOpacity = isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark
-    // Convert decimal to percentage for CSS class
-    const opacityPercent = Math.round(themeOpacity * 100)
-    backgroundOpacity = `opacity-[${themeOpacity}]`
-  }
+  const backgroundClasses = 'bg-[var(--colors-background)]'
+  const backgroundOpacity = isHomePage ? 0 : (isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark)
+  console.log('backgroundOpacity', backgroundOpacity)
 
   // noise
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
@@ -86,9 +79,7 @@ const ThemedBackground = () => {
       <div
         id='tint-background'
         className={`${baseClasses} ${backgroundClasses} ${zIndexClass} ${transitionClass}`}
-        style={{
-          opacity: isHomePage ? 0 : (isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark),
-        }}
+        style={{ opacity: backgroundOpacity }}
         aria-hidden='true'
       />
     </>
