@@ -8,6 +8,6 @@ export const createScene = (
   THREE: typeof Three,
 ): Promise<Three.Scene> => {
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(currentGLTheme.value.background)
+  scene.background = new THREE.Color(currentGLTheme.value.palette.background)
   return scene
 }

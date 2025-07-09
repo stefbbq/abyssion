@@ -15,7 +15,6 @@ const GLCanvasController = () => {
 
   useEffect(() => {
     // Early return if GL is disabled
-    console.log('isGLDisabled', isGLDisabled())
     if (isGLDisabled()) return
     if (!pathname) return
 

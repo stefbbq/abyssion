@@ -31,7 +31,7 @@ export default function App({ Component, url }: PageProps) {
         <link rel='stylesheet' href='/styles.css' />
         {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
-      <body f-client-nav class='min-h-screen relative text-foreground' style={{ fontFamily: theme.typography.fontFamily.body }}>
+      <body f-client-nav class='min-h-screen relative text-foreground bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
         <ThemedBackground />
 
         <ThemeProvider />

@@ -5,6 +5,7 @@ uniform sampler2D tDiffuse;
 uniform float time;
 uniform float chromaStrength;
 uniform float gain;
+uniform float contrast;
 uniform float segmentedGlitchMode;
 uniform float glitchIntensity;
 uniform float flickerRate;
@@ -45,13 +46,19 @@ void main() {
     vec4 b = texture2D(tDiffuse, vUv - vec2(displacement, 0.0));
     vec4 color = vec4(r.r, g.g, b.b, g.a);
 
-    // Vignette for focus
-    vec2 uv = vUv * (1.0 - vUv.yx);
-    float vig = uv.x * uv.y * 15.0;
-    vig = pow(vig, 0.25);
-    color *= vec4(vig, vig, vig, 1.0);
+    // Apply contrast
+    color.rgb = ((color.rgb - 0.5) * contrast) + 0.5;
+    
+      // Apply contrast
+  color.rgb = ((color.rgb - 0.5) * contrast) + 0.5;
+  
+  // Vignette for focus
+  vec2 uv = vUv * (1.0 - vUv.yx);
+  float vig = uv.x * uv.y * 15.0;
+  vig = pow(vig, 0.25);
+  color *= vec4(vig, vig, vig, 1.0);
 
-    gl_FragColor = color * gain;
+  gl_FragColor = color * gain;
     return;
   }
 

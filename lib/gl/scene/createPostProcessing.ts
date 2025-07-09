@@ -153,6 +153,7 @@ export const createPostProcessing = async (
       time: { value: 0 },
       chromaStrength: { value: finalPassConfig.chromaStrength },
       gain: { value: finalPassConfig.gain ?? 1.0 },
+      contrast: { value: finalPassConfig.contrast ?? 1.0 },
       segmentedGlitchMode: { value: 0 }, // 0 = classic, 1 = segmented
       glitchIntensity: { value: 0.7 }, // exposed for animation
       flickerRate: { value: 2.0 }, // slower block animation for analog feel

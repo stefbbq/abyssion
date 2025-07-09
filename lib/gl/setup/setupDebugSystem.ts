@@ -66,6 +66,13 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         }
       }
     },
+    onFinalPassChange: (params) => {
+      if (state.finalPass && state.finalPass.uniforms) {
+        state.finalPass.uniforms.chromaStrength.value = params.chromaStrength
+        state.finalPass.uniforms.gain.value = params.gain
+        state.finalPass.uniforms.contrast.value = params.contrast
+      }
+    },
     onSelectiveColorizationChange: (params) => {
       // Update video background selective colorization uniforms
       if (state.videoBackground && state.videoBackground.mesh) {
@@ -94,23 +101,29 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
               material.uniforms.selectiveSecondaryColor.value = secondaryColor.toArray()
             }
           }
+
+          log.debug(lc.GL_DEBUG, 'Video background selective colorization updated:', {
+            enabled: params.enabled,
+            brightnessWeight: params.targeting.brightnessWeight,
+            saturationWeight: params.targeting.saturationWeight,
+            brightnessThreshold: params.targeting.brightnessThreshold,
+            saturationThreshold: params.targeting.saturationThreshold,
+            blendBalance: params.colorBlending.blendBalance,
+            blendMode: params.colorBlending.blendMode,
+          })
         }
       }
 
-      // Update final pass glitch effect uniforms
-      if (state.finalPass && state.finalPass.uniforms) {
-        // Use segmentedGlitchMode to enable/disable the effect
-        state.finalPass.uniforms.segmentedGlitchMode.value = params.enabled ? 1.0 : 0.0
-        state.finalPass.uniforms.colorPopIntensity.value = params.colorBlending.blendBalance
-
-        log.debug(lc.GL_DEBUG, 'Selective colorization updated:', {
-          enabled: params.enabled,
-          blendBalance: params.colorBlending.blendBalance,
-          uniformsAfterUpdate: {
-            segmentedGlitchMode: state.finalPass.uniforms.segmentedGlitchMode.value,
-            colorPopIntensity: state.finalPass.uniforms.colorPopIntensity.value,
-          },
-        })
+      // Note: Removed final pass glitch effect control - that should be a separate effect
+    },
+    onVideoBackgroundOpacityChange: (opacity) => {
+      // Update video background opacity
+      if (state.videoBackground && state.videoBackground.mesh) {
+        const material = state.videoBackground.mesh.material as Three.ShaderMaterial
+        if (material && material.uniforms) {
+          material.uniforms.opacity.value = opacity
+          log.debug(lc.GL_DEBUG, 'Video background opacity updated:', opacity)
+        }
       }
     },
   })
@@ -149,8 +162,18 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
     })
   }
 
-  // Initialize selective colorization parameters
+  // Initialize final pass parameters
   if (state.finalPass && state.finalPass.uniforms) {
+    debugPanelsAPI.updateFinalPassParams({
+      chromaStrength: state.finalPass.uniforms.chromaStrength.value,
+      gain: state.finalPass.uniforms.gain.value,
+      contrast: state.finalPass.uniforms.contrast.value,
+    })
+  }
+
+  // Initialize selective colorization parameters
+  if (state.videoBackground && state.videoBackground.mesh) {
+    const material = state.videoBackground.mesh.material as Three.ShaderMaterial
     const glTheme = currentGLTheme.value
 
     log.debug(lc.GL_DEBUG, 'Theme colors for selective colorization:', {
@@ -162,23 +185,27 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       secondaryCSS: hexToCSS(rgbToHex(glTheme.secondary)),
     })
 
+    // Initialize video background opacity
+    const currentOpacity = material.uniforms.opacity?.value || 0.5
+    debugPanelsAPI.updateVideoBackgroundOpacity(currentOpacity)
+
     // Update the debug panels with initial selective colorization values
     debugPanelsAPI.updateSelectiveColorizationParams(
       {
-        enabled: state.finalPass.uniforms.segmentedGlitchMode?.value === 1.0,
+        enabled: material.uniforms.selectiveColorizationEnabled?.value === 1.0,
         useThemeColors: true,
         primaryTargetColor: hexToCSS(rgbToHex(glTheme.primary)),
         secondaryTargetColor: hexToCSS(rgbToHex(glTheme.secondary)),
         targeting: {
-          brightnessWeight: 0.5,
-          saturationWeight: 0.5,
-          brightnessThreshold: 0.5,
-          saturationThreshold: 0.5,
-          blendSmoothness: 0.1,
+          brightnessWeight: material.uniforms.selectiveBrightnessWeight?.value || 0.5,
+          saturationWeight: material.uniforms.selectiveSaturationWeight?.value || 0.5,
+          brightnessThreshold: material.uniforms.selectiveBrightnessThreshold?.value || 0.5,
+          saturationThreshold: material.uniforms.selectiveSaturationThreshold?.value || 0.5,
+          blendSmoothness: material.uniforms.selectiveBlendSmoothness?.value || 0.1,
         },
         colorBlending: {
           blendMode: 'mixed',
-          blendBalance: state.finalPass.uniforms.colorPopIntensity?.value || 1.0,
+          blendBalance: material.uniforms.selectiveBlendBalance?.value || 0.3,
         },
       },
       {

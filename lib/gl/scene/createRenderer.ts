@@ -24,6 +24,8 @@ export const createRenderer = (
     alpha: rendererConfig.alpha,
   })
 
+  renderer.setClearColor(0x000000, 1)
+
   // Debug: Check if WebGL context is available
   const gl = renderer.getContext()
   log(lc.GL, 'WebGL context:', gl)

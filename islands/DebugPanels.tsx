@@ -18,6 +18,12 @@ type DOFParams = {
   maxblur: number
 }
 
+type FinalPassParams = {
+  chromaStrength: number
+  gain: number
+  contrast: number
+}
+
 type SelectiveColorizationParams = {
   enabled: boolean
   useThemeColors: boolean
@@ -49,6 +55,7 @@ type DOFMeta = {
 const debugVisible = signal(false)
 const debugInfoContent = signal('')
 const dofParams = signal({ focus: 5.0, aperture: 0.025, maxblur: 0.01 })
+const finalPassParams = signal({ chromaStrength: 0.002, gain: 1.0, contrast: 1.0 })
 const selectiveColorizationParams = signal<SelectiveColorizationParams>({
   enabled: true,
   useThemeColors: true,
@@ -74,10 +81,15 @@ const isGLDisabled = signal(false)
 // the active GL scene name
 const activeGLScene = signal<'logo-page' | 'content-page'>('logo-page')
 
+// video background opacity
+const videoBackgroundOpacity = signal(0.5)
+
 // callbacks that will be set by setupDebugSystem
 let onDOFChangeCallback: ((params: DOFParams, meta?: DOFMeta) => void) | null = null
+let onFinalPassChangeCallback: ((params: FinalPassParams) => void) | null = null
 let onSelectiveColorizationChangeCallback: ((params: SelectiveColorizationParams) => void) | null = null
 let onToggleDebugCallback: ((enabled: boolean) => void) | null = null
+let onVideoBackgroundOpacityChangeCallback: ((opacity: number) => void) | null = null
 
 // the props for DebugPanels
 type Props = {
@@ -108,21 +120,33 @@ export const DebugPanels = (props: Props) => {
         if (typeof loaded.isGLDisabled === 'boolean') isGLDisabled.value = loaded.isGLDisabled
         if (typeof loaded.activeGLScene === 'string') activeGLScene.value = loaded.activeGLScene
         if (loaded.dofParams) dofParams.value = loaded.dofParams
+        if (loaded.finalPassParams) finalPassParams.value = loaded.finalPassParams
         if (loaded.selectiveColorizationParams) selectiveColorizationParams.value = loaded.selectiveColorizationParams
         if (loaded.themeColors) themeColors.value = loaded.themeColors
+        if (typeof loaded.videoBackgroundOpacity === 'number') videoBackgroundOpacity.value = loaded.videoBackgroundOpacity
       }
     }
 
     // Now set up subscriptions to save on change
-    const signals = [dofParams, selectiveColorizationParams, themeColors, isGLDisabled, activeGLScene] as const
+    const signals = [
+      dofParams,
+      finalPassParams,
+      selectiveColorizationParams,
+      themeColors,
+      isGLDisabled,
+      activeGLScene,
+      videoBackgroundOpacity,
+    ] as const
     const unsubscribers = signals.map((sig) =>
       sig.subscribe(() => {
         saveDebugSettings({
           isGLDisabled: isGLDisabled.value,
           activeGLScene: activeGLScene.value,
           dofParams: dofParams.value,
+          finalPassParams: finalPassParams.value,
           selectiveColorizationParams: selectiveColorizationParams.value,
           themeColors: themeColors.value,
+          videoBackgroundOpacity: videoBackgroundOpacity.value,
         })
       })
     )
@@ -147,6 +171,11 @@ export const DebugPanels = (props: Props) => {
   const handleDOFChange = (params: DOFParams, meta?: DOFMeta) => {
     dofParams.value = params
     if (onDOFChangeCallback) onDOFChangeCallback(params, meta)
+  }
+
+  const handleFinalPassChange = (params: FinalPassParams) => {
+    finalPassParams.value = params
+    if (onFinalPassChangeCallback) onFinalPassChangeCallback(params)
   }
 
   const handleSelectiveColorizationChange = (params: SelectiveColorizationParams) => {
@@ -180,7 +209,9 @@ export const DebugPanels = (props: Props) => {
     resetDebugSettings()
     isGLDisabled.value = false
     activeGLScene.value = 'logo-page'
+    videoBackgroundOpacity.value = 0.5
     dofParams.value = { focus: 5.0, aperture: 0.025, maxblur: 0.01 }
+    finalPassParams.value = { chromaStrength: 0.002, gain: 1.0, contrast: 1.0 }
     selectiveColorizationParams.value = {
       enabled: true,
       useThemeColors: true,
@@ -201,14 +232,21 @@ export const DebugPanels = (props: Props) => {
     themeColors.value = { highlight: '#ff00ff', shadow: '#0000ff' }
   }
 
+  const handleVideoBackgroundOpacityChange = (opacity: number) => {
+    videoBackgroundOpacity.value = opacity
+    if (onVideoBackgroundOpacityChangeCallback) onVideoBackgroundOpacityChangeCallback(opacity)
+  }
+
   return (
     <>
       <DebugControls
         visible={debugVisible.value}
         dofParams={dofParams.value}
+        finalPassParams={finalPassParams.value}
         selectiveColorizationParams={selectiveColorizationParams.value}
         themeColors={themeColors.value}
         onDOFChange={handleDOFChange}
+        onFinalPassChange={handleFinalPassChange}
         onSelectiveColorizationChange={handleSelectiveColorizationChange}
         onClose={handleClose}
         isGLDisabled={isGLDisabled.value}
@@ -216,6 +254,8 @@ export const DebugPanels = (props: Props) => {
         activeGLScene={activeGLScene.value}
         onSceneChange={handleSceneChange}
         onReset={handleReset}
+        videoBackgroundOpacity={videoBackgroundOpacity.value}
+        onVideoBackgroundOpacityChange={handleVideoBackgroundOpacityChange}
       />
       <DebugInfo
         visible={debugVisible.value}
@@ -231,10 +271,18 @@ export const debugPanelsAPI = {
   updateDOFParams: (params: DOFParams) => {
     dofParams.value = params
   },
+  // update final pass parameters
+  updateFinalPassParams: (params: FinalPassParams) => {
+    finalPassParams.value = params
+  },
   // update selective colorization parameters
   updateSelectiveColorizationParams: (params: SelectiveColorizationParams, colors: ThemeColors) => {
     selectiveColorizationParams.value = params
     themeColors.value = colors
+  },
+  // update video background opacity
+  updateVideoBackgroundOpacity: (opacity: number) => {
+    videoBackgroundOpacity.value = opacity
   },
   // set debug info content
   setDebugInfo: (content: string) => {
@@ -243,12 +291,16 @@ export const debugPanelsAPI = {
   // set callbacks
   setCallbacks: (callbacks: {
     onDOFChange?: (params: DOFParams, meta?: DOFMeta) => void
+    onFinalPassChange?: (params: FinalPassParams) => void
     onSelectiveColorizationChange?: (params: SelectiveColorizationParams) => void
     onToggleDebug?: (enabled: boolean) => void
+    onVideoBackgroundOpacityChange?: (opacity: number) => void
   }) => {
     if (callbacks.onDOFChange) onDOFChangeCallback = callbacks.onDOFChange
+    if (callbacks.onFinalPassChange) onFinalPassChangeCallback = callbacks.onFinalPassChange
     if (callbacks.onSelectiveColorizationChange) onSelectiveColorizationChangeCallback = callbacks.onSelectiveColorizationChange
     if (callbacks.onToggleDebug) onToggleDebugCallback = callbacks.onToggleDebug
+    if (callbacks.onVideoBackgroundOpacityChange) onVideoBackgroundOpacityChangeCallback = callbacks.onVideoBackgroundOpacityChange
   },
   // check if debug is available
   isAvailable: () => debugVisible.value,

@@ -115,6 +115,7 @@ export type GLTheme = {
   stencilColor: RGBColor
   baseLayerColor: RGBColor
   outlineColor: RGBColor
+  background: HexColor | RGBColor
   ghostingColors: {
     cyan: RGBColor
     magenta: RGBColor

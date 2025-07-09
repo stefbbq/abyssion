@@ -8,6 +8,12 @@ type DOFParams = {
   maxblur: number
 }
 
+type FinalPassParams = {
+  chromaStrength: number
+  gain: number
+  contrast: number
+}
+
 type SelectiveColorizationParams = {
   enabled: boolean
   useThemeColors: boolean
@@ -37,12 +43,16 @@ type Props = {
   visible: boolean
   // current DOF parameters
   dofParams: DOFParams
+  // current final pass parameters
+  finalPassParams: FinalPassParams
   // current selective colorization parameters
   selectiveColorizationParams: SelectiveColorizationParams
   // current theme colors
   themeColors: ThemeColors
   // callback when DOF parameters change
   onDOFChange: (params: DOFParams, meta?: { eventType: string }) => void
+  // callback when final pass parameters change
+  onFinalPassChange: (params: FinalPassParams) => void
   // callback when selective colorization parameters change
   onSelectiveColorizationChange: (params: SelectiveColorizationParams) => void
   // callback to close the debug panel
@@ -57,6 +67,10 @@ type Props = {
   onSceneChange: (scene: string) => void
   // callback to reset all debug settings
   onReset: () => void
+  // current video background opacity
+  videoBackgroundOpacity: number
+  // callback when video background opacity changes
+  onVideoBackgroundOpacityChange: (opacity: number) => void
 }
 
 /**
@@ -64,19 +78,19 @@ type Props = {
  * renders controls for DOF, tone mapping, theme switching, and hotkey info
  */
 export const DebugControls = (props: Props) => {
-  if (!props.visible) return null
-
-  const availableThemes = getAllThemeFamilies()
-  const currentTheme = currentThemeFamilyName.value
-
-  // Collapsible sections state
   const [sectionsExpanded, setSectionsExpanded] = useState({
     glControls: true,
     homepageControls: false,
     theme: true,
     dof: false,
+    finalPass: false,
     colorization: false,
   })
+
+  if (!props.visible) return null
+
+  const availableThemes = getAllThemeFamilies()
+  const currentTheme = currentThemeFamilyName.value
 
   const toggleSection = (section: keyof typeof sectionsExpanded) => {
     setSectionsExpanded((prev) => ({
@@ -101,6 +115,15 @@ export const DebugControls = (props: Props) => {
       [field]: parseFloat(target.value),
     }
     props.onDOFChange(newParams, { eventType: 'change' })
+  }
+
+  const handleFinalPassChange = (field: keyof FinalPassParams) => (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const value = parseFloat(target.value)
+    props.onFinalPassChange({
+      ...props.finalPassParams,
+      [field]: value,
+    })
   }
 
   const handleColorizationToggle = (e: Event) => {
@@ -184,6 +207,19 @@ export const DebugControls = (props: Props) => {
 
         {sectionsExpanded.glControls && (
           <>
+            <div className='flex items-center gap-2'>
+              <label className='flex-1'>Video BG Opacity:</label>
+              <input
+                type='range'
+                min='0'
+                max='1'
+                step='0.1'
+                value={props.videoBackgroundOpacity}
+                onChange={(e) => props.onVideoBackgroundOpacityChange(parseFloat((e.target as HTMLInputElement).value))}
+                className='flex-1'
+              />
+              <span className='w-12 text-right'>{props.videoBackgroundOpacity.toFixed(1)}</span>
+            </div>
             <label className='flex items-center gap-2'>
               <input
                 type='checkbox'
@@ -359,6 +395,68 @@ export const DebugControls = (props: Props) => {
 
       <hr className='border-border-subtle my-3' />
 
+      {/* Final Pass controls */}
+      <div className='space-y-2 mb-3'>
+        <div className='flex items-center justify-between mb-2'>
+          <p className='font-bold text-sm'>Final Pass</p>
+          <button
+            type='button'
+            onClick={() => toggleSection('finalPass')}
+            className='text-xs px-2 py-1 rounded-theme-sm bg-border-primary hover:bg-border-subtle'
+          >
+            {sectionsExpanded.finalPass ? '−' : '+'}
+          </button>
+        </div>
+
+        {sectionsExpanded.finalPass && (
+          <>
+            <div className='flex items-center gap-2'>
+              <label className='flex-1'>Gain:</label>
+              <input
+                type='range'
+                min='0.1'
+                max='3'
+                step='0.01'
+                value={props.finalPassParams.gain}
+                onInput={handleFinalPassChange('gain')}
+                className='flex-1'
+              />
+              <span className='w-12 text-right'>{props.finalPassParams.gain.toFixed(2)}</span>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <label className='flex-1'>Contrast:</label>
+              <input
+                type='range'
+                min='0.1'
+                max='3'
+                step='0.01'
+                value={props.finalPassParams.contrast}
+                onInput={handleFinalPassChange('contrast')}
+                className='flex-1'
+              />
+              <span className='w-12 text-right'>{props.finalPassParams.contrast.toFixed(2)}</span>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <label className='flex-1'>Chroma Strength:</label>
+              <input
+                type='range'
+                min='0'
+                max='0.01'
+                step='0.0001'
+                value={props.finalPassParams.chromaStrength}
+                onInput={handleFinalPassChange('chromaStrength')}
+                className='flex-1'
+              />
+              <span className='w-12 text-right'>{props.finalPassParams.chromaStrength.toFixed(4)}</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <hr className='border-border-subtle my-3' />
+
       {/* selective colorization controls */}
       <div className='space-y-2'>
         <div className='flex items-center justify-between mb-2'>
@@ -374,6 +472,14 @@ export const DebugControls = (props: Props) => {
 
         {sectionsExpanded.colorization && (
           <>
+            <div className='text-text-tertiary text-xs mb-2'>
+              <p className='mb-1'>
+                <strong>Effect:</strong> Makes video background grayscale except for areas that meet brightness/saturation criteria.
+              </p>
+              <p className='mb-1'>
+                <strong>Tip:</strong> Increase video background opacity above to see the effect more clearly.
+              </p>
+            </div>
             <label className='flex items-center gap-2'>
               <input
                 type='checkbox'

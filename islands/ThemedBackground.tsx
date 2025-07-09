@@ -62,7 +62,6 @@ const ThemedBackground = () => {
   // background
   const backgroundClasses = 'bg-[var(--colors-background)]'
   const backgroundOpacity = isHomePage ? 0 : (isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark)
-  console.log('backgroundOpacity', backgroundOpacity)
 
   // noise
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'

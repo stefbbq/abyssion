@@ -26,11 +26,12 @@ export const createGLTheme = (baseTheme: BaseTheme): GLTheme => {
 
   // Now use palette-based color lookup with proper shades
   const primaryHex = resolveColorReference('primary.500', fullPalette)
-  const secondaryHex = resolveColorReference('secondary.500', fullPalette)
-  const accentHex = resolveColorReference('tertiary.500', fullPalette)
-
   const primary = hexStringToRGB('#' + primaryHex.toString(16).padStart(6, '0'))
+
+  const secondaryHex = resolveColorReference('secondary.500', fullPalette)
   const secondary = hexStringToRGB('#' + secondaryHex.toString(16).padStart(6, '0'))
+
+  const accentHex = resolveColorReference('tertiary.500', fullPalette)
   const accent = hexStringToRGB('#' + accentHex.toString(16).padStart(6, '0'))
 
   return {

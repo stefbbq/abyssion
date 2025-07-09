@@ -6,7 +6,7 @@
     "pixelRatioMultiplier": 1.5,
     "pixelRatioMax": 2.5,
     "antialias": true,
-    "alpha": true,
+    "alpha": false,
     "exposure": 1
   },
   "postProcessingEnabled": true,
@@ -17,7 +17,7 @@
       "maxblur": 1
     },
     "bloom": {
-      "bloomStrength": 0.1,
+      "bloomStrength": 0,
       "bloomThreshold": 0.2,
       "bloomRadius": 0.8,
       "bloomStrengthMultiplier": 3,
@@ -44,10 +44,11 @@
       "ditherStrength": 10,
       "ditherFrequency": 1000.0,
       "ditherAnimation": 0.1,
-      "gain": 1.5
+      "gain": 1.2,
+      "contrast": 1.1
     },
     "selectiveColorization": {
-      "enabled": true,
+      "enabled": false,
       "useThemeColors": true,
       "primaryTargetColor": "#ff6600",
       "secondaryTargetColor": "#0066ff",

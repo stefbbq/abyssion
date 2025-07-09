@@ -61,6 +61,8 @@ export type FinalPassParams = {
   ditherAnimation: number
   /** Gain/brightness multiplier for final pass (default 1.0) */
   gain?: number
+  /** Contrast adjustment (default 1.0) */
+  contrast?: number
 }
 
 /** Parameters for sharpening effect */
