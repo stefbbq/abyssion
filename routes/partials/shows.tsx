@@ -1,5 +1,3 @@
-import { defineRoute } from '$fresh/server.ts'
-import { Head } from '$fresh/runtime.ts'
 import { Button } from '@components/Button.tsx'
 import shows from '@data/content-shows.json' with { type: 'json' }
 import { Shell } from '@components/Shell.tsx'
@@ -11,7 +9,7 @@ type ShowData = {
   ticketLink: string
 }
 
-export default defineRoute(() => {
+export default function ShowsSection() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -29,11 +27,6 @@ export default defineRoute(() => {
 
   return (
     <>
-      <Head>
-        <title>shows | abyssion</title>
-        <meta name='description' content='Upcoming and past shows by abyssion' />
-      </Head>
-
       {/* Upcoming Shows */}
       <Shell>
         <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>upcoming shows</h2>
@@ -89,4 +82,4 @@ export default defineRoute(() => {
       </Shell>
     </>
   )
-})
+}

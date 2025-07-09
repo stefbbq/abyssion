@@ -1,13 +1,7 @@
-import { defineRoute } from '$fresh/server.ts'
-import { Head } from '$fresh/runtime.ts'
-
-export default defineRoute(() => {
+export default function HomeSection() {
   return (
-    <>
-      <Head>
-        <title>abyssion</title>
-        <meta name='description' content='Official website for abyssion' />
-      </Head>
-    </>
+    <section>
+      {/* Home content goes here. Add hero, intro, etc. */}
+    </section>
   )
-})
+}

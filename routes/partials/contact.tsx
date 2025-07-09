@@ -1,17 +1,10 @@
-import { defineRoute } from '$fresh/server.ts'
-import { Head } from '$fresh/runtime.ts'
 import { Shell } from '@components/Shell.tsx'
 import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '@components/icons/index.ts'
 import ContactForm from '@islands/ContactForm.tsx'
 
-export default defineRoute(() => {
+export default function ContactSection() {
   return (
     <>
-      <Head>
-        <title>Contact | abyssion</title>
-        <meta name='description' content='Get in touch with abyssion' />
-      </Head>
-
       {/* Send us a message */}
       <div class='grid gap-8 lg:grid-cols-2'>
         <Shell>
@@ -101,4 +94,4 @@ export default defineRoute(() => {
       </div>
     </>
   )
-})
+}

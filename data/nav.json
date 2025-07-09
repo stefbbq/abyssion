@@ -2,23 +2,23 @@
   "mainNav": [
     {
       "key": "home",
-      "path": "/",
+      "path": "#home",
       "label": "home",
       "excludeFrom": ["header"]
     },
     {
       "key": "shows",
-      "path": "/shows",
+      "path": "#shows",
       "label": "shows"
     },
     {
       "key": "bio",
-      "path": "/bio",
+      "path": "#bio",
       "label": "bio"
     },
     {
       "key": "contact",
-      "path": "/contact",
+      "path": "#contact",
       "label": "contact"
     }
   ],

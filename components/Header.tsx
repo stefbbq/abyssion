@@ -24,6 +24,16 @@ export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
   const themeMode = useSignal(currentThemeMode.value)
+  const [currentHash, setCurrentHash] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentHash(globalThis.location.hash)
+      const onHashChange = () => setCurrentHash(globalThis.location.hash)
+      globalThis.addEventListener('hashchange', onHashChange)
+      return () => globalThis.removeEventListener('hashchange', onHashChange)
+    }
+  }, [])
 
   // Track theme mode changes
   useSignalEffect(() => {
@@ -89,7 +99,7 @@ export const Header = () => {
                   key={item.key}
                   href={item.path}
                   className={getFocusClass()}
-                  isActive={item.path === currentPath}
+                  isActive={currentHash === item.path}
                 >
                   {item.label}
                 </HeaderLink>

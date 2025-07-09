@@ -1,19 +1,12 @@
-import { defineRoute } from '$fresh/server.ts'
-import { Head } from '$fresh/runtime.ts'
 import { bio } from '@data/content-bio.ts'
 import { Shell } from '@components/Shell.tsx'
 import { Card } from '@components/Card.tsx'
 import { ListItem } from '@components/ListItem.tsx'
 import { TextBlock } from '@components/TextBlock.tsx'
 
-export default defineRoute(() => {
+export default function BioSection() {
   return (
     <>
-      <Head>
-        <title>About | abyssion</title>
-        <meta name='description' content='Learn about the band abyssion' />
-      </Head>
-
       {/* about */}
       <Shell>
         <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>{bio.aboutTitle}</h2>
@@ -58,4 +51,4 @@ export default defineRoute(() => {
       </Shell>
     </>
   )
-})
+}

@@ -4,8 +4,9 @@ import { initGL, type InitOptions } from '@lib/gl/index.ts'
 /**
  * GLCanvas component with electrical effects and interactivity
  * Only renders if GL is not disabled (debug signal)
+ * Accepts a style prop for parallax transform.
  */
-export const GLCanvas = () => {
+export const GLCanvas = ({ style }: { style?: any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -35,8 +36,8 @@ export const GLCanvas = () => {
   return (
     <canvas
       ref={canvasRef}
-      class='fixed inset-0 w-full h-full block bg-black'
-      style={{ top: 0, left: 0 }}
+      class='fixed inset-0 w-full h-full block bg-black -z-10'
+      style={style}
     />
   )
 }

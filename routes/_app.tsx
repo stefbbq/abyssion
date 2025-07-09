@@ -2,15 +2,14 @@ import { type PageProps } from '$fresh/server.ts'
 import { Head, Partial } from '$fresh/runtime.ts'
 import Header from '@islands/Header.tsx'
 import ActionZoneController from '@islands/ActionZoneController.tsx'
-import GLCanvasController from '@islands/GLCanvasController.tsx'
 import { DebugPanels } from '@islands/DebugPanels.tsx'
 import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
-import PageContainer from '@islands/PageContainer.tsx'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentUITheme } from '@lib/theme/index.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
 import videoManifest from '../static/videos/manifest.json' with { type: 'json' }
+import SinglePageScrollManager from '@islands/SinglePageScrollManager.tsx'
 
 export default function App({ Component, url }: PageProps) {
   const pagePath = url.pathname
@@ -36,17 +35,15 @@ export default function App({ Component, url }: PageProps) {
 
         <ThemeProvider />
 
-        <GLCanvasController />
-
         <DebugPanels />
+
+        <SinglePageScrollManager />
 
         {showHeader && <Header />}
 
-        <PageContainer>
-          <Partial name='page-content'>
-            <Component />
-          </Partial>
-        </PageContainer>
+        <Partial name='page-content'>
+          <Component />
+        </Partial>
 
         {showActionZone && <ActionZoneController />}
       </body>

@@ -20,6 +20,14 @@ export default function ActionZoneController() {
   }, [])
 
   const onAction = (action: NavButtonState['action']) => {
+    if (action.type === 'navigate' && action.href && action.href.startsWith('#')) {
+      const element = document.querySelector(action.href)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+        setIsMenuOpen(false)
+        return
+      }
+    }
     switch (action.type) {
       case 'back':
         globalThis.history.back()
@@ -28,6 +36,7 @@ export default function ActionZoneController() {
         setIsMenuOpen(!isMenuOpen)
         break
       case 'navigate':
+        // fallback: do nothing
         break
     }
   }
@@ -35,11 +44,12 @@ export default function ActionZoneController() {
   const onAnchorLink = (path: string) => {
     if (path.startsWith('#')) {
       const element = document.querySelector(path)
-      element?.scrollIntoView({ behavior: 'smooth' })
-      setIsMenuOpen(false)
-      return true
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+        setIsMenuOpen(false)
+        return true
+      }
     }
-
     return false
   }
 

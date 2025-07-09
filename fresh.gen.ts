@@ -18,9 +18,8 @@ import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
-import * as $GLCanvasController from './islands/GLCanvasController.tsx'
 import * as $Header from './islands/Header.tsx'
-import * as $PageContainer from './islands/PageContainer.tsx'
+import * as $SinglePageScrollManager from './islands/SinglePageScrollManager.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
 import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
 import * as $ThemedBackground from './islands/ThemedBackground.tsx'
@@ -46,9 +45,8 @@ const manifest = {
     './islands/ContactForm.tsx': $ContactForm,
     './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
-    './islands/GLCanvasController.tsx': $GLCanvasController,
     './islands/Header.tsx': $Header,
-    './islands/PageContainer.tsx': $PageContainer,
+    './islands/SinglePageScrollManager.tsx': $SinglePageScrollManager,
     './islands/ThemeProvider.tsx': $ThemeProvider,
     './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
     './islands/ThemedBackground.tsx': $ThemedBackground,
