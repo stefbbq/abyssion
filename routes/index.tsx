@@ -2,31 +2,23 @@ import HomeSection from './partials/home.tsx'
 import ShowsSection from './partials/shows.tsx'
 import BioSection from './partials/bio.tsx'
 import ContactSection from './partials/contact.tsx'
+import { Section } from '@components/Section.tsx'
 
 export default function MainPage() {
   return (
-    <main class=''>
-      <section id='home' className='min-h-screen'>
+    <main class='space-y-8'>
+      <Section id='home' fullHeight>
         <HomeSection />
-      </section>
-      <section
-        id='shows'
-        className='bg-gray-100 min-h-screen pt-24 pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 sm:pt-5 relative z-10 space-y-6'
-      >
+      </Section>
+      <Section id='shows'>
         <ShowsSection />
-      </section>
-      <section
-        id='bio'
-        className='bg-gray-200 min-h-screen pt-24 pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 sm:pt-5 relative z-10 space-y-6'
-      >
+      </Section>
+      <Section id='bio'>
         <BioSection />
-      </section>
-      <section
-        id='contact'
-        className='bg-gray-300 min-h-screen pt-24 pb-8 max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 sm:pt-5 relative z-10 space-y-6'
-      >
+      </Section>
+      <Section id='contact' lastSection>
         <ContactSection />
-      </section>
+      </Section>
     </main>
   )
 }

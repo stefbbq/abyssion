@@ -73,12 +73,21 @@ export default function SinglePageScrollManager() {
     )
     sections.forEach((section) => observer.observe(section))
 
+    // Helper function to get scroll offset based on device
+    const getScrollOffset = () => {
+      const isMobile = globalThis.innerWidth < 768 // md breakpoint
+      return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop
+    }
+
     // Smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {
       const hash = globalThis.location.hash
       if (hash && sectionIds.includes(hash.replace('#', ''))) {
         const el = document.getElementById(hash.replace('#', ''))
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
+        if (el) {
+          const offsetTop = el.offsetTop - getScrollOffset()
+          globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+        }
       }
     }
     globalThis.addEventListener('hashchange', handleHashChange)
@@ -91,7 +100,10 @@ export default function SinglePageScrollManager() {
         if (sectionIds.includes(hash.replace('#', ''))) {
           e.preventDefault()
           const el = document.getElementById(hash.replace('#', ''))
-          if (el) el.scrollIntoView({ behavior: 'smooth' })
+          if (el) {
+            const offsetTop = el.offsetTop - getScrollOffset()
+            globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+          }
           history.replaceState(null, '', hash)
         }
       }
@@ -102,21 +114,21 @@ export default function SinglePageScrollManager() {
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
-          setParallaxY(window.scrollY * -0.2)
+          setParallaxY(globalThis.scrollY * -0.2)
           ticking.current = false
         })
         ticking.current = true
       }
     }
-    window.addEventListener('scroll', handleScroll)
+    globalThis.addEventListener('scroll', handleScroll)
     // Set initial position
-    setParallaxY(window.scrollY * -0.2)
+    setParallaxY(globalThis.scrollY * -0.2)
 
     return () => {
       observer.disconnect()
       globalThis.removeEventListener('hashchange', handleHashChange)
       document.removeEventListener('click', handleClick)
-      window.removeEventListener('scroll', handleScroll)
+      globalThis.removeEventListener('scroll', handleScroll)
     }
   }, [])
 
