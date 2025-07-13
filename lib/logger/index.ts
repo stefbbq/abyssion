@@ -24,7 +24,7 @@ import { type ContextFilter, createContextFilter } from './utils/createContextFi
 import { createServerLogger } from './utils/createServerLogger.ts'
 import { createClientLogger, type LogFunction } from './utils/createClientLogger.ts'
 
-let minLogLevel: LogLevel = 'debug'
+let minLogLevel: LogLevel = 'trace'
 const contextFilter: ContextFilter = createContextFilter()
 const getMinLogLevelFn = () => minLogLevel
 

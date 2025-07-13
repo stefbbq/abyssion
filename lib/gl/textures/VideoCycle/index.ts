@@ -25,9 +25,11 @@ export const createVideoCycle = (
 
   // Prevent concurrent transitions
   let isTransitioning = false
+  let transitionStartTime = 0
   let nextVideoPrepared = false
   // deno-lint-ignore no-unused-vars
   let preparedVideoIndex = -1
+  let nextVideoPreparationTriggerTime = 0
 
   // Buffers - mutable boundary
   let activeBuffer: BufferObject = frontBuffer
@@ -49,8 +51,16 @@ export const createVideoCycle = (
    * Prepares the next video in the background for smooth transitions
    */
   const prepareNextVideo = async (state: PlaybackState): Promise<void> => {
-    if (nextVideoPrepared || state.videos.length < 2) return
+    if (nextVideoPrepared) {
+      log.trace(lc.GL_TEXTURES, `Preparation skipped: already prepared`)
+      return
+    }
+    if (state.videos.length < 2) {
+      log.trace(lc.GL_TEXTURES, `Preparation skipped: not enough videos (${state.videos.length})`)
+      return
+    }
 
+    log.debug(lc.GL_TEXTURES, `Starting preparation for next video (current: ${state.currentIndex})`)
     try {
       const nextIndex = selectNextVideoIndex(
         state.currentIndex,
@@ -60,15 +70,15 @@ export const createVideoCycle = (
 
       const nextVideo = state.videos[nextIndex]
 
-      // Wait for video to be ready
-      if (nextVideo.video.readyState < 3) {
+      // Wait for video to be ready (reduce readyState requirement)
+      if (nextVideo.video.readyState < 2) {
         await new Promise<void>((resolve, reject) => {
           let attempts = 0
-          const maxAttempts = 30 // 3 seconds max
+          const maxAttempts = 50 // 5 seconds max
 
           const checkReady = () => {
             attempts++
-            if (nextVideo.video.readyState >= 3) resolve()
+            if (nextVideo.video.readyState >= 2) resolve()
             else if (attempts >= maxAttempts) reject(new Error('Video not ready'))
             else setTimeout(checkReady, ms('0.1s'))
           }
@@ -92,7 +102,12 @@ export const createVideoCycle = (
       // Prepare video timing
       const result = await getNewStartTimeAndDuration(nextVideo.video, minVideoLength, maxVideoLength)
       nextVideo.video.currentTime = result.startTime
-      await nextVideo.video.play()
+
+      // Add timeout protection for video.play()
+      await Promise.race([
+        nextVideo.video.play(),
+        new Promise<void>((_, reject) => setTimeout(() => reject(new Error(`Video ${nextIndex} preparation play timed out`)), ms('3s'))),
+      ])
 
       // Store preparation state
       nextVideoPrepared = true
@@ -107,6 +122,11 @@ export const createVideoCycle = (
     } catch (error) {
       log.warn(lc.GL_TEXTURES, `Failed to prepare next video:`, error)
       nextVideoPrepared = false
+      preparedVideoIndex = -1
+      // Clear any preparation state on the hidden buffer
+      hiddenBuffer._plannedStartTime = undefined
+      hiddenBuffer._plannedDuration = undefined
+      hiddenBuffer._plannedVideoIndex = undefined
     }
   }
 
@@ -125,19 +145,25 @@ export const createVideoCycle = (
       const recentIndices = [currentIndex]
       const current = state.videos[currentIndex]
 
-      // Wait for video to have enough data
-      if (current.video.readyState < 3) {
+      log.debug(lc.GL_TEXTURES, `Selected video ${currentIndex} for startup, readyState: ${current.video.readyState}`)
+
+      // Wait for video to have enough data (reduce readyState requirement)
+      if (current.video.readyState < 2) {
         log.trace(lc.GL_TEXTURES, `Video ${currentIndex} not ready (readyState=${current.video.readyState}), waiting...`)
 
         await new Promise<void>((resolve) => {
           const checkReady = () => {
-            if (current.video.readyState >= 3) resolve()
+            log.trace(lc.GL_TEXTURES, `Checking readyState: ${current.video.readyState}`)
+            if (current.video.readyState >= 2) resolve()
             else setTimeout(checkReady, ms('0.1s'))
           }
           checkReady()
         })
       }
 
+      log.debug(lc.GL_TEXTURES, `Video ${currentIndex} readyState check passed: ${current.video.readyState}`)
+
+      log.debug(lc.GL_TEXTURES, `Setting up material for video ${currentIndex}`)
       if ('uniforms' in activeBuffer.material) {
         // ShaderMaterial
         activeBuffer.material.uniforms.videoTexture.value = current.texture
@@ -149,10 +175,20 @@ export const createVideoCycle = (
       }
       activeBuffer.material.needsUpdate = true
 
+      log.debug(lc.GL_TEXTURES, `Getting start time and duration for video ${currentIndex}`)
       const result = await getNewStartTimeAndDuration(current.video, minVideoLength, maxVideoLength)
+      log.debug(lc.GL_TEXTURES, `Got timing result: startTime=${result.startTime.toFixed(2)}s, duration=${result.duration.toFixed(2)}s`)
 
       current.video.currentTime = result.startTime
-      await current.video.play()
+      log.debug(lc.GL_TEXTURES, `Set currentTime to ${result.startTime.toFixed(2)}s for video ${currentIndex}`)
+
+      // Add timeout protection for video.play()
+      log.debug(lc.GL_TEXTURES, `Attempting to play video ${currentIndex}`)
+      await Promise.race([
+        current.video.play(),
+        new Promise<void>((_, reject) => setTimeout(() => reject(new Error(`Video ${currentIndex} startup play timed out`)), ms('3s'))),
+      ])
+      log.debug(lc.GL_TEXTURES, `Video ${currentIndex} play() completed successfully`)
 
       log.debug(lc.GL_TEXTURES, `Started with video ${currentIndex}, duration: ${result.duration}s`)
 
@@ -168,9 +204,10 @@ export const createVideoCycle = (
 
       isTransitioning = false
 
-      // Prepare next video when halfway through current one
-      setTimeout(() => prepareNextVideo(newState), result.duration * 500) // 50% through
+      // Schedule next video preparation when halfway through current one
+      nextVideoPreparationTriggerTime = Date.now() + (result.duration * 500) // 50% through
 
+      log.debug(lc.GL_TEXTURES, `startPlayback completed successfully, returning new state with isPlaying=${newState.isPlaying}`)
       return newState
     } catch (error) {
       log.error(lc.GL_TEXTURES, `Error starting playback:`, error)
@@ -183,9 +220,14 @@ export const createVideoCycle = (
    * Smoothly transitions to the prepared next video
    */
   const transitionToNextVideo = async (state: PlaybackState): Promise<PlaybackState> => {
-    if (isTransitioning) return state
+    if (isTransitioning) {
+      log.warn(lc.GL_TEXTURES, `Transition blocked: already transitioning`)
+      return state
+    }
 
+    log.debug(lc.GL_TEXTURES, `Starting transition from video ${state.currentIndex} (prepared: ${nextVideoPrepared})`)
     isTransitioning = true
+    transitionStartTime = Date.now()
 
     try {
       let nextIndex: number
@@ -254,7 +296,12 @@ export const createVideoCycle = (
         // Play it
         const result = await getNewStartTimeAndDuration(next.video, minVideoLength, maxVideoLength)
         next.video.currentTime = result.startTime
-        await next.video.play()
+
+        // Add timeout protection for video.play()
+        await Promise.race([
+          next.video.play(),
+          new Promise<void>((_, reject) => setTimeout(() => reject(new Error(`Video ${nextIndex} play timed out`)), ms('3s'))),
+        ])
 
         duration = result.duration
       }
@@ -274,15 +321,31 @@ export const createVideoCycle = (
       log(lc.GL_TEXTURES, `Switched to video ${nextIndex}, duration: ${duration.toFixed(2)}s (recent: [${updatedRecentIndices.join(',')}])`)
 
       isTransitioning = false
+      transitionStartTime = 0
 
-      // Prepare next video for the following transition
-      setTimeout(() => prepareNextVideo(newState), duration * ms('0.5s')) // 50% through
+      // Schedule next video preparation for the following transition
+      nextVideoPreparationTriggerTime = Date.now() + (duration * ms('0.5s')) // 50% through
 
       return newState
     } catch (error) {
       log.error(lc.GL_TEXTURES, `Error in transition:`, error)
       isTransitioning = false
-      return state
+      transitionStartTime = 0
+      nextVideoPrepared = false
+      preparedVideoIndex = -1
+      nextVideoPreparationTriggerTime = 0
+
+      // Clear any preparation state on error
+      hiddenBuffer._plannedStartTime = undefined
+      hiddenBuffer._plannedDuration = undefined
+      hiddenBuffer._plannedVideoIndex = undefined
+
+      // Return modified state with reset timer to prevent infinite loop
+      return {
+        ...state,
+        timeSinceSwitch: 0,
+        currentDuration: Math.max(state.currentDuration, 5), // Ensure minimum 5s before next attempt
+      }
     }
   }
 
@@ -310,11 +373,49 @@ export const createVideoCycle = (
    * Updates the video cycle state and handles video transitions
    */
   const update = async (delta: number): Promise<void> => {
-    if (!enabled || !playbackState.isPlaying || playbackState.videos.length < 2 || isTransitioning) return
+    if (!enabled) {
+      log.trace(lc.GL_TEXTURES, `Update skipped: disabled`)
+      return
+    }
+    if (!playbackState.isPlaying) {
+      log.trace(lc.GL_TEXTURES, `Update skipped: not playing`)
+      return
+    }
+    if (playbackState.videos.length < 2) {
+      log.trace(lc.GL_TEXTURES, `Update skipped: not enough videos (${playbackState.videos.length})`)
+      return
+    }
+    if (isTransitioning) {
+      // Check if transition has been stuck for too long
+      const transitionDuration = Date.now() - transitionStartTime
+      if (transitionDuration > ms('10s')) {
+        log.error(lc.GL_TEXTURES, `Transition stuck for ${transitionDuration}ms - forcing reset`)
+        isTransitioning = false
+        nextVideoPrepared = false
+        preparedVideoIndex = -1
+        transitionStartTime = 0
+        nextVideoPreparationTriggerTime = 0
+        // Clear any preparation state
+        hiddenBuffer._plannedStartTime = undefined
+        hiddenBuffer._plannedDuration = undefined
+        hiddenBuffer._plannedVideoIndex = undefined
+      } else {
+        log.trace(lc.GL_TEXTURES, `Update skipped: currently transitioning (${transitionDuration}ms)`)
+        return
+      }
+    }
+
+    // Check if it's time to prepare next video
+    if (nextVideoPreparationTriggerTime > 0 && Date.now() >= nextVideoPreparationTriggerTime) {
+      log.debug(lc.GL_TEXTURES, `Triggering next video preparation`)
+      nextVideoPreparationTriggerTime = 0 // Reset trigger
+      prepareNextVideo(playbackState)
+    }
 
     const newTimeSinceSwitch = playbackState.timeSinceSwitch + delta
 
     if (newTimeSinceSwitch >= playbackState.currentDuration) {
+      log.debug(lc.GL_TEXTURES, `Time to transition: ${newTimeSinceSwitch.toFixed(2)}s >= ${playbackState.currentDuration.toFixed(2)}s`)
       playbackState = await transitionToNextVideo(playbackState)
     } else {
       playbackState = {

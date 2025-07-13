@@ -20,8 +20,13 @@ type OrchestratorRegistry = Record<string, () => AnimationOrchestrator>
 export const createSceneOrchestrator = (state: RendererState, orchestratorRegistry: OrchestratorRegistry) => {
   let time = 0
   let lastTime = 0
+  let lastRenderTime = 0
   let animationId: number
   let isPaused = false
+
+  // 24 FPS = 1000ms / 24 = ~41.67ms between frames
+  const TARGET_FPS = 60
+  const FRAME_INTERVAL = 1000 / TARGET_FPS
 
   // Create shared behaviors that persist across page changes
   const shared = createSharedBehaviors()
@@ -39,6 +44,7 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
 
   /**
    * Main animation loop (side effect)
+   * Limited to 24 FPS for performance
    */
   const animate = (timestamp: number) => {
     // Align focus plane if present
@@ -49,6 +55,14 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
     }
 
     animationId = requestAnimationFrame(animate)
+
+    // FPS limiting - only render if enough time has passed
+    const timeSinceLastRender = timestamp - lastRenderTime
+    if (timeSinceLastRender < FRAME_INTERVAL) {
+      return // Skip this frame
+    }
+
+    lastRenderTime = timestamp
     const deltaTime = timestamp - lastTime
     lastTime = timestamp
     time += animation.timeIncrement

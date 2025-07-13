@@ -69,17 +69,18 @@ export const initGL = async (options: InitOptions) => {
   log(lc.GL, 'Added video background')
 
   // Set up post-processing effects
-  let composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass
+  let composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass
   if (configScene.postProcessingEnabled) {
-    ;({ composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass } = await createPostProcessing(
-      THREE,
-      scene,
-      camera,
-      renderer,
-      width,
-      height,
-      postProcessingConfig,
-    ))
+    ;({ composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass } =
+      await createPostProcessing(
+        THREE,
+        scene,
+        camera,
+        renderer,
+        width,
+        height,
+        postProcessingConfig,
+      ))
   } else {
     // Minimal composer-like object for compatibility
     composer = {
@@ -92,6 +93,8 @@ export const initGL = async (options: InitOptions) => {
     ditheringPass = null
     sharpeningPass = null
     pixelationPass = null
+    pixelBleedPass = null
+    crtPass = null
   }
 
   // Create the 2D UI overlay
@@ -135,6 +138,8 @@ export const initGL = async (options: InitOptions) => {
     ditheringPass,
     sharpeningPass,
     pixelationPass,
+    pixelBleedPass,
+    crtPass,
     logoController,
     logoPlanes,
     logoLayers,
@@ -266,27 +271,94 @@ export const getGLState = () => {
   return glState
 }
 
-export const updateScrollCorruption = (corruptionLevel: number) => {
-  if (!glState) return
+export const updateScrollCorruption = (scrollY: number, state: RendererState) => {
+  if (!state) return
 
-  // Apply corruption effects based on scroll position
-  // This could affect post-processing effects or other scene elements
-  if (glState.pixelationPass) {
-    // Increase pixelation based on corruption level
-    const basePixelSize = 16
-    const maxPixelSize = 64
-    const pixelSize = basePixelSize + (corruptionLevel * (maxPixelSize - basePixelSize))
-    if (glState.pixelationPass.uniforms.pixelSize) {
-      glState.pixelationPass.uniforms.pixelSize.value = pixelSize
+  // Move camera down at 1/1000th of scroll speed
+  if (state.camera) {
+    const cameraYOffset = scrollY * -0.002 // Move camera down as we scroll down (1/1000th)
+    state.camera.position.y = cameraYOffset
+
+    // Also move the lookAt target down by the same amount to maintain view direction
+    const lookAtTarget = cameraYOffset // Look at point moves down with camera
+    state.camera.lookAt(0, lookAtTarget, 0)
+
+    // Update orbit controls target if they exist (debug mode only)
+    if (state.controls && state.controls.target) {
+      state.controls.target.set(0, lookAtTarget, 0)
+    }
+
+    state.camera.updateProjectionMatrix()
+  }
+
+  // Calculate scroll progress - corruption starts at 10% scroll and reaches full at 100%
+  const scrollProgress = Math.min(scrollY / (document.body.scrollHeight - window.innerHeight), 1.0)
+  const corruptionThreshold = 0.1 // Start corruption at 10% scroll
+
+  // Calculate corruption intensity using square root easing for aggressive ramp-up
+  let corruptionIntensity = 0.0
+  if (scrollProgress > corruptionThreshold) {
+    const normalizedProgress = (scrollProgress - corruptionThreshold) / (1.0 - corruptionThreshold)
+    corruptionIntensity = Math.sqrt(normalizedProgress) // Square root for aggressive early ramp
+  }
+
+  console.log('📊 updateScrollCorruption:', {
+    scrollY,
+    cameraY: state.camera.position.y,
+    scrollProgress: scrollProgress.toFixed(3),
+    corruptionIntensity: corruptionIntensity.toFixed(3),
+    documentHeight: document.body.scrollHeight,
+    windowHeight: window.innerHeight,
+    scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
+  })
+
+  // Update CRT corruption pass uniforms
+  if (state.crtPass && state.crtPass.material) {
+    const material = state.crtPass.material as any
+    if (material.uniforms) {
+      // Update main corruption intensity from scroll
+      material.uniforms.corruptionIntensity.value = corruptionIntensity
+
+      // Update time for animation effects
+      material.uniforms.time.value = performance.now() / 1000
+
+      console.log('🎯 CRT Pass uniforms updated:', {
+        corruptionIntensity: material.uniforms.corruptionIntensity.value,
+        time: material.uniforms.time.value,
+        resolution: material.uniforms.resolution?.value,
+      })
     }
   }
 
-  if (glState.finalPass?.uniforms) {
+  // Update pixel bleed pass uniforms
+  if (state.pixelBleedPass && state.pixelBleedPass.material) {
+    const material = state.pixelBleedPass.material as any
+    if (material.uniforms) {
+      // Update time if the pass is enabled (controlled by debug controls)
+      if (state.pixelBleedPass.enabled) {
+        material.uniforms.time.value = performance.now() / 1000
+        console.log('🎯 Pixel Bleed Pass time updated:', material.uniforms.time.value)
+      }
+    }
+  }
+
+  // Keep existing effects for compatibility
+  if (state.pixelationPass) {
+    // Increase pixelation based on corruption level
+    const basePixelSize = 16
+    const maxPixelSize = 64
+    const pixelSize = basePixelSize + (corruptionIntensity * (maxPixelSize - basePixelSize))
+    if (state.pixelationPass.uniforms.pixelSize) {
+      state.pixelationPass.uniforms.pixelSize.value = pixelSize
+    }
+  }
+
+  if (state.finalPass?.uniforms) {
     // Increase chromatic aberration based on corruption
     const baseChroma = 0.002
     const maxChroma = 0.02
-    const chromaStrength = baseChroma + (corruptionLevel * (maxChroma - baseChroma))
-    glState.finalPass.uniforms.chromaStrength.value = chromaStrength
+    const chromaStrength = baseChroma + (corruptionIntensity * (maxChroma - baseChroma))
+    state.finalPass.uniforms.chromaStrength.value = chromaStrength
   }
 }
 

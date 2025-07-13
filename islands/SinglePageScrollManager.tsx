@@ -13,7 +13,6 @@ const sectionIds = ['home', 'shows', 'bio', 'contact']
 export default function SinglePageScrollManager() {
   const [showGL, setShowGL] = useState(() => !isGLDisabled())
   const lastScene = useRef<'logo-page' | 'content-page' | null>(null)
-  const [parallaxY, setParallaxY] = useState(0)
   const ticking = useRef(false)
 
   useEffect(() => {
@@ -110,12 +109,11 @@ export default function SinglePageScrollManager() {
     }
     document.addEventListener('click', handleClick)
 
-    // Parallax scroll effect and corruption tracking
+    // Scroll corruption tracking
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
           const scrollY = globalThis.scrollY
-          setParallaxY(scrollY * -0.2)
 
           // Update scroll corruption effect if GL is initialized
           if (isGLInitialized.value) {
@@ -132,12 +130,9 @@ export default function SinglePageScrollManager() {
     }
     globalThis.addEventListener('scroll', handleScroll)
 
-    // Set initial positions
-    setParallaxY(globalThis.scrollY * -0.2)
-
     // Update scroll metrics when layout changes
     const handleResize = () => {
-      updateScrollMetrics()
+      updateScrollMetrics(globalThis.scrollY, 0)
     }
     globalThis.addEventListener('resize', handleResize)
 
@@ -158,6 +153,6 @@ export default function SinglePageScrollManager() {
     }
   }, [])
 
-  // Render GLCanvas if not disabled, with parallax transform
-  return showGL ? <GLCanvas style={{ transform: `translateY(${parallaxY}px)` }} /> : null
+  // Render GLCanvas if not disabled, fixed position
+  return showGL ? <GLCanvas /> : null
 }

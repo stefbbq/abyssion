@@ -6,6 +6,7 @@ import {
   pixelBleedFragmentShader,
   sharpeningFragmentShader,
 } from '@lib/gl/shaders/index.ts'
+import { CRTShader } from '@lib/gl/shaders/CRTShader.ts'
 import passthroughVertexShader from '@lib/gl/shaders/glsl/passthrough.vert.ts'
 import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
@@ -67,7 +68,7 @@ export const createPostProcessing = async (
     width,
     height,
   })
-  composer.addPass(bokehPass)
+  // composer.addPass(bokehPass)
 
   /**
    * UnrealBloomPass (Bloom)
@@ -81,7 +82,7 @@ export const createPostProcessing = async (
     bloom.bloomRadius,
     bloom.bloomThreshold * bloom.bloomThresholdMultiplier,
   )
-  composer.addPass(bloomPass)
+  // composer.addPass(bloomPass)
   bloomPass.threshold = bloom.thresholdOverride
 
   /**
@@ -99,7 +100,7 @@ export const createPostProcessing = async (
     vertexShader: passthroughVertexShader,
     fragmentShader: sharpeningFragmentShader,
   })
-  if (sharpening.enabled) composer.addPass(sharpeningPass)
+  // if (sharpening.enabled) composer.addPass(sharpeningPass)
 
   /**
    * PixelationPass
@@ -116,7 +117,7 @@ export const createPostProcessing = async (
     fragmentShader: pixelationFragmentShader,
   })
   pixelationPass.enabled = pixelateConfig.enabled
-  composer.addPass(pixelationPass)
+  // composer.addPass(pixelationPass)
 
   /**
    * Pixel Bleed Pass
@@ -129,11 +130,11 @@ export const createPostProcessing = async (
       time: { value: 0 },
       resolution: { value: new THREE.Vector2(width, height) },
       intensity: { value: 0.0 },
-      chunkSize: { value: 30.0 },
+      chunkSize: { value: 20.0 },
       chunkRandomness: { value: 0.5 },
       stretchDistance: { value: 0.3 },
-      geometryComplexity: { value: 0.7 },
-      persistence: { value: 0.6 },
+      geometryComplexity: { value: 0.5 },
+      persistence: { value: 0.5 },
       regenerationRate: { value: 0.4 },
     },
     vertexShader: passthroughVertexShader,
@@ -141,6 +142,22 @@ export const createPostProcessing = async (
   })
   pixelBleedPass.enabled = false // Disabled by default
   composer.addPass(pixelBleedPass)
+
+  /**
+   * CRT Corruption Pass
+   * Applies CRT-style corruption effects including RGB distortion, block corruption,
+   * white noise, wave distortion, and screen shake. This creates retro TV-like glitches
+   * and distortion effects controlled by scroll position and debug parameters.
+   */
+  const crtPass = new ShaderPass(CRTShader)
+  crtPass.enabled = true // Always enabled since it's controlled by intensity
+
+  // Set resolution for CRT shader
+  if (crtPass.material && crtPass.material.uniforms.resolution) {
+    crtPass.material.uniforms.resolution.value = new THREE.Vector2(width, height)
+  }
+
+  // composer.addPass(crtPass)
 
   /**
    * FilmPass
@@ -155,7 +172,7 @@ export const createPostProcessing = async (
     film.scanlineCount,
     film.grayscale,
   )
-  composer.addPass(filmPass)
+  // composer.addPass(filmPass)
 
   /**
    * FinalPass
@@ -191,8 +208,8 @@ export const createPostProcessing = async (
     fragmentShader: finalPassFragmentShader,
   })
 
-  finalPass.renderToScreen = true
-  composer.addPass(finalPass)
+  // finalPass should NOT render to screen - only the last pass should
+  // composer.addPass(finalPass)
 
   /**
    * DitheringPass
@@ -211,8 +228,8 @@ export const createPostProcessing = async (
     vertexShader: passthroughVertexShader,
     fragmentShader: ditheringFragmentShader,
   })
-  ditheringPass.renderToScreen = true
-  composer.addPass(ditheringPass)
+  ditheringPass.renderToScreen = true // Only the last pass renders to screen
+  // composer.addPass(ditheringPass)
 
-  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass }
+  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass }
 }

@@ -19,7 +19,7 @@ export const getNewStartTimeAndDuration = (
   return new Promise<{ startTime: number; duration: number }>((resolve, reject) => {
     if (isNaN(video.duration) || video.duration <= 0) {
       log.warn(lc.GL_VIDEO, 'Cannot seek: video duration is not available')
-      resolve({ startTime: 0, duration: video.duration || 0 })
+      resolve({ startTime: 0, duration: (video.duration || 0) / video.playbackRate })
       return
     }
 
@@ -44,14 +44,20 @@ export const getNewStartTimeAndDuration = (
     const onSeeked = () => {
       video.removeEventListener('seeked', onSeeked)
       clearTimeout(timeoutId)
-      resolve({ startTime, duration })
+      const finalDuration = duration / video.playbackRate
+      log.trace(
+        lc.GL_VIDEO,
+        `Calculated duration: raw=${duration.toFixed(2)}s, rate=${video.playbackRate}x, final=${finalDuration.toFixed(2)}s`,
+      )
+      resolve({ startTime, duration: finalDuration })
     }
 
     // Add timeout to prevent hanging
     timeoutId = setTimeout(() => {
       video.removeEventListener('seeked', onSeeked)
-      log.warn(lc.GL_VIDEO, 'Video seek timeout after 3s, resolving anyway')
-      resolve({ startTime, duration })
+      const finalDuration = duration / video.playbackRate
+      log.warn(lc.GL_VIDEO, `Video seek timeout after 3s, resolving anyway with duration ${finalDuration.toFixed(2)}s`)
+      resolve({ startTime, duration: finalDuration })
     }, ms('3s'))
 
     video.addEventListener('seeked', onSeeked)

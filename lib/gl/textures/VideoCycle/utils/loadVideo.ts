@@ -21,12 +21,18 @@ export const loadVideo = (path: string): Promise<{
 
     // Set video attributes
     video.autoplay = false
-    video.loop = true
+    video.loop = false
     video.muted = true
     video.crossOrigin = 'anonymous'
     video.playsInline = true
     video.preload = 'auto'
     video.playbackRate = playbackSpeed
+
+    // Ensure video stays paused when it naturally ends
+    video.addEventListener('ended', () => {
+      video.pause()
+      log.trace(lc.GL_TEXTURES, `Video naturally ended and paused: ${path}`)
+    })
 
     // Create a timeout for loading
     const timeout = setTimeout(() => {

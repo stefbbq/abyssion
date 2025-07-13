@@ -36,11 +36,11 @@ export type PixelBleedConfig = {
  */
 export const defaultPixelBleedConfig: PixelBleedConfig = {
   intensity: 0.0,
-  chunkSize: 30.0,
+  chunkSize: 20.0,
   chunkRandomness: 0.5,
   stretchDistance: 0.3,
-  geometryComplexity: 0.7,
-  persistence: 0.6,
+  geometryComplexity: 0.5,
+  persistence: 0.5,
   regenerationRate: 0.4,
 }
 

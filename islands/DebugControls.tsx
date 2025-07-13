@@ -296,11 +296,9 @@ export const DebugControls = (props: Props) => {
 
         {sectionsExpanded.homepageControls && (
           <div className='text-text-secondary'>
-            <p className='font-bold mb-1'>Controls remain fully enabled in debug mode.</p>
+            <p className='font-bold mb-1'>Homepage interaction:</p>
             <ul className='ml-4 mb-2 space-y-0.5'>
-              <li>Move mouse to rotate</li>
-              <li>Click and drag to orbit</li>
-              <li>Scroll to zoom</li>
+              <li>Move mouse to rotate scene</li>
             </ul>
             <p className='font-bold mb-1'>Hotkeys:</p>
             <ul className='ml-4 space-y-0.5'>
@@ -808,9 +806,9 @@ export const DebugControls = (props: Props) => {
                 <label className='flex-1'>Chunk Size:</label>
                 <input
                   type='range'
-                  min='1'
-                  max='100'
-                  step='1'
+                  min='5'
+                  max='200'
+                  step='5'
                   value={props.corruptionParams.pixelBleedChunkSize}
                   onInput={(e) => {
                     const value = parseFloat((e.target as HTMLInputElement).value)
@@ -851,7 +849,7 @@ export const DebugControls = (props: Props) => {
                 <input
                   type='range'
                   min='0'
-                  max='1'
+                  max='0.5'
                   step='0.01'
                   value={props.corruptionParams.pixelBleedStretchDistance}
                   onInput={(e) => {

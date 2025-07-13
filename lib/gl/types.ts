@@ -50,5 +50,7 @@ export type RendererState = {
   shapeLayer: Group
   videoBackground?: VideoBackgroundManager
   pixelationPass: ShaderPass
+  pixelBleedPass: ShaderPass
+  crtPass: ShaderPass
   shadowLayer: ShadowLayer
 }

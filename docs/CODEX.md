@@ -146,26 +146,33 @@ The visual effects pipeline is managed in `/lib/gl/scene/createPostProcessing.ts
 
 ### Pixel Bleed Shader
 
-The **Pixel Bleed Shader** (`PixelBleedShader.ts`) creates sophisticated digital corruption effects that sample large chunks of the image and stretch them using geometric shapes.
+The **Pixel Bleed Shader** (`PixelBleedShader.ts`) creates bold digital corruption effects that sample pixels from geometric shape outlines and stretch them in fixed directions to simulate pixel corruption.
 
 #### Features
 
-- **Geometric Shapes**: Uses triangles, rectangles, and diamonds as corruption masks
-- **Multi-directional Stretching**: Up to 3 stretch directions per geometric shape
-- **Persistent Corruption**: Effects build and persist over time with configurable decay
-- **Layered System**: Multiple corruption layers with different timescales
-- **Color Distortion**: Adds hue shifting and saturation changes to corrupted areas
+- **Geometric Shape Outlines**: Uses triangles, rectangles, and diamonds as source areas
+- **Half-Outline Sampling**: Only samples pixels from half of each shape's perimeter:
+  - **Triangle**: Top two edges (from apex to both corners)
+  - **Rectangle**: Top edge only
+  - **Diamond**: Top-right diagonal edge only
+- **Fixed Stretch Directions**: Only 3 directions supported:
+  - **Down (90°)**: Vertical downward stretching
+  - **Right (0°)**: Horizontal rightward stretching  
+  - **Down-Right (45°)**: Diagonal stretching
+- **Bold Pixel Replacement**: No tapering or fading - direct pixel duplication
+- **Persistent Corruption**: Effects last for configurable duration before clearing
+- **Backward Tracing**: Traces from current pixel backwards to find source outline pixels
 
 #### Configuration Parameters
 
 ```typescript
 type PixelBleedConfig = {
   intensity: number           // Overall effect strength (0.0 - 1.0)
-  chunkSize: number          // Size of corruption areas (1.0 - 100.0)  
+  chunkSize: number          // Size of geometric shapes (5.0 - 200.0)  
   chunkRandomness: number    // Placement randomness (0.0 - 1.0)
-  stretchDistance: number    // How far pixels stretch (0.0 - 1.0)
+  stretchDistance: number    // How far pixels stretch (0.0 - 0.5)
   geometryComplexity: number // Shape complexity (0.0 - 1.0)
-  persistence: number        // Corruption buildup (0.0 - 1.0)
+  persistence: number        // How long corruption lasts (0.0 - 1.0)
   regenerationRate: number   // New corruption spawn rate (0.0 - 1.0)
 }
 ```
@@ -175,21 +182,24 @@ type PixelBleedConfig = {
 The pixel bleed effect includes comprehensive debug controls accessible via the debug panel:
 
 - **Enable/Disable Toggle**: Activate the effect with intensity control
-- **Chunk Size**: Control the size of corrupted image areas
+- **Chunk Size**: Control the size of geometric shapes (5-200 pixels)
 - **Chunk Randomness**: Adjust placement variation of corruption centers
-- **Stretch Distance**: How far pixels are stretched from their origin
+- **Stretch Distance**: How far pixels stretch (0.0-0.5 in UV space)
 - **Geometry Complexity**: Complexity of geometric corruption shapes
-- **Persistence**: How long corruption effects build up over time  
+- **Persistence**: How long corruption effects persist before clearing
 - **Regeneration Rate**: Speed of new corruption appearance
 
 #### Implementation Details
 
-The shader uses two main corruption layers:
+The shader uses a simplified approach focused on creating bold, clean pixel stretching:
 
-1. **Long-lived Layer**: Slow-building corruption that persists over time
-2. **Fast Layer**: Quick-changing corruption for dynamic variation
+1. **Shape Generation**: Creates geometric shapes (triangles, rectangles, diamonds) at random positions
+2. **Outline Detection**: Uses `isOnActiveOutline()` to detect pixels on the "active" half of each shape's perimeter
+3. **Backward Tracing**: For each pixel, traces backwards along one of the 3 fixed directions to find source outline pixels
+4. **Direct Replacement**: Replaces current pixel with source pixel color - no blending or tapering
+5. **Lifecycle Management**: Each corruption area has a timed lifecycle and eventually disappears
 
-Each layer generates corruption centers using noise functions and applies geometric masks (triangles, rectangles, diamonds) to define affected areas. Pixels within these areas are sampled from offset positions to create the "stretching" effect, with multiple stretch directions based on the geometric shape.
+The effect creates the appearance of pixels being "stretched" or "pulled" from shape outlines in straight lines, simulating digital corruption or glitch effects.
 
 #### Usage in Pipeline
 
@@ -208,7 +218,7 @@ const pixelBleedPass = new ShaderPass({
     persistence: { value: 0.6 },
     regenerationRate: { value: 0.4 },
   },
-  vertexShader: pixelBleedVertexShader,
+  vertexShader: passthroughVertexShader,
   fragmentShader: pixelBleedFragmentShader,
 })
 ```

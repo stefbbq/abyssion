@@ -8,6 +8,7 @@ import { lc, log } from '@lib/logger/index.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
 import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
+import { updateCRTShaderUniforms, updatePixelBleedShaderUniforms } from '@lib/gl/shaders/CRTShader.ts'
 
 type DebugSystemConfig = {
   canvas: HTMLCanvasElement
@@ -126,6 +127,26 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         }
       }
     },
+    onCorruptionChange: (params) => {
+      // Update CRT corruption shader uniforms
+      if (state.crtPass && state.crtPass.material) {
+        const material = state.crtPass.material as Three.ShaderMaterial
+        updateCRTShaderUniforms(material, params)
+        log.debug(lc.GL_DEBUG, 'CRT corruption uniforms updated:', params)
+      }
+
+      // Update pixel bleed shader uniforms AND enable/disable the pass
+      if (state.pixelBleedPass && state.pixelBleedPass.material) {
+        const material = state.pixelBleedPass.material as Three.ShaderMaterial
+        updatePixelBleedShaderUniforms(material, params)
+
+        // Enable/disable the pixel bleed pass based on the pixelBleedEnabled flag
+        state.pixelBleedPass.enabled = params.pixelBleedEnabled && params.enabled
+
+        log.debug(lc.GL_DEBUG, 'Pixel bleed uniforms updated:', params)
+        log.debug(lc.GL_DEBUG, 'Pixel bleed pass enabled:', state.pixelBleedPass.enabled)
+      }
+    },
   })
 
   // Initialize DOF parameters
@@ -213,6 +234,52 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         shadow: hexToCSS(rgbToHex(glTheme.secondary)),
       },
     )
+  }
+
+  // Initialize corruption parameters
+  if (state.crtPass && state.crtPass.material) {
+    const material = state.crtPass.material as Three.ShaderMaterial
+    debugPanelsAPI.updateCorruptionParams({
+      enabled: false,
+      intensity: 0.0,
+      timeEnabled: true,
+
+      // Initialize from shader defaults - ALL DISABLED BY DEFAULT
+      staticIntensity: material.uniforms.staticIntensity?.value || 0.0,
+      rgbDistortionIntensity: material.uniforms.rgbDistortionIntensity?.value || 0.0,
+      rgbDistortionEnabled: material.uniforms.rgbDistortionEnabled?.value === 1.0,
+      whiteNoiseIntensity: material.uniforms.whiteNoiseIntensity?.value || 0.0,
+      whiteNoiseEnabled: material.uniforms.whiteNoiseEnabled?.value === 1.0,
+      blockCorruptionRate: material.uniforms.blockCorruptionRate?.value || 0.0,
+      blockCorruptionEnabled: material.uniforms.blockCorruptionEnabled?.value === 1.0,
+      waveNoiseIntensity: material.uniforms.waveNoiseIntensity?.value || 0.0,
+      waveNoiseEnabled: material.uniforms.waveNoiseEnabled?.value === 1.0,
+      shakeIntensity: material.uniforms.shakeIntensity?.value || 0.0,
+      shakeEnabled: material.uniforms.shakeEnabled?.value === 1.0,
+
+      // Large block corruption
+      largeBlockIntensity: material.uniforms.largeBlockIntensity?.value || 0.0,
+      largeBlockSize: material.uniforms.largeBlockSize?.value || 20.0,
+      largeBlockFPS: material.uniforms.largeBlockFPS?.value || 10.0,
+      largeBlockEnabled: false,
+
+      // Artifact noise
+      artifactNoiseIntensity: material.uniforms.artifactNoiseIntensity?.value || 0.0,
+      artifactChunkSize: material.uniforms.artifactChunkSize?.value || 50.0,
+      artifactShiftAmount: material.uniforms.artifactShiftAmount?.value || 0.5,
+      artifactNoiseFPS: material.uniforms.artifactNoiseFPS?.value || 10.0,
+      artifactNoiseEnabled: false,
+
+      // Pixel bleed (from pixel bleed pass if available, otherwise use defaults)
+      pixelBleedIntensity: state.pixelBleedPass?.material?.uniforms?.intensity?.value || 0.0,
+      pixelBleedChunkSize: state.pixelBleedPass?.material?.uniforms?.chunkSize?.value || 20.0,
+      pixelBleedChunkRandomness: state.pixelBleedPass?.material?.uniforms?.chunkRandomness?.value || 0.5,
+      pixelBleedStretchDistance: state.pixelBleedPass?.material?.uniforms?.stretchDistance?.value || 0.3,
+      pixelBleedGeometryComplexity: state.pixelBleedPass?.material?.uniforms?.geometryComplexity?.value || 0.5,
+      pixelBleedPersistence: state.pixelBleedPass?.material?.uniforms?.persistence?.value || 0.5,
+      pixelBleedRegenerationRate: state.pixelBleedPass?.material?.uniforms?.regenerationRate?.value || 0.4,
+      pixelBleedEnabled: false,
+    })
   }
 
   // Debug info updater function
