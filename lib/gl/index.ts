@@ -262,4 +262,45 @@ export const getSceneOrchestrator = () => {
   return glState?.sceneOrchestrator
 }
 
+export const getGLState = () => {
+  return glState
+}
+
+export const updateScrollCorruption = (corruptionLevel: number) => {
+  if (!glState) return
+
+  // Apply corruption effects based on scroll position
+  // This could affect post-processing effects or other scene elements
+  if (glState.pixelationPass) {
+    // Increase pixelation based on corruption level
+    const basePixelSize = 16
+    const maxPixelSize = 64
+    const pixelSize = basePixelSize + (corruptionLevel * (maxPixelSize - basePixelSize))
+    if (glState.pixelationPass.uniforms.pixelSize) {
+      glState.pixelationPass.uniforms.pixelSize.value = pixelSize
+    }
+  }
+
+  if (glState.finalPass?.uniforms) {
+    // Increase chromatic aberration based on corruption
+    const baseChroma = 0.002
+    const maxChroma = 0.02
+    const chromaStrength = baseChroma + (corruptionLevel * (maxChroma - baseChroma))
+    glState.finalPass.uniforms.chromaStrength.value = chromaStrength
+  }
+}
+
+export const updateScrollMetrics = (scrollPosition: number, scrollVelocity: number) => {
+  if (!glState) return
+
+  // Update scroll-based metrics for the scene
+  // This could affect various visual elements based on scroll position
+  if (glState.ditheringPass?.uniforms) {
+    // Modify dithering based on scroll velocity
+    const baseIntensity = 0.8
+    const velocityMultiplier = Math.min(Math.abs(scrollVelocity) * 0.1, 2.0)
+    glState.ditheringPass.uniforms.intensity.value = baseIntensity + velocityMultiplier
+  }
+}
+
 export { type InitOptions, type RendererState }

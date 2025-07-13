@@ -110,6 +110,111 @@ The selective colorization system is configured via `configScene.json` under `po
 - **Blending Modes:** Determine how primary and secondary theme colors are mixed
 - **Real-time Updates:** All settings are applied immediately and update with theme changes
 
+## Visual Effects & Shaders
+
+The application features an advanced shader system for post-processing effects, built on Three.js with a modular GLSL architecture.
+
+### Shader Architecture
+
+- **Location:** `/lib/gl/shaders/` contains all shader implementations
+- **Modular GLSL:** Uses a `#pragma include` system for reusable utility functions
+- **Type Safety:** All shaders are converted to TypeScript modules via build process
+- **Utility Functions:** Located in `/lib/gl/shaders/glsl/utils/` for shared functionality
+
+#### GLSL Utilities
+
+Core utility functions available for all shaders:
+
+- **`random.glsl`**: Pseudo-random number generation from 2D coordinates
+- **`random2D.glsl`**: Random 2D direction vectors for movement effects  
+- **`snoise3.glsl`**: 3D Simplex noise for organic patterns
+- **`randomRange.glsl`**: Random values within specified ranges
+
+### Post-Processing Pipeline
+
+The visual effects pipeline is managed in `/lib/gl/scene/createPostProcessing.ts` and includes:
+
+1. **Render Pass**: Base scene rendering
+2. **Bokeh Pass**: Depth of field effects
+3. **Bloom Pass**: Glow and light bleeding  
+4. **Sharpening Pass**: Edge enhancement
+5. **Pixelation Pass**: Retro pixelation effects
+6. **Pixel Bleed Pass**: Advanced corruption effects *(new)*
+7. **Film Pass**: Analog film grain and scanlines
+8. **Final Pass**: Color grading and chromatic aberration
+9. **Dithering Pass**: Noise injection to prevent banding
+
+### Pixel Bleed Shader
+
+The **Pixel Bleed Shader** (`PixelBleedShader.ts`) creates sophisticated digital corruption effects that sample large chunks of the image and stretch them using geometric shapes.
+
+#### Features
+
+- **Geometric Shapes**: Uses triangles, rectangles, and diamonds as corruption masks
+- **Multi-directional Stretching**: Up to 3 stretch directions per geometric shape
+- **Persistent Corruption**: Effects build and persist over time with configurable decay
+- **Layered System**: Multiple corruption layers with different timescales
+- **Color Distortion**: Adds hue shifting and saturation changes to corrupted areas
+
+#### Configuration Parameters
+
+```typescript
+type PixelBleedConfig = {
+  intensity: number           // Overall effect strength (0.0 - 1.0)
+  chunkSize: number          // Size of corruption areas (1.0 - 100.0)  
+  chunkRandomness: number    // Placement randomness (0.0 - 1.0)
+  stretchDistance: number    // How far pixels stretch (0.0 - 1.0)
+  geometryComplexity: number // Shape complexity (0.0 - 1.0)
+  persistence: number        // Corruption buildup (0.0 - 1.0)
+  regenerationRate: number   // New corruption spawn rate (0.0 - 1.0)
+}
+```
+
+#### Debug Controls
+
+The pixel bleed effect includes comprehensive debug controls accessible via the debug panel:
+
+- **Enable/Disable Toggle**: Activate the effect with intensity control
+- **Chunk Size**: Control the size of corrupted image areas
+- **Chunk Randomness**: Adjust placement variation of corruption centers
+- **Stretch Distance**: How far pixels are stretched from their origin
+- **Geometry Complexity**: Complexity of geometric corruption shapes
+- **Persistence**: How long corruption effects build up over time  
+- **Regeneration Rate**: Speed of new corruption appearance
+
+#### Implementation Details
+
+The shader uses two main corruption layers:
+
+1. **Long-lived Layer**: Slow-building corruption that persists over time
+2. **Fast Layer**: Quick-changing corruption for dynamic variation
+
+Each layer generates corruption centers using noise functions and applies geometric masks (triangles, rectangles, diamonds) to define affected areas. Pixels within these areas are sampled from offset positions to create the "stretching" effect, with multiple stretch directions based on the geometric shape.
+
+#### Usage in Pipeline
+
+```typescript
+// Added to post-processing pipeline after pixelation
+const pixelBleedPass = new ShaderPass({
+  uniforms: {
+    tDiffuse: { value: null },
+    time: { value: 0 },
+    resolution: { value: new THREE.Vector2(width, height) },
+    intensity: { value: 0.0 },
+    chunkSize: { value: 30.0 },
+    chunkRandomness: { value: 0.5 },
+    stretchDistance: { value: 0.3 },
+    geometryComplexity: { value: 0.7 },
+    persistence: { value: 0.6 },
+    regenerationRate: { value: 0.4 },
+  },
+  vertexShader: pixelBleedVertexShader,
+  fragmentShader: pixelBleedFragmentShader,
+})
+```
+
+The effect is disabled by default and can be enabled through debug controls or programmatically via the intensity parameter.
+
 ### Font System
 
 - The theme supports custom font families via Tailwind's `fontFamily` extension in `tailwind.config.ts`.

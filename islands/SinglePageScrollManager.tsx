@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { isGLDisabled } from '@lib/debug/index.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
-import { getSceneOrchestrator } from '@lib/gl/index.ts'
+import { getGLState, getSceneOrchestrator, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 
 const sectionIds = ['home', 'shows', 'bio', 'contact']
@@ -45,21 +45,21 @@ export default function SinglePageScrollManager() {
               }
               // GL scene switching logic
               if (isGLInitialized.value) {
-                const orchestrator = getSceneOrchestrator()
-                if (orchestrator) {
-                  // If home is mostly visible, use logo-page; otherwise, use content-page
-                  if (topSection.id === 'home') {
-                    if (lastScene.current !== 'logo-page') {
-                      orchestrator.switchToPage('logo-page')
-                      lastScene.current = 'logo-page'
-                    }
-                  } else {
-                    if (lastScene.current !== 'content-page') {
-                      orchestrator.switchToPage('content-page')
-                      lastScene.current = 'content-page'
-                    }
-                  }
-                }
+                // const orchestrator = getSceneOrchestrator()
+                // if (orchestrator) {
+                //   // If home is mostly visible, use logo-page; otherwise, use content-page
+                //   if (topSection.id === 'home') {
+                //     if (lastScene.current !== 'logo-page') {
+                //       orchestrator.switchToPage('logo-page')
+                //       lastScene.current = 'logo-page'
+                //     }
+                //   } else {
+                //     if (lastScene.current !== 'content-page') {
+                //       orchestrator.switchToPage('content-page')
+                //       lastScene.current = 'content-page'
+                //     }
+                //   }
+                // }
               }
             }
             ticking.current = false
@@ -110,25 +110,51 @@ export default function SinglePageScrollManager() {
     }
     document.addEventListener('click', handleClick)
 
-    // Parallax scroll effect
+    // Parallax scroll effect and corruption tracking
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
-          setParallaxY(globalThis.scrollY * -0.2)
+          const scrollY = globalThis.scrollY
+          setParallaxY(scrollY * -0.2)
+
+          // Update scroll corruption effect if GL is initialized
+          if (isGLInitialized.value) {
+            const glState = getGLState()
+            if (glState) {
+              updateScrollCorruption(scrollY, glState)
+            }
+          }
+
           ticking.current = false
         })
         ticking.current = true
       }
     }
     globalThis.addEventListener('scroll', handleScroll)
-    // Set initial position
+
+    // Set initial positions
     setParallaxY(globalThis.scrollY * -0.2)
+
+    // Update scroll metrics when layout changes
+    const handleResize = () => {
+      updateScrollMetrics()
+    }
+    globalThis.addEventListener('resize', handleResize)
+
+    // Initial scroll corruption update
+    if (isGLInitialized.value) {
+      const glState = getGLState()
+      if (glState) {
+        updateScrollCorruption(globalThis.scrollY, glState)
+      }
+    }
 
     return () => {
       observer.disconnect()
       globalThis.removeEventListener('hashchange', handleHashChange)
       document.removeEventListener('click', handleClick)
       globalThis.removeEventListener('scroll', handleScroll)
+      globalThis.removeEventListener('resize', handleResize)
     }
   }, [])
 

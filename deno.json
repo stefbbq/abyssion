@@ -8,9 +8,11 @@
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update .",
-    "shaders:build": "deno run --allow-read --allow-write scripts/glsl-to-ts.ts",
-    "dev": "deno task shaders:build && deno run --allow-all dev.ts",
-    "watch": "deno run --allow-read --allow-write --allow-run dev-watch.ts"
+    "build:shaders:preprocess": "deno run --allow-read --allow-write scripts/glsl-preprocessor.ts",
+    "build:shaders:to-ts": "deno run --allow-read --allow-write scripts/glsl-to-ts.ts",
+    "build:shaders": "deno task build:shaders:preprocess && deno task build:shaders:to-ts",
+    "dev": "deno task build:shaders && deno run --allow-all dev.ts",
+    "watch": "deno run --allow-read --allow-write --allow-run scripts/dev-watch.ts"
   },
   "lint": {
     "rules": {

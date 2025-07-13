@@ -47,6 +47,58 @@ type ThemeColors = {
   shadow: string
 }
 
+type CorruptionParams = {
+  enabled: boolean
+  intensity: number
+  timeEnabled: boolean
+
+  // Existing effect parameters
+  staticIntensity: number
+
+  // RGB distortion parameters
+  rgbDistortionIntensity: number
+  rgbDistortionEnabled: boolean
+
+  // White noise parameters
+  whiteNoiseIntensity: number
+  whiteNoiseEnabled: boolean
+
+  // Original block corruption parameters
+  blockCorruptionRate: number
+  blockCorruptionEnabled: boolean
+
+  // Wave distortion parameters
+  waveNoiseIntensity: number
+  waveNoiseEnabled: boolean
+
+  // Screen shake parameters
+  shakeIntensity: number
+  shakeEnabled: boolean
+
+  // Advanced pixel bleed effect parameters
+  pixelBleedIntensity: number
+  pixelBleedChunkSize: number
+  pixelBleedChunkRandomness: number
+  pixelBleedStretchDistance: number
+  pixelBleedGeometryComplexity: number
+  pixelBleedPersistence: number
+  pixelBleedRegenerationRate: number
+  pixelBleedEnabled: boolean
+
+  // Large block corruption parameters
+  largeBlockIntensity: number
+  largeBlockSize: number
+  largeBlockFPS: number
+  largeBlockEnabled: boolean
+
+  // Artifact noise parameters
+  artifactNoiseIntensity: number
+  artifactChunkSize: number
+  artifactShiftAmount: number
+  artifactNoiseFPS: number
+  artifactNoiseEnabled: boolean
+}
+
 type DOFMeta = {
   eventType: string
 }
@@ -74,6 +126,57 @@ const selectiveColorizationParams = signal<SelectiveColorizationParams>({
   },
 })
 const themeColors = signal({ highlight: '#ff00ff', shadow: '#0000ff' })
+const corruptionParams = signal<CorruptionParams>({
+  enabled: false,
+  intensity: 0.0,
+  timeEnabled: true,
+
+  // Existing effect defaults (all disabled by default)
+  staticIntensity: 0.8,
+
+  // RGB distortion defaults
+  rgbDistortionIntensity: 20.0,
+  rgbDistortionEnabled: false,
+
+  // White noise defaults
+  whiteNoiseIntensity: 0.3,
+  whiteNoiseEnabled: false,
+
+  // Original block corruption defaults
+  blockCorruptionRate: 10.0,
+  blockCorruptionEnabled: false,
+
+  // Wave distortion defaults
+  waveNoiseIntensity: 0.2,
+  waveNoiseEnabled: false,
+
+  // Screen shake defaults
+  shakeIntensity: 10.0,
+  shakeEnabled: false,
+
+  // Advanced pixel bleed effect defaults
+  pixelBleedIntensity: 0.0,
+  pixelBleedChunkSize: 30.0,
+  pixelBleedChunkRandomness: 0.5,
+  pixelBleedStretchDistance: 0.3,
+  pixelBleedGeometryComplexity: 0.7,
+  pixelBleedPersistence: 0.6,
+  pixelBleedRegenerationRate: 0.4,
+  pixelBleedEnabled: false,
+
+  // Large block corruption defaults
+  largeBlockIntensity: 0.0,
+  largeBlockSize: 15.0,
+  largeBlockFPS: 6.0,
+  largeBlockEnabled: false,
+
+  // Artifact noise defaults
+  artifactNoiseIntensity: 0.0,
+  artifactChunkSize: 20.0,
+  artifactShiftAmount: 0.5,
+  artifactNoiseFPS: 10.0,
+  artifactNoiseEnabled: false,
+})
 
 // the debug state for GL rendering
 const isGLDisabled = signal(false)
@@ -88,6 +191,7 @@ const videoBackgroundOpacity = signal(0.5)
 let onDOFChangeCallback: ((params: DOFParams, meta?: DOFMeta) => void) | null = null
 let onFinalPassChangeCallback: ((params: FinalPassParams) => void) | null = null
 let onSelectiveColorizationChangeCallback: ((params: SelectiveColorizationParams) => void) | null = null
+let onCorruptionChangeCallback: ((params: CorruptionParams) => void) | null = null
 let onToggleDebugCallback: ((enabled: boolean) => void) | null = null
 let onVideoBackgroundOpacityChangeCallback: ((opacity: number) => void) | null = null
 
@@ -122,6 +226,12 @@ export const DebugPanels = (props: Props) => {
         if (loaded.dofParams) dofParams.value = loaded.dofParams
         if (loaded.finalPassParams) finalPassParams.value = loaded.finalPassParams
         if (loaded.selectiveColorizationParams) selectiveColorizationParams.value = loaded.selectiveColorizationParams
+        if (loaded.corruptionParams) {
+          corruptionParams.value = {
+            ...corruptionParams.value,
+            ...loaded.corruptionParams,
+          }
+        }
         if (loaded.themeColors) themeColors.value = loaded.themeColors
         if (typeof loaded.videoBackgroundOpacity === 'number') videoBackgroundOpacity.value = loaded.videoBackgroundOpacity
       }
@@ -132,6 +242,7 @@ export const DebugPanels = (props: Props) => {
       dofParams,
       finalPassParams,
       selectiveColorizationParams,
+      corruptionParams,
       themeColors,
       isGLDisabled,
       activeGLScene,
@@ -145,6 +256,7 @@ export const DebugPanels = (props: Props) => {
           dofParams: dofParams.value,
           finalPassParams: finalPassParams.value,
           selectiveColorizationParams: selectiveColorizationParams.value,
+          corruptionParams: corruptionParams.value,
           themeColors: themeColors.value,
           videoBackgroundOpacity: videoBackgroundOpacity.value,
         })
@@ -181,6 +293,14 @@ export const DebugPanels = (props: Props) => {
   const handleSelectiveColorizationChange = (params: SelectiveColorizationParams) => {
     selectiveColorizationParams.value = params
     if (onSelectiveColorizationChangeCallback) onSelectiveColorizationChangeCallback(params)
+  }
+
+  const handleCorruptionChange = (params: CorruptionParams) => {
+    console.log('🔄 handleCorruptionChange called in DebugPanels with:', params)
+    console.log('🔄 Old corruptionParams.value:', corruptionParams.value)
+    corruptionParams.value = params
+    console.log('🔄 New corruptionParams.value:', corruptionParams.value)
+    if (onCorruptionChangeCallback) onCorruptionChangeCallback(params)
   }
 
   const handleClose = () => {
@@ -229,11 +349,120 @@ export const DebugPanels = (props: Props) => {
         blendBalance: 0.3,
       },
     }
+    corruptionParams.value = {
+      enabled: false,
+      intensity: 0.0,
+      timeEnabled: true,
+
+      // Existing effect defaults (all disabled by default)
+      staticIntensity: 0.8,
+
+      // RGB distortion defaults
+      rgbDistortionIntensity: 20.0,
+      rgbDistortionEnabled: false,
+
+      // White noise defaults
+      whiteNoiseIntensity: 0.3,
+      whiteNoiseEnabled: false,
+
+      // Original block corruption defaults
+      blockCorruptionRate: 10.0,
+      blockCorruptionEnabled: false,
+
+      // Wave distortion defaults
+      waveNoiseIntensity: 0.2,
+      waveNoiseEnabled: false,
+
+      // Screen shake defaults
+      shakeIntensity: 10.0,
+      shakeEnabled: false,
+
+      // Advanced pixel bleed effect defaults
+      pixelBleedIntensity: 0.0,
+      pixelBleedChunkSize: 30.0,
+      pixelBleedChunkRandomness: 0.5,
+      pixelBleedStretchDistance: 0.3,
+      pixelBleedGeometryComplexity: 0.7,
+      pixelBleedPersistence: 0.6,
+      pixelBleedRegenerationRate: 0.4,
+      pixelBleedEnabled: false,
+
+      // Large block corruption defaults
+      largeBlockIntensity: 0.0,
+      largeBlockSize: 15.0,
+      largeBlockFPS: 6.0,
+      largeBlockEnabled: false,
+
+      // Artifact noise defaults
+      artifactNoiseIntensity: 0.0,
+      artifactChunkSize: 20.0,
+      artifactShiftAmount: 0.5,
+      artifactNoiseFPS: 10.0,
+      artifactNoiseEnabled: false,
+    }
     themeColors.value = { highlight: '#ff00ff', shadow: '#0000ff' }
+
+    // Reset corruption debug override
+    if (onCorruptionChangeCallback) {
+      onCorruptionChangeCallback({
+        enabled: false,
+        intensity: 0.0,
+        timeEnabled: true,
+
+        // Existing effect defaults (all disabled by default)
+        staticIntensity: 0.8,
+
+        // RGB distortion defaults
+        rgbDistortionIntensity: 20.0,
+        rgbDistortionEnabled: false,
+
+        // White noise defaults
+        whiteNoiseIntensity: 0.3,
+        whiteNoiseEnabled: false,
+
+        // Original block corruption defaults
+        blockCorruptionRate: 10.0,
+        blockCorruptionEnabled: false,
+
+        // Wave distortion defaults
+        waveNoiseIntensity: 0.2,
+        waveNoiseEnabled: false,
+
+        // Screen shake defaults
+        shakeIntensity: 10.0,
+        shakeEnabled: false,
+
+        // Advanced pixel bleed effect defaults
+        pixelBleedIntensity: 0.0,
+        pixelBleedChunkSize: 30.0,
+        pixelBleedChunkRandomness: 0.5,
+        pixelBleedStretchDistance: 0.3,
+        pixelBleedGeometryComplexity: 0.7,
+        pixelBleedPersistence: 0.6,
+        pixelBleedRegenerationRate: 0.4,
+        pixelBleedEnabled: false,
+
+        // Large block corruption defaults
+        largeBlockIntensity: 0.0,
+        largeBlockSize: 15.0,
+        largeBlockFPS: 6.0,
+        largeBlockEnabled: false,
+
+        // Artifact noise defaults
+        artifactNoiseIntensity: 0.0,
+        artifactChunkSize: 20.0,
+        artifactShiftAmount: 0.5,
+        artifactNoiseFPS: 10.0,
+        artifactNoiseEnabled: false,
+      })
+    }
   }
 
   const handleVideoBackgroundOpacityChange = (opacity: number) => {
+    console.log('🔄 handleVideoBackgroundOpacityChange called in DebugPanels with:', opacity)
+    console.log('🔄 Old videoBackgroundOpacity.value:', videoBackgroundOpacity.value)
     videoBackgroundOpacity.value = opacity
+    console.log('🔄 New videoBackgroundOpacity.value:', videoBackgroundOpacity.value)
     if (onVideoBackgroundOpacityChangeCallback) onVideoBackgroundOpacityChangeCallback(opacity)
   }
 
@@ -244,10 +473,12 @@ export const DebugPanels = (props: Props) => {
         dofParams={dofParams.value}
         finalPassParams={finalPassParams.value}
         selectiveColorizationParams={selectiveColorizationParams.value}
+        corruptionParams={corruptionParams.value}
         themeColors={themeColors.value}
         onDOFChange={handleDOFChange}
         onFinalPassChange={handleFinalPassChange}
         onSelectiveColorizationChange={handleSelectiveColorizationChange}
+        onCorruptionChange={handleCorruptionChange}
         onClose={handleClose}
         isGLDisabled={isGLDisabled.value}
         onGLDisableChange={handleGLDisableChange}
@@ -280,6 +511,10 @@ export const debugPanelsAPI = {
     selectiveColorizationParams.value = params
     themeColors.value = colors
   },
+  // update corruption parameters
+  updateCorruptionParams: (params: CorruptionParams) => {
+    corruptionParams.value = params
+  },
   // update video background opacity
   updateVideoBackgroundOpacity: (opacity: number) => {
     videoBackgroundOpacity.value = opacity
@@ -293,12 +528,14 @@ export const debugPanelsAPI = {
     onDOFChange?: (params: DOFParams, meta?: DOFMeta) => void
     onFinalPassChange?: (params: FinalPassParams) => void
     onSelectiveColorizationChange?: (params: SelectiveColorizationParams) => void
+    onCorruptionChange?: (params: CorruptionParams) => void
     onToggleDebug?: (enabled: boolean) => void
     onVideoBackgroundOpacityChange?: (opacity: number) => void
   }) => {
     if (callbacks.onDOFChange) onDOFChangeCallback = callbacks.onDOFChange
     if (callbacks.onFinalPassChange) onFinalPassChangeCallback = callbacks.onFinalPassChange
     if (callbacks.onSelectiveColorizationChange) onSelectiveColorizationChangeCallback = callbacks.onSelectiveColorizationChange
+    if (callbacks.onCorruptionChange) onCorruptionChangeCallback = callbacks.onCorruptionChange
     if (callbacks.onToggleDebug) onToggleDebugCallback = callbacks.onToggleDebug
     if (callbacks.onVideoBackgroundOpacityChange) onVideoBackgroundOpacityChangeCallback = callbacks.onVideoBackgroundOpacityChange
   },
@@ -307,3 +544,4 @@ export const debugPanelsAPI = {
 }
 
 export { activeGLScene, isGLDisabled, resetDebugSettings }
+export type { CorruptionParams }

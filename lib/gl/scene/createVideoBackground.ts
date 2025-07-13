@@ -4,10 +4,7 @@ import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
 import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
-import {
-  selectiveVideoBackgroundFragmentShader,
-  selectiveVideoBackgroundVertexShader,
-} from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
+import { passthroughVertexShader, selectiveVideoBackgroundFragmentShader } from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 
@@ -71,7 +68,7 @@ export const createVideoBackground = (
         selectiveBlendMode: { value: blendModeValue },
         selectiveBlendBalance: { value: selectiveColorization?.colorBlending?.blendBalance ?? 0.3 },
       },
-      vertexShader: selectiveVideoBackgroundVertexShader,
+      vertexShader: passthroughVertexShader,
       fragmentShader: selectiveVideoBackgroundFragmentShader,
       transparent: true,
       side: THREE.FrontSide,

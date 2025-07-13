@@ -1,14 +1,12 @@
 import * as Three from 'three'
 import {
   ditheringFragmentShader,
-  ditheringVertexShader,
   finalPassFragmentShader,
-  finalPassVertexShader,
   pixelationFragmentShader,
-  pixelationVertexShader,
+  pixelBleedFragmentShader,
   sharpeningFragmentShader,
-  sharpeningVertexShader,
 } from '@lib/gl/shaders/index.ts'
+import passthroughVertexShader from '@lib/gl/shaders/glsl/passthrough.vert.ts'
 import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 
@@ -98,7 +96,7 @@ export const createPostProcessing = async (
       sharpStrength: { value: sharpening.strength },
       resolution: { value: new THREE.Vector2(width, height) },
     },
-    vertexShader: sharpeningVertexShader,
+    vertexShader: passthroughVertexShader,
     fragmentShader: sharpeningFragmentShader,
   })
   if (sharpening.enabled) composer.addPass(sharpeningPass)
@@ -114,11 +112,35 @@ export const createPostProcessing = async (
       pixelSize: { value: pixelateConfig.pixelSize },
       resolution: { value: new THREE.Vector2(width, height) },
     },
-    vertexShader: pixelationVertexShader,
+    vertexShader: passthroughVertexShader,
     fragmentShader: pixelationFragmentShader,
   })
   pixelationPass.enabled = pixelateConfig.enabled
   composer.addPass(pixelationPass)
+
+  /**
+   * Pixel Bleed Pass
+   * Applies advanced pixel bleed corruption that samples large chunks and stretches them
+   * using geometric shapes. Creates a computerized corruption that builds on itself.
+   */
+  const pixelBleedPass = new ShaderPass({
+    uniforms: {
+      tDiffuse: { value: null },
+      time: { value: 0 },
+      resolution: { value: new THREE.Vector2(width, height) },
+      intensity: { value: 0.0 },
+      chunkSize: { value: 30.0 },
+      chunkRandomness: { value: 0.5 },
+      stretchDistance: { value: 0.3 },
+      geometryComplexity: { value: 0.7 },
+      persistence: { value: 0.6 },
+      regenerationRate: { value: 0.4 },
+    },
+    vertexShader: passthroughVertexShader,
+    fragmentShader: pixelBleedFragmentShader,
+  })
+  pixelBleedPass.enabled = false // Disabled by default
+  composer.addPass(pixelBleedPass)
 
   /**
    * FilmPass
@@ -165,7 +187,7 @@ export const createPostProcessing = async (
       blockOnProbability: { value: 0.000 }, // probability a block is on (lower = cleaner signal)
       burstProbability: { value: 0.1 }, // probability of a global burst (lower = rarer bursts)
     },
-    vertexShader: finalPassVertexShader,
+    vertexShader: passthroughVertexShader,
     fragmentShader: finalPassFragmentShader,
   })
 
@@ -186,11 +208,11 @@ export const createPostProcessing = async (
       ditherFrequency: { value: finalPassConfig.ditherFrequency },
       ditherAnimation: { value: finalPassConfig.ditherAnimation },
     },
-    vertexShader: ditheringVertexShader,
+    vertexShader: passthroughVertexShader,
     fragmentShader: ditheringFragmentShader,
   })
   ditheringPass.renderToScreen = true
   composer.addPass(ditheringPass)
 
-  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass }
+  return { composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass }
 }

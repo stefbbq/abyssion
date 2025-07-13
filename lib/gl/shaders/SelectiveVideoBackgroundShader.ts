@@ -5,7 +5,7 @@
  * Grayscales the video but preserves/remaps high brightness/saturation areas to a target color
  */
 
-import selectiveVideoBackgroundVertexShader from './glsl/selectiveVideoBackground.vert.ts'
+import passthroughVertexShader from './glsl/passthrough.vert.ts'
 import selectiveVideoBackgroundFragmentShader from './glsl/selectiveVideoBackground.frag.ts'
 
-export { selectiveVideoBackgroundFragmentShader, selectiveVideoBackgroundVertexShader }
+export { passthroughVertexShader, selectiveVideoBackgroundFragmentShader }

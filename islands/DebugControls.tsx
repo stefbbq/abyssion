@@ -1,6 +1,7 @@
 import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
 import { currentThemeFamilyName, currentThemeMode, getAllThemeFamilies, setThemeFamily } from '@lib/theme/index.ts'
 import { useState } from 'preact/hooks'
+import type { CorruptionParams } from './DebugPanels.tsx'
 
 type DOFParams = {
   focus: number
@@ -47,6 +48,8 @@ type Props = {
   finalPassParams: FinalPassParams
   // current selective colorization parameters
   selectiveColorizationParams: SelectiveColorizationParams
+  // current corruption parameters
+  corruptionParams: CorruptionParams
   // current theme colors
   themeColors: ThemeColors
   // callback when DOF parameters change
@@ -55,6 +58,8 @@ type Props = {
   onFinalPassChange: (params: FinalPassParams) => void
   // callback when selective colorization parameters change
   onSelectiveColorizationChange: (params: SelectiveColorizationParams) => void
+  // callback when corruption parameters change
+  onCorruptionChange: (params: CorruptionParams) => void
   // callback to close the debug panel
   onClose: () => void
   // whether GL is disabled
@@ -79,11 +84,12 @@ type Props = {
  */
 export const DebugControls = (props: Props) => {
   const [sectionsExpanded, setSectionsExpanded] = useState({
-    glControls: true,
+    glControls: false,
     homepageControls: false,
-    theme: true,
+    theme: false,
     dof: false,
     finalPass: false,
+    corruption: false,
     colorization: false,
   })
 
@@ -123,6 +129,24 @@ export const DebugControls = (props: Props) => {
     props.onFinalPassChange({
       ...props.finalPassParams,
       [field]: value,
+    })
+  }
+
+  const handleCorruptionToggle = (field: 'enabled' | 'timeEnabled') => (e: Event) => {
+    const target = e.target as HTMLInputElement
+    props.onCorruptionChange({
+      ...props.corruptionParams,
+      [field]: target.checked,
+    })
+  }
+
+  const handleCorruptionIntensityInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const value = parseFloat(target.value)
+    console.log('🎛️ Corruption intensity slider input:', value)
+    props.onCorruptionChange({
+      ...props.corruptionParams,
+      intensity: value,
     })
   }
 
@@ -215,7 +239,11 @@ export const DebugControls = (props: Props) => {
                 max='1'
                 step='0.1'
                 value={props.videoBackgroundOpacity}
-                onChange={(e) => props.onVideoBackgroundOpacityChange(parseFloat((e.target as HTMLInputElement).value))}
+                onInput={(e) => {
+                  const value = parseFloat((e.target as HTMLInputElement).value)
+                  console.log('🎛️ Video background opacity slider INPUT:', value)
+                  props.onVideoBackgroundOpacityChange(value)
+                }}
                 className='flex-1'
               />
               <span className='w-12 text-right'>{props.videoBackgroundOpacity.toFixed(1)}</span>
@@ -450,6 +478,650 @@ export const DebugControls = (props: Props) => {
                 className='flex-1'
               />
               <span className='w-12 text-right'>{props.finalPassParams.chromaStrength.toFixed(4)}</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <hr className='border-border-subtle my-3' />
+
+      {/* Corruption controls */}
+      <div className='space-y-2 mb-3'>
+        <div className='flex items-center justify-between mb-2'>
+          <p className='font-bold text-sm'>CRT Corruption</p>
+          <button
+            type='button'
+            onClick={() => toggleSection('corruption')}
+            className='text-xs px-2 py-1 rounded-theme-sm bg-border-primary hover:bg-border-subtle'
+          >
+            {sectionsExpanded.corruption ? '−' : '+'}
+          </button>
+        </div>
+
+        {sectionsExpanded.corruption && (
+          <>
+            <div className='text-text-tertiary text-xs mb-2'>
+              <p className='mb-1'>
+                <strong>Effect:</strong> Adds CRT-style corruption effects with glitches, static, and distortion.
+              </p>
+              <p className='mb-1'>
+                <strong>Tip:</strong> Use scroll to trigger corruption, or manually enable it here.
+              </p>
+            </div>
+
+            <label className='flex items-center gap-2'>
+              <input
+                type='checkbox'
+                checked={props.corruptionParams.enabled}
+                onChange={handleCorruptionToggle('enabled')}
+                className='mr-1'
+              />
+              Enable Corruption
+            </label>
+
+            <div className='flex items-center gap-2'>
+              <label className='flex-1'>Intensity:</label>
+              <input
+                type='range'
+                min='0'
+                max='1'
+                step='0.01'
+                value={props.corruptionParams.intensity}
+                onInput={handleCorruptionIntensityInput}
+                className='flex-1'
+                disabled={!props.corruptionParams.enabled}
+              />
+              <span className='w-12 text-right'>{props.corruptionParams.intensity.toFixed(2)}</span>
+            </div>
+
+            <label className='flex items-center gap-2'>
+              <input
+                type='checkbox'
+                checked={props.corruptionParams.timeEnabled}
+                onChange={handleCorruptionToggle('timeEnabled')}
+                className='mr-1'
+                disabled={!props.corruptionParams.enabled}
+              />
+              Enable Time Animation
+            </label>
+
+            {/* Existing Effect Controls */}
+            <div className='mt-3 pt-3 border-t border-border-subtle'>
+              <p className='font-bold text-xs mb-2'>Core Effects</p>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Static Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='2'
+                  step='0.01'
+                  value={props.corruptionParams.staticIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      staticIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                <span className='w-12 text-right'>{(props.corruptionParams.staticIntensity ?? 0.8).toFixed(2)}</span>
+              </div>
+
+              <label className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.rgbDistortionEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      rgbDistortionEnabled: checked,
+                    })
+                  }}
+                  className='mr-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                RGB Distortion
+              </label>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>RGB Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='50'
+                  step='0.1'
+                  value={props.corruptionParams.rgbDistortionIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      rgbDistortionIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.rgbDistortionEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.rgbDistortionIntensity.toFixed(1)}</span>
+              </div>
+
+              <label className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.whiteNoiseEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      whiteNoiseEnabled: checked,
+                    })
+                  }}
+                  className='mr-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                White Noise
+              </label>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Noise Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='2'
+                  step='0.01'
+                  value={props.corruptionParams.whiteNoiseIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      whiteNoiseIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.whiteNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.whiteNoiseIntensity.toFixed(2)}</span>
+              </div>
+
+              <label className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.blockCorruptionEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      blockCorruptionEnabled: checked,
+                    })
+                  }}
+                  className='mr-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                Block Corruption
+              </label>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Block Rate:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='50'
+                  step='0.1'
+                  value={props.corruptionParams.blockCorruptionRate}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      blockCorruptionRate: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.blockCorruptionEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.blockCorruptionRate.toFixed(1)}</span>
+              </div>
+
+              <label className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.waveNoiseEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      waveNoiseEnabled: checked,
+                    })
+                  }}
+                  className='mr-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                Wave Distortion
+              </label>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Wave Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='2'
+                  step='0.01'
+                  value={props.corruptionParams.waveNoiseIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      waveNoiseIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.waveNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.waveNoiseIntensity.toFixed(2)}</span>
+              </div>
+
+              <label className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.shakeEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      shakeEnabled: checked,
+                    })
+                  }}
+                  className='mr-1'
+                  disabled={!props.corruptionParams.enabled}
+                />
+                Screen Shake
+              </label>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Shake Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='50'
+                  step='0.1'
+                  value={props.corruptionParams.shakeIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      shakeIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.shakeEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.shakeIntensity.toFixed(1)}</span>
+              </div>
+            </div>
+
+            {/* Pixel Bleed Effect Controls */}
+            <div className='mt-3 pt-3 border-t border-border-subtle'>
+              <p className='font-bold text-xs mb-2'>Pixel Bleed Effect</p>
+
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.pixelBleedEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedEnabled: checked,
+                      // Reset intensity to 0 when disabling
+                      pixelBleedIntensity: checked ? props.corruptionParams.pixelBleedIntensity : 0.0,
+                    })
+                  }}
+                  disabled={!props.corruptionParams.enabled}
+                />
+                <label className='flex-1'>Enable Pixel Bleed</label>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Bleed Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedIntensity.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Chunk Size:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='100'
+                  step='1'
+                  value={props.corruptionParams.pixelBleedChunkSize}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedChunkSize: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedChunkSize.toFixed(0)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Chunk Randomness:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedChunkRandomness}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedChunkRandomness: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedChunkRandomness.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Stretch Distance:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedStretchDistance}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedStretchDistance: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedStretchDistance.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Geometry Complexity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedGeometryComplexity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedGeometryComplexity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedGeometryComplexity.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Persistence:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedPersistence}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedPersistence: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedPersistence.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Regeneration Rate:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.pixelBleedRegenerationRate}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      pixelBleedRegenerationRate: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.pixelBleedEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.pixelBleedRegenerationRate.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Large Block Corruption Controls */}
+            <div className='mt-3 pt-3 border-t border-border-subtle'>
+              <p className='font-bold text-xs mb-2'>Large Block Corruption</p>
+
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.largeBlockEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      largeBlockEnabled: checked,
+                      // Reset intensity to 0 when disabling
+                      largeBlockIntensity: checked ? props.corruptionParams.largeBlockIntensity : 0.0,
+                    })
+                  }}
+                  disabled={!props.corruptionParams.enabled}
+                />
+                <label className='flex-1'>Enable Large Block Corruption</label>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Block Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.largeBlockIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      largeBlockIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.largeBlockEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.largeBlockIntensity.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Block Size:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='100'
+                  step='1'
+                  value={props.corruptionParams.largeBlockSize}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      largeBlockSize: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.largeBlockEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.largeBlockSize.toFixed(0)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Block FPS:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='30'
+                  step='1'
+                  value={props.corruptionParams.largeBlockFPS}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      largeBlockFPS: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.largeBlockEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.largeBlockFPS.toFixed(0)}</span>
+              </div>
+            </div>
+
+            {/* Artifact Noise Controls */}
+            <div className='mt-3 pt-3 border-t border-border-subtle'>
+              <p className='font-bold text-xs mb-2'>Artifact Noise</p>
+
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={props.corruptionParams.artifactNoiseEnabled}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      artifactNoiseEnabled: checked,
+                      // Reset intensity to 0 when disabling
+                      artifactNoiseIntensity: checked ? props.corruptionParams.artifactNoiseIntensity : 0.0,
+                    })
+                  }}
+                  disabled={!props.corruptionParams.enabled}
+                />
+                <label className='flex-1'>Enable Artifact Noise</label>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Artifact Intensity:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={props.corruptionParams.artifactNoiseIntensity}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      artifactNoiseIntensity: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.artifactNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.artifactNoiseIntensity.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Chunk Size:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='200'
+                  step='1'
+                  value={props.corruptionParams.artifactChunkSize}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      artifactChunkSize: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.artifactNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.artifactChunkSize.toFixed(0)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Shift Amount:</label>
+                <input
+                  type='range'
+                  min='0'
+                  max='2'
+                  step='0.01'
+                  value={props.corruptionParams.artifactShiftAmount}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      artifactShiftAmount: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.artifactNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{props.corruptionParams.artifactShiftAmount.toFixed(2)}</span>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <label className='flex-1'>Artifact FPS:</label>
+                <input
+                  type='range'
+                  min='1'
+                  max='30'
+                  step='1'
+                  value={props.corruptionParams.artifactNoiseFPS ?? 10.0}
+                  onInput={(e) => {
+                    const value = parseFloat((e.target as HTMLInputElement).value)
+                    props.onCorruptionChange({
+                      ...props.corruptionParams,
+                      artifactNoiseFPS: value,
+                    })
+                  }}
+                  className='flex-1'
+                  disabled={!props.corruptionParams.enabled || !props.corruptionParams.artifactNoiseEnabled}
+                />
+                <span className='w-12 text-right'>{(props.corruptionParams.artifactNoiseFPS ?? 10.0).toFixed(0)}</span>
+              </div>
             </div>
           </>
         )}
