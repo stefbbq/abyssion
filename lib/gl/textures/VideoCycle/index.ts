@@ -1,22 +1,22 @@
 import { lc, log } from '@lib/logger/index.ts'
+import { pipe } from '@lib/utils/pipe.ts'
 import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
+import * as Three from 'three'
+
+import { calculateNextVideoSource } from './utils/calculateNextVideoSource.ts'
+import { calculateImmediatePlaybackReadiness, calculateVideoReadiness } from './utils/calculateVideoReadiness.ts'
+import { calculateBufferState, calculatePreparationTiming } from './utils/calculateBufferState.ts'
+
 import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
-import { createVideoLoadingStream } from './utils/createVideoLoadingStream.ts'
-import { createInitialPlaybackState } from './utils/createInitialPlaybackState.ts'
-import { shouldStartPlayback } from './utils/shouldStartPlayback.ts'
-import { selectNextVideoIndex } from './utils/selectNextVideoIndex.ts'
-import { updateRecentIndices } from './utils/updateRecentIndices.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
-import type { BufferObject, PlaybackState, VideoTexture } from './types.ts'
+import type { BufferObject, PlaybackState, VideoManifest, VideoPool } from './types.ts'
 import ms from 'ms'
 
-type PreparedVideo = {
-  index: number
-  video: VideoTexture
-  startTime: number
-  duration: number
-}
-
+/**
+ * Creates an efficient video cycle system with 2-3 video elements maximum
+ *
+ * Uses pure utility functions for calculations and keeps Three.js mutations isolated
+ */
 export const createVideoCycle = (
   frontBuffer: BufferObject,
   backBuffer: BufferObject,
@@ -25,404 +25,582 @@ export const createVideoCycle = (
     enabled,
     cycling: { minSegmentLength, maxSegmentLength, antiRepeat },
     appearance: { opacity },
+    videos: { path: videosPath },
   } = videoCycleConfig
 
-  // Immutable state - only updated through pure functions
-  let playbackState: PlaybackState = createInitialPlaybackState([])
+  // Timeout values - TODO: add to config
+  const videoSwapTimeoutMs = 3000
+  const videoLoadTimeoutMs = 10000
 
-  // Prevent concurrent transitions
-  let isTransitioning = false
-  let nextVideoPrepared = false
-  // deno-lint-ignore no-unused-vars
-  let preparedVideoIndex = -1
+  // Create video pool with 3 elements for efficient memory usage
+  const createVideoPool = (manifest: VideoManifest): VideoPool => {
+    const videos = Array.from({ length: 3 }, () => {
+      const video = document.createElement('video')
+      video.autoplay = false
+      video.loop = true
+      video.muted = true
+      video.crossOrigin = 'anonymous'
+      video.playsInline = true
+      video.preload = 'auto'
+      video.playbackRate = videoCycleConfig.cycling.playbackSpeed
+      return video
+    })
 
-  // Buffers - mutable boundary
-  let activeBuffer: BufferObject = frontBuffer
-  let hiddenBuffer: BufferObject = backBuffer
-  activeBuffer.material.opacity = opacity
-  activeBuffer.material.needsUpdate = true
-
-  /**
-   * Selects a video and calculates its timing - THE SINGLE SOURCE OF TRUTH
-   */
-  const selectVideoWithTiming = (
-    currentIndex: number,
-    recentIndices: readonly number[],
-    videos: VideoTexture[],
-    isInitial = false,
-  ): PreparedVideo => {
-    const nextIndex = isInitial
-      ? Math.floor(Math.random() * videos.length)
-      : selectNextVideoIndex(currentIndex, recentIndices, videos.length)
-
-    const video = videos[nextIndex]
-    const result = getNewStartTimeAndDuration(video.video, minSegmentLength, maxSegmentLength)
+    const textures = videos.map((video) => {
+      const texture = new Three.VideoTexture(video)
+      texture.minFilter = Three.LinearFilter
+      texture.magFilter = Three.LinearFilter
+      texture.format = Three.RGBAFormat
+      return texture
+    })
 
     return {
-      index: nextIndex,
-      video,
-      startTime: result.startTime,
-      duration: result.duration,
+      videos,
+      textures,
+      activeIndex: 0,
+      nextIndex: 1,
+      backupIndex: 2,
     }
   }
 
-  /**
-   * Updates playback state immutably with new videos
-   */
-  const updateStateWithNewVideos = (newVideos: VideoTexture[]): PlaybackState => {
-    return {
-      ...playbackState,
-      videos: newVideos,
-    }
-  }
-
-  /**
-   * Prepares the next video in the background for smooth transitions
-   */
-  const prepareNextVideo = async (state: PlaybackState): Promise<void> => {
-    if (nextVideoPrepared || state.videos.length < 2) return
-
+  // Load video manifest
+  const loadManifest = async (): Promise<VideoManifest> => {
     try {
-      const prepared = selectVideoWithTiming(
-        state.currentIndex,
-        state.recentIndices,
-        state.videos,
-      )
+      const manifestPath = `${videosPath}manifest.json`
+      const response = await fetch(manifestPath)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch manifest: ${response.status}`)
+      }
+
+      const manifestData = await response.json()
+      const files = Array.isArray(manifestData) ? manifestData.filter((file) => typeof file === 'string') : []
+
+      return {
+        files,
+        basePath: videosPath,
+        totalCount: files.length,
+      }
+    } catch (error) {
+      log.error(lc.GL_VIDEO, 'Error loading video manifest:', error)
+      return { files: [], basePath: videosPath, totalCount: 0 }
+    }
+  }
+
+  // Load video source directly into video element
+  const loadVideoIntoElement = async (
+    video: HTMLVideoElement,
+    videoPath: string,
+    timeout: number = videoLoadTimeoutMs,
+  ): Promise<boolean> => {
+    try {
+      log.debug(lc.GL_VIDEO, `Loading video source: ${videoPath}`)
+
+      // Configure video element
+      video.autoplay = false
+      video.loop = true
+      video.muted = true
+      video.crossOrigin = 'anonymous'
+      video.playsInline = true
+      video.preload = 'auto'
+      video.playbackRate = videoCycleConfig.cycling.playbackSpeed
+
+      // Set the source directly
+      video.src = videoPath
+      video.load()
 
       // Wait for video to be ready
-      if (prepared.video.video.readyState < 3) {
-        await new Promise<void>((resolve, reject) => {
-          let attempts = 0
-          const maxAttempts = 30 // 3 seconds max
+      await new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          cleanup()
+          reject(new Error('Video load timeout'))
+        }, timeout)
 
-          const checkReady = () => {
-            attempts++
-            if (prepared.video.video.readyState >= 3) resolve()
-            else if (attempts >= maxAttempts) reject(new Error('Video not ready'))
-            else setTimeout(checkReady, ms('0.1s'))
-          }
+        const handleCanPlay = () => {
+          cleanup()
+          log.trace(lc.GL_VIDEO, `Video ready: ${videoPath}`)
+          resolve()
+        }
 
-          checkReady()
-        })
-      }
+        const handleError = (event: Event) => {
+          cleanup()
+          reject(new Error(`Video load error: ${event.type}`))
+        }
 
-      // Set up hidden buffer with next video
-      if ('uniforms' in hiddenBuffer.material) {
-        // ShaderMaterial
-        hiddenBuffer.material.uniforms.videoTexture.value = prepared.video.texture
-        hiddenBuffer.material.uniforms.opacity.value = 0 // Keep hidden initially
-      } else {
-        // Fallback for MeshBasicMaterial
-        hiddenBuffer.material.map = prepared.video.texture
-        hiddenBuffer.material.opacity = 0
-      }
-      hiddenBuffer.material.needsUpdate = true
+        const cleanup = () => {
+          clearTimeout(timeoutId)
+          video.removeEventListener('canplay', handleCanPlay)
+          video.removeEventListener('error', handleError)
+        }
 
-      // Apply the calculated timing
-      prepared.video.video.currentTime = prepared.startTime
-      await prepared.video.video.play()
+        video.addEventListener('canplay', handleCanPlay)
+        video.addEventListener('error', handleError)
+      })
 
-      // Store preparation state
-      nextVideoPrepared = true
-      preparedVideoIndex = prepared.index
-
-      // Store timing info in buffer for later use
-      hiddenBuffer._plannedStartTime = prepared.startTime
-      hiddenBuffer._plannedDuration = prepared.duration
-      hiddenBuffer._plannedVideoIndex = prepared.index
-
-      log.trace(lc.GL_TEXTURES, `Prepared video ${prepared.index} for smooth transition (duration: ${prepared.duration.toFixed(2)}s)`)
+      log.debug(lc.GL_VIDEO, `Successfully loaded video source: ${videoPath}`)
+      return true
     } catch (error) {
-      log.warn(lc.GL_TEXTURES, `Failed to prepare next video:`, error)
-      nextVideoPrepared = false
+      log.error(lc.GL_VIDEO, `Failed to load video source: ${videoPath}`, error)
+      return false
     }
   }
 
-  /**
-   * Starts playback by selecting initial video and updating state
-   */
-  const startPlayback = async (state: PlaybackState): Promise<PlaybackState> => {
-    if (state.isPlaying || state.videos.length < 2 || isTransitioning) return state
+  // Play video with timeout protection
+  const playVideoSafely = async (
+    video: HTMLVideoElement,
+    timeout: number = videoSwapTimeoutMs,
+  ): Promise<boolean> => {
+    try {
+      await Promise.race([
+        video.play(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Video play timeout')), timeout)),
+      ])
+      return true
+    } catch (error) {
+      log.error(lc.GL_VIDEO, 'Failed to play video:', error)
+      return false
+    }
+  }
+
+  // Seek video to specific time and wait for completion
+  const seekVideoSafely = async (
+    video: HTMLVideoElement,
+    targetTime: number,
+    timeout: number = 2000,
+  ): Promise<boolean> => {
+    try {
+      log.debug(lc.GL_VIDEO, `Seeking to ${targetTime.toFixed(2)}s (current: ${video.currentTime.toFixed(2)}s)`)
+
+      // If already at target time (within 0.1s), no need to seek
+      if (Math.abs(video.currentTime - targetTime) < 0.1) {
+        log.trace(lc.GL_VIDEO, `Already at target time ${targetTime.toFixed(2)}s`)
+        return true
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          cleanup()
+          reject(new Error('Video seek timeout'))
+        }, timeout)
+
+        const handleSeeked = () => {
+          cleanup()
+          log.trace(lc.GL_VIDEO, `Seek completed to ${video.currentTime.toFixed(2)}s`)
+          resolve()
+        }
+
+        const handleError = (event: Event) => {
+          cleanup()
+          reject(new Error(`Video seek error: ${event.type}`))
+        }
+
+        const cleanup = () => {
+          clearTimeout(timeoutId)
+          video.removeEventListener('seeked', handleSeeked)
+          video.removeEventListener('error', handleError)
+        }
+
+        video.addEventListener('seeked', handleSeeked)
+        video.addEventListener('error', handleError)
+
+        // Perform the seek
+        video.currentTime = targetTime
+      })
+
+      return true
+    } catch (error) {
+      log.error(lc.GL_VIDEO, `Failed to seek video to ${targetTime.toFixed(2)}s:`, error)
+      return false
+    }
+  }
+
+  // Initialize state
+  let manifest: VideoManifest = { files: [], basePath: videosPath, totalCount: 0 }
+  let videoPool: VideoPool
+  let playbackState: PlaybackState
+  let activeBuffer: BufferObject = frontBuffer
+  let hiddenBuffer: BufferObject = backBuffer
+  let isTransitioning = false
+
+  // Initialize the system
+  const initialize = async (): Promise<void> => {
+    manifest = await loadManifest()
+
+    if (manifest.totalCount === 0) {
+      log.error(lc.GL_VIDEO, 'No videos found in manifest')
+      return
+    }
+
+    videoPool = createVideoPool(manifest)
+
+    playbackState = {
+      manifest,
+      videoPool,
+      currentManifestIndex: -1,
+      recentIndices: [],
+      timeSinceSwitch: 0,
+      currentDuration: 0,
+      currentStartTime: 0,
+      isPlaying: false,
+      isNextVideoPrepared: false,
+    }
+
+    // Set initial buffer opacity
+    activeBuffer.material.opacity = opacity
+    activeBuffer.material.needsUpdate = true
+
+    log(lc.GL_TEXTURES, `Video cycle initialized with ${manifest.totalCount} videos`)
+  }
+
+  // Start playback with first video
+  const startPlayback = async (): Promise<void> => {
+    if (playbackState.isPlaying || manifest.totalCount === 0) return
 
     try {
       isTransitioning = true
-      log(lc.GL_TEXTURES, `🎥 Starting playback with ${state.videos.length} videos`)
+      log(lc.GL_TEXTURES, `Starting video playback`)
 
-      // Select initial video with timing calculation
-      const prepared = selectVideoWithTiming(0, [], state.videos, true)
-      const recentIndices = [prepared.index]
+      // Calculate first video to play
+      const firstVideoSource = calculateNextVideoSource({
+        currentIndex: -1,
+        recentIndices: [],
+        manifest: manifest.files,
+        basePath: manifest.basePath,
+      })
 
-      // Wait for video to have enough data
-      if (prepared.video.video.readyState < 3) {
-        log.trace(lc.GL_TEXTURES, `Video ${prepared.index} not ready (readyState=${prepared.video.video.readyState}), waiting...`)
+      const activeVideo = videoPool.videos[videoPool.activeIndex]
+      const activeTexture = videoPool.textures[videoPool.activeIndex]
 
-        await new Promise<void>((resolve) => {
-          const checkReady = () => {
-            if (prepared.video.video.readyState >= 3) resolve()
-            else setTimeout(checkReady, ms('0.1s'))
-          }
-          checkReady()
-        })
+      // Load first video
+      const loadSuccess = await loadVideoIntoElement(activeVideo, firstVideoSource.videoPath)
+      if (!loadSuccess) {
+        log.error(lc.GL_VIDEO, 'Failed to load first video')
+        isTransitioning = false
+        return
       }
 
+      // Calculate segment timing
+      const timing = getNewStartTimeAndDuration(
+        activeVideo,
+        minSegmentLength,
+        maxSegmentLength,
+      )
+
+      // Seek to start time
+      const seekSuccess = await seekVideoSafely(activeVideo, timing.startTime)
+      if (!seekSuccess) {
+        log.error(lc.GL_VIDEO, 'Failed to seek to start time')
+        isTransitioning = false
+        return
+      }
+
+      // Start playing
+      const playSuccess = await playVideoSafely(activeVideo)
+      if (!playSuccess) {
+        log.error(lc.GL_VIDEO, 'Failed to start video playback')
+        isTransitioning = false
+        return
+      }
+
+      // Verify video started at correct time
+      verifyVideoTiming(activeVideo, timing.startTime)
+
+      // Update buffer material
       if ('uniforms' in activeBuffer.material) {
-        // ShaderMaterial
-        activeBuffer.material.uniforms.videoTexture.value = prepared.video.texture
+        activeBuffer.material.uniforms.videoTexture.value = activeTexture
         activeBuffer.material.uniforms.opacity.value = opacity
       } else {
-        // Fallback for MeshBasicMaterial
-        activeBuffer.material.map = prepared.video.texture
+        activeBuffer.material.map = activeTexture
         activeBuffer.material.opacity = opacity
       }
       activeBuffer.material.needsUpdate = true
 
-      // Apply the calculated timing
-      prepared.video.video.currentTime = prepared.startTime
-      await prepared.video.video.play()
-
-      // Store timing info in active buffer for update() to use
-      activeBuffer._plannedStartTime = prepared.startTime
-      activeBuffer._plannedDuration = prepared.duration
-      activeBuffer._plannedVideoIndex = prepared.index
-
-      log.debug(lc.GL_TEXTURES, `Started with video ${prepared.index}, duration: ${prepared.duration}s`)
-
-      // Start preparing next video in background
-      const newState = {
-        ...state,
-        currentIndex: prepared.index,
-        recentIndices,
-        currentDuration: prepared.duration,
-        timeSinceSwitch: 0, // Will be calculated based on video position in update()
-        isPlaying: true,
-      }
-
-      isTransitioning = false
-
-      // Prepare next video when halfway through current one
-      setTimeout(() => prepareNextVideo(newState), prepared.duration * 500) // 50% through
-
-      return newState
-    } catch (error) {
-      log.error(lc.GL_TEXTURES, `Error starting playback:`, error)
-      isTransitioning = false
-      return state
-    }
-  }
-
-  /**
-   * Smoothly transitions to the prepared next video
-   */
-  const transitionToNextVideo = async (state: PlaybackState): Promise<PlaybackState> => {
-    if (isTransitioning) return state
-
-    isTransitioning = true
-
-    try {
-      let nextIndex: number
-      let updatedRecentIndices: readonly number[]
-      let duration: number
-
-      if (nextVideoPrepared && hiddenBuffer._plannedVideoIndex !== undefined) {
-        // Use pre-prepared video for smooth transition
-        nextIndex = hiddenBuffer._plannedVideoIndex
-        duration = hiddenBuffer._plannedDuration || 10
-
-        const videoName = state.videos[nextIndex]?.video?.src?.split('/').pop() || '(unknown)'
-        log.debug(lc.GL_TEXTURES, `Smooth transition to prepared video ${nextIndex} (${videoName})`)
-
-        // Just swap buffers - video is already playing!
-        const temp = activeBuffer
-        activeBuffer = hiddenBuffer
-        hiddenBuffer = temp
-
-        if ('uniforms' in activeBuffer.material && 'uniforms' in hiddenBuffer.material) {
-          // ShaderMaterial
-          activeBuffer.material.uniforms.opacity.value = opacity
-          hiddenBuffer.material.uniforms.opacity.value = 0
-        } else {
-          // Fallback for MeshBasicMaterial
-          activeBuffer.material.opacity = opacity
-          hiddenBuffer.material.opacity = 0
-        }
-        activeBuffer.material.needsUpdate = true
-        hiddenBuffer.material.needsUpdate = true
-
-        updatedRecentIndices = updateRecentIndices(state.recentIndices, nextIndex, antiRepeat)
-      } else {
-        // Fallback: preparation failed, so prepare video now
-        log.debug(lc.GL_TEXTURES, `Fallback transition (no prepared video)`)
-
-        // Select video with timing calculation once
-        const prepared = selectVideoWithTiming(
-          state.currentIndex,
-          state.recentIndices,
-          state.videos,
-        )
-
-        nextIndex = prepared.index
-        duration = prepared.duration
-        updatedRecentIndices = updateRecentIndices(state.recentIndices, nextIndex, antiRepeat)
-
-        // Swap buffers
-        const temp = activeBuffer
-        activeBuffer = hiddenBuffer
-        hiddenBuffer = temp
-
-        // Set up new video with calculated timing
-        if ('uniforms' in activeBuffer.material && 'uniforms' in hiddenBuffer.material) {
-          // ShaderMaterial
-          activeBuffer.material.uniforms.videoTexture.value = prepared.video.texture
-          activeBuffer.material.uniforms.opacity.value = opacity
-          hiddenBuffer.material.uniforms.opacity.value = 0
-        } else {
-          // Fallback for MeshBasicMaterial
-          activeBuffer.material.map = prepared.video.texture
-          activeBuffer.material.opacity = opacity
-          hiddenBuffer.material.opacity = 0
-        }
-        activeBuffer.material.needsUpdate = true
-        hiddenBuffer.material.needsUpdate = true
-
-        // Apply the timing calculated once
-        prepared.video.video.currentTime = prepared.startTime
-        await prepared.video.video.play()
-
-        // Store timing info in active buffer for update() to use
-        activeBuffer._plannedStartTime = prepared.startTime
-        activeBuffer._plannedDuration = prepared.duration
-        activeBuffer._plannedVideoIndex = prepared.index
-      }
-
-      // Reset preparation state
-      nextVideoPrepared = false
-      preparedVideoIndex = -1
-
-      const newState = {
-        ...state,
-        currentIndex: nextIndex,
-        recentIndices: updatedRecentIndices,
-        currentDuration: duration,
-        timeSinceSwitch: 0, // Will be calculated based on video position in update()
-      }
-
-      log(lc.GL_TEXTURES, `Switched to video ${nextIndex}, duration: ${duration.toFixed(2)}s (recent: [${updatedRecentIndices.join(',')}])`)
-
-      isTransitioning = false
-
-      // Prepare next video for the following transition
-      setTimeout(() => prepareNextVideo(newState), duration * ms('0.5s')) // 50% through
-
-      return newState
-    } catch (error) {
-      log.error(lc.GL_TEXTURES, `Error in transition:`, error)
-      isTransitioning = false
-      return state
-    }
-  }
-
-  // Initialize video loading stream
-  const videoStream = createVideoLoadingStream() // Process video loading events
-  ;(async () => {
-    for await (const videos of videoStream) {
-      log.trace(lc.GL_TEXTURES, `Videos loaded: ${videos.length}, currently playing: ${playbackState.isPlaying}`)
-
-      // Check if we should start playback BEFORE updating state
-      const shouldStart = shouldStartPlayback(videos.length, playbackState.isPlaying)
-      log.trace(lc.GL_TEXTURES, `Should start playback: ${shouldStart}`)
-
-      const newState = updateStateWithNewVideos(videos)
-
-      // Start playback if conditions are met
-      if (shouldStart) {
-        log.trace(lc.GL_TEXTURES, `Starting playback...`)
-        playbackState = await startPlayback(newState)
-      } else playbackState = newState
-    }
-  })()
-
-  /**
-   * Updates the video cycle state and handles video transitions
-   */
-  const update = async (delta: number): Promise<void> => {
-    if (!enabled || !playbackState.isPlaying || playbackState.videos.length < 2 || isTransitioning) return
-
-    const currentVideo = playbackState.videos[playbackState.currentIndex]
-    if (!currentVideo) return
-
-    // Calculate elapsed time based on actual video position vs expected start time
-    const expectedStartTime = activeBuffer._plannedStartTime || 0
-    const videoElapsedTime = currentVideo.video.currentTime - expectedStartTime
-
-    // Handle video looping (currentTime < startTime means video looped)
-    const hasLooped = currentVideo.video.currentTime < expectedStartTime
-    const shouldTransition = hasLooped || (videoElapsedTime >= playbackState.currentDuration)
-
-    if (shouldTransition) {
-      log.debug(
-        lc.GL_TEXTURES,
-        `Video transition triggered: ${hasLooped ? 'looped' : 'duration exceeded'} (elapsed: ${videoElapsedTime.toFixed(2)}s, expected: ${
-          playbackState.currentDuration.toFixed(2)
-        }s)`,
-      )
-      playbackState = await transitionToNextVideo(playbackState)
-    } else {
-      // Update timeSinceSwitch for debug/display purposes (but don't use it for switching logic)
+      // Update playback state
       playbackState = {
         ...playbackState,
-        timeSinceSwitch: videoElapsedTime * 1000,
+        currentManifestIndex: firstVideoSource.manifestIndex,
+        recentIndices: firstVideoSource.updatedRecentIndices,
+        currentDuration: timing.duration,
+        currentStartTime: timing.startTime,
+        isPlaying: true,
+        timeSinceSwitch: 0,
       }
+
+      log.debug(lc.GL_TEXTURES, `Started playback with video ${firstVideoSource.manifestIndex}`)
+      isTransitioning = false
+    } catch (error) {
+      log.error(lc.GL_TEXTURES, 'Error starting playback:', error)
+      isTransitioning = false
     }
   }
 
-  const dispose = () => {
-    playbackState.videos.forEach(({ video, texture }) => {
-      texture.dispose()
-      video.pause()
-      video.src = ''
-      video.load()
-    })
+  // Prepare next video for smooth transition
+  const prepareNextVideo = async (): Promise<void> => {
+    if (playbackState.isNextVideoPrepared || isTransitioning) {
+      log.trace(lc.GL_VIDEO, `Skipping preparation: prepared=${playbackState.isNextVideoPrepared}, transitioning=${isTransitioning}`)
+      return
+    }
+
+    try {
+      log.debug(lc.GL_VIDEO, `Starting next video preparation from manifest index ${playbackState.currentManifestIndex}`)
+
+      const nextVideoSource = calculateNextVideoSource({
+        currentIndex: playbackState.currentManifestIndex,
+        recentIndices: playbackState.recentIndices,
+        manifest: manifest.files,
+        basePath: manifest.basePath,
+      })
+
+      const nextVideo = videoPool.videos[videoPool.nextIndex]
+      log.debug(
+        lc.GL_VIDEO,
+        `Preparing video ${nextVideoSource.manifestIndex}: ${nextVideoSource.filename} (pool index: ${videoPool.nextIndex})`,
+      )
+
+      const loadSuccess = await loadVideoIntoElement(nextVideo, nextVideoSource.videoPath)
+      if (!loadSuccess) {
+        log.warn(lc.GL_VIDEO, 'Failed to prepare next video')
+        return
+      }
+
+      // Calculate timing for next video
+      const timing = getNewStartTimeAndDuration(
+        nextVideo,
+        minSegmentLength,
+        maxSegmentLength,
+      )
+
+      // Seek to start time
+      const seekSuccess = await seekVideoSafely(nextVideo, timing.startTime)
+      if (!seekSuccess) {
+        log.warn(lc.GL_VIDEO, 'Failed to seek next video to start time')
+        return
+      }
+      log.debug(lc.GL_VIDEO, `Set next video start time to ${timing.startTime.toFixed(2)}s (duration: ${timing.duration.toFixed(2)}s)`)
+
+      // Start playing but keep hidden
+      const playSuccess = await playVideoSafely(nextVideo)
+      if (!playSuccess) {
+        log.warn(lc.GL_VIDEO, 'Failed to start next video playing')
+        return
+      }
+
+      // Update hidden buffer
+      const nextTexture = videoPool.textures[videoPool.nextIndex]
+      if ('uniforms' in hiddenBuffer.material) {
+        hiddenBuffer.material.uniforms.videoTexture.value = nextTexture
+        hiddenBuffer.material.uniforms.opacity.value = 0
+      } else {
+        hiddenBuffer.material.map = nextTexture
+        hiddenBuffer.material.opacity = 0
+      }
+      hiddenBuffer.material.needsUpdate = true
+
+      // Store timing info for transition
+      hiddenBuffer._plannedStartTime = timing.startTime
+      hiddenBuffer._plannedDuration = timing.duration
+      hiddenBuffer._plannedVideoIndex = nextVideoSource.manifestIndex
+
+      playbackState = {
+        ...playbackState,
+        isNextVideoPrepared: true,
+      }
+
+      log.debug(lc.GL_VIDEO, `Successfully prepared next video ${nextVideoSource.manifestIndex} (${nextVideoSource.filename})`)
+    } catch (error) {
+      log.error(lc.GL_VIDEO, 'Error preparing next video:', error)
+    }
   }
+
+  // Verify video timing after operations
+  const verifyVideoTiming = (
+    video: HTMLVideoElement,
+    expectedTime: number,
+    tolerance: number = 0.2,
+  ): boolean => {
+    const actualTime = video.currentTime
+    const timeDiff = Math.abs(actualTime - expectedTime)
+    const isCorrect = timeDiff <= tolerance
+
+    if (!isCorrect) {
+      log.warn(
+        lc.GL_VIDEO,
+        `Video timing mismatch: expected ${expectedTime.toFixed(2)}s, got ${actualTime.toFixed(2)}s (diff: ${timeDiff.toFixed(2)}s)`,
+      )
+    } else {
+      log.trace(lc.GL_VIDEO, `Video timing correct: ${actualTime.toFixed(2)}s (expected: ${expectedTime.toFixed(2)}s)`)
+    }
+
+    return isCorrect
+  }
+
+  // Transition to next video
+  const transitionToNext = async (): Promise<void> => {
+    if (!playbackState.isNextVideoPrepared || isTransitioning) return
+
+    try {
+      isTransitioning = true
+
+      const nextVideoIndex = hiddenBuffer._plannedVideoIndex!
+      const nextDuration = hiddenBuffer._plannedDuration!
+      const nextStartTime = hiddenBuffer._plannedStartTime!
+
+      log.debug(lc.GL_VIDEO, `Transitioning to video ${nextVideoIndex} (duration: ${nextDuration.toFixed(2)}s)`)
+
+      // Verify the prepared video is at the correct time
+      const nextVideo = videoPool.videos[videoPool.nextIndex]
+      verifyVideoTiming(nextVideo, nextStartTime)
+
+      // Swap buffers
+      const tempBuffer = activeBuffer
+      activeBuffer = hiddenBuffer
+      hiddenBuffer = tempBuffer
+
+      // Rotate video pool indices forward
+      const newActiveIndex = videoPool.nextIndex
+      const newNextIndex = videoPool.backupIndex
+      const newBackupIndex = videoPool.activeIndex
+
+      videoPool.activeIndex = newActiveIndex
+      videoPool.nextIndex = newNextIndex
+      videoPool.backupIndex = newBackupIndex
+
+      log.trace(lc.GL_VIDEO, `Pool indices rotated: active=${newActiveIndex}, next=${newNextIndex}, backup=${newBackupIndex}`)
+
+      // Update buffer opacities
+      if ('uniforms' in activeBuffer.material && 'uniforms' in hiddenBuffer.material) {
+        activeBuffer.material.uniforms.opacity.value = opacity
+        hiddenBuffer.material.uniforms.opacity.value = 0
+      } else {
+        activeBuffer.material.opacity = opacity
+        hiddenBuffer.material.opacity = 0
+      }
+      activeBuffer.material.needsUpdate = true
+      hiddenBuffer.material.needsUpdate = true
+
+      // Pause old video after delay to avoid hitching
+      const oldVideo = videoPool.videos[videoPool.backupIndex]
+      setTimeout(() => {
+        if (!oldVideo.paused) {
+          oldVideo.pause()
+          log.trace(lc.GL_VIDEO, `Paused old video (index ${videoPool.backupIndex})`)
+        }
+      }, ms('0.5s'))
+
+      // Update playback state
+      playbackState = {
+        ...playbackState,
+        currentManifestIndex: nextVideoIndex,
+        recentIndices: [nextVideoIndex, ...playbackState.recentIndices].slice(0, antiRepeat),
+        currentDuration: nextDuration,
+        currentStartTime: nextStartTime,
+        timeSinceSwitch: 0,
+        isNextVideoPrepared: false,
+      }
+
+      log.debug(lc.GL_VIDEO, `Successfully transitioned to video ${nextVideoIndex}`)
+      isTransitioning = false
+    } catch (error) {
+      log.error(lc.GL_VIDEO, 'Error in video transition:', error)
+      isTransitioning = false
+    }
+  }
+
+  // Main update loop
+  const update = async (_delta: number): Promise<void> => {
+    if (!enabled || !playbackState.isPlaying || isTransitioning) return
+
+    const activeVideo = videoPool.videos[videoPool.activeIndex]
+    if (!activeVideo) {
+      log.warn(lc.GL_VIDEO, 'No active video found in update loop')
+      return
+    }
+
+    // Calculate buffer state
+    const bufferState = calculateBufferState({
+      currentStartTime: playbackState.currentStartTime,
+      currentDuration: playbackState.currentDuration,
+      currentVideoTime: activeVideo.currentTime,
+      transitionTriggerPoint: calculatePreparationTiming(playbackState.currentDuration),
+      isNextVideoPrepared: playbackState.isNextVideoPrepared,
+    })
+
+    // Update timing
+    playbackState = {
+      ...playbackState,
+      timeSinceSwitch: bufferState.elapsedTime * 1000,
+    }
+
+    // Prepare next video if needed
+    if (bufferState.shouldPrepareNext) {
+      log.debug(lc.GL_VIDEO, `Preparing next video at ${(bufferState.progress * 100).toFixed(1)}% progress`)
+      await prepareNextVideo()
+    }
+
+    // Transition if needed
+    if (bufferState.shouldTransition) {
+      log.debug(
+        lc.GL_VIDEO,
+        `Video transition triggered: ${bufferState.hasLooped ? 'looped' : 'duration exceeded'} (progress: ${
+          (bufferState.progress * 100).toFixed(1)
+        }%)`,
+      )
+      await transitionToNext()
+    }
+  }
+
+  // Cleanup
+  const dispose = (): void => {
+    if (videoPool) {
+      videoPool.videos.forEach((video) => {
+        video.pause()
+        video.src = ''
+        video.load()
+      })
+      videoPool.textures.forEach((texture) => texture.dispose())
+    }
+  }
+
+  // Debug info
+  const getDebugInfo = () => {
+    const activeVideo = videoPool?.videos[videoPool.activeIndex]
+    const currentVideoName = activeVideo?.src?.split('/').pop() || 'Unknown'
+
+    return {
+      isPlaying: playbackState?.isPlaying || false,
+      currentVideoIndex: playbackState?.currentManifestIndex || -1,
+      currentVideoName,
+      currentVideoSrc: activeVideo?.src || '',
+      timeSinceSwitch: playbackState?.timeSinceSwitch || 0,
+      currentDuration: playbackState?.currentDuration || 0,
+      fullVideoDuration: activeVideo?.duration || 0,
+      videoStartTime: playbackState?.currentStartTime || 0,
+      totalVideos: manifest?.totalCount || 0,
+      recentIndices: playbackState?.recentIndices || [],
+      nextPreparedIndex: playbackState?.isNextVideoPrepared ? videoPool?.nextIndex : null,
+      nextPreparedVideoName: playbackState?.isNextVideoPrepared
+        ? videoPool?.videos[videoPool.nextIndex]?.src?.split('/').pop() || null
+        : null,
+      isTransitioning,
+      loadingProgress: {
+        loaded: 3, // Always 3 video elements in pool
+        total: manifest?.totalCount || 0,
+        hasMoreToLoad: false,
+      },
+    }
+  } // Initialize and start
+  ;(async () => {
+    await initialize()
+    if (manifest.totalCount >= 2) {
+      await startPlayback()
+    }
+  })()
 
   return {
     update,
     dispose,
     mesh: activeBuffer.mesh,
     handleResize: () => {},
-    getDebugInfo: () => {
-      const currentVideo = playbackState.videos[playbackState.currentIndex]
-      const currentVideoName = currentVideo?.video?.src?.split('/').pop() || 'Unknown'
-      const currentVideoSrc = currentVideo?.video?.src || ''
-      const fullVideoDuration = currentVideo?.video?.duration || 0
-      const currentPlaybackPosition = currentVideo?.video?.currentTime || 0
-
-      // Calculate the actual segment start time from when the video began playing
-      const segmentStartTime = currentPlaybackPosition - (playbackState.timeSinceSwitch / 1000)
-
-      // Get next prepared video name
-      const nextPreparedVideo = nextVideoPrepared && preparedVideoIndex >= 0 ? playbackState.videos[preparedVideoIndex] : null
-      const nextPreparedVideoName = nextPreparedVideo?.video?.src?.split('/').pop() || null
-
-      return {
-        isPlaying: playbackState.isPlaying,
-        currentVideoIndex: playbackState.currentIndex,
-        currentVideoName,
-        currentVideoSrc,
-        timeSinceSwitch: playbackState.timeSinceSwitch,
-        currentDuration: playbackState.currentDuration,
-        fullVideoDuration,
-        videoStartTime: segmentStartTime, // Fixed: actual segment start time
-        totalVideos: playbackState.videos.length,
-        recentIndices: playbackState.recentIndices,
-        nextPreparedIndex: nextVideoPrepared ? preparedVideoIndex : null,
-        nextPreparedVideoName,
-        isTransitioning,
-        loadingProgress: {
-          loaded: playbackState.videos.length,
-          total: playbackState.videos.length, // This would need to be enhanced with manifest info
-          hasMoreToLoad: false, // This would need to be enhanced with loader state
-        },
-      }
-    },
+    getDebugInfo,
   }
 }

@@ -157,7 +157,7 @@ export const createPostProcessing = async (
     crtPass.material.uniforms.resolution.value = new THREE.Vector2(width, height)
   }
 
-  // composer.addPass(crtPass)
+  composer.addPass(crtPass)
 
   /**
    * FilmPass

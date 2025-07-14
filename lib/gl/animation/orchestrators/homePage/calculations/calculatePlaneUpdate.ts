@@ -103,26 +103,20 @@ export const calculatePlaneUpdate = (config: PlaneUpdateConfig): PlaneUpdateResu
     duration: 0,
   }
 
-  if (burstEffect.shouldApply) {
-    const randomFactor = Math.sin(time * 2 + planeIndex * 0.5) * 0.3 + 0.7
-    const burstIntensity = 0.2 * randomFactor * (planeIndex + 1) / totalLayers
+  // if (burstEffect.shouldApply) {
+  //   const randomFactor = Math.sin(time * 2 + planeIndex * 0.5) * 0.3 + 0.7
+  //   const burstIntensity = 0.2 * randomFactor * (planeIndex + 1) / totalLayers
 
-    burstEffect.offsetX = (Math.random() - 0.5) * burstIntensity
-    burstEffect.offsetY = (Math.random() - 0.5) * burstIntensity
-    burstEffect.duration = 50 + Math.random() * 100
-  }
+  //   burstEffect.offsetX = (Math.random() - 0.5) * burstIntensity
+  //   burstEffect.offsetY = (Math.random() - 0.5) * burstIntensity
+  //   burstEffect.duration = 50 + Math.random() * 100
+  // }
 
-  // Calculate opacity
+  // Add flicker effect for random layers
   let opacity = layer.opacity
 
-  if (layer.isStencil) {
-    // Stencil layers: keep original opacity
-    opacity = layer.opacity
-  } else {
-    // Add flicker effect for random layers
-    if (layer.isRandom && Math.random() < 0.003 && opacity > 0) {
-      opacity = opacity * (Math.random() * 1.5 + 0.5)
-    }
+  if (!layer.isStencil && layer.isRandom && Math.random() < 0.003 && opacity > 0) {
+    opacity = opacity * (Math.random() * 1.5 + 0.5)
   }
 
   return {

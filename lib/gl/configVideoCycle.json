@@ -1,10 +1,12 @@
 {
   "enabled": true,
   "cycling": {
-    "minSegmentLength": 1.5,
-    "maxSegmentLength": 5,
-    "playbackSpeed": 1.2,
-    "antiRepeat": 2
+    "minSegmentLength": 2,
+    "maxSegmentLength": 6,
+    "playbackSpeed": 1,
+    "antiRepeat": 2,
+    "videoSwapTimeoutMs": 3000,
+    "videoLoadTimeoutMs": 10000
   },
   "appearance": {
     "opacity": 0.78

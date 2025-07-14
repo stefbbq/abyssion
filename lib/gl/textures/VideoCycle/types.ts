@@ -12,48 +12,71 @@ export type VideoTexture = {
 }
 
 /**
+ * Represents a video pool for efficient memory management
+ * Contains 2-3 video elements that dynamically load different sources
+ */
+export type VideoPool = {
+  /** The video elements in the pool */
+  videos: readonly HTMLVideoElement[]
+  /** The textures for each video element */
+  textures: readonly Three.VideoTexture[]
+  /** Current active video index in pool */
+  activeIndex: number
+  /** Next video index in pool */
+  nextIndex: number
+  /** Backup video index in pool */
+  backupIndex: number
+}
+
+/**
+ * Represents the manifest of available video files
+ * Contains metadata about all videos that can be loaded
+ */
+export type VideoManifest = {
+  /** Array of video filenames */
+  files: readonly string[]
+  /** Base path for video files */
+  basePath: string
+  /** Total number of videos */
+  totalCount: number
+}
+
+/**
  * Tracks the current state of video playback including timing and history
  * Used to manage video transitions and prevent repetition
  */
 export type PlaybackState = {
-  /** Array of currently loaded video textures */
-  readonly videos: VideoTexture[]
-  /** Index of the currently playing video */
-  readonly currentIndex: number
+  /** Video manifest containing all available videos */
+  readonly manifest: VideoManifest
+  /** Video pool for efficient memory management */
+  readonly videoPool: VideoPool
+  /** Index of the currently playing video in manifest */
+  readonly currentManifestIndex: number
   /** Indices of recently played videos to avoid repetition */
   readonly recentIndices: readonly number[]
   /** Time elapsed since last video switch in milliseconds */
   readonly timeSinceSwitch: number
   /** Duration of current video in seconds */
   readonly currentDuration: number
+  /** Start time of current video segment */
+  readonly currentStartTime: number
   /** Whether video playback is currently active */
   readonly isPlaying: boolean
+  /** Whether next video is prepared for transition */
+  readonly isNextVideoPrepared: boolean
 }
 
 /**
  * Result of an asynchronous video loading operation
- * Both video and texture may be null if loading failed
+ * Contains video element, texture, and success status
  */
 export type VideoLoadResult = {
   /** The loaded HTML video element, null if loading failed */
   readonly video: HTMLVideoElement | null
   /** The created Three.js texture, null if loading failed */
   readonly texture: Three.VideoTexture | null
-}
-
-/**
- * Handles loading and managing video assets
- * Provides methods for progressive loading of videos
- */
-export type VideoLoader = {
-  /** Array of loaded HTML video elements */
-  readonly videos: HTMLVideoElement[]
-  /** Array of created Three.js video textures */
-  readonly videoTextures: Three.VideoTexture[]
-  /** Loads the next video in sequence */
-  readonly loadNextVideo: () => Promise<VideoLoadResult>
-  /** Checks if more videos are available to load */
-  readonly hasMoreVideos: () => boolean
+  /** Whether the load was successful */
+  readonly success: boolean
 }
 
 /**

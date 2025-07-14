@@ -14,7 +14,6 @@ const sectionIds = ['home', 'shows', 'bio', 'contact']
  */
 export default function SinglePageScrollManager() {
   const [showGL, setShowGL] = useState(() => !isGLDisabled())
-  const lastScene = useRef<'home-page' | 'content-page' | null>(null)
   const ticking = useRef(false)
 
   initializeClientLogger(lc.GL, 'debug')
@@ -47,23 +46,23 @@ export default function SinglePageScrollManager() {
                 history.replaceState(null, '', newHash)
               }
               // GL scene switching logic
-              if (isGLInitialized.value) {
-                // const orchestrator = getSceneOrchestrator()
-                // if (orchestrator) {
-                //   // If home is mostly visible, use home-page; otherwise, use content-page
-                //   if (topSection.id === 'home') {
-                //     if (lastScene.current !== 'home-page') {
-                //       orchestrator.switchToPage('home-page')
-                //       lastScene.current = 'home-page'
-                //     }
-                //   } else {
-                //     if (lastScene.current !== 'content-page') {
-                //       orchestrator.switchToPage('content-page')
-                //       lastScene.current = 'content-page'
-                //     }
-                //   }
-                // }
-              }
+              // if (isGLInitialized.value) {
+              // const orchestrator = getSceneOrchestrator()
+              // if (orchestrator) {
+              //   // If home is mostly visible, use home-page; otherwise, use content-page
+              //   if (topSection.id === 'home') {
+              //     if (lastScene.current !== 'home-page') {
+              //       orchestrator.switchToPage('home-page')
+              //       lastScene.current = 'home-page'
+              //     }
+              //   } else {
+              //     if (lastScene.current !== 'content-page') {
+              //       orchestrator.switchToPage('content-page')
+              //       lastScene.current = 'content-page'
+              //     }
+              //   }
+              // }
+              // }
             }
             ticking.current = false
           })

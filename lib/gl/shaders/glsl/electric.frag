@@ -62,7 +62,7 @@ void main() {
   // Stencil: solid, minimal noise. Outline: full effect
   if (isStencil) {
     float stencilNoise = mix(0.95, 1.0, noise); // subtle
-    float boostedOpacity = min(opacity * 1.5, 1.0);
+    float boostedOpacity = min(opacity * 2.0, 1.0);
     float alpha = texColor.a * stencilNoise * boostedOpacity;
     gl_FragColor = vec4(color * texColor.rgb, alpha);
   } else {
