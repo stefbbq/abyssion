@@ -184,7 +184,7 @@ const corruptionParams = signal<CorruptionParams>({
 const isGLDisabled = signal(false)
 
 // the active GL scene name
-const activeGLScene = signal<'logo-page' | 'content-page'>('logo-page')
+const activeGLScene = signal<'home-page' | 'content-page'>('home-page')
 
 // video background opacity
 const videoBackgroundOpacity = signal(0.5)
@@ -316,7 +316,7 @@ export const DebugPanels = (props: Props) => {
   }
 
   const handleSceneChange = async (scene: string) => {
-    activeGLScene.value = scene as 'logo-page' | 'content-page'
+    activeGLScene.value = scene as 'home-page' | 'content-page'
     // switch scene if GL is enabled and debug is visible
     if (!isGLDisabled.value && debugVisible.value && typeof window !== 'undefined') {
       try {

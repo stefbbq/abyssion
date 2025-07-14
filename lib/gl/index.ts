@@ -9,7 +9,7 @@ import { addLensFlares } from './scene/addLensFlares.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
 import { createControlsSystem } from './controls/index.ts'
 import { createUILayer } from './layers/UILayer.ts'
-import { createContentPageOrchestrator, createLogoPageOrchestrator, createSceneOrchestrator } from './animation/index.ts'
+import { createContentPageOrchestrator, createHomePageOrchestrator, createSceneOrchestrator } from './animation/index.ts'
 import { debugMobileResponsiveness } from './scene/utils/mobileDebugHelper.ts'
 import { isDebugModeEnabled } from '@lib/debug/index.ts'
 import {
@@ -229,7 +229,7 @@ export const initGL = async (options: InitOptions) => {
 
   // Define the registry of page orchestrators
   const orchestratorRegistry = {
-    'logo-page': () => createLogoPageOrchestrator(logoController),
+    'home-page': () => createHomePageOrchestrator(logoController),
     'content-page': createContentPageOrchestrator,
   }
 
@@ -237,7 +237,7 @@ export const initGL = async (options: InitOptions) => {
   const sceneOrchestrator = createSceneOrchestrator(state, orchestratorRegistry)
 
   // Register the initial orchestrator (e.g., for the home page)
-  sceneOrchestrator.registerOrchestrator('logo-page')
+  sceneOrchestrator.registerOrchestrator('home-page')
 
   // Store the orchestrator on the glState
   glState = { ...state, sceneOrchestrator }

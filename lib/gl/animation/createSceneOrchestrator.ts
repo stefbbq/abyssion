@@ -3,10 +3,10 @@ import type { AnimationContext, AnimationOrchestrator, SceneState } from './core
 import { createSharedBehaviors } from './core/createSharedBehaviors.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import { lc, log } from '@lib/logger/index.ts'
-import { registerOrchestrator } from './orchestrator/registerOrchestrator.ts'
-import { unregisterOrchestrator } from './orchestrator/unregisterOrchestrator.ts'
-import { switchToPage } from './orchestrator/switchToPage.ts'
-import { stepOrchestrators } from './orchestrator/stepOrchestrators.ts'
+import { registerOrchestrator } from './orchestrators/registerOrchestrator.ts'
+import { unregisterOrchestrator } from './orchestrators/unregisterOrchestrator.ts'
+import { switchToPage } from './orchestrators/switchToPage.ts'
+import { stepOrchestrators } from './orchestrators/stepOrchestrators.ts'
 import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
 import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 

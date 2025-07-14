@@ -8,13 +8,11 @@ export { createSharedBehaviors } from './core/createSharedBehaviors.ts'
 export type { AnimationContext, AnimationOrchestrator, SceneState, TransitionState } from './core/types.ts'
 
 // Page orchestrators
-export { createLogoPageOrchestrator } from './orchestrators/createLogoPageOrchestrator.ts'
-export { createContentPageOrchestrator } from './orchestrators/createContentPageOrchestrator.ts'
+export { createHomePageOrchestrator } from './orchestrators/homePage/createHomePageOrchestrator.ts'
+export { createContentPageOrchestrator } from './orchestrators/contentPage/createContentPageOrchestrator.ts'
 
 // Pure calculation functions
-export { calculateStaticLayerPosition } from './calculations/calculateStaticLayerPosition.ts'
-export { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
-export { calculateShaderTime } from './calculations/calculateShaderTime.ts'
-export { calculateBloomEffect } from './calculations/calculateBloomEffect.ts'
-export { calculateRegenerationTiming } from './calculations/calculateRegenerationTiming.ts'
 export { calculateRotationInterpolation } from './calculations/calculateRotationInterpolation.ts'
+export { calculateScrollProgress } from './calculations/calculateScrollProgress.ts'
+export { calculateShaderTime } from './calculations/calculateShaderTime.ts'
+export { calculateMouseRotation } from './calculations/calculateMouseRotation.ts'

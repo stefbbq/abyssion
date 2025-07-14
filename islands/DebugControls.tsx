@@ -270,7 +270,7 @@ export const DebugControls = (props: Props) => {
                 onChange={(e) => props.onSceneChange((e.target as HTMLSelectElement).value)}
                 className='flex-1 bg-surface-primary border border-border-primary rounded-theme-sm px-2 py-1 text-xs text-text-primary'
               >
-                <option value='logo-page'>Logo Page</option>
+                <option value='home-page'>Home Page</option>
                 <option value='content-page'>Content Page</option>
               </select>
             </div>

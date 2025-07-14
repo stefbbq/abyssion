@@ -1,5 +1,5 @@
 import { assertEquals } from '$std/assert/mod.ts'
-import { calculateMouseRotation } from '../calculateMouseRotation.ts'
+import { calculateMouseRotation } from './calculateMouseRotation.ts'
 
 Deno.test('calculateMouseRotation - basic functionality', async (test) => {
   await test.step('should calculate rotation from mouse position', () => {
