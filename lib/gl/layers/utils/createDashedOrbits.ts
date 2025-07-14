@@ -23,6 +23,8 @@ export const createDashedOrbits = (
     maxOpacity = 1,
     variationFactor = 1,
     linewidth = 1,
+    zBase = 0,
+    zSpread = 0,
   } = options
 
   const orbitGroup = new THREE.Group()
@@ -73,7 +75,9 @@ export const createDashedOrbits = (
     })
 
     thickLine.rotation.x = 0 + rotationAngle
-    const zPosition = (i - orbitCount / 2) * height * 0.05 * variationFactor
+    // randomize z-position around zBase
+    const zJitter = (Math.random() - 0.5) * 2 * zSpread
+    const zPosition = zBase + zJitter
     thickLine.position.z = zPosition
 
     // Create a holder group for x/y jitter

@@ -1,8 +1,8 @@
-import ms from 'ms'
 import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Calculates a new start time and duration for a video segment, ensuring it fits within specified length constraints.
+ * This is a pure function with no side effects - it only calculates values.
  *
  * @param video - The HTMLVideoElement to analyze.
  * @param minVideoLength - Minimum allowed segment length (in seconds). Default is 1.
@@ -12,65 +12,64 @@ import { lc, log } from '@lib/logger/index.ts'
  */
 export const getNewStartTimeAndDuration = (
   video: HTMLVideoElement,
-  minVideoLength: number = 1,
-  maxVideoLength: number = 3,
+  minSegmentLength: number = 1,
+  maxSegmentLength: number = 3,
   marginSeconds = 0.1,
-): Promise<{ startTime: number; duration: number }> => {
-  return new Promise<{ startTime: number; duration: number }>((resolve, reject) => {
-    if (isNaN(video.duration) || video.duration <= 0) {
-      log.warn(lc.GL_VIDEO, 'Cannot seek: video duration is not available')
-      resolve({ startTime: 0, duration: (video.duration || 0) / video.playbackRate })
-      return
-    }
+): { startTime: number; duration: number } => {
+  if (isNaN(video.duration) || video.duration <= 0) {
+    log.warn(lc.GL_VIDEO, 'Cannot calculate segment: video duration is not available')
+    return { startTime: 0, duration: video.duration || 0 }
+  }
 
-    const earliestStartTime = marginSeconds
+  const earliestStartTime = marginSeconds
+  const latestStartTime = video.duration - marginSeconds - minSegmentLength
+  const maxDurationTime = video.duration - marginSeconds * 2
 
-    // Ensure the chosen segment length is always within [minVideoLength, maxVideoLength]
-    const maxAllowedDuration = Math.min(maxVideoLength, video.duration - earliestStartTime * 2)
+  const startTime = Math.random() * (latestStartTime - earliestStartTime) + earliestStartTime
+  let duration = Math.random() * (maxSegmentLength - minSegmentLength) + minSegmentLength
 
-    // If even the minimum length can't fit, bail early
-    if (maxAllowedDuration < minVideoLength) {
-      resolve({ startTime: 0, duration: 0 })
-      return
-    }
+  if (duration + startTime > latestStartTime) duration = minSegmentLength
 
-    const duration = minVideoLength + Math.random() * (maxAllowedDuration - minVideoLength)
-    const latestStartTime = video.duration - duration - marginSeconds
-    const startTime = earliestStartTime + Math.random() * (latestStartTime - earliestStartTime)
+  log.group(lc.GL_VIDEO, 'getNewStartTimeAndDuration')
+  log.debug(lc.GL_VIDEO, 'video.duration', video.duration)
+  log.debug(lc.GL_VIDEO, 'earliestStartTime', earliestStartTime)
+  log.debug(lc.GL_VIDEO, 'minSegmentLength', minSegmentLength)
+  log.debug(lc.GL_VIDEO, 'maxSegmentLength', maxSegmentLength)
+  log.debug(lc.GL_VIDEO, 'maxDurationTime', maxDurationTime)
+  log.debug(lc.GL_VIDEO, 'latestStartTime', latestStartTime)
+  log.groupEnd()
 
-    // deno-lint-ignore prefer-const
-    let timeoutId: number
+  log.debug(lc.GL_VIDEO, 'generated duration', duration)
+  log.debug(lc.GL_VIDEO, 'generated startTime', startTime)
 
-    const onSeeked = () => {
-      video.removeEventListener('seeked', onSeeked)
-      clearTimeout(timeoutId)
-      const finalDuration = duration / video.playbackRate
-      log.trace(
-        lc.GL_VIDEO,
-        `Calculated duration: raw=${duration.toFixed(2)}s, rate=${video.playbackRate}x, final=${finalDuration.toFixed(2)}s`,
-      )
-      resolve({ startTime, duration: finalDuration })
-    }
+  // If even the minimum length can't fit, return whatever could work
+  if (maxDurationTime < minSegmentLength) {
+    log.debug(lc.GL_VIDEO, 'maxDurationTime < minSegmentLength', maxDurationTime, minSegmentLength)
+    return { startTime: marginSeconds, duration: maxDurationTime }
+  }
 
-    // Add timeout to prevent hanging
-    timeoutId = setTimeout(() => {
-      video.removeEventListener('seeked', onSeeked)
-      const finalDuration = duration / video.playbackRate
-      log.warn(lc.GL_VIDEO, `Video seek timeout after 3s, resolving anyway with duration ${finalDuration.toFixed(2)}s`)
-      resolve({ startTime, duration: finalDuration })
-    }, ms('3s'))
+  // Ensure we have a valid start time range
+  if (latestStartTime < earliestStartTime) {
+    log.warn(lc.GL_VIDEO, `Invalid time range: duration ${duration.toFixed(2)}s too long for video ${video.duration.toFixed(2)}s`)
+    return { startTime: 0, duration: Math.max(0, video.duration - marginSeconds * 2) }
+  }
 
-    video.addEventListener('seeked', onSeeked)
+  const segmentEnd = startTime + duration
 
-    try {
-      // Pause the video before seeking to ensure clean state
-      video.pause()
-      video.currentTime = startTime
-    } catch (error) {
-      log.error(lc.GL_VIDEO, 'Error seeking to random position:', error)
-      video.removeEventListener('seeked', onSeeked)
-      clearTimeout(timeoutId)
-      reject(error)
-    }
-  })
+  // Final validation: ensure segment doesn't exceed video bounds
+  if (segmentEnd > video.duration - marginSeconds) {
+    log.warn(
+      lc.GL_VIDEO,
+      `Segment validation failed: ${startTime.toFixed(2)}s + ${duration.toFixed(2)}s = ${segmentEnd.toFixed(2)}s > ${
+        (video.duration - marginSeconds).toFixed(2)
+      }s`,
+    )
+    // Fix the duration to fit
+    const safeDuration = Math.max(minSegmentLength, video.duration - startTime - marginSeconds)
+    log.debug(lc.GL_VIDEO, `Corrected to safe duration: ${safeDuration.toFixed(2)}s`)
+    return { startTime, duration: safeDuration }
+  }
+
+  log.debug(lc.GL_VIDEO, `Calculated segment: ${startTime.toFixed(2)}s for ${duration.toFixed(2)}s`)
+  return { startTime, duration }
 }

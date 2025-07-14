@@ -12,9 +12,9 @@
   "postProcessingEnabled": true,
   "postProcessingConfig": {
     "bokeh": {
-      "focus": 4.0,
+      "focus": 0,
       "aperture": 0.025,
-      "maxblur": 1
+      "maxblur": 2
     },
     "bloom": {
       "bloomStrength": 0,

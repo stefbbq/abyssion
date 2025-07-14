@@ -1,5 +1,6 @@
 import { refreshColors } from '../colors.ts'
-import { setMinLogLevel } from '../index.ts'
+import { focusContext, type lc, setMinLogLevel } from '../index.ts'
+import type { LogLevel } from '../constants.ts'
 import { getMinLogLevel } from './getMinLogLevel.ts'
 
 /**
@@ -14,12 +15,16 @@ import { getMinLogLevel } from './getMinLogLevel.ts'
  * initializeClientLogger() // Call this in an island
  * initializeClientLogger('debug') // Override with specific level
  */
-export const initializeClientLogger = (): void => {
+export const initializeClientLogger = (focus?: lc, level?: LogLevel): void => {
   if (typeof globalThis.window === 'undefined') return
 
   // Use provided log level or fallback to environment detection
   const logLevel = getMinLogLevel()
-  setMinLogLevel('trace')
+  setMinLogLevel(level || logLevel)
+
+  if (focus) {
+    focusContext(focus)
+  }
 
   // Initial color setup & listen for theme changes
   refreshColors()
@@ -27,4 +32,5 @@ export const initializeClientLogger = (): void => {
 
   // Use console directly since logger isn't ready yet
   if (logLevel !== 'off') console.log(`🌐 Client logger initialized with level: ${logLevel}`)
+  if (focus) console.log(`🌐 Client logger initialized with focus: ${focus}`)
 }

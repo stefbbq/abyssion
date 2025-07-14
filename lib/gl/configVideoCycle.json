@@ -1,8 +1,8 @@
 {
   "enabled": true,
   "cycling": {
-    "minVideoLength": 1.5,
-    "maxVideoLength": 5,
+    "minSegmentLength": 1.5,
+    "maxSegmentLength": 5,
     "playbackSpeed": 1.2,
     "antiRepeat": 2
   },

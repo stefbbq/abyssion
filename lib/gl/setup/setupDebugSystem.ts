@@ -3,7 +3,7 @@ import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene, SelectiveColorizationParams } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
-import type { RendererState } from '@libgl/types.ts'
+import type { RendererState, VideoDebugInfo } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
@@ -180,6 +180,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       focus: bokehPass.materialBokeh.uniforms.focus.value,
       aperture: bokehPass.materialBokeh.uniforms.aperture.value,
       maxblur: bokehPass.materialBokeh.uniforms.maxblur.value,
+      liveFocusDistance: bokehPass.materialBokeh.uniforms.focus.value,
     })
   }
 
@@ -292,6 +293,52 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       `<b>Camera FOV:</b> ${cameraFOV}°`,
     ].join('<br>')
 
+    // Video background information
+    let videoInfo = '<b>Video Background:</b> Not available'
+    log.debug(lc.GL_DEBUG, 'Debug system checking video background:', state.videoBackground)
+    log.debug(
+      lc.GL_DEBUG,
+      'Video background has getDebugInfo:',
+      state.videoBackground && typeof state.videoBackground.getDebugInfo === 'function',
+    )
+    if (state.videoBackground && state.videoBackground.getDebugInfo) {
+      const vDebug = state.videoBackground.getDebugInfo()
+      const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
+      const progressBar = createVideoProgressBar(vDebug)
+
+      // Anti-repeat blocked videos
+      const blockedVideos = Array.from({ length: vDebug.totalVideos }, (_, i) => i)
+        .filter((i) => vDebug.recentIndices.includes(i) && i !== vDebug.currentVideoIndex)
+        .map((i) => `#${i}`)
+        .join(', ')
+
+      // Get next prepared video name
+      const nextPreparedInfo = vDebug.nextPreparedIndex !== null ? `#${vDebug.nextPreparedIndex}` : 'None'
+
+      videoInfo = [
+        `<b>Video Background:</b>`,
+        `<b>Current:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}`,
+        `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'} ${vDebug.isTransitioning ? '(Transitioning)' : ''}`,
+        `<b>Segment:</b> ${(vDebug.timeSinceSwitch / 1000).toFixed(1)}s / ${vDebug.currentDuration.toFixed(1)}s (${
+          segmentProgress.toFixed(1)
+        }%)`,
+        `<b>Full Video:</b> ${vDebug.fullVideoDuration.toFixed(1)}s | Start: ${vDebug.videoStartTime.toFixed(1)}s`,
+        progressBar,
+        `<b>Next Prepared:</b> ${nextPreparedInfo}`,
+        `<b>Total Videos:</b> ${vDebug.totalVideos} loaded`,
+        `<b>Recent History:</b> [${vDebug.recentIndices.join(', ')}]`,
+        `<b>Anti-Repeat Blocked:</b> ${blockedVideos || 'None'}`,
+      ].join('<br>')
+    } else {
+      log.debug(lc.GL_DEBUG, 'Video background debug info not available. Reasons:')
+      log.debug(lc.GL_DEBUG, '- state.videoBackground exists:', !!state.videoBackground)
+      log.debug(
+        lc.GL_DEBUG,
+        '- state.videoBackground.getDebugInfo exists:',
+        state.videoBackground && typeof state.videoBackground.getDebugInfo === 'function',
+      )
+    }
+
     // Scene elements information
     const sceneElements = scene.children
       .map((child: Three.Object3D, index: number) => {
@@ -299,17 +346,64 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         const name = child.name || `unnamed_${type}_${index}`
         const position = `(${child.position.x.toFixed(2)}, ${child.position.y.toFixed(2)}, ${child.position.z.toFixed(2)})`
         const visible = child.visible ? '✓' : '✗'
-        return `${visible} ${name}: ${type} ${position}`
+        const opacity = child.material?.uniforms?.opacity?.value ? `opacity=${child.material.uniforms.opacity.value.toFixed(2)}` : ''
+        return `${visible} ${name}: ${type} ${position} ${opacity}`
       })
       .join('<br>')
 
     const debugContent = [
       cameraInfo,
+      '<br/>',
+      videoInfo,
       '<br/><b>Scene Elements:</b>',
       sceneElements || 'No scene elements',
     ].join('<br>')
 
     debugPanelsAPI.setDebugInfo(debugContent)
+  }
+
+  // Create a visual progress bar showing video segment within full video
+  const createVideoProgressBar = (vDebug: VideoDebugInfo) => {
+    const barWidth = 40 // characters
+
+    // Calculate positions within the full video (0-1 range)
+    const segmentStart = vDebug.videoStartTime / vDebug.fullVideoDuration
+    const segmentEnd = (vDebug.videoStartTime + vDebug.currentDuration) / vDebug.fullVideoDuration
+    const currentPos = (vDebug.videoStartTime + (vDebug.timeSinceSwitch / 1000)) / vDebug.fullVideoDuration
+
+    // Clamp values to prevent overflow
+    const clampedSegmentStart = Math.max(0, Math.min(1, segmentStart))
+    const clampedSegmentEnd = Math.max(0, Math.min(1, segmentEnd))
+    const clampedCurrentPos = Math.max(0, Math.min(1, currentPos))
+
+    // Create the full video bar using a simpler approach
+    let bar = ''
+    for (let i = 0; i < barWidth; i++) {
+      const pos = i / barWidth // Simplified position calculation
+
+      if (pos < clampedSegmentStart || pos > clampedSegmentEnd) {
+        // Outside visible segment
+        bar += `<span style="color: #666666;">░</span>` // Hidden
+      } else if (pos <= clampedCurrentPos) {
+        // Within segment and played
+        bar += `<span style="color: #00ff00;">█</span>` // Played portion of segment
+      } else {
+        // Within segment but not yet played
+        bar += `<span style="color: #ffaa00;">▓</span>` // Remaining portion of segment
+      }
+    }
+
+    const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
+
+    return [
+      `<div style="font-family: monospace; background: rgba(0,100,255,0.1); padding: 4px 6px; border-radius: 4px; margin: 2px 0;">`,
+      `<div style="display: inline-block; margin-right: 8px;"><span style="color: #00ff00;">█</span> Played</div>`,
+      `<div style="display: inline-block; margin-right: 8px;"><span style="color: #ffaa00;">▓</span> Segment</div>`,
+      `<div style="display: inline-block;"><span style="color: #666666;">░</span> Hidden</div>`,
+      `<div style="letter-spacing: 1px; margin-top: 4px;">${bar}</div>`,
+      `<div style="font-size: 10px; margin-top: 2px;">Segment: ${segmentProgress.toFixed(1)}% complete</div>`,
+      `</div>`,
+    ].join('')
   }
 
   // Layer regeneration function

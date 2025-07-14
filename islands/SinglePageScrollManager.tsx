@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { isGLDisabled } from '@lib/debug/index.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
-import { getGLState, getSceneOrchestrator, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
+import { getGLState, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
+import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
+import { lc } from '@lib/logger/index.ts'
 
 const sectionIds = ['home', 'shows', 'bio', 'contact']
 
@@ -15,8 +17,10 @@ export default function SinglePageScrollManager() {
   const lastScene = useRef<'logo-page' | 'content-page' | null>(null)
   const ticking = useRef(false)
 
+  initializeClientLogger(lc.GL, 'debug')
+
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof globalThis.window === 'undefined') return
     if (isGLDisabled()) {
       setShowGL(false)
       return

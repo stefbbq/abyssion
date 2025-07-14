@@ -7,6 +7,7 @@ import type { VideoBackgroundManager } from '@libgl/types.ts'
 import { passthroughVertexShader, selectiveVideoBackgroundFragmentShader } from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Creates a dual-buffer video background system with seamless cycling and responsive scaling.
@@ -22,7 +23,12 @@ export const createVideoBackground = (
   THREE: typeof Three,
   scene: Three.Scene,
 ): VideoBackgroundManager | undefined => {
-  if (!videoCycleConfig.enabled) return undefined
+  if (!videoCycleConfig.enabled) {
+    log.info(lc.GL, 'Video cycle is disabled in config')
+    return undefined
+  }
+
+  log.info(lc.GL, 'Creating video background with config:', videoCycleConfig)
 
   // Get baseline dimensions including video plane sizing
   const { videoPlaneWidth, videoPlaneHeight } = getBaselineDimensions()
@@ -159,6 +165,8 @@ export const createVideoBackground = (
 
   // Now pass the planes to VideoCycle for texture management
   const videoCycle = createVideoCycle(frontBuffer, backBuffer)
+  log.info(lc.GL, 'Created video cycle:', videoCycle)
+  log.debug(lc.GL, 'Video cycle has getDebugInfo:', videoCycle && typeof videoCycle.getDebugInfo === 'function')
 
   // Return manager with dispose that includes our cleanup
   return {
@@ -182,5 +190,6 @@ export const createVideoBackground = (
     mesh: frontBuffer.mesh,
     handleResize,
     updateThemeColors,
+    getDebugInfo: videoCycle.getDebugInfo,
   }
 }

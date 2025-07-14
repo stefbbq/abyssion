@@ -8,6 +8,7 @@ import { unregisterOrchestrator } from './orchestrator/unregisterOrchestrator.ts
 import { switchToPage } from './orchestrator/switchToPage.ts'
 import { stepOrchestrators } from './orchestrator/stepOrchestrators.ts'
 import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
+import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 
 const { animationConfig: animation } = animationConfig
 
@@ -44,7 +45,6 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
 
   /**
    * Main animation loop (side effect)
-   * Limited to 24 FPS for performance
    */
   const animate = (timestamp: number) => {
     // Align focus plane if present
@@ -69,7 +69,25 @@ export const createSceneOrchestrator = (state: RendererState, orchestratorRegist
     state.controls?.update()
     if (!isMobileDevice()) shared.applyMouseRotation(state.scene)
 
-    if (state.videoBackground) shared.updateVideoBackground(state.videoBackground, animation.timeIncrement)
+    // dynamically set bokeh focus to always focus on logo at z=0
+    if (state.bokehPass && state.camera) {
+      // logo is at (0,0,0) in world space
+      const logoWorldPosition = new state.THREE.Vector3(0, 0, 0)
+      const cameraPosition = state.camera.position
+      const focusDistance = cameraPosition.distanceTo(logoWorldPosition)
+      if (state.bokehPass.materialBokeh && state.bokehPass.materialBokeh.uniforms.focus) {
+        state.bokehPass.materialBokeh.uniforms.focus.value = focusDistance
+        // update debug panels with live focus distance
+        debugPanelsAPI.updateDOFParams({
+          focus: state.bokehPass.materialBokeh.uniforms.focus.value,
+          aperture: state.bokehPass.materialBokeh.uniforms.aperture.value,
+          maxblur: state.bokehPass.materialBokeh.uniforms.maxblur.value,
+          liveFocusDistance: focusDistance,
+        })
+      }
+    }
+
+    if (state.videoBackground) shared.updateVideoBackground(state.videoBackground, deltaTime)
     const context: AnimationContext = { state, shared, time, deltaTime }
     sceneState = stepOrchestrators(sceneState, context)
     state.composer.render()

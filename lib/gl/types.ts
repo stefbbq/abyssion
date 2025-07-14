@@ -11,6 +11,28 @@ export type VideoBackgroundManager = {
   mesh: Mesh // The mesh containing the video texture
   handleResize: () => void
   updateThemeColors?: () => void // Update theme colors in real-time
+  getDebugInfo?: () => VideoDebugInfo // Get debug information about video state
+}
+
+// Video debug information
+export type VideoDebugInfo = {
+  isPlaying: boolean
+  currentVideoIndex: number
+  currentVideoName: string
+  currentVideoSrc: string
+  timeSinceSwitch: number // in milliseconds
+  currentDuration: number // in seconds (visible segment duration)
+  fullVideoDuration: number // in seconds (actual video file duration)
+  videoStartTime: number // in seconds (where the visible segment starts)
+  totalVideos: number
+  recentIndices: readonly number[]
+  nextPreparedIndex: number | null
+  isTransitioning: boolean
+  loadingProgress: {
+    loaded: number
+    total: number
+    hasMoreToLoad: boolean
+  }
 }
 
 // UI Overlay type
@@ -53,4 +75,8 @@ export type RendererState = {
   pixelBleedPass: ShaderPass
   crtPass: ShaderPass
   shadowLayer: ShadowLayer
+  /** bokeh pass for DOF, dynamically updated in animation loop */
+  bokehPass: any
+  /** random order for layer fade-out effect during scroll */
+  layerFadeOrder?: number[]
 }

@@ -24,6 +24,72 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
   let bloomOverrideActive = false
   let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
 
+  /**
+   * Calculate fade-out effect based on scroll position
+   */
+  const calculateFadeOpacity = (state: RendererState, layerIndex: number, originalOpacity: number): number => {
+    const fadeStartThreshold = 0.65 // Start fading at 65% scroll
+    const fadeEndThreshold = 0.80 // Fully faded at 80% scroll
+
+    // Calculate current scroll progress based on window height
+    const scrollY = globalThis.scrollY || 0
+    const scrollProgress = Math.min(scrollY / globalThis.innerHeight, 1.0)
+
+    // Not in fade zone - return original opacity
+    if (scrollProgress < fadeStartThreshold) {
+      // Reset fade order when scrolling back up
+      if (state.layerFadeOrder) {
+        delete state.layerFadeOrder
+      }
+      return originalOpacity
+    }
+
+    // In fade zone - create fade order if needed
+    if (!state.layerFadeOrder) {
+      const allLayers = state.logoPlanes.map((plane, index) => ({
+        index,
+        isStencil: state.logoLayers[index]?.isStencil,
+        layer: state.logoLayers[index],
+      }))
+
+      const nonStencilIndices = allLayers
+        .filter((item) => !item.isStencil)
+        .map((item) => item.index)
+
+      // Shuffle the indices for random fade order
+      state.layerFadeOrder = [...nonStencilIndices].sort(() => Math.random() - 0.5)
+    }
+
+    // Calculate fade progress (0 to 1 between 65% and 80%)
+    const fadeProgress = Math.min((scrollProgress - fadeStartThreshold) / (fadeEndThreshold - fadeStartThreshold), 1.0)
+
+    // Find this layer's position in the fade order
+    const fadeOrderIndex = state.layerFadeOrder.indexOf(layerIndex)
+    if (fadeOrderIndex === -1) return originalOpacity // Not in fade order
+
+    // Calculate how many layers should be faded based on progress
+    const totalFadeLayers = state.layerFadeOrder.length
+    const layersToFade = Math.floor(fadeProgress * totalFadeLayers)
+
+    if (fadeOrderIndex < layersToFade) {
+      // This layer should be completely faded
+      console.log(`🎭 Layer ${layerIndex} completely faded (${fadeOrderIndex}/${layersToFade})`)
+      return 0
+    } else if (fadeOrderIndex === layersToFade && fadeProgress < 1.0) {
+      // This layer is currently fading (sputter effect)
+      const layerFadeProgress = (fadeProgress * totalFadeLayers) - layersToFade
+
+      // Add sputter effect - random fluctuation during fade
+      const sputterIntensity = Math.sin(performance.now() * 0.01 + layerIndex) * 0.3 + 0.7
+      const fadeOpacity = originalOpacity * (1 - layerFadeProgress) * sputterIntensity
+      console.log(`🎭 Layer ${layerIndex} sputtering: ${fadeOpacity.toFixed(3)} (progress: ${layerFadeProgress.toFixed(3)})`)
+      return Math.max(0, fadeOpacity)
+    }
+
+    // This layer hasn't started fading yet
+    return originalOpacity
+  }
+
   const update = (context: AnimationContext) => {
     const { state, time } = context
 
@@ -94,14 +160,38 @@ export const createLogoPageOrchestrator = (logoController: LogoController): Anim
         }, ms('0.05s') + Math.random() * ms('0.1s'))
       }
 
-      // Handle opacity flickers for random layers
-      if (layer.isRandom && Math.random() < 0.003 && plane.material?.uniforms?.opacity) {
-        const originalOpacity = plane.material.uniforms.opacity.value
-        plane.material.uniforms.opacity.value *= Math.random() * 1.5 + 0.5
+      // Handle opacity for all layers
+      if (plane.material?.uniforms?.opacity) {
+        const baseOpacity = layer.opacity // Original layer opacity
 
-        setTimeout(() => {
-          if (plane?.material?.uniforms?.opacity) plane.material.uniforms.opacity.value = originalOpacity
-        }, ms('0.05s') + Math.random() * ms('0.15s'))
+        // Stencil layers: always maintain their original opacity
+        if (layer.isStencil) {
+          plane.material.uniforms.opacity.value = baseOpacity
+        } // Random layers: apply fade + occasional flicker
+        else if (layer.isRandom) {
+          const fadeOpacity = calculateFadeOpacity(state, i, baseOpacity)
+
+          // Occasional flicker (only if not completely faded out)
+          if (Math.random() < 0.003 && fadeOpacity > 0) {
+            const flickerOpacity = fadeOpacity * (Math.random() * 1.5 + 0.5)
+            plane.material.uniforms.opacity.value = flickerOpacity
+
+            setTimeout(() => {
+              if (plane?.material?.uniforms?.opacity) {
+                // Restore to current fade-adjusted opacity
+                const currentFadeOpacity = calculateFadeOpacity(state, i, baseOpacity)
+                plane.material.uniforms.opacity.value = currentFadeOpacity
+              }
+            }, ms('0.05s') + Math.random() * ms('0.15s'))
+          } else {
+            // Normal fade-adjusted opacity
+            plane.material.uniforms.opacity.value = fadeOpacity
+          }
+        } // Static layers: apply fade only
+        else {
+          const fadeOpacity = calculateFadeOpacity(state, i, baseOpacity)
+          plane.material.uniforms.opacity.value = fadeOpacity
+        }
       }
     })
 

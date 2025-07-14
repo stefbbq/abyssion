@@ -37,7 +37,6 @@ export async function preprocessGLSL(
 
     // Skip if already included globally (prevents duplicates)
     if (globalIncludedFiles.has(includePath)) {
-      console.log(`Skipping already included file: ${includePath}`)
       processedSource = processedSource.replace(fullMatch, '')
       continue
     }

@@ -58,6 +58,10 @@ export type GeometricOptions = {
   linewidth?: number
   /** uniform size multiplier for the entire component */
   scale?: number
+  /** base z-position for the orbits (center of spread) */
+  zBase?: number
+  /** how much to randomly spread orbits along z-axis (symmetric, so total range is 2*zSpread) */
+  zSpread?: number
 }
 
 /**
@@ -143,11 +147,23 @@ export const createGeometricLayer = (
   // }
 
   // Debug log before creating dashed orbits
-  const dashedOrbits = createDashedOrbits(THREE)
-  log(lc.GL_GEOMETRY, 'Created dashed orbits with config:', getDashedOrbitsConfig())
-
+  // --- Dashed Orbits: Behind the logo ---
+  const dashedOrbits = createDashedOrbits(THREE, {
+    ...getDashedOrbitsConfig(),
+    count: (getDashedOrbitsConfig().count ?? 6) * 2, // double the rings
+    minRadius: (getDashedOrbitsConfig().minRadius ?? 1) * 1.1, // slightly larger min
+    maxRadius: (getDashedOrbitsConfig().maxRadius ?? 2) * 1.5, // much larger max
+    zBase: 0, // center behind
+    zSpread: 3, // random spread
+  })
+  log(lc.GL_GEOMETRY, 'Created dashed orbits (behind) with config:', {
+    ...getDashedOrbitsConfig(),
+    count: (getDashedOrbitsConfig().count ?? 6) * 2,
+    minRadius: (getDashedOrbitsConfig().minRadius ?? 1) * 1.1,
+    maxRadius: (getDashedOrbitsConfig().maxRadius ?? 2) * 1.5,
+    zPosition: -1.5,
+  })
   shapeGroup.add(dashedOrbits)
-  log(lc.GL_GEOMETRY, 'Dashed orbits group:', dashedOrbits)
 
   // shapeGroup.add(createOrbitalGrids(THREE, {
   //   radius: geometricRadius * 1.2,

@@ -7,6 +7,8 @@ type DOFParams = {
   focus: number
   aperture: number
   maxblur: number
+  /** live focus distance being used by the animation loop */
+  liveFocusDistance: number
 }
 
 type FinalPassParams = {
@@ -76,6 +78,7 @@ type Props = {
   videoBackgroundOpacity: number
   // callback when video background opacity changes
   onVideoBackgroundOpacityChange: (opacity: number) => void
+  liveFocusDistance: number
 }
 
 /**
@@ -201,8 +204,8 @@ export const DebugControls = (props: Props) => {
 
   return (
     <div
-      className='fixed bottom-4 right-4 rounded-theme-lg p-3 font-mono text-xs text-black max-w-xs bg-white/80 backdrop-blur-sm'
-      style={{ zIndex: 2000, minWidth: '280px' }}
+      className='overflow-y-auto fixed bottom-4 right-4 rounded-theme-lg p-3 font-mono text-xs text-black max-w-xs bg-white/80 backdrop-blur-sm'
+      style={{ zIndex: 2000, minWidth: '380px', maxHeight: '80vh' }}
     >
       {/* header */}
       <div className='flex items-center justify-between mb-2'>
@@ -218,7 +221,10 @@ export const DebugControls = (props: Props) => {
 
       {/* GL controls */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('glControls')}
+        >
           <p className='font-bold text-sm'>GL Environment</p>
           <button
             type='button'
@@ -279,11 +285,12 @@ export const DebugControls = (props: Props) => {
         )}
       </div>
 
-      <hr className='border-border-subtle my-3' />
-
       {/* instructions */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('homepageControls')}
+        >
           <p className='font-bold text-sm'>Homepage Controls</p>
           <button
             type='button'
@@ -318,11 +325,13 @@ export const DebugControls = (props: Props) => {
 
       {/* theme selector */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('theme')}
+        >
           <p className='font-bold text-sm'>Theme Selector</p>
           <button
             type='button'
-            onClick={() => toggleSection('theme')}
             className='text-xs px-2 py-1 rounded-theme-sm bg-border-primary hover:bg-border-subtle'
           >
             {sectionsExpanded.theme ? '−' : '+'}
@@ -356,11 +365,12 @@ export const DebugControls = (props: Props) => {
         )}
       </div>
 
-      <hr className='border-border-subtle my-3' />
-
       {/* DOF controls */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('dof')}
+        >
           <p className='font-bold text-sm'>Depth of Field</p>
           <button
             type='button'
@@ -415,15 +425,20 @@ export const DebugControls = (props: Props) => {
               />
               <span className='w-12 text-right'>{props.dofParams.maxblur.toFixed(3)}</span>
             </div>
+            {/* info: current focus distance (auto) */}
+            <div className='text-xs text-gray-500 mt-2'>
+              Current Focus Distance (auto): <span className='font-mono'>{props.liveFocusDistance.toFixed(2)}</span>
+            </div>
           </>
         )}
       </div>
 
-      <hr className='border-border-subtle my-3' />
-
       {/* Final Pass controls */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('finalPass')}
+        >
           <p className='font-bold text-sm'>Final Pass</p>
           <button
             type='button'
@@ -481,11 +496,12 @@ export const DebugControls = (props: Props) => {
         )}
       </div>
 
-      <hr className='border-border-subtle my-3' />
-
       {/* Corruption controls */}
       <div className='space-y-2 mb-3'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('corruption')}
+        >
           <p className='font-bold text-sm'>CRT Corruption</p>
           <button
             type='button'
@@ -1125,11 +1141,12 @@ export const DebugControls = (props: Props) => {
         )}
       </div>
 
-      <hr className='border-border-subtle my-3' />
-
       {/* selective colorization controls */}
       <div className='space-y-2'>
-        <div className='flex items-center justify-between mb-2'>
+        <div
+          className='flex items-center justify-between mb-2 cursor-pointer'
+          onClick={() => toggleSection('colorization')}
+        >
           <p className='font-bold text-sm'>Selective Colorization</p>
           <button
             type='button'

@@ -82,7 +82,7 @@ export const createPostProcessing = async (
     bloom.bloomRadius,
     bloom.bloomThreshold * bloom.bloomThresholdMultiplier,
   )
-  // composer.addPass(bloomPass)
+  composer.addPass(bloomPass)
   bloomPass.threshold = bloom.thresholdOverride
 
   /**
@@ -141,7 +141,7 @@ export const createPostProcessing = async (
     fragmentShader: pixelBleedFragmentShader,
   })
   pixelBleedPass.enabled = false // Disabled by default
-  composer.addPass(pixelBleedPass)
+  // composer.addPass(pixelBleedPass)
 
   /**
    * CRT Corruption Pass

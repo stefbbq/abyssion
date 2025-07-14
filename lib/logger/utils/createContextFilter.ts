@@ -22,15 +22,6 @@ export const createContextFilter = (): ContextFilter => {
 
   return {
     shouldLog: (context: LogContext): boolean => {
-      // console.log(
-      //   '[ContextFilter] shouldLog called with context:',
-      //   context,
-      //   '| disabled:',
-      //   Array.from(disabledContexts),
-      //   '| focused:',
-      //   focusedContext,
-      // )
-
       // if context is disabled, don't log
       if (disabledContexts.has(context)) return false
 
@@ -42,27 +33,22 @@ export const createContextFilter = (): ContextFilter => {
     },
 
     disable: (context: LogContext): void => {
-      console.log('[ContextFilter] Disabling context:', context)
       disabledContexts.add(context)
     },
 
     enable: (context: LogContext): void => {
-      console.log('[ContextFilter] Enabling context:', context)
       disabledContexts.delete(context)
     },
 
     focus: (context: LogContext): void => {
-      console.log('[ContextFilter] Focusing context:', context)
       focusedContext = context
     },
 
     clearFocus: (): void => {
-      console.log('[ContextFilter] Clearing focus')
       focusedContext = null
     },
 
     reset: (): void => {
-      console.log('[ContextFilter] Resetting filter (clearing disabled and focus)')
       disabledContexts.clear()
       focusedContext = null
     },

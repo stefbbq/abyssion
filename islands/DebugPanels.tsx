@@ -16,6 +16,8 @@ type DOFParams = {
   focus: number
   aperture: number
   maxblur: number
+  /** live focus distance being used by the animation loop */
+  liveFocusDistance: number
 }
 
 type FinalPassParams = {
@@ -106,7 +108,7 @@ type DOFMeta = {
 // global signals for debug state
 const debugVisible = signal(false)
 const debugInfoContent = signal('')
-const dofParams = signal({ focus: 5.0, aperture: 0.025, maxblur: 0.01 })
+const dofParams = signal({ focus: 5.0, aperture: 0.025, maxblur: 0.01, liveFocusDistance: 5.0 })
 const finalPassParams = signal({ chromaStrength: 0.002, gain: 1.0, contrast: 1.0 })
 const selectiveColorizationParams = signal<SelectiveColorizationParams>({
   enabled: true,
@@ -326,11 +328,7 @@ export const DebugPanels = (props: Props) => {
   }
 
   const handleReset = () => {
-    resetDebugSettings()
-    isGLDisabled.value = false
-    activeGLScene.value = 'logo-page'
-    videoBackgroundOpacity.value = 0.5
-    dofParams.value = { focus: 5.0, aperture: 0.025, maxblur: 0.01 }
+    dofParams.value = { focus: 5.0, aperture: 0.025, maxblur: 0.01, liveFocusDistance: 5.0 }
     finalPassParams.value = { chromaStrength: 0.002, gain: 1.0, contrast: 1.0 }
     selectiveColorizationParams.value = {
       enabled: true,
@@ -342,120 +340,47 @@ export const DebugPanels = (props: Props) => {
         saturationWeight: 0.8,
         brightnessThreshold: 0.7,
         saturationThreshold: 0.25,
-        blendSmoothness: 0.3,
+        blendSmoothness: 0.1,
       },
       colorBlending: {
-        blendMode: 'mixed' as const,
-        blendBalance: 0.3,
+        blendMode: 'mixed',
+        blendBalance: 0.5,
       },
     }
     corruptionParams.value = {
       enabled: false,
-      intensity: 0.0,
-      timeEnabled: true,
-
-      // Existing effect defaults (all disabled by default)
-      staticIntensity: 0.8,
-
-      // RGB distortion defaults
-      rgbDistortionIntensity: 20.0,
+      intensity: 0.5,
+      timeEnabled: false,
+      staticIntensity: 0.1,
+      rgbDistortionIntensity: 0.1,
       rgbDistortionEnabled: false,
-
-      // White noise defaults
-      whiteNoiseIntensity: 0.3,
+      whiteNoiseIntensity: 0.1,
       whiteNoiseEnabled: false,
-
-      // Original block corruption defaults
-      blockCorruptionRate: 10.0,
+      blockCorruptionRate: 0.1,
       blockCorruptionEnabled: false,
-
-      // Wave distortion defaults
-      waveNoiseIntensity: 0.2,
+      waveNoiseIntensity: 0.1,
       waveNoiseEnabled: false,
-
-      // Screen shake defaults
-      shakeIntensity: 10.0,
+      shakeIntensity: 0.1,
       shakeEnabled: false,
-
-      // Advanced pixel bleed effect defaults
-      pixelBleedIntensity: 0.0,
-      pixelBleedChunkSize: 30.0,
+      pixelBleedIntensity: 0.1,
+      pixelBleedChunkSize: 5,
       pixelBleedChunkRandomness: 0.5,
-      pixelBleedStretchDistance: 0.3,
-      pixelBleedGeometryComplexity: 0.7,
-      pixelBleedPersistence: 0.6,
-      pixelBleedRegenerationRate: 0.4,
+      pixelBleedStretchDistance: 10,
+      pixelBleedGeometryComplexity: 5,
+      pixelBleedPersistence: 0.8,
+      pixelBleedRegenerationRate: 0.1,
       pixelBleedEnabled: false,
-
-      // Large block corruption defaults
-      largeBlockIntensity: 0.0,
-      largeBlockSize: 15.0,
-      largeBlockFPS: 6.0,
+      largeBlockIntensity: 0.1,
+      largeBlockSize: 50,
+      largeBlockFPS: 10,
       largeBlockEnabled: false,
-
-      // Artifact noise defaults
-      artifactNoiseIntensity: 0.0,
-      artifactChunkSize: 20.0,
-      artifactShiftAmount: 0.5,
-      artifactNoiseFPS: 10.0,
+      artifactNoiseIntensity: 0.1,
+      artifactChunkSize: 10,
+      artifactShiftAmount: 5,
+      artifactNoiseFPS: 15,
       artifactNoiseEnabled: false,
     }
-    themeColors.value = { highlight: '#ff00ff', shadow: '#0000ff' }
-
-    // Reset corruption debug override
-    if (onCorruptionChangeCallback) {
-      onCorruptionChangeCallback({
-        enabled: false,
-        intensity: 0.0,
-        timeEnabled: true,
-
-        // Existing effect defaults (all disabled by default)
-        staticIntensity: 0.8,
-
-        // RGB distortion defaults
-        rgbDistortionIntensity: 20.0,
-        rgbDistortionEnabled: false,
-
-        // White noise defaults
-        whiteNoiseIntensity: 0.3,
-        whiteNoiseEnabled: false,
-
-        // Original block corruption defaults
-        blockCorruptionRate: 10.0,
-        blockCorruptionEnabled: false,
-
-        // Wave distortion defaults
-        waveNoiseIntensity: 0.2,
-        waveNoiseEnabled: false,
-
-        // Screen shake defaults
-        shakeIntensity: 10.0,
-        shakeEnabled: false,
-
-        // Advanced pixel bleed effect defaults
-        pixelBleedIntensity: 0.0,
-        pixelBleedChunkSize: 30.0,
-        pixelBleedChunkRandomness: 0.5,
-        pixelBleedStretchDistance: 0.3,
-        pixelBleedGeometryComplexity: 0.7,
-        pixelBleedPersistence: 0.6,
-        pixelBleedRegenerationRate: 0.4,
-        pixelBleedEnabled: false,
-
-        // Large block corruption defaults
-        largeBlockIntensity: 0.0,
-        largeBlockSize: 15.0,
-        largeBlockFPS: 6.0,
-        largeBlockEnabled: false,
-
-        // Artifact noise defaults
-        artifactNoiseIntensity: 0.0,
-        artifactChunkSize: 20.0,
-        artifactShiftAmount: 0.5,
-        artifactNoiseFPS: 10.0,
-        artifactNoiseEnabled: false,
-      })
-    }
+    videoBackgroundOpacity.value = 1.0
   }
 
   const handleVideoBackgroundOpacityChange = (opacity: number) => {
@@ -487,6 +412,7 @@ export const DebugPanels = (props: Props) => {
         onReset={handleReset}
         videoBackgroundOpacity={videoBackgroundOpacity.value}
         onVideoBackgroundOpacityChange={handleVideoBackgroundOpacityChange}
+        liveFocusDistance={dofParams.value.liveFocusDistance}
       />
       <DebugInfo
         visible={debugVisible.value}

@@ -66,7 +66,8 @@ export const initGL = async (options: InitOptions) => {
 
   // Add video background
   const videoBackground = await addVideoBackground(THREE, scene) as VideoBackgroundManager
-  log(lc.GL, 'Added video background')
+  log(lc.GL, 'Added video background:', videoBackground)
+  log(lc.GL, 'Video background has getDebugInfo:', videoBackground && typeof videoBackground.getDebugInfo === 'function')
 
   // Set up post-processing effects
   let composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass
@@ -133,6 +134,7 @@ export const initGL = async (options: InitOptions) => {
     camera,
     renderer,
     composer,
+    bokehPass,
     bloomPass,
     finalPass,
     ditheringPass,
@@ -271,12 +273,56 @@ export const getGLState = () => {
   return glState
 }
 
+/**
+ * Calculate responsive scroll speed based on screen width
+ * Ensures logo stays centered between header and content across different screen sizes
+ */
+const getResponsiveScrollSpeed = (width: number): number => {
+  const breakpoints = [
+    { width: 800, speed: -0.003 },
+    { width: 1200, speed: -0.0020 },
+    { width: 1440, speed: -0.0022 },
+    { width: 1920, speed: -0.0023 },
+    { width: 2560, speed: -0.0024 },
+  ]
+
+  // Find the appropriate speed range for interpolation
+  let lowerBound = breakpoints[0]
+  let upperBound = breakpoints[breakpoints.length - 1]
+
+  for (let i = 0; i < breakpoints.length - 1; i++) {
+    if (width >= breakpoints[i].width && width <= breakpoints[i + 1].width) {
+      lowerBound = breakpoints[i]
+      upperBound = breakpoints[i + 1]
+      break
+    }
+  }
+
+  // Handle edge cases
+  if (width <= breakpoints[0].width) {
+    return breakpoints[0].speed
+  }
+  if (width >= breakpoints[breakpoints.length - 1].width) {
+    return breakpoints[breakpoints.length - 1].speed
+  }
+
+  // Linear interpolation between breakpoints
+  const widthRange = upperBound.width - lowerBound.width
+  const speedRange = upperBound.speed - lowerBound.speed
+  const widthFactor = (width - lowerBound.width) / widthRange
+
+  return lowerBound.speed + (speedRange * widthFactor)
+}
+
 export const updateScrollCorruption = (scrollY: number, state: RendererState) => {
   if (!state) return
 
-  // Move camera down at 1/1000th of scroll speed
+  // Move camera down with responsive speed based on screen width
   if (state.camera) {
-    const cameraYOffset = scrollY * -0.002 // Move camera down as we scroll down (1/1000th)
+    const currentWidth = globalThis.innerWidth
+    const scrollSpeed = getResponsiveScrollSpeed(currentWidth)
+    const cameraYOffset = scrollY * scrollSpeed
+
     state.camera.position.y = cameraYOffset
 
     // Also move the lookAt target down by the same amount to maintain view direction
@@ -302,13 +348,15 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     corruptionIntensity = Math.sqrt(normalizedProgress) // Square root for aggressive early ramp
   }
 
-  console.log('📊 updateScrollCorruption:', {
+  log.debug(lc.GL, '📊 updateScrollCorruption:', {
     scrollY,
     cameraY: state.camera.position.y,
+    scrollSpeed: getResponsiveScrollSpeed(globalThis.innerWidth),
+    screenWidth: globalThis.innerWidth,
     scrollProgress: scrollProgress.toFixed(3),
     corruptionIntensity: corruptionIntensity.toFixed(3),
     documentHeight: document.body.scrollHeight,
-    windowHeight: window.innerHeight,
+    windowHeight: globalThis.innerHeight,
     scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
   })
 
@@ -322,7 +370,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       // Update time for animation effects
       material.uniforms.time.value = performance.now() / 1000
 
-      console.log('🎯 CRT Pass uniforms updated:', {
+      log.debug(lc.GL, '🎯 CRT Pass uniforms updated:', {
         corruptionIntensity: material.uniforms.corruptionIntensity.value,
         time: material.uniforms.time.value,
         resolution: material.uniforms.resolution?.value,
@@ -337,7 +385,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       // Update time if the pass is enabled (controlled by debug controls)
       if (state.pixelBleedPass.enabled) {
         material.uniforms.time.value = performance.now() / 1000
-        console.log('🎯 Pixel Bleed Pass time updated:', material.uniforms.time.value)
+        log.debug(lc.GL, '🎯 Pixel Bleed Pass time updated:', material.uniforms.time.value)
       }
     }
   }

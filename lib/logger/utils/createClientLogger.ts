@@ -99,7 +99,7 @@ export const createClientLogger = (
   log.critical = (ctx: LogContext | null, ...args: unknown[]): void => _log('critical', ctx, ...args)
 
   // Grouping methods
-  log.group = (ctx: LogContext | null, ...args: unknown[]): void => _log('debug', ctx, ...args)
+  log.group = (ctx: LogContext | null, ...args: unknown[]): void => globalThis.console.group(ctx, ...args)
   log.groupEnd = (): void => globalThis.console.groupEnd()
 
   return log as LogFunction

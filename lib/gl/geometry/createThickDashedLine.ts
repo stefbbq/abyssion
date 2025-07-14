@@ -130,6 +130,7 @@ export const createThickDashedLine = (
         transparent: true,
         opacity,
         side: THREE.DoubleSide,
+        depthWrite: true, // ensure DOF/BokehPass works on dashed orbits
       })
 
       const mesh = new THREE.Mesh(ribbonGeometry, material)
