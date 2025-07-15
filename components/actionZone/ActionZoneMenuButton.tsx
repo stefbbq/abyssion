@@ -14,11 +14,20 @@ const baseClass = 'w-full h-10 flex items-center justify-center rounded-theme-xl
 
 /**
  * ActionZoneMenuButton
- * Dedicated button for expanded menu items (no border, no outline, fade-in)
+ * Dedicated button for expanded menu items with proper active state styling
  * Uses theme-aware border radius for consistent styling
  */
 export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, style = {}, action }: Props) => {
-  const activeClass = isActive ? 'bg-background-primary text-text-primary font-semibold' : 'bg-transparent text-text-secondary font-medium'
+  const activeClass = isActive
+    ? 'bg-background-primary text-text-primary font-semibold'
+    : 'bg-transparent text-text-secondary font-medium hover:bg-interactive-ghostHover hover:text-text-primary'
+
+  const handleClick = (e?: Event) => {
+    if (action.type === 'navigate' && action.href?.startsWith('#')) {
+      e?.preventDefault()
+    }
+    onClick()
+  }
 
   if (action?.type === 'navigate' && action.href) {
     return (
@@ -27,8 +36,9 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
         href={action.href}
         className={`${baseClass} ${activeClass}`}
         tabIndex={0}
-        f-client-nav
-        {...{ style, onClick }}
+        f-client-nav={false}
+        onClick={handleClick}
+        style={style}
       >
         {label}
       </a>
@@ -40,7 +50,8 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
       className={`${baseClass} ${activeClass}`}
       tabIndex={0}
       type='button'
-      {...{ style, onClick }}
+      onClick={handleClick}
+      style={style}
     >
       {label}
     </button>

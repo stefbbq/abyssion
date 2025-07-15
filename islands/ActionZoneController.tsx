@@ -12,11 +12,22 @@ import pages from '@data/pages.json' with { type: 'json' }
 export default function ActionZoneController() {
   const [isMounted, setIsMounted] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [currentHash, setCurrentHash] = useState('')
   const theme = currentUITheme.value
   const [currentPath] = useClientLocation()
 
   useEffect(() => {
     setIsMounted(true)
+  }, [])
+
+  // Track hash changes for active section detection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentHash(globalThis.location.hash)
+      const onHashChange = () => setCurrentHash(globalThis.location.hash)
+      globalThis.addEventListener('hashchange', onHashChange)
+      return () => globalThis.removeEventListener('hashchange', onHashChange)
+    }
   }, [])
 
   const onAction = (action: NavButtonState['action']) => {
@@ -25,6 +36,13 @@ export default function ActionZoneController() {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' })
         setIsMenuOpen(false)
+
+        // Update the hash without triggering a navigation
+        if (globalThis.history && globalThis.history.pushState) {
+          globalThis.history.pushState(null, '', action.href)
+          // Trigger hash change event manually for our listener
+          globalThis.dispatchEvent(new HashChangeEvent('hashchange'))
+        }
         return
       }
     }
@@ -74,7 +92,7 @@ export default function ActionZoneController() {
     const config = actionZoneConfig[state] || { buttons: [], layout: {} }
     if (!Array.isArray(config.buttons)) return { buttons: [], layout: {} }
 
-    // Patch in page title if needed
+    // Patch in page title if needed and mark active buttons
     const page = navData.mainNav.find((p: MenuItem) => p.path === currentPath)
     const buttons = config.buttons.map((button: NavButtonState) => {
       if (button.role === 'page-title') {
@@ -82,7 +100,11 @@ export default function ActionZoneController() {
         return { ...button, content: { ...button.content, label } }
       }
 
-      return button
+      // Mark button as active if its href matches the current hash
+      // For home section, consider it active if no hash or hash is #home
+      const isActive = button.action?.href === currentHash ||
+        (button.action?.href === '#home' && (!currentHash || currentHash === '#home'))
+      return { ...button, isActive }
     })
 
     return { buttons, layout: config.layout }

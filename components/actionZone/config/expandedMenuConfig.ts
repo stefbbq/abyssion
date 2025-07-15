@@ -1,41 +1,27 @@
 import type { ActionZoneLayout } from '../types.ts'
 import { createNavButton } from '../utils/createNavButton.ts'
 import { createExpandedLayout } from '../utils/createLayoutConfig.ts'
+import navData from '@data/nav.json' with { type: 'json' }
 
 /**
  * Creates the expanded menu action zone configuration
- * Shows all navigation options in expanded state
+ * Shows all navigation options including home (excluded from header)
+ * Used for single page scrolling navigation
  */
-export const createExpandedMenuConfig = (): ActionZoneLayout => ({
-  buttons: [
-    createNavButton({
-      id: 'home',
-      key: 'home',
-      label: 'Home',
-      href: '/',
-      position: 'left',
-    }),
-    createNavButton({
-      id: 'shows',
-      key: 'shows',
-      label: 'Shows',
-      href: '/shows',
-      position: 'center',
-    }),
-    createNavButton({
-      id: 'bio',
-      key: 'bio',
-      label: 'Bio',
-      href: '/bio',
-      position: 'center',
-    }),
-    createNavButton({
-      id: 'contact',
-      key: 'contact',
-      label: 'Contact',
-      href: '/contact',
-      position: 'right',
-    }),
-  ],
-  layout: createExpandedLayout(),
-})
+export const createExpandedMenuConfig = (): ActionZoneLayout => {
+  const navButtons = navData.mainNav.map((item, index) => {
+    const positions: Array<'left' | 'center' | 'right'> = ['left', 'center', 'center', 'right'] // home=left, bio=center, shows=center, contact=right
+    return createNavButton({
+      id: item.key,
+      key: item.key,
+      label: item.label,
+      href: item.path,
+      position: positions[index] || 'center',
+    })
+  })
+
+  return {
+    buttons: navButtons,
+    layout: createExpandedLayout(),
+  }
+}

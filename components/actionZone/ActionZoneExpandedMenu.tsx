@@ -26,8 +26,11 @@ export const ActionZoneExpandedMenu = ({
   const navButtons: ActionZoneButton[] = actionZoneAnimationConfig.expandedMenu.buttons || []
 
   const handleAction = (action: ActionZoneButton['action'], item: MenuItem) => {
-    if (item.path.startsWith('#')) onAnchorLink(item.path)
-    else if (action.type === 'navigate') onMenuClose()
+    if (action.href && action.href.startsWith('#')) {
+      onAnchorLink(action.href)
+    } else if (action.type === 'navigate') {
+      onMenuClose()
+    }
   }
 
   return (
@@ -59,6 +62,7 @@ export const ActionZoneExpandedMenu = ({
       <div className='space-y-0.5'>
         {navButtons.map((button: ActionZoneButton) => (
           <ActionZoneMenuButton
+            key={button.id}
             id={button.id}
             label={button.content.label}
             isActive={button.isActive}

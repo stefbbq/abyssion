@@ -79,7 +79,7 @@ export const ActionZoneButton = (
     variant = 'outlined',
   }: Props,
 ) => {
-  const { action: { type }, role, content: { label, icon } } = state
+  const { action: { type }, role, content: { label, icon }, isActive } = state
 
   // base classes shared by all buttons
   const baseClasses =
@@ -90,13 +90,20 @@ export const ActionZoneButton = (
   const showText = role === 'nav-item' || role === 'page-title'
   const isLink = type === 'navigate'
 
-  // build complete class string
-  const borderClass = (variant === 'outlined' && role === 'nav-item') ? roleStyle.border : 'border-none'
+  // build complete class string - only show border for nav-items when not active
+  const shouldShowBorder = variant === 'outlined' && role === 'nav-item' && !isActive
+  const borderClass = shouldShowBorder ? roleStyle.border : 'border-none'
   const colorClass = role === 'page-title' ? roleStyle.colors || '' : ''
-  const hoverClass = roleStyle.hover || ''
 
   // only call onAction if the action is not 'none'
-  const handleClick = () => type !== 'none' && onAction(state.action)
+  const handleClick = (e?: Event) => {
+    if (type === 'navigate' && state.action.href?.startsWith('#')) {
+      e?.preventDefault()
+    }
+    if (type !== 'none') {
+      onAction(state.action)
+    }
+  }
 
   // get the icon and label for the button
   const getIconAndLabel = () => (
@@ -113,7 +120,7 @@ export const ActionZoneButton = (
 
   const commonProps = {
     id,
-    className: `${baseClasses} ${roleStyle.base} ${borderClass} ${colorClass} ${hoverClass} ${className || ''}`,
+    className: `${baseClasses} ${roleStyle.base} ${borderClass} ${colorClass} ${className || ''}`,
     style: {
       ...style,
       flex: flex || (role === 'page-title' ? '1 1 0%' : '0 0 auto'),
@@ -129,8 +136,8 @@ export const ActionZoneButton = (
       <a
         {...commonProps}
         href={state.action.href}
-        f-client-nav
-        onClick={() => onAction(state.action)}
+        f-client-nav={false}
+        onClick={handleClick}
       >
         {getIconAndLabel()}
       </a>

@@ -13,7 +13,7 @@ type Props = {
  * ActionZone component
  * Main navigation coordinator that orchestrates collapsed and expanded states.
  * Delegates specific responsibilities to specialized organisms.
- * Features theme-aware filter effects and border radius.
+ * Features theme-aware surface styling and border radius - always visible like header.
  */
 export const ActionZone = ({
   isMenuOpen,
@@ -40,7 +40,7 @@ export const ActionZone = ({
       {/* bottom navigation container */}
       <nav
         ref={navRef}
-        className='fixed bottom-4 left-4 right-4 z-50 py-2 rounded-theme-full md:hidden overflow-hidden frost-effect shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] filter-nav'
+        className='fixed bottom-4 left-4 right-4 z-50 py-2 rounded-theme-full md:hidden overflow-hidden surface-header shadow-[0_8px_32px_0_rgba(0,0,0,0.25)]'
         style={{
           height,
           borderRadius,
