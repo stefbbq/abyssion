@@ -1,7 +1,7 @@
 import * as Three from 'three'
 import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
-import type { ConfigScene, SelectiveColorizationParams } from '@libgl/configScene.types.ts'
+import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import type { RendererState, VideoDebugInfo } from '@libgl/types.ts'
 import { lc, log } from '@lib/logger/index.ts'

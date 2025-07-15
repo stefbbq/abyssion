@@ -6,7 +6,7 @@ import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
 import { passthroughVertexShader, selectiveVideoBackgroundFragmentShader } from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
-import configScene from '@libgl/configScene.json' with { type: 'json' }
+import configPostProcessing from '@libgl/configPostProcessing.json' with { type: 'json' }
 import { lc, log } from '@lib/logger/index.ts'
 
 /**
@@ -38,7 +38,7 @@ export const createVideoBackground = (
     const geometry = new THREE.PlaneGeometry(videoPlaneWidth, videoPlaneHeight)
 
     // Get selective colorization config and theme
-    const { selectiveColorization } = configScene.postProcessingConfig as any
+    const { selectiveColorization } = configPostProcessing
     const glTheme = currentGLTheme.value
 
     // Determine colors based on configuration
@@ -96,7 +96,7 @@ export const createVideoBackground = (
 
   // Update theme colors for selective colorization in real-time
   const updateThemeColors = () => {
-    const { selectiveColorization } = configScene.postProcessingConfig as any
+    const { selectiveColorization } = configPostProcessing
     if (!selectiveColorization?.enabled) return
 
     const useThemeColors = selectiveColorization?.useThemeColors === true

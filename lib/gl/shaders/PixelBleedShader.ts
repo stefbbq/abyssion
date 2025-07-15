@@ -6,6 +6,7 @@
  * Creates a computerized corruption that builds on itself over time.
  */
 
+import * as Three from 'three'
 import passthroughVertexShader from './glsl/passthrough.vert.ts'
 import pixelBleedFragmentShader from './glsl/pixelBleed.frag.ts'
 
@@ -47,7 +48,7 @@ export const defaultPixelBleedConfig: PixelBleedConfig = {
 /**
  * Creates a pixel bleed shader material with the specified configuration
  */
-export const createPixelBleedMaterial = (THREE: any, config: Partial<PixelBleedConfig> = {}) => {
+export const createPixelBleedMaterial = (THREE: typeof Three, config: Partial<PixelBleedConfig> = {}) => {
   const finalConfig = { ...defaultPixelBleedConfig, ...config }
 
   return new THREE.ShaderMaterial({

@@ -193,14 +193,9 @@ export type BaseSurfaceEffects = {
 }
 
 /**
- * Opacity configuration for light/dark modes
+ * Surface opacity configuration
  */
-export type BaseSurfaceOpacity = {
-  /** Opacity in light mode */
-  light: number
-  /** Opacity in dark mode */
-  dark: number
-}
+export type BaseSurfaceOpacity = number
 
 /**
  * Complete surface configuration

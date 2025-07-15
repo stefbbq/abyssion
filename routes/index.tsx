@@ -10,11 +10,11 @@ export default function MainPage() {
       <Section id='home' fullHeight>
         <HomeSection />
       </Section>
-      <Section id='shows'>
-        <ShowsSection />
-      </Section>
       <Section id='bio'>
         <BioSection />
+      </Section>
+      <Section id='shows'>
+        <ShowsSection />
       </Section>
       <Section id='contact' lastSection>
         <ContactSection />

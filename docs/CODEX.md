@@ -84,7 +84,7 @@ Theme preferences are automatically saved to browser cookies with 1-year expirat
 
 #### Selective Colorization Configuration
 
-The selective colorization system is configured via `configScene.json` under `postProcessingConfig.selectiveColorization`:
+The selective colorization system is configured via `configPostProcessing.json` under `selectiveColorization`:
 
 ```json
 {
@@ -120,6 +120,36 @@ The application features an advanced shader system for post-processing effects, 
 - **Modular GLSL:** Uses a `#pragma include` system for reusable utility functions
 - **Type Safety:** All shaders are converted to TypeScript modules via build process
 - **Utility Functions:** Located in `/lib/gl/shaders/glsl/utils/` for shared functionality
+
+### Post-Processing Configuration
+
+The post-processing system is now modular and configured via separate files:
+
+- **`configPostProcessing.json`**: Contains all post-processing effect configurations with a top-level `enabled` flag
+- **`configPostProcessing.types.ts`**: TypeScript type definitions for all post-processing effects
+- **`configScene.json`**: Retains only the `postProcessingEnabled` flag for backward compatibility
+
+#### Configuration Structure
+
+```json
+{
+  "enabled": true,
+  "bokeh": { "focus": 0, "aperture": 0.025, "maxblur": 2 },
+  "bloom": { "bloomStrength": 0, "bloomThreshold": 0.2, ... },
+  "film": { "noiseIntensity": 0.05, "scanlineIntensity": 1.5, ... },
+  "sharpening": { "strength": 0.2, "enabled": true },
+  "pixelate": { "enabled": false, "pixelSize": 16 },
+  "crtScrollCorruption": { "enabled": true, ... },
+  "selectiveColorization": { "enabled": false, ... },
+  "lensFlare": { "lightIntensity": 0.8, ... }
+}
+```
+
+This separation allows for:
+- **Modular Configuration**: Post-processing effects can be configured independently
+- **Type Safety**: Dedicated TypeScript types for each effect
+- **Easier Maintenance**: Changes to effects don't affect core scene configuration
+- **Better Organization**: Related configuration and types are co-located
 
 #### GLSL Utilities
 
@@ -225,6 +255,126 @@ const pixelBleedPass = new ShaderPass({
 
 The effect is disabled by default and can be enabled through debug controls or programmatically via the intensity parameter.
 
+## Video Cycle System
+
+The video cycle system (`/lib/gl/textures/VideoCycle/`) manages dynamic video backgrounds with efficient memory usage and smooth transitions. The system is built on functional programming principles with pure utility functions and clear separation of concerns.
+
+### Architecture
+
+```
+/lib/gl/textures/VideoCycle/
+  index.ts                      # Main video cycle manager
+  types.ts                      # TypeScript type definitions
+  /utils/                       # Pure utility functions
+    calculateBufferState.ts     # Buffer state calculations
+    calculateNextVideoSource.ts # Video selection logic
+    calculateVideoReadiness.ts  # Video readiness checks
+    getNewStartTimeAndDuration.ts # Segment timing calculations
+```
+
+### Core Features
+
+- **Efficient Memory Management**: Uses only 2-3 video elements regardless of video library size
+- **Smooth Transitions**: Prepares next video while current is playing for seamless switches
+- **Anti-Repetition**: Configurable system to avoid recently played videos
+- **Segment Playback**: Plays random segments of videos rather than full duration
+- **Pure Functions**: All calculations are deterministic and side-effect free
+
+### Configuration
+
+The video cycle system is configured via `configVideoCycle.json`:
+
+```json
+{
+  "enabled": true,
+  "cycling": {
+    "minSegmentLength": 2,
+    "maxSegmentLength": 8,
+    "playbackSpeed": 1,
+    "antiRepeat": 3
+  },
+  "appearance": {
+    "opacity": 0.78
+  },
+  "videos": {
+    "path": "/static/videos/"
+  }
+}
+```
+
+### Video Pool Management
+
+The system maintains a pool of 3 video elements that rotate roles:
+
+- **Active Video**: Currently visible and playing
+- **Next Video**: Prepared and ready for transition
+- **Backup Video**: Available for next preparation
+
+This approach minimizes memory usage while ensuring smooth playback without loading delays.
+
+### Pure Function Design
+
+All video calculations are implemented as pure functions:
+
+```typescript
+// Buffer state calculation
+const bufferState = calculateBufferState({
+  currentStartTime: 2.5,
+  currentDuration: 5.0,
+  currentVideoTime: 4.0,
+  transitionTriggerPoint: 0.7,
+  isNextVideoPrepared: true
+})
+
+// Video source selection
+const nextVideo = calculateNextVideoSource({
+  currentIndex: 5,
+  recentIndices: [3, 7, 1],
+  manifest: videoFiles,
+  basePath: '/static/videos/'
+})
+```
+
+### Transition Logic
+
+The system uses a sophisticated transition system:
+
+1. **Preparation Phase**: When current video reaches 70% progress, next video is prepared
+2. **Loading Phase**: Next video is loaded, positioned, and started playing (hidden)
+3. **Transition Phase**: Buffers swap roles, opacity changes, old video is cleaned up
+4. **Cycle Continues**: Process repeats with new active video
+
+### Debug Information
+
+The video cycle system provides comprehensive debug information:
+
+- Current video name and index
+- Playback timing and progress
+- Buffer states and transitions
+- Video pool status
+- Recent video history
+- Loading progress
+
+### Usage in GL System
+
+```typescript
+const videoCycle = createVideoCycle(frontBuffer, backBuffer)
+
+// In animation loop
+await videoCycle.update(deltaTime)
+
+// Debug info
+const debugInfo = videoCycle.getDebugInfo()
+```
+
+### Benefits
+
+- **Performance**: Minimal memory footprint with efficient video reuse
+- **Smooth Playback**: No loading delays during video transitions
+- **Flexibility**: Configurable segment lengths and anti-repetition rules
+- **Reliability**: Timeout protection and error handling for video operations
+- **Maintainability**: Pure functions are easy to test and debug
+
 ### Font System
 
 - The theme supports custom font families via Tailwind's `fontFamily` extension in `tailwind.config.ts`.
@@ -313,7 +463,10 @@ In addition to standard utilities, two custom utility classes are available in `
   - `pages.json`: Site-wide page configuration (`debugOnly`, `showHeader`).
   - `*.json`: Static content for pages (navigation, shows, bio).
 
-- **`/lib/gl/configScene.types.ts`**: GL-specific type definitions including `PostProcessingConfig` and `SelectiveColorizationParams` for advanced video effects configuration.
+- **`/lib/gl/configScene.types.ts`**: GL-specific type definitions for core scene configuration.
+- **`/lib/gl/configPostProcessing.json`**: Post-processing effects configuration with top-level `enabled` flag.
+- **`/lib/gl/configPostProcessing.types.ts`**: TypeScript type definitions for all post-processing effects.
+- **`/lib/gl/textures/VideoCycle/`**: Video background management system with efficient memory usage and smooth transitions.
 
 - **`/lib`**: Core Libraries
   - `/theme`: The core UI theme system. See "Theme System" section above.
@@ -324,13 +477,23 @@ In addition to standard utilities, two custom utility classes are available in `
 - **`/utils`**: Shared utility functions.
 - **`/scene`, `/gl`, etc.**: All logic for the Three.js visualization.
   - `/gl/scene/`: Core scene setup including video background with selective colorization
-  - `/gl/shaders/`: Custom GLSL shaders including selective video background processing
-  - `/gl/textures/VideoCycle/`: Video texture management with shader material support
+  - `/gl/shaders/`: Custom GLSL shaders including pixel bleed, CRT effects, and selective video background processing
+  - `/gl/textures/VideoCycle/`: Advanced video background management with efficient memory usage, smooth transitions, and pure function design
+  - `/gl/animation/`: Functional animation system with pure calculations and side-effect isolation
+  - `/gl/layers/`: Dynamic layer management for geometric shapes and logo animations
+  - `/gl/controls/`: Mouse and keyboard interaction systems
 
 ## Main Entry
 
-- `index.ts` - `initGL()`, `InitOptions`, `RendererState`
-- `types.ts` - Core GL types
+- `/lib/gl/index.ts` - `initGL()`, `InitOptions`, `RendererState` - Main GL system initialization
+- `/lib/gl/types.ts` - Core GL types and interfaces
+- `/lib/gl/state.ts` - Global GL state management
+- `/lib/gl/configScene.json` - Core scene configuration (geometry, renderer settings)
+- `/lib/gl/configPostProcessing.json` - Post-processing effects configuration
+- `/lib/gl/configAnimation.json` - Animation timing and behavior configuration
+- `/lib/gl/configControls.json` - Mouse and keyboard interaction configuration
+- `/lib/gl/configLayers.json` - Layer generation and positioning configuration
+- `/lib/gl/configVideoCycle.json` - Video background cycling configuration
 
 ## Theme System
 
@@ -411,11 +574,12 @@ The animation system has been refactored following strict functional programming
 - **Pure functions only** - no side effects in calculations
 - **Immutable data structures** throughout
 - **Clear separation** between pure calculations and necessary side effects
+- **Orchestrator pattern** - side effects isolated to orchestrator functions
 
 ### Architecture
 
 ```
-/animation/
+/lib/gl/animation/
   /core/                    # Pure animation engine functions
     /createAnimationEngine.ts
     /updateAnimationEngine.ts
@@ -423,15 +587,26 @@ The animation system has been refactored following strict functional programming
     /removeBehavior.ts
   /calculations/           # Pure calculation functions
     /calculateMouseRotation.ts
-    /calculateStaticLayerPosition.ts
-    /calculateRandomLayerPosition.ts
+    /calculateScrollProgress.ts
+    /calculateShaderTime.ts
+    /calculateRotationInterpolation.ts
+  /orchestrators/          # Main orchestrators with side effects
+    /homePage/
+      /createHomePageOrchestrator.ts
+      /calculations/       # Home page specific calculations
+        /calculateBloomEffect.ts
+        /calculateFadeOpacity.ts
+        /calculatePlaneUpdate.ts
+        /calculatePostProcessingUpdate.ts
+    /contentPage/
+      /createContentPageOrchestrator.ts
   /utils/                  # Pure utility functions
     /smoothRotationInterpolation.ts
     /getRandomInterval.ts
     /timeUtils.ts
     /interpolationUtils.ts
-  /createLogoAnimator.ts   # Main orchestrator
-  /types.ts               # Type definitions
+  /createSceneOrchestrator.ts   # Main scene orchestrator
+  /types.ts                     # Type definitions
 ```
 
 ## Core Principles
@@ -471,34 +646,34 @@ export const calculateMouseRotation = (mouseX, mouseY, coefficient) => ({
 ### Basic Setup
 
 ```typescript
-import { createLogoAnimator } from './animation'
+import { createSceneOrchestrator } from '@libgl/animation'
 
-const animator = createLogoAnimator(dependencies)
-const cleanup = animator.start()
+const orchestrator = createSceneOrchestrator(dependencies)
+const cleanup = orchestrator.start()
 ```
 
 ### Pure Calculations (Testable)
 
 ```typescript
-import { calculateStaticLayerPosition } from './animation'
+import { calculateMouseRotation } from '@libgl/animation/calculations'
 
 // Pure function - easy to test
-const position = calculateStaticLayerPosition(1000, 0, 5, false)
-// Returns: { rotationX: 0, rotationY: 0, positionZ: 5.02 }
+const rotation = calculateMouseRotation(0.5, 0.3, 0.1)
+// Returns: { targetRotationX: 0.03, targetRotationY: 0.05 }
 ```
 
 ### Custom Calculations
 
 ```typescript
 // Create your own pure calculation
-const calculateCustomPosition = (time, factor) => ({
-  x: Math.sin(time * factor),
-  y: Math.cos(time * factor)
+const calculateCustomRotation = (time, intensity) => ({
+  rotationX: Math.sin(time * 0.001) * intensity,
+  rotationY: Math.cos(time * 0.001) * intensity
 })
 
-// Use in your own animator
-const customPosition = calculateCustomPosition(totalTime, 0.1)
-plane.position.x = customPosition.x
+// Use in your own orchestrator
+const customRotation = calculateCustomRotation(totalTime, 0.1)
+logoController.setRotation(customRotation.rotationX, customRotation.rotationY)
 ```
 
 ## Benefits
@@ -508,6 +683,8 @@ plane.position.x = customPosition.x
 3. **Modular**: Each function can be used independently
 4. **Composable**: Easy to combine functions for new behaviors
 5. **Debuggable**: Clear data flow makes debugging simple
+6. **Performance**: Pure calculations can be optimized and memoized
+7. **Maintainable**: Clear separation between calculations and side effects
 
 ## File Organization
 
@@ -516,9 +693,10 @@ Following the guide's "one function per file" principle:
 - Each calculation is a separate file
 - Each utility is a separate file  
 - Each core function is a separate file
+- Page-specific orchestrators handle different contexts
 - Main orchestrator combines them all
 
-This makes the codebase highly modular and follows pure FP principles while keeping the necessary side effects (Three.js mutations) clearly isolated.
+This makes the codebase highly modular and follows pure FP principles while keeping the necessary side effects (Three.js mutations) clearly isolated in orchestrator functions.
 
 > **Note:** All theme shape types (`BaseTheme`, `BaseTypography`, `BaseSpacing`) are now defined in `lib/theme/themes/types.ts` alongside the theme objects themselves. They are re-exported from `lib/theme/types.ts` for convenience. This keeps type definitions close to the data and supports feature-based organization.
 

@@ -1,5 +1,5 @@
 import * as Three from 'three'
-import configScene from '../configScene.json' with { type: 'json' }
+import configPostProcessing from '../configPostProcessing.json' with { type: 'json' }
 
 /**
  * Creates a procedural texture for lens flare elements
@@ -101,7 +101,7 @@ export const addLensFlares = async (
   scene: Three.Scene,
 ): Promise<Three.PointLight> => {
   const { LensflareElement, Lensflare } = await import('three/examples/jsm/objects/Lensflare.js')
-  const { lensFlare } = configScene.postProcessingConfig
+  const { lensFlare } = configPostProcessing
 
   // Create the main light source
   const flareLight = new THREE.PointLight(

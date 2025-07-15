@@ -7,14 +7,14 @@
       "excludeFrom": ["header"]
     },
     {
-      "key": "shows",
-      "path": "#shows",
-      "label": "shows"
-    },
-    {
       "key": "bio",
       "path": "#bio",
       "label": "bio"
+    },
+    {
+      "key": "shows",
+      "path": "#shows",
+      "label": "shows"
     },
     {
       "key": "contact",

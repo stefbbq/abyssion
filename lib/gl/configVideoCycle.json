@@ -9,11 +9,11 @@
     "videoLoadTimeoutMs": 10000
   },
   "appearance": {
-    "opacity": 0.78
+    "opacity": 1
   },
   "position": {
     "z": -15,
-    "scale": 1.2
+    "scale": 1.23
   },
   "videos": {
     "path": "/videos/"

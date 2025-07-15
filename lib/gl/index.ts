@@ -1,7 +1,9 @@
 import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
 import type { ConfigScene, RendererConfig } from './configScene.types.ts'
+import type { PostProcessingConfig } from './configPostProcessing.types.ts'
 import configScene from './configScene.json' with { type: 'json' }
+import configPostProcessing from './configPostProcessing.json' with { type: 'json' }
 import animationConfig from './configAnimation.json' with { type: 'json' }
 import controlsConfig from './configControls.json' with { type: 'json' }
 import { createPostProcessing } from './scene/createPostProcessing.ts'
@@ -23,6 +25,7 @@ import {
 import type { VideoBackgroundManager } from '@libgl/types.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
 import { getScrollCorruptionProgress } from './scene/utils/getScrollCorruptionProgress.ts'
+import { ShaderMaterial } from 'three'
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 
@@ -30,7 +33,7 @@ let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createScen
  * Initialize the GL scene using composable setup functions
  */
 export const initGL = async (options: InitOptions) => {
-  const { rendererConfig, postProcessingConfig } = configScene as ConfigScene
+  const { rendererConfig } = configScene as ConfigScene
   const { outlineTexturePath, stencilTexturePath, canvas } = options
   const THREE = await import('three')
   const width = globalThis.innerWidth
@@ -81,7 +84,7 @@ export const initGL = async (options: InitOptions) => {
         renderer,
         width,
         height,
-        postProcessingConfig,
+        configPostProcessing as PostProcessingConfig,
       ))
   } else {
     // Minimal composer-like object for compatibility
@@ -319,8 +322,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   if (!state) return
 
   // Get CRT scroll corruption configuration
-  const { postProcessingConfig } = configScene as ConfigScene
-  const crtConfig = postProcessingConfig.crtScrollCorruption
+  const crtConfig = configPostProcessing.crtScrollCorruption
 
   // If CRT scroll corruption is disabled, skip all effects
   if (!crtConfig?.enabled) {
@@ -364,7 +366,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 
   // Update CRT corruption pass uniforms
   if (state.crtPass && state.crtPass.material) {
-    const material = state.crtPass.material as any
+    const material = state.crtPass.material as ShaderMaterial
     if (material.uniforms) {
       // Update main corruption intensity from scroll
       material.uniforms.corruptionIntensity.value = corruptionIntensity
@@ -458,7 +460,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 
   // Update pixel bleed pass uniforms
   if (state.pixelBleedPass && state.pixelBleedPass.material) {
-    const material = state.pixelBleedPass.material as any
+    const material = state.pixelBleedPass.material as ShaderMaterial
     if (material.uniforms) {
       // Update time if the pass is enabled (controlled by debug controls)
       if (state.pixelBleedPass.enabled) {
@@ -488,7 +490,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   }
 }
 
-export const updateScrollMetrics = (scrollPosition: number, scrollVelocity: number) => {
+export const updateScrollMetrics = (scrollVelocity: number) => {
   if (!glState) return
 
   // Update scroll-based metrics for the scene

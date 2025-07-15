@@ -1,14 +1,12 @@
 /// <reference lib="deno.ns" />
-import ms from 'ms'
-
 // scripts/dev-watch.ts
 // Watches shader files, rebuilds .ts modules, and restarts the app on changes.
 // Run with: deno run --allow-read --allow-write --allow-run scripts/dev-watch.ts
 
+import ms from 'ms'
 import { lc, log } from '../lib/logger/index.ts'
 
 const SHADER_DIR = 'lib/gl/shaders/glsl'
-let app: Deno.ChildProcess | undefined
 let debounceTimer: number | undefined
 
 async function buildShaders() {
@@ -20,14 +18,6 @@ async function buildShaders() {
   const process = command.spawn()
   const { code } = await process.status
   if (code !== 0) log(lc.GL, 'Shader build failed.')
-}
-
-async function stopApp() {
-  if (app) {
-    app.kill('SIGTERM')
-    await app.status
-    app = undefined
-  }
 }
 
 log(lc.GL, `Watching ${SHADER_DIR} for shader changes...`)

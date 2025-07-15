@@ -323,7 +323,9 @@ export const DebugPanels = (props: Props) => {
         const mod = await import('@lib/gl/index.ts')
         const orchestrator = mod.getSceneOrchestrator()
         if (orchestrator) orchestrator.switchToPage(scene)
-      } catch {}
+      } catch {
+        log.error(lc.GL, 'Error switching scene:', scene)
+      }
     }
   }
 

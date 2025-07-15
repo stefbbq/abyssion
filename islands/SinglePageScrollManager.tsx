@@ -7,7 +7,7 @@ import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger
 import { lc } from '@lib/logger/index.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
 import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
-import configScene from '@lib/gl/configScene.json' with { type: 'json' }
+import configPostProcessing from '@lib/gl/configPostProcessing.json' with { type: 'json' }
 
 const sectionIds = ['home', 'shows', 'bio', 'contact']
 
@@ -131,7 +131,7 @@ export default function SinglePageScrollManager() {
           }
 
           // Calculate background fade intensity using shared utility
-          const crtConfig = configScene.postProcessingConfig?.crtScrollCorruption ?? {}
+          const crtConfig = configPostProcessing.crtScrollCorruption ?? {}
           const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
           setBackgroundIntensity(intensity)
 
@@ -144,13 +144,13 @@ export default function SinglePageScrollManager() {
 
     // Update scroll metrics when layout changes
     const handleResize = () => {
-      updateScrollMetrics(globalThis.scrollY, 0)
+      updateScrollMetrics(0)
     }
     globalThis.addEventListener('resize', handleResize)
 
     // Initial background intensity update
     const scrollY = globalThis.scrollY
-    const crtConfig = configScene.postProcessingConfig?.crtScrollCorruption ?? {}
+    const crtConfig = configPostProcessing.crtScrollCorruption ?? {}
     const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
     setBackgroundIntensity(intensity)
 

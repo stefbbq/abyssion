@@ -8,7 +8,7 @@ import {
 } from '@lib/gl/shaders/index.ts'
 import { CRTShader } from '@lib/gl/shaders/CRTShader.ts'
 import passthroughVertexShader from '@lib/gl/shaders/glsl/passthrough.vert.ts'
-import type { PostProcessingConfig } from '@libgl/configScene.types.ts'
+import type { PostProcessingConfig } from '@libgl/configPostProcessing.types.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 
 /**
@@ -172,7 +172,7 @@ export const createPostProcessing = async (
     film.scanlineCount,
     film.grayscale,
   )
-  // composer.addPass(filmPass)
+  composer.addPass(filmPass)
 
   /**
    * FinalPass

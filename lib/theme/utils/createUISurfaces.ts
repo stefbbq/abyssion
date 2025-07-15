@@ -13,10 +13,7 @@ const numberToHexString = (num: number) => `#${num.toString(16).padStart(6, '0')
 export const createDefaultSurfaces = (): BaseSurfaces => ({
   main: {
     color: 'surface.500',
-    opacity: {
-      light: 0.4,
-      dark: 0.5,
-    },
+    opacity: 0.5,
     borderRadius: '0.375rem',
     border: {
       width: '1px',
@@ -29,10 +26,7 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
   },
   shell: {
     color: 'surface.200',
-    opacity: {
-      light: 0.9,
-      dark: 0.85,
-    },
+    opacity: 0.85,
     borderRadius: '0.5rem',
     border: {
       width: '1px',
@@ -45,10 +39,7 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
   },
   header: {
     color: 'surface.100',
-    opacity: {
-      light: 0.95,
-      dark: 0.9,
-    },
+    opacity: 0.9,
     borderRadius: '0.5rem',
     border: {
       width: '1px',
@@ -97,8 +88,8 @@ const convertToUISurface = (
     )
     : hexToCSS(borderColor)
 
-  // Get opacity for current mode
-  const currentOpacity = mode === 'dark' ? (surface.opacity?.dark || 0.5) : (surface.opacity?.light || 0.4)
+  // Get opacity value
+  const currentOpacity = surface.opacity || 0.5
 
   // Helper to parse and replace palette refs in a string
   const parse = (val: string | undefined) => val ? replacePaletteRefs(val, palette) : undefined

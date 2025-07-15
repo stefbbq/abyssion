@@ -78,7 +78,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
   surfaces: {
     main: {
       color: 'background.primary',
-      opacity: { light: 0.4, dark: 0.4 },
+      opacity: 0.4,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -93,7 +93,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
     },
     alt: {
       color: 'background.secondary',
-      opacity: { light: 0.3, dark: 0.8 },
+      opacity: 0.8,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -108,7 +108,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
     },
     card: {
       color: 'surface.primary',
-      opacity: { light: 0.4, dark: 0.88 },
+      opacity: 0.88,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -122,7 +122,7 @@ export const deepSpaceHUDTheme = createBaseTheme({
     },
     header: {
       color: 'background.primary',
-      opacity: { light: 0.4, dark: 0.92 },
+      opacity: 0.92,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -220,7 +220,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
   surfaces: {
     main: {
       color: 'background.primary',
-      opacity: { light: 0.92, dark: 0.85 },
+      opacity: 0.92,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -235,7 +235,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
     },
     alt: {
       color: 'background.secondary',
-      opacity: { light: 0.85, dark: 0.8 },
+      opacity: 0.85,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -250,7 +250,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
     },
     card: {
       color: 'surface.primary',
-      opacity: { light: 0.95, dark: 0.88 },
+      opacity: 0.95,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -264,7 +264,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
     },
     header: {
       color: 'background.primary',
-      opacity: { light: 0.92, dark: 0.85 },
+      opacity: 0.92,
       borderRadius: '1rem',
       border: {
         width: '2px',
@@ -279,7 +279,7 @@ export const deepSpaceHUDLightTheme = createBaseTheme({
     },
     nav: {
       color: 'background.secondary',
-      opacity: { light: 0.92, dark: 0.85 },
+      opacity: 0.92,
       borderRadius: '1rem',
       border: {
         width: '2px',

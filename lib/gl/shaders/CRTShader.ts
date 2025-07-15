@@ -2,6 +2,7 @@ import { ShaderMaterial } from 'three'
 import crtFragmentShader from './glsl/crt.frag.ts'
 import passthroughVertexShader from './glsl/passthrough.vert.ts'
 import pixelBleedFragmentShader from './glsl/pixelBleed.frag.ts'
+import type { PixelBleedConfig } from './PixelBleedShader.ts'
 
 /**
  * CRT Corruption Shader
@@ -93,7 +94,7 @@ export const PixelBleedShader = {
 /**
  * Update CRT shader uniforms from corruption parameters
  */
-export const updateCRTShaderUniforms = (material: ShaderMaterial, params: any) => {
+export const updateCRTShaderUniforms = (material: ShaderMaterial, params: CorruptionParams) => {
   // Base parameters
   if (material.uniforms.corruptionIntensity) {
     material.uniforms.corruptionIntensity.value = params.enabled ? params.intensity : 0.0
@@ -212,7 +213,7 @@ export const updateCRTShaderUniforms = (material: ShaderMaterial, params: any) =
 /**
  * Update pixel bleed shader uniforms from corruption parameters
  */
-export const updatePixelBleedShaderUniforms = (material: ShaderMaterial, params: any) => {
+export const updatePixelBleedShaderUniforms = (material: ShaderMaterial, params: PixelBleedConfig) => {
   if (material.uniforms.intensity) {
     material.uniforms.intensity.value = params.pixelBleedEnabled ? (params.pixelBleedIntensity ?? 0.0) : 0.0
   }

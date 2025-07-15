@@ -1,12 +1,8 @@
 import { lc, log } from '@lib/logger/index.ts'
-import { pipe } from '@lib/utils/pipe.ts'
 import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
 import * as Three from 'three'
-
 import { calculateNextVideoSource } from './utils/calculateNextVideoSource.ts'
-import { calculateImmediatePlaybackReadiness, calculateVideoReadiness } from './utils/calculateVideoReadiness.ts'
 import { calculateBufferState, calculatePreparationTiming } from './utils/calculateBufferState.ts'
-
 import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
 import type { BufferObject, PlaybackState, VideoManifest, VideoPool } from './types.ts'
@@ -33,7 +29,7 @@ export const createVideoCycle = (
   const videoLoadTimeoutMs = 10000
 
   // Create video pool with 3 elements for efficient memory usage
-  const createVideoPool = (manifest: VideoManifest): VideoPool => {
+  const createVideoPool = (): VideoPool => {
     const videos = Array.from({ length: 3 }, () => {
       const video = document.createElement('video')
       video.autoplay = false
@@ -231,7 +227,7 @@ export const createVideoCycle = (
       return
     }
 
-    videoPool = createVideoPool(manifest)
+    videoPool = createVideoPool()
 
     playbackState = {
       manifest,
@@ -435,7 +431,7 @@ export const createVideoCycle = (
   }
 
   // Transition to next video
-  const transitionToNext = async (): Promise<void> => {
+  const transitionToNext = (): void => {
     if (!playbackState.isNextVideoPrepared || isTransitioning) return
 
     try {

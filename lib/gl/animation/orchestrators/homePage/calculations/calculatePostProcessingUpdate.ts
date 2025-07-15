@@ -1,11 +1,11 @@
 import { calculateBloomEffect } from './calculateBloomEffect.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
-import configScene from '@libgl/configScene.json' with { type: 'json' }
-import type { ConfigScene } from '@libgl/configScene.types.ts'
+import configPostProcessing from '@libgl/configPostProcessing.json' with { type: 'json' }
+import type { PostProcessingConfig as PostProcessingConfigType } from '@libgl/configPostProcessing.types.ts'
 import ms from 'ms'
 
 const { animationConfig: animation } = animationConfig
-const { postProcessingConfig } = configScene as ConfigScene
+const postProcessingConfig = configPostProcessing as PostProcessingConfigType
 
 // configuration for post-processing calculation
 type PostProcessingConfig = {

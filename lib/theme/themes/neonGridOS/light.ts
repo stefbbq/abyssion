@@ -2,7 +2,7 @@ import type { BaseTheme } from '../../index.types.ts'
 import { neonGridLightPalette, neonGridSemanticPalette } from './palette.ts'
 
 export const neonGridOSLightTheme: BaseTheme = {
-  name: 'neon-grid-os',
+  name: 'neon-grid-os-light',
   mode: 'light',
   palette: {
     ...neonGridLightPalette,
@@ -11,43 +11,41 @@ export const neonGridOSLightTheme: BaseTheme = {
   surfaces: {
     main: {
       color: 'surface.500',
-      opacity: { light: 0.85, dark: 0.88 },
-      borderRadius: '2px',
-      border: { width: '2px', style: 'solid', color: 'foreground.500' },
-      // effects: {
-      //   backdropBlur: '10px',
-      //   filter: 'perspective(800px) rotateX(0.8deg) scale(1.003, 0.997) brightness(1.05) contrast(1.08) hue-rotate(1deg)',
-      //   boxShadow: '0 0 8px rgba(255, 69, 110, 0.4)',
-      // },
+      effects: {
+        filter: 'perspective(800px) rotateX(0.8deg) scale(1.003, 0.997) brightness(1.05) contrast(1.08) hue-rotate(1deg)',
+      },
     },
     shell: {
       color: 'surface.500',
-      opacity: { light: 0.85, dark: 0.88 },
-      borderRadius: '2px',
-      border: { width: '2px', style: 'solid', color: 'foreground.500' },
-      // effects: {
-      //   backdropBlur: '10px',
-      //   filter: 'perspective(800px) rotateX(0.8deg) scale(1.003, 0.997) brightness(1.05) contrast(1.08) hue-rotate(1deg)',
-      //   boxShadow: '0 0 8px rgba(255, 69, 110, 0.4)',
-      // },
+      opacity: 0.8,
+      borderRadius: '12px',
+      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.2 },
+      effects: {
+        backdropBlur: '6px',
+        boxShadow: '0 0 8px rgba(0,0,0,.2)',
+      },
     },
     header: {
-      color: 'surface.200',
-      opacity: { light: 0.9, dark: 0.9 },
-      borderRadius: '0px',
+      color: 'surface.100',
+      opacity: 0.9,
+      borderRadius: '12px',
       border: { width: '0px', style: 'none' },
-      // effects: {
-      //   filter: 'brightness(1.02) saturate(1.05) drop-shadow(0 0 1px rgba(255, 69, 110, 0.4))',
-      //   boxShadow: '0 2px 8px rgba(255, 69, 110, 0.2)',
-      // },
+      effects: {
+        backdropBlur: '8px',
+        boxShadow: '0 10px 20px rgba(0,0,0,.5)',
+      },
     },
   },
-  backgroundOpacity: { light: 0, dark: 0.75 },
+  backgroundOpacity: { light: 0.8, dark: 0.85 },
   typography: {
     fontFamily: {
-      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      heading: '"Oxanium", sans-serif',
+      body: '"Oxanium", sans-serif',
+      quote: '"EB Garamond", serif',
     },
+    fontUrls: [
+      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
+      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
+    ],
   },
 }

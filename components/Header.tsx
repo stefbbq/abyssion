@@ -4,7 +4,6 @@ import navData from '@data/nav.json' with { type: 'json' }
 import { ThemeToggle } from '@components/ThemeToggle.tsx'
 import { ThemeSwitcher } from '@components/ThemeSwitcher.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
-import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { currentThemeMode } from '@lib/theme/index.ts'
 import { HeaderLink } from './HeaderLink.tsx'
 
@@ -20,7 +19,6 @@ type SocialIconKey = keyof SocialIconMap
  *   <Header />
  */
 export const Header = () => {
-  const [currentPath] = useClientLocation()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
   const themeMode = useSignal(currentThemeMode.value)
