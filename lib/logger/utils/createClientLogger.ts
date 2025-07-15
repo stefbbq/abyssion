@@ -68,6 +68,7 @@ export const createClientLogger = (
     if (level === 'critical') method = 'error'
     else if (level === 'info') method = 'log'
     else if (level === 'trace') method = 'log'
+    else if (level === 'group') method = 'group'
     else method = level as keyof Console
     if (typeof con[method] !== 'function') method = 'log'
 
@@ -99,7 +100,7 @@ export const createClientLogger = (
   log.critical = (ctx: LogContext | null, ...args: unknown[]): void => _log('critical', ctx, ...args)
 
   // Grouping methods
-  log.group = (ctx: LogContext | null, ...args: unknown[]): void => globalThis.console.group(ctx, ...args)
+  log.group = (ctx: LogContext | null, ...args: unknown[]): void => _log('group', ctx, ...args)
   log.groupEnd = (): void => globalThis.console.groupEnd()
 
   return log as LogFunction

@@ -3,15 +3,18 @@
     "dashedOrbits": {
       "radius": 1,
       "minRadius": 1,
-      "maxRadius": 2,
+      "maxRadius": 2.5,
       "height": 0.5,
       "rotationAngle": 0,
-      "minOpacity": 0.8,
-      "maxOpacity": 1,
+      "minOpacity": 0.1,
+      "maxOpacity": 0.8,
       "variationFactor": 1,
       "linewidth": 1,
-      "count": 6,
-      "zPosition": -1
+      "thickness": 0.01,
+      "minThicknessMultiplier": 0.2,
+      "maxThicknessMultiplier": 2.2,
+      "count": 8,
+      "zPosition": 0
     },
     "concentricRings": {
       "radius": 1,

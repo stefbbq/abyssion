@@ -15,7 +15,6 @@ export const createDashedOrbits = (
   const {
     minRadius = 0.5,
     maxRadius = 1.5,
-    height = 0.5,
     color = 0x00ffff,
     secondaryColor = 0xff00ff,
     rotationAngle = 0,
@@ -25,7 +24,15 @@ export const createDashedOrbits = (
     linewidth = 1,
     zBase = 0,
     zSpread = 0,
+    thickness = 0.01, // Base thickness
+    // Thickness variation parameters
+    minThicknessMultiplier = 0.3, // Thinnest orbit multiplier (30% of base)
+    maxThicknessMultiplier = 3.0, // Thickest orbit multiplier (300% of base)
   } = options
+
+  // Calculate thickness variation range
+  const minThickness = thickness * minThicknessMultiplier
+  const maxThickness = thickness * maxThicknessMultiplier
 
   const orbitGroup = new THREE.Group()
   const orbitCount = typeof options.count === 'number' ? options.count : 4
@@ -65,16 +72,20 @@ export const createDashedOrbits = (
     const colorBlend = Math.random() // 0 = fully color, 1 = fully secondaryColor
     const numericColor = interpolateColors(color, secondaryColor, colorBlend)
 
+    // calculate varied thickness for this orbit
+    const orbitThickness = lerp(minThickness, maxThickness, Math.random()) * linewidth
+
     // create thick dashed line using mesh geometry
     const thickLine = createThickDashedLine(THREE, curve, {
       color: numericColor,
       opacity: orbitOpacity,
-      thickness: linewidth * 0.01,
+      thickness: orbitThickness,
       dashSize: dashSize,
       gapSize: gapSize,
     })
 
     thickLine.rotation.x = 0 + rotationAngle
+
     // randomize z-position around zBase
     const zJitter = (Math.random() - 0.5) * 2 * zSpread
     const zPosition = zBase + zJitter
@@ -87,7 +98,18 @@ export const createDashedOrbits = (
     // Make x/y jitter very subtle, but random, for organic look
     const maxXYJitter = 0.01 // Try 0.01 for a pixel or two
     orbitHolder.position.x += rand() * maxXYJitter * variationFactor
-    orbitHolder.position.y += rand() * maxXYJitter * variationFactor
+    orbitHolder.position.y += rand() * maxXYJitter * variationFactor + 0.1
+
+    // Add rotation properties for slow random rotation around z-axis only (facing camera)
+    const rotationSpeed = (Math.random() * 0.002 + 0.0005) * (Math.random() < 0.5 ? 1 : -1) // Random slow speed and direction
+
+    // Store rotation properties in userData for animation system
+    orbitHolder.userData = {
+      rotationSpeed,
+      rotationAxis: 'z', // Only rotate around z-axis to keep orbits facing camera
+      originalPosition: orbitHolder.position.clone(),
+    }
+
     orbitGroup.add(orbitHolder)
 
     // log orbit creation details
@@ -104,7 +126,11 @@ export const createDashedOrbits = (
       zPosition,
       xJitter: orbitHolder.position.x,
       yJitter: orbitHolder.position.y,
-      lineThickness: linewidth * 0.02,
+      baseThickness: thickness,
+      actualThickness: orbitThickness,
+      thicknessMultiplier: orbitThickness / thickness,
+      rotationSpeed: orbitHolder.userData.rotationSpeed,
+      rotationAxis: orbitHolder.userData.rotationAxis,
     })
   }
 

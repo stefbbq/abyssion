@@ -20,8 +20,8 @@ const getRandomIndex = (exclude: number, length: number) => {
   return idx
 }
 
-// Accept intensity as a prop
-const ThemedBackground = ({ intensity = 0 }: { intensity?: number }) => {
+// Accept intensity and showNoise as props
+const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: number; showNoise?: boolean }) => {
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
   const isLight = currentThemeMode.value === 'light'
@@ -30,6 +30,8 @@ const ThemedBackground = ({ intensity = 0 }: { intensity?: number }) => {
   const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
+    if (!showNoise) return
+
     // Preload all noise images
     noiseImages.forEach((src) => {
       const img = new globalThis.Image()
@@ -53,7 +55,7 @@ const ThemedBackground = ({ intensity = 0 }: { intensity?: number }) => {
       isMounted = false
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [])
+  }, [showNoise])
 
   // shared classes
   const baseClasses = 'fixed inset-0 pointer-events-none'
@@ -73,12 +75,14 @@ const ThemedBackground = ({ intensity = 0 }: { intensity?: number }) => {
 
   return (
     <>
-      <div
-        id='noise-background'
-        className={`${noiseClasses} ${zIndexClass}`}
-        style={{ backgroundImage: `url(${noiseImages[noiseIndex]})`, opacity: noiseFadeOpacity }}
-        aria-hidden='true'
-      />
+      {showNoise && (
+        <div
+          id='noise-background'
+          className={`${noiseClasses} ${zIndexClass}`}
+          style={{ backgroundImage: `url(${noiseImages[noiseIndex]})`, opacity: noiseFadeOpacity }}
+          aria-hidden='true'
+        />
+      )}
       <div
         id='tint-background'
         className={`${baseClasses} ${backgroundClasses} ${zIndexClass} ${transitionClass}`}

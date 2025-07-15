@@ -16,6 +16,7 @@ export const LOG_LEVELS = [
   'warn',
   'error',
   'critical',
+  'group',
   'off',
 ] as const
 

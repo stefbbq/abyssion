@@ -1,4 +1,4 @@
-import type { AnimationContext, AnimationOrchestrator } from '../core/types.ts'
+import type { AnimationContext, AnimationOrchestrator } from '../../core/types.ts'
 
 /**
  * An orchestrator for pages with no special GL animations.
@@ -10,7 +10,7 @@ export const createContentPageOrchestrator = (): AnimationOrchestrator => {
     name: 'content-page',
     update: (context: AnimationContext) => {
       // enable pixelation effect
-      const { pixelationPass, renderer } = context.state
+      const { pixelationPass, renderer, crtPass } = context.state
       if (pixelationPass && !pixelationPass.enabled) {
         pixelationPass.enabled = true
         if (pixelationPass.uniforms.pixelSize) pixelationPass.uniforms.pixelSize.value = 16
@@ -20,6 +20,11 @@ export const createContentPageOrchestrator = (): AnimationOrchestrator => {
             renderer.domElement.height,
           )
         }
+      }
+
+      // Apply CRT pass time updates (for continuous animation)
+      if (crtPass?.material?.uniforms?.time) {
+        crtPass.material.uniforms.time.value = performance.now() / 1000
       }
     },
     dispose: (context: AnimationContext) => {

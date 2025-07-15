@@ -2,8 +2,9 @@ import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
 import type { ConfigScene, RendererConfig } from './configScene.types.ts'
 import type { PostProcessingConfig } from './configPostProcessing.types.ts'
+import { type CorruptionParams, updateCRTShaderUniforms } from './shaders/CRTShader.ts'
 import configScene from './configScene.json' with { type: 'json' }
-import configPostProcessing from './configPostProcessing.json' with { type: 'json' }
+import configPostProcessingJson from './configPostProcessing.json' with { type: 'json' }
 import animationConfig from './configAnimation.json' with { type: 'json' }
 import controlsConfig from './configControls.json' with { type: 'json' }
 import { createPostProcessing } from './scene/createPostProcessing.ts'
@@ -26,6 +27,9 @@ import type { VideoBackgroundManager } from '@libgl/types.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
 import { getScrollCorruptionProgress } from './scene/utils/getScrollCorruptionProgress.ts'
 import { ShaderMaterial } from 'three'
+
+// Type the config properly
+const configPostProcessing = configPostProcessingJson as PostProcessingConfig
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 
@@ -364,103 +368,95 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
   })
 
-  // Update CRT corruption pass uniforms
+  // Update CRT corruption pass uniforms using proper shader function
   if (state.crtPass && state.crtPass.material) {
     const material = state.crtPass.material as ShaderMaterial
-    if (material.uniforms) {
-      // Update main corruption intensity from scroll
-      material.uniforms.corruptionIntensity.value = corruptionIntensity
 
-      // Update time for animation effects
-      material.uniforms.time.value = performance.now() / 1000
+    // Build corruption parameters from config and scroll intensity
+    const corruptionParams: CorruptionParams = {
+      enabled: corruptionIntensity > 0.0,
+      intensity: corruptionIntensity,
+      timeEnabled: true,
 
-      // Enable and configure specific CRT effects based on corruption intensity
-      if (corruptionIntensity > 0.0) {
-        // RGB distortion
-        if (crtConfig.rgbDistortion.enabled) {
-          material.uniforms.rgbDistortionEnabled.value = 1.0
-          material.uniforms.rgbDistortionIntensity.value = crtConfig.rgbDistortion.minIntensity +
-            (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
-        }
+      // RGB distortion
+      rgbDistortionEnabled: crtConfig.rgbDistortion.enabled,
+      rgbDistortionIntensity: crtConfig.rgbDistortion.enabled
+        ? crtConfig.rgbDistortion.minIntensity +
+          (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
+        : 0,
 
-        // Block corruption
-        if (crtConfig.blockCorruption.enabled) {
-          material.uniforms.blockCorruptionEnabled.value = 1.0
-          material.uniforms.blockCorruptionRate.value = crtConfig.blockCorruption.minRate +
-            (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
-        }
+      // Block corruption
+      blockCorruptionEnabled: crtConfig.blockCorruption.enabled,
+      blockCorruptionRate: crtConfig.blockCorruption.enabled
+        ? crtConfig.blockCorruption.minRate +
+          (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
+        : 0,
 
-        // White noise
-        if (crtConfig.whiteNoise.enabled) {
-          material.uniforms.whiteNoiseEnabled.value = 1.0
-          material.uniforms.whiteNoiseIntensity.value = crtConfig.whiteNoise.minIntensity +
-            (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
-        }
+      // White noise
+      whiteNoiseEnabled: crtConfig.whiteNoise.enabled,
+      whiteNoiseIntensity: crtConfig.whiteNoise.enabled
+        ? crtConfig.whiteNoise.minIntensity +
+          (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
+        : 0,
 
-        // Wave noise
-        if (crtConfig.waveNoise.enabled) {
-          material.uniforms.waveNoiseEnabled.value = 1.0
-          material.uniforms.waveNoiseIntensity.value = crtConfig.waveNoise.minIntensity +
-            (corruptionIntensity * (crtConfig.waveNoise.maxIntensity - crtConfig.waveNoise.minIntensity))
-        }
+      // Wave noise
+      waveNoiseEnabled: crtConfig.waveNoise.enabled,
+      waveNoiseIntensity: crtConfig.waveNoise.enabled
+        ? crtConfig.waveNoise.minIntensity + (corruptionIntensity * (crtConfig.waveNoise.maxIntensity - crtConfig.waveNoise.minIntensity))
+        : 0,
 
-        // Static intensity
-        if (crtConfig.staticIntensity.enabled) {
-          material.uniforms.staticIntensity.value = crtConfig.staticIntensity.minIntensity +
-            (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
-        }
+      // Static intensity
+      staticIntensity: crtConfig.staticIntensity.enabled
+        ? crtConfig.staticIntensity.minIntensity +
+          (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
+        : 0,
 
-        // Large block corruption (only activate after threshold)
-        if (crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold) {
-          const largeBlockProgress = (corruptionIntensity - crtConfig.largeBlockCorruption.startThreshold) /
-            (1.0 - crtConfig.largeBlockCorruption.startThreshold)
-          material.uniforms.largeBlockIntensity.value = largeBlockProgress * crtConfig.largeBlockCorruption.maxIntensity
-        }
+      // Large block corruption (only activate after threshold)
+      largeBlockEnabled: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold,
+      largeBlockIntensity: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold
+        ? ((corruptionIntensity - crtConfig.largeBlockCorruption.startThreshold) / (1.0 - crtConfig.largeBlockCorruption.startThreshold)) *
+          crtConfig.largeBlockCorruption.maxIntensity
+        : 0,
 
-        // Artifact noise (only activate after threshold)
-        if (crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold) {
-          const artifactProgress = (corruptionIntensity - crtConfig.artifactNoise.startThreshold) /
-            (1.0 - crtConfig.artifactNoise.startThreshold)
-          material.uniforms.artifactNoiseIntensity.value = artifactProgress * crtConfig.artifactNoise.maxIntensity
-          if (typeof crtConfig.artifactNoise.artifactHeightJitterMin === 'number') {
-            material.uniforms.artifactHeightJitterMin.value = crtConfig.artifactNoise.artifactHeightJitterMin
-          }
-          if (typeof crtConfig.artifactNoise.artifactHeightJitterMax === 'number') {
-            material.uniforms.artifactHeightJitterMax.value = crtConfig.artifactNoise.artifactHeightJitterMax
-          }
-          // Scale block density with intensity: 0 at top, config value at max intensity
-          if (typeof crtConfig.artifactNoise.artifactBlockDensity === 'number') {
-            material.uniforms.artifactBlockDensity.value = artifactProgress * crtConfig.artifactNoise.artifactBlockDensity
-          }
-        }
-      } else {
-        // Disable all effects when corruption intensity is 0
-        material.uniforms.rgbDistortionEnabled.value = 0.0
-        material.uniforms.blockCorruptionEnabled.value = 0.0
-        material.uniforms.whiteNoiseEnabled.value = 0.0
-        material.uniforms.waveNoiseEnabled.value = 0.0
-        material.uniforms.staticIntensity.value = 0.0
-        material.uniforms.largeBlockIntensity.value = 0.0
-        material.uniforms.artifactNoiseIntensity.value = 0.0
-      }
+      // Artifact noise (only activate after threshold)
+      artifactNoiseEnabled: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold,
+      artifactNoiseIntensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
+        ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
+          crtConfig.artifactNoise.maxIntensity
+        : 0,
+      artifactBlockDensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
+        ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
+          (crtConfig.artifactNoise.artifactBlockDensity ?? 0.7)
+        : 0,
+      artifactHeightJitter: crtConfig.artifactNoise.artifactHeightJitter,
+      artifactHeightJitterMin: crtConfig.artifactNoise.artifactHeightJitterMin,
+      artifactHeightJitterMax: crtConfig.artifactNoise.artifactHeightJitterMax,
+      artifactNoiseFPS: crtConfig.artifactNoise.artifactNoiseFPS,
 
-      log.debug(lc.GL, '🎯 CRT Pass uniforms updated:', {
-        corruptionIntensity: material.uniforms.corruptionIntensity.value,
-        time: material.uniforms.time.value,
-        rgbDistortionEnabled: material.uniforms.rgbDistortionEnabled.value,
-        rgbDistortionIntensity: material.uniforms.rgbDistortionIntensity.value,
-        blockCorruptionEnabled: material.uniforms.blockCorruptionEnabled.value,
-        blockCorruptionRate: material.uniforms.blockCorruptionRate.value,
-        whiteNoiseEnabled: material.uniforms.whiteNoiseEnabled.value,
-        whiteNoiseIntensity: material.uniforms.whiteNoiseIntensity.value,
-        resolution: material.uniforms.resolution?.value,
-      })
+      // Screen shake - not used in scroll corruption
+      shakeEnabled: false,
     }
+
+    // Use the proper shader function to update all uniforms
+    updateCRTShaderUniforms(material, corruptionParams)
+
+    log.debug(lc.GL, '🎯 CRT Pass uniforms updated:', {
+      corruptionIntensity: material.uniforms.corruptionIntensity.value,
+      time: material.uniforms.time.value,
+      rgbDistortionEnabled: material.uniforms.rgbDistortionEnabled.value,
+      rgbDistortionIntensity: material.uniforms.rgbDistortionIntensity.value,
+      blockCorruptionEnabled: material.uniforms.blockCorruptionEnabled.value,
+      blockCorruptionRate: material.uniforms.blockCorruptionRate.value,
+      whiteNoiseEnabled: material.uniforms.whiteNoiseEnabled.value,
+      whiteNoiseIntensity: material.uniforms.whiteNoiseIntensity.value,
+      resolution: material.uniforms.resolution?.value,
+    })
   }
 
   // Update pixel bleed pass uniforms
   if (state.pixelBleedPass && state.pixelBleedPass.material) {
     const material = state.pixelBleedPass.material as ShaderMaterial
+
     if (material.uniforms) {
       // Update time if the pass is enabled (controlled by debug controls)
       if (state.pixelBleedPass.enabled) {
@@ -476,9 +472,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     const basePixelSize = 16
     const maxPixelSize = 64
     const pixelSize = basePixelSize + (corruptionIntensity * (maxPixelSize - basePixelSize))
-    if (state.pixelationPass.uniforms.pixelSize) {
-      state.pixelationPass.uniforms.pixelSize.value = pixelSize
-    }
+    if (state.pixelationPass.uniforms.pixelSize) state.pixelationPass.uniforms.pixelSize.value = pixelSize
   }
 
   if (state.finalPass?.uniforms) {
@@ -503,4 +497,4 @@ export const updateScrollMetrics = (scrollVelocity: number) => {
   }
 }
 
-export { type InitOptions, type RendererState }
+export { type InitOptions }

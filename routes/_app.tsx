@@ -30,19 +30,25 @@ export default function App({ Component, url }: PageProps) {
         {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
       <body f-client-nav class='min-h-screen relative text-foreground bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
+        {/** global theme state and CSS custom properties */}
         <ThemeProvider />
 
+        {/** renders debug controls and GL debugging tools */}
         <DebugPanels />
 
+        {/** scroll events, themed background, GL canvas */}
         <SinglePageScrollManager />
 
+        {/** desktop only, navigation and branding elements */}
         {showHeader && <Header />}
 
+        {/** mobile only, floating action button and navigation menu */}
+        {showActionZone && <ActionZoneController />}
+
+        {/** main content area for each route */}
         <Partial name='page-content'>
           <Component />
         </Partial>
-
-        {showActionZone && <ActionZoneController />}
       </body>
     </html>
   )

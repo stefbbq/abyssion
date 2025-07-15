@@ -1,13 +1,147 @@
+/**
+ * CRT Corruption Shader System
+ *
+ * This shader system creates authentic CRT television corruption effects including:
+ * - RGB channel distortion (chromatic aberration)
+ * - Block corruption (digital artifacts)
+ * - White noise (analog static)
+ * - Wave distortion (scan line effects)
+ * - Screen shake (mechanical vibration)
+ * - Large block corruption (major signal loss)
+ * - Artifact noise (horizontal strips with pixel shifting)
+ *
+ * The system is designed to simulate the visual artifacts of failing CRT monitors
+ * and analog television signals, creating authentic retro corruption effects.
+ *
+ * @example
+ * ```typescript
+ * import { CRTShader, updateCRTShaderUniforms } from './CRTShader.ts'
+ *
+ * // Create shader material
+ * const material = new THREE.ShaderMaterial(CRTShader)
+ *
+ * // Configure corruption effects
+ * const params: CorruptionParams = {
+ *   enabled: true,
+ *   intensity: 0.5,
+ *   timeEnabled: true,
+ *   rgbDistortionEnabled: true,
+ *   rgbDistortionIntensity: 10.0,
+ *   whiteNoiseEnabled: true,
+ *   whiteNoiseIntensity: 0.1
+ * }
+ *
+ * // Update shader uniforms
+ * updateCRTShaderUniforms(material, params)
+ * ```
+ */
+
 import { ShaderMaterial } from 'three'
 import crtFragmentShader from './glsl/crt.frag.ts'
 import passthroughVertexShader from './glsl/passthrough.vert.ts'
-import pixelBleedFragmentShader from './glsl/pixelBleed.frag.ts'
-import type { PixelBleedConfig } from './PixelBleedShader.ts'
+import { lc, log } from '@lib/logger/index.ts'
+
+/**
+ * CRT corruption parameters for shader uniforms
+ *
+ * This interface defines all available corruption effects and their intensities.
+ * Each effect can be individually enabled/disabled and configured.
+ */
+export type CorruptionParams = {
+  // Base parameters
+  // Master enable/disable switch for all corruption effects
+  enabled: boolean
+  // Overall corruption intensity multiplier (0.0 to 1.0)
+  intensity: number
+  // Enable time-based animation for dynamic effects
+  timeEnabled: boolean
+
+  // Static Effects
+  // Base static intensity for general noise (0.0 to 2.0)
+  staticIntensity?: number
+
+  // RGB Distortion Effects
+  // Enable RGB channel separation (chromatic aberration)
+  rgbDistortionEnabled: boolean
+  // Intensity of RGB channel offset (0.0 to 50.0)
+  rgbDistortionIntensity?: number
+
+  // White Noise Effects
+  // Enable random white noise overlay
+  whiteNoiseEnabled: boolean
+  // Intensity of white noise static (0.0 to 2.0)
+  whiteNoiseIntensity?: number
+
+  // Block Corruption Effects
+  // Enable rectangular block corruption artifacts
+  blockCorruptionEnabled: boolean
+  // Speed of block corruption updates (1.0 to 50.0)
+  blockCorruptionRate?: number
+
+  // Wave Distortion Effects
+  // Enable wave-based distortion
+  waveNoiseEnabled: boolean
+  // Intensity of wave distortion (0.0 to 2.0)
+  waveNoiseIntensity?: number
+
+  // Screen Shake Effects
+  // Enable screen shake/vibration
+  shakeEnabled: boolean
+  // Intensity of screen shake (0.0 to 50.0)
+  shakeIntensity?: number
+
+  // Large Block Corruption Effects
+  // Enable large irregular block corruption
+  largeBlockEnabled: boolean
+  // Intensity of large block corruption (0.0 to 1.0)
+  largeBlockIntensity?: number
+  // Size of large corruption blocks (1.0 to 50.0)
+  largeBlockSize?: number
+  // Update frequency for large blocks (1.0 to 30.0 FPS)
+  largeBlockFPS?: number
+
+  // Artifact Noise Effects
+  // Enable horizontal artifact noise strips
+  artifactNoiseEnabled: boolean
+  // Intensity of artifact noise (0.0 to 1.0)
+  artifactNoiseIntensity?: number
+  // Size of artifact chunks (1.0 to 100.0)
+  artifactChunkSize?: number
+  // Amount of horizontal shifting (0.0 to 1.0)
+  artifactShiftAmount?: number
+  // Update frequency for artifact noise (1.0 to 30.0 FPS)
+  artifactNoiseFPS?: number
+  // Probability that a strip becomes an artifact (0.0 to 1.0)
+  artifactBlockDensity?: number
+  // Height variation of artifact blocks (0.0 to 1.0)
+  artifactHeightJitter?: number
+  // Minimum height jitter multiplier
+  artifactHeightJitterMin?: number
+  // Maximum height jitter multiplier
+  artifactHeightJitterMax?: number
+}
 
 /**
  * CRT Corruption Shader
- * Creates various corruption effects like RGB distortion, block corruption,
- * white noise, wave distortion, and screen shake
+ *
+ * A comprehensive shader for creating authentic CRT television corruption effects.
+ * This shader simulates the visual artifacts of failing CRT monitors and analog
+ * television signals, including various types of distortion, noise, and corruption.
+ *
+ * Features:
+ * - RGB Channel Distortion: Simulates chromatic aberration and color channel separation
+ * - Block Corruption: Creates digital compression-like artifacts with rectangular blocks
+ * - White Noise: Adds analog static noise overlay
+ * - Wave Distortion: Simulates scan line and wave-based distortion
+ * - Screen Shake: Adds mechanical vibration effects
+ * - Large Block Corruption: Creates major signal loss with irregular blocks
+ * - Artifact Noise: Horizontal strips with pixel shifting, strongest at screen edges
+ *
+ * All effects are disabled by default and can be individually enabled and configured.
+ * The shader uses time-based animation for dynamic effects when timeEnabled is true.
+ *
+ * @performance The shader is optimized to skip disabled effects, minimizing GPU load.
+ * @compatibility Works with Three.js post-processing pipeline via ShaderPass.
  */
 export const CRTShader = {
   uniforms: {
@@ -54,15 +188,6 @@ export const CRTShader = {
     artifactHeightJitter: { value: 0.5 }, // how much the height of each block can vary
     artifactHeightJitterMin: { value: 0.3 }, // min jitter multiplier
     artifactHeightJitterMax: { value: 1.7 }, // max jitter multiplier
-
-    // Pixel bleed controls (for future use) - DISABLED BY DEFAULT
-    pixelBleedIntensity: { value: 0.0 },
-    pixelBleedChunkSize: { value: 20.0 },
-    pixelBleedChunkRandomness: { value: 0.5 },
-    pixelBleedStretchDistance: { value: 0.3 },
-    pixelBleedGeometryComplexity: { value: 0.5 },
-    pixelBleedPersistence: { value: 0.5 },
-    pixelBleedRegenerationRate: { value: 0.5 },
   },
 
   vertexShader: passthroughVertexShader,
@@ -70,180 +195,111 @@ export const CRTShader = {
 }
 
 /**
- * Pixel Bleed Shader
- * Creates geometric pixel stretching corruption effects
- */
-export const PixelBleedShader = {
-  uniforms: {
-    tDiffuse: { value: null },
-    resolution: { value: null },
-    time: { value: 0.0 },
-    intensity: { value: 0.0 },
-    chunkSize: { value: 20.0 },
-    chunkRandomness: { value: 0.5 },
-    stretchDistance: { value: 0.3 },
-    geometryComplexity: { value: 0.5 },
-    persistence: { value: 0.5 },
-    regenerationRate: { value: 0.5 },
-  },
-
-  vertexShader: passthroughVertexShader,
-  fragmentShader: pixelBleedFragmentShader,
-}
-
-/**
  * Update CRT shader uniforms from corruption parameters
+ *
+ * This function efficiently updates all CRT shader uniforms based on the provided
+ * corruption parameters. It handles the translation between high-level parameters
+ * and low-level shader uniforms, including proper enable/disable logic.
+ *
+ * The function is optimized to only update uniforms that exist in the material,
+ * making it safe to use with different shader variations.
+ *
+ * @param material - The Three.js ShaderMaterial with CRT shader uniforms
+ * @param params - Corruption parameters defining effect intensities and enables
+ *
+ * @example
+ * ```typescript
+ * // Update shader with specific corruption effects
+ * updateCRTShaderUniforms(crtMaterial, {
+ *   enabled: true,
+ *   intensity: 0.8,
+ *   timeEnabled: true,
+ *   rgbDistortionEnabled: true,
+ *   rgbDistortionIntensity: 15.0,
+ *   largeBlockEnabled: true,
+ *   largeBlockIntensity: 0.6
+ * })
+ * ```
+ *
+ * @performance The function includes null checks for all uniforms to avoid errors
+ *              and uses conditional logic to disable unused effects.
  */
 export const updateCRTShaderUniforms = (material: ShaderMaterial, params: CorruptionParams) => {
-  // Base parameters
-  if (material.uniforms.corruptionIntensity) {
-    material.uniforms.corruptionIntensity.value = params.enabled ? params.intensity : 0.0
+  if (!material.uniforms) {
+    log.error(lc.GL, 'CRTShader uniforms are not set')
+    return
   }
 
-  if (material.uniforms.time) {
-    material.uniforms.time.value = params.timeEnabled ? performance.now() / 1000 : 0.0
-  }
+  const { uniforms } = material
+  const {
+    enabled,
+    intensity,
+    timeEnabled,
+    staticIntensity,
+    rgbDistortionEnabled,
+    rgbDistortionIntensity,
+    whiteNoiseEnabled,
+    whiteNoiseIntensity,
+    blockCorruptionEnabled,
+    blockCorruptionRate,
+    waveNoiseEnabled,
+    waveNoiseIntensity,
+    shakeEnabled,
+    shakeIntensity,
+    largeBlockEnabled,
+    largeBlockIntensity,
+    largeBlockSize,
+    largeBlockFPS,
+    artifactNoiseEnabled,
+    artifactNoiseIntensity,
+    artifactChunkSize,
+    artifactShiftAmount,
+    artifactNoiseFPS,
+    artifactBlockDensity,
+    artifactHeightJitter,
+    artifactHeightJitterMin,
+    artifactHeightJitterMax,
+  } = params
+
+  // Base parameters
+  if (uniforms.corruptionIntensity) uniforms.corruptionIntensity.value = enabled ? intensity : 0.0
+  if (uniforms.time) uniforms.time.value = timeEnabled ? performance.now() / 1000 : 0.0
 
   // Static intensity
-  if (material.uniforms.staticIntensity) {
-    material.uniforms.staticIntensity.value = params.staticIntensity ?? 0.0
-  }
+  if (uniforms.staticIntensity) uniforms.staticIntensity.value = staticIntensity ?? 0.0
 
   // RGB distortion
-  if (material.uniforms.rgbDistortionEnabled) {
-    material.uniforms.rgbDistortionEnabled.value = params.rgbDistortionEnabled ? 1.0 : 0.0
-  }
-  if (material.uniforms.rgbDistortionIntensity) {
-    material.uniforms.rgbDistortionIntensity.value = params.rgbDistortionIntensity ?? 0.0
-  }
+  if (uniforms.rgbDistortionEnabled) uniforms.rgbDistortionEnabled.value = rgbDistortionEnabled ? 1.0 : 0.0
+  if (uniforms.rgbDistortionIntensity) uniforms.rgbDistortionIntensity.value = rgbDistortionIntensity ?? 0.0
 
   // White noise
-  if (material.uniforms.whiteNoiseEnabled) {
-    material.uniforms.whiteNoiseEnabled.value = params.whiteNoiseEnabled ? 1.0 : 0.0
-  }
-  if (material.uniforms.whiteNoiseIntensity) {
-    material.uniforms.whiteNoiseIntensity.value = params.whiteNoiseIntensity ?? 0.0
-  }
+  if (uniforms.whiteNoiseEnabled) uniforms.whiteNoiseEnabled.value = whiteNoiseEnabled ? 1.0 : 0.0
+  if (uniforms.whiteNoiseIntensity) uniforms.whiteNoiseIntensity.value = whiteNoiseIntensity ?? 0.0
 
   // Block corruption
-  if (material.uniforms.blockCorruptionEnabled) {
-    material.uniforms.blockCorruptionEnabled.value = params.blockCorruptionEnabled ? 1.0 : 0.0
-  }
-  if (material.uniforms.blockCorruptionRate) {
-    material.uniforms.blockCorruptionRate.value = params.blockCorruptionRate ?? 0.0
-  }
+  if (uniforms.blockCorruptionEnabled) uniforms.blockCorruptionEnabled.value = blockCorruptionEnabled ? 1.0 : 0.0
+  if (uniforms.blockCorruptionRate) uniforms.blockCorruptionRate.value = blockCorruptionRate ?? 0.0
 
   // Wave noise
-  if (material.uniforms.waveNoiseEnabled) {
-    material.uniforms.waveNoiseEnabled.value = params.waveNoiseEnabled ? 1.0 : 0.0
-  }
-  if (material.uniforms.waveNoiseIntensity) {
-    material.uniforms.waveNoiseIntensity.value = params.waveNoiseIntensity ?? 0.0
-  }
+  if (uniforms.waveNoiseEnabled) uniforms.waveNoiseEnabled.value = waveNoiseEnabled ? 1.0 : 0.0
+  if (uniforms.waveNoiseIntensity) uniforms.waveNoiseIntensity.value = waveNoiseIntensity ?? 0.0
 
   // Screen shake
-  if (material.uniforms.shakeEnabled) {
-    material.uniforms.shakeEnabled.value = params.shakeEnabled ? 1.0 : 0.0
-  }
-  if (material.uniforms.shakeIntensity) {
-    material.uniforms.shakeIntensity.value = params.shakeIntensity ?? 0.0
-  }
+  if (uniforms.shakeEnabled) uniforms.shakeEnabled.value = shakeEnabled ? 1.0 : 0.0
+  if (uniforms.shakeIntensity) uniforms.shakeIntensity.value = shakeIntensity ?? 0.0
 
   // Large block corruption
-  if (material.uniforms.largeBlockIntensity) {
-    material.uniforms.largeBlockIntensity.value = params.largeBlockEnabled ? (params.largeBlockIntensity ?? 0.0) : 0.0
-  }
-  if (material.uniforms.largeBlockSize) {
-    material.uniforms.largeBlockSize.value = params.largeBlockSize ?? 20.0
-  }
-  if (material.uniforms.largeBlockFPS) {
-    material.uniforms.largeBlockFPS.value = params.largeBlockFPS ?? 10.0
-  }
+  if (uniforms.largeBlockIntensity) uniforms.largeBlockIntensity.value = largeBlockEnabled ? (largeBlockIntensity ?? 0.0) : 0.0
+  if (uniforms.largeBlockSize) uniforms.largeBlockSize.value = largeBlockSize ?? 20.0
+  if (uniforms.largeBlockFPS) uniforms.largeBlockFPS.value = largeBlockFPS ?? 10.0
 
   // Artifact noise
-  if (material.uniforms.artifactNoiseIntensity) {
-    material.uniforms.artifactNoiseIntensity.value = params.artifactNoiseEnabled ? (params.artifactNoiseIntensity ?? 0.0) : 0.0
-  }
-  if (material.uniforms.artifactChunkSize) {
-    material.uniforms.artifactChunkSize.value = params.artifactChunkSize ?? 50.0
-  }
-  if (material.uniforms.artifactShiftAmount) {
-    material.uniforms.artifactShiftAmount.value = params.artifactShiftAmount ?? 0.5
-  }
-  if (material.uniforms.artifactNoiseFPS) {
-    material.uniforms.artifactNoiseFPS.value = params.artifactNoiseFPS ?? 10.0
-  }
-  if (material.uniforms.artifactBlockDensity) {
-    material.uniforms.artifactBlockDensity.value = params.artifactBlockDensity ?? 0.7
-  }
-  if (material.uniforms.artifactHeightJitter) {
-    material.uniforms.artifactHeightJitter.value = params.artifactHeightJitter ?? 0.5
-  }
-  if (material.uniforms.artifactHeightJitterMin) {
-    material.uniforms.artifactHeightJitterMin.value = params.artifactHeightJitterMin ?? 0.3
-  }
-  if (material.uniforms.artifactHeightJitterMax) {
-    material.uniforms.artifactHeightJitterMax.value = params.artifactHeightJitterMax ?? 1.7
-  }
-
-  // Pixel bleed controls
-  if (material.uniforms.pixelBleedIntensity) {
-    material.uniforms.pixelBleedIntensity.value = params.pixelBleedEnabled ? (params.pixelBleedIntensity ?? 0.0) : 0.0
-  }
-  if (material.uniforms.pixelBleedChunkSize) {
-    material.uniforms.pixelBleedChunkSize.value = params.pixelBleedChunkSize ?? 20.0
-  }
-  if (material.uniforms.pixelBleedChunkRandomness) {
-    material.uniforms.pixelBleedChunkRandomness.value = params.pixelBleedChunkRandomness ?? 0.5
-  }
-  if (material.uniforms.pixelBleedStretchDistance) {
-    material.uniforms.pixelBleedStretchDistance.value = params.pixelBleedStretchDistance ?? 0.3
-  }
-  if (material.uniforms.pixelBleedGeometryComplexity) {
-    material.uniforms.pixelBleedGeometryComplexity.value = params.pixelBleedGeometryComplexity ?? 0.5
-  }
-  if (material.uniforms.pixelBleedPersistence) {
-    material.uniforms.pixelBleedPersistence.value = params.pixelBleedPersistence ?? 0.5
-  }
-  if (material.uniforms.pixelBleedRegenerationRate) {
-    material.uniforms.pixelBleedRegenerationRate.value = params.pixelBleedRegenerationRate ?? 0.5
-  }
-}
-
-/**
- * Update pixel bleed shader uniforms from corruption parameters
- */
-export const updatePixelBleedShaderUniforms = (material: ShaderMaterial, params: PixelBleedConfig) => {
-  if (material.uniforms.intensity) {
-    material.uniforms.intensity.value = params.pixelBleedEnabled ? (params.pixelBleedIntensity ?? 0.0) : 0.0
-  }
-
-  if (material.uniforms.time) {
-    // Always update time when enabled and timeEnabled is true
-    material.uniforms.time.value = (params.pixelBleedEnabled && params.timeEnabled) ? performance.now() / 1000 : 0.0
-  }
-
-  if (material.uniforms.chunkSize) {
-    material.uniforms.chunkSize.value = params.pixelBleedChunkSize ?? 20.0
-  }
-
-  if (material.uniforms.chunkRandomness) {
-    material.uniforms.chunkRandomness.value = params.pixelBleedChunkRandomness ?? 0.5
-  }
-
-  if (material.uniforms.stretchDistance) {
-    material.uniforms.stretchDistance.value = params.pixelBleedStretchDistance ?? 0.3
-  }
-
-  if (material.uniforms.geometryComplexity) {
-    material.uniforms.geometryComplexity.value = params.pixelBleedGeometryComplexity ?? 0.5
-  }
-
-  if (material.uniforms.persistence) {
-    material.uniforms.persistence.value = params.pixelBleedPersistence ?? 0.5
-  }
-
-  if (material.uniforms.regenerationRate) {
-    material.uniforms.regenerationRate.value = params.pixelBleedRegenerationRate ?? 0.5
-  }
+  if (uniforms.artifactNoiseIntensity) uniforms.artifactNoiseIntensity.value = artifactNoiseEnabled ? (artifactNoiseIntensity ?? 0.0) : 0.0
+  if (uniforms.artifactChunkSize) uniforms.artifactChunkSize.value = artifactChunkSize ?? 50.0
+  if (uniforms.artifactShiftAmount) uniforms.artifactShiftAmount.value = artifactShiftAmount ?? 0.5
+  if (uniforms.artifactNoiseFPS) uniforms.artifactNoiseFPS.value = artifactNoiseFPS ?? 10.0
+  if (uniforms.artifactBlockDensity) uniforms.artifactBlockDensity.value = artifactBlockDensity ?? 0.7
+  if (uniforms.artifactHeightJitter) uniforms.artifactHeightJitter.value = artifactHeightJitter ?? 0.5
+  if (uniforms.artifactHeightJitterMin) uniforms.artifactHeightJitterMin.value = artifactHeightJitterMin ?? 0.3
+  if (uniforms.artifactHeightJitterMax) uniforms.artifactHeightJitterMax.value = artifactHeightJitterMax ?? 1.7
 }

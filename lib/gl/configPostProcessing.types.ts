@@ -162,6 +162,7 @@ export type CrtScrollCorruptionParams = {
     artifactHeightJitter?: number
     artifactHeightJitterMin?: number
     artifactHeightJitterMax?: number
+    artifactNoiseFPS?: number
   }
 }
 

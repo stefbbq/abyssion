@@ -20,7 +20,9 @@ export default function SinglePageScrollManager() {
   const [backgroundIntensity, setBackgroundIntensity] = useState(0)
   const ticking = useRef(false)
 
-  initializeClientLogger(lc.GL, 'debug')
+  useEffect(() => {
+    initializeClientLogger(lc.GL, 'debug')
+  }, [])
 
   useEffect(() => {
     if (typeof globalThis.window === 'undefined') return
@@ -166,7 +168,7 @@ export default function SinglePageScrollManager() {
   // Render ThemedBackground and GLCanvas if not disabled, fixed position
   return (
     <>
-      <ThemedBackground intensity={backgroundIntensity} />
+      <ThemedBackground intensity={backgroundIntensity} showNoise={false} />
       {showGL ? <GLCanvas /> : null}
     </>
   )

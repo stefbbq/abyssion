@@ -16,6 +16,7 @@ const DARK_CONTEXT_COLORS: Record<LogContext, string> = {
   [LogContext.GL_SHADERS]: `${baseStyle} background: #87cefa; color: black;`,
   [LogContext.GL_TEXTURES]: `${baseStyle} background: #636363; color: white;`,
   [LogContext.GL_DEBUG]: `${baseStyle} background: #ff69b4; color: white;`,
+  [LogContext.THEME]: `${baseStyle} background: #9370db; color: white;`,
   [LogContext.PREACT]: `${baseStyle} background: #777; color: white;`,
 }
 
@@ -32,6 +33,7 @@ const LIGHT_CONTEXT_COLORS: Record<LogContext, string> = {
   [LogContext.GL_SHADERS]: `${baseStyle} background: #4169e1; color: white;`, // Royal blue
   [LogContext.GL_TEXTURES]: `${baseStyle} background: #2f4f4f; color: white;`, // Dark slate gray
   [LogContext.GL_DEBUG]: `${baseStyle} background: #c71585; color: white;`, // Medium violet red
+  [LogContext.THEME]: `${baseStyle} background: #663399; color: white;`, // Dark purple
   [LogContext.PREACT]: `${baseStyle} background: #555; color: white;`, // Darker gray
 }
 
@@ -45,6 +47,7 @@ const DARK_LOG_LEVEL_STYLES: Record<LogLevel, string> = {
   warn: 'color: #ffb347;', // Light orange for dark backgrounds
   error: 'color: #ff6b6b; font-weight: bold;', // Light red
   critical: 'color: #ff6b6b; font-weight: bold; text-decoration: underline;',
+  group: 'color: #87ceeb; font-weight: bold;', // Light blue for grouping
   off: '',
 }
 
@@ -58,6 +61,7 @@ const LIGHT_LOG_LEVEL_STYLES: Record<LogLevel, string> = {
   warn: 'color: #cc6600; font-weight: bold;', // Dark orange for light backgrounds
   error: 'color: #cc0000; font-weight: bold;', // Dark red
   critical: 'color: #cc0000; font-weight: bold; text-decoration: underline;',
+  group: 'color: #4169e1; font-weight: bold;', // Royal blue for grouping
   off: '',
 }
 

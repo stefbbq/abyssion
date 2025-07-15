@@ -50,6 +50,10 @@ export type GeometricOptions = {
   segments?: number
   /** width/depth of the geometry from surface to surface */
   thickness?: number
+  /** minimum thickness multiplier (e.g., 0.3 = 30% of base thickness) */
+  minThicknessMultiplier?: number
+  /** maximum thickness multiplier (e.g., 3.0 = 300% of base thickness) */
+  maxThicknessMultiplier?: number
   /** controls randomization intensity in position and rotation (0-1) */
   variationFactor?: number
   /** when true, elements are distributed along a flat plane rather than in 3D space */
@@ -148,20 +152,11 @@ export const createGeometricLayer = (
 
   // Debug log before creating dashed orbits
   // --- Dashed Orbits: Behind the logo ---
+  const dashedOrbitsConfig = getDashedOrbitsConfig()
   const dashedOrbits = createDashedOrbits(THREE, {
-    ...getDashedOrbitsConfig(),
-    count: (getDashedOrbitsConfig().count ?? 6) * 2, // double the rings
-    minRadius: (getDashedOrbitsConfig().minRadius ?? 1) * 1.1, // slightly larger min
-    maxRadius: (getDashedOrbitsConfig().maxRadius ?? 2) * 1.5, // much larger max
+    ...dashedOrbitsConfig,
     zBase: 0, // center behind
-    zSpread: 3, // random spread
-  })
-  log(lc.GL_GEOMETRY, 'Created dashed orbits (behind) with config:', {
-    ...getDashedOrbitsConfig(),
-    count: (getDashedOrbitsConfig().count ?? 6) * 2,
-    minRadius: (getDashedOrbitsConfig().minRadius ?? 1) * 1.1,
-    maxRadius: (getDashedOrbitsConfig().maxRadius ?? 2) * 1.5,
-    zPosition: -1.5,
+    zSpread: 1, // random spread
   })
   shapeGroup.add(dashedOrbits)
 

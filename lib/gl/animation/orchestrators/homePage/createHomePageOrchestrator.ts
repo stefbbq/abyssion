@@ -6,6 +6,7 @@ import { calculateRandomLayerPosition } from './calculations/calculateRandomLaye
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
+import * as Three from 'three'
 
 /**
  * Home page animation orchestrator (formerly logo page)
@@ -16,6 +17,31 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
   let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
   let bloomOverrideActive = false
   let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
+
+  /**
+   * Updates dashed orbit rotations for slow random rotation
+   */
+  const updateDashedOrbitRotations = (scene: Three.Scene, time: number) => {
+    scene.traverse((child: Three.Object3D) => {
+      // Look for dashed orbit groups
+      if (child.type === 'Group' && child.children) {
+        child.children.forEach((orbitHolder: Three.Object3D) => {
+          if (orbitHolder.userData && orbitHolder.userData.rotationSpeed) {
+            const { rotationSpeed, rotationAxis } = orbitHolder.userData
+
+            // Apply rotation based on the stored axis and speed
+            if (rotationAxis === 'x') {
+              orbitHolder.rotation.x += rotationSpeed
+            } else if (rotationAxis === 'y') {
+              orbitHolder.rotation.y += rotationSpeed
+            } else if (rotationAxis === 'z') {
+              orbitHolder.rotation.z += rotationSpeed
+            }
+          }
+        })
+      }
+    })
+  }
 
   const update = (context: AnimationContext) => {
     const { state, time } = context
@@ -162,6 +188,11 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
       state.ditheringPass.uniforms.time.value = postProcessingResult.ditheringPass.timeValue
     }
 
+    // Apply CRT pass time updates (for continuous animation)
+    if (state.crtPass?.material?.uniforms?.time) {
+      state.crtPass.material.uniforms.time.value = performance.now() / 1000
+    }
+
     // Apply sharpening pass updates
     if (state.sharpeningPass?.uniforms?.resolution) {
       state.sharpeningPass.uniforms.resolution.value.set(
@@ -169,6 +200,9 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
         postProcessingResult.sharpeningPass.resolutionHeight,
       )
     }
+
+    // Update dashed orbit rotations
+    updateDashedOrbitRotations(state.scene, time)
   }
 
   const dispose = (context: AnimationContext) => {

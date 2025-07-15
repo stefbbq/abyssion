@@ -8,7 +8,8 @@ import { lc, log } from '@lib/logger/index.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
 import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
-import { updateCRTShaderUniforms, updatePixelBleedShaderUniforms } from '@lib/gl/shaders/CRTShader.ts'
+import { updateCRTShaderUniforms } from '@lib/gl/shaders/CRTShader.ts'
+import { updatePixelBleedShaderUniforms } from '@lib/gl/shaders/PixelBleedShader.ts'
 
 type DebugSystemConfig = {
   canvas: HTMLCanvasElement
