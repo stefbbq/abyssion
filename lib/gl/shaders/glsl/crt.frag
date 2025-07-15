@@ -42,6 +42,10 @@ uniform float artifactNoiseIntensity; // How strong artifact noise is (0.0 to 1.
 uniform float artifactChunkSize;      // Size of artifact chunks (1.0 to 100.0)
 uniform float artifactShiftAmount;    // How much chunks shift (0.0 to 1.0)
 uniform float artifactNoiseFPS;       // FPS for artifact noise updates (1.0 to 30.0)
+uniform float artifactBlockDensity;   // Probability a strip is an artifact (0.0 to 1.0)
+uniform float artifactHeightJitter;   // How much the height of each block can vary (0.0 to 1.0)
+uniform float artifactHeightJitterMin; // Minimum jitter multiplier
+uniform float artifactHeightJitterMax; // Maximum jitter multiplier
 
 // VARYING INPUTS (like interpolated values from vertex shader)
 // These change per pixel - think of them as coordinates passed down from vertex processing
@@ -285,53 +289,61 @@ void main() {
         // === NEW EFFECT 3: ARTIFACT NOISE BLOCKS ===
         // Horizontal strips that shift left/right, strongest on sides, taper to middle
         if (artifactNoiseIntensity > 0.0) {
-            // Create horizontal strip system
-            float stripHeight = artifactChunkSize / resolution.y;
+            float artifactTime = floor(time * artifactNoiseFPS) / artifactNoiseFPS;
+            float artifactSeed = artifactTime * 30.0;
+            // Vary strip height per strip using noise and artifactHeightJitter
+            float baseStripHeight = artifactChunkSize / resolution.y;
+            float jitterNoise = snoise3(vec3(0.0, floor(uv.y / baseStripHeight), artifactSeed + 999.0));
+            float jitterMin = artifactHeightJitterMin;
+            float jitterMax = artifactHeightJitterMax;
+            float jitterRange = jitterMax - jitterMin;
+            float jitterValue = jitterMin + abs(jitterNoise) * jitterRange;
+            float stripHeight = baseStripHeight * mix(1.0, jitterValue, artifactHeightJitter);
             float stripY = floor(uv.y / stripHeight) * stripHeight;
-            
+
             // Calculate distance from horizontal center for tapering
             float centerDistance = abs(uv.x - 0.5) * 2.0; // 0.0 at center, 1.0 at edges
             float sideStrength = centerDistance * centerDistance; // Quadratic falloff towards center
-            
-            // Generate shifting pattern for horizontal strips (discrete FPS)
-            float artifactTime = floor(time * artifactNoiseFPS) / artifactNoiseFPS;
-            float artifactSeed = artifactTime * 30.0;
-            float stripSeed = stripY * 100.0 + artifactSeed;
-            
-            // Horizontal shift amount (up to 50% of screen width)
-            float maxShift = artifactShiftAmount * 0.5; // Up to 50% of screen
-            float horizontalShift = snoise3(vec3(stripY * 20.0, artifactSeed, 0.0)) * maxShift * sideStrength;
-            
-            // Create artifact mask for this strip
-            float artifactMask = step(0.7 - artifactNoiseIntensity * 0.5, 
-                                     snoise3(vec3(stripY * 25.0, artifactSeed + 100.0, 0.0)) + 0.5);
-            
-            if (artifactMask > 0.0) {
-                // Calculate shifted UV for sampling
-                vec2 shiftedUV = vec2(uv.x + horizontalShift, uv.y);
-                
-                // Wrap around if we go off screen
-                if (shiftedUV.x < 0.0) shiftedUV.x += 1.0;
-                if (shiftedUV.x > 1.0) shiftedUV.x -= 1.0;
-                
-                // Sample the shifted color (100% replacement of original)
-                vec4 shiftedColor = texture2D(tDiffuse, shiftedUV);
-                
-                // Apply with intensity that tapers towards center - full replacement
-                float finalIntensity = artifactNoiseIntensity * strength * sideStrength;
-                
-                // FULL REPLACEMENT: Use the shifted image as base
-                color.rgb = mix(color.rgb, shiftedColor.rgb, artifactMask * finalIntensity);
-                
-                // BLENDED COLOR EFFECT: Add color shift as a separate overlay
-                vec3 colorShift = vec3(
-                    snoise3(vec3(stripY * 15.0, artifactSeed + 200.0, 0.0)) * sideStrength,
-                    snoise3(vec3(stripY * 15.0, artifactSeed + 300.0, 0.0)) * sideStrength,
-                    snoise3(vec3(stripY * 15.0, artifactSeed + 400.0, 0.0)) * sideStrength
-                ) * 0.4;
-                
-                // Apply color shift as an additive blend
-                color.rgb += colorShift * artifactMask * finalIntensity * 0.5;
+
+            float stripRand = fract(sin(dot(vec2(stripY, artifactSeed), vec2(12.9898,78.233))) * 43758.5453);
+            // Only allow artifact on this strip if random < artifactBlockDensity
+            if (stripRand < artifactBlockDensity) {
+                float stripSeed = stripY * 100.0 + artifactSeed;
+                // Horizontal shift amount (up to 50% of screen width)
+                float maxShift = artifactShiftAmount * 0.5; // Up to 50% of screen
+                float horizontalShift = snoise3(vec3(stripY * 20.0, artifactSeed, 0.0)) * maxShift * sideStrength;
+
+                // Create artifact mask for this strip
+                float artifactMask = step(0.7 - artifactNoiseIntensity * 0.5, 
+                                         snoise3(vec3(stripY * 25.0, artifactSeed + 100.0, 0.0)) + 0.5);
+
+                if (artifactMask > 0.0) {
+                    // Calculate shifted UV for sampling
+                    vec2 shiftedUV = vec2(uv.x + horizontalShift, uv.y);
+
+                    // Wrap around if we go off screen
+                    if (shiftedUV.x < 0.0) shiftedUV.x += 1.0;
+                    if (shiftedUV.x > 1.0) shiftedUV.x -= 1.0;
+
+                    // Sample the shifted color (100% replacement of original)
+                    vec4 shiftedColor = texture2D(tDiffuse, shiftedUV);
+
+                    // Apply with intensity that tapers towards center - full replacement
+                    float finalIntensity = artifactNoiseIntensity * strength * sideStrength;
+
+                    // FULL REPLACEMENT: Use the shifted image as base
+                    color.rgb = mix(color.rgb, shiftedColor.rgb, artifactMask * finalIntensity);
+
+                    // BLENDED COLOR EFFECT: Add color shift as a separate overlay
+                    vec3 colorShift = vec3(
+                        snoise3(vec3(stripY * 15.0, artifactSeed + 200.0, 0.0)) * sideStrength,
+                        snoise3(vec3(stripY * 15.0, artifactSeed + 300.0, 0.0)) * sideStrength,
+                        snoise3(vec3(stripY * 15.0, artifactSeed + 400.0, 0.0)) * sideStrength
+                    ) * 0.4;
+
+                    // Apply color shift as an additive blend
+                    color.rgb += colorShift * artifactMask * finalIntensity * 0.5;
+                }
             }
         }
 

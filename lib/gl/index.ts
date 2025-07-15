@@ -420,6 +420,16 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
           const artifactProgress = (corruptionIntensity - crtConfig.artifactNoise.startThreshold) /
             (1.0 - crtConfig.artifactNoise.startThreshold)
           material.uniforms.artifactNoiseIntensity.value = artifactProgress * crtConfig.artifactNoise.maxIntensity
+          if (typeof crtConfig.artifactNoise.artifactHeightJitterMin === 'number') {
+            material.uniforms.artifactHeightJitterMin.value = crtConfig.artifactNoise.artifactHeightJitterMin
+          }
+          if (typeof crtConfig.artifactNoise.artifactHeightJitterMax === 'number') {
+            material.uniforms.artifactHeightJitterMax.value = crtConfig.artifactNoise.artifactHeightJitterMax
+          }
+          // Scale block density with intensity: 0 at top, config value at max intensity
+          if (typeof crtConfig.artifactNoise.artifactBlockDensity === 'number') {
+            material.uniforms.artifactBlockDensity.value = artifactProgress * crtConfig.artifactNoise.artifactBlockDensity
+          }
         }
       } else {
         // Disable all effects when corruption intensity is 0

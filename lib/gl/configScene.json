@@ -108,7 +108,11 @@
       "artifactNoise": {
         "enabled": true,
         "startThreshold": 0.5,
-        "maxIntensity": 1.0
+        "maxIntensity": 1.0,
+        "artifactBlockDensity": 0.7,
+        "artifactHeightJitter": 0.5,
+        "artifactHeightJitterMin": 0.3,
+        "artifactHeightJitterMax": 10
       }
     },
     "lensFlare": {

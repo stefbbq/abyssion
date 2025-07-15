@@ -49,6 +49,10 @@ export const CRTShader = {
     artifactChunkSize: { value: 50.0 },
     artifactShiftAmount: { value: 0.5 },
     artifactNoiseFPS: { value: 10.0 },
+    artifactBlockDensity: { value: 0.7 }, // probability a strip is an artifact
+    artifactHeightJitter: { value: 0.5 }, // how much the height of each block can vary
+    artifactHeightJitterMin: { value: 0.3 }, // min jitter multiplier
+    artifactHeightJitterMax: { value: 1.7 }, // max jitter multiplier
 
     // Pixel bleed controls (for future use) - DISABLED BY DEFAULT
     pixelBleedIntensity: { value: 0.0 },
@@ -167,6 +171,18 @@ export const updateCRTShaderUniforms = (material: ShaderMaterial, params: any) =
   }
   if (material.uniforms.artifactNoiseFPS) {
     material.uniforms.artifactNoiseFPS.value = params.artifactNoiseFPS ?? 10.0
+  }
+  if (material.uniforms.artifactBlockDensity) {
+    material.uniforms.artifactBlockDensity.value = params.artifactBlockDensity ?? 0.7
+  }
+  if (material.uniforms.artifactHeightJitter) {
+    material.uniforms.artifactHeightJitter.value = params.artifactHeightJitter ?? 0.5
+  }
+  if (material.uniforms.artifactHeightJitterMin) {
+    material.uniforms.artifactHeightJitterMin.value = params.artifactHeightJitterMin ?? 0.3
+  }
+  if (material.uniforms.artifactHeightJitterMax) {
+    material.uniforms.artifactHeightJitterMax.value = params.artifactHeightJitterMax ?? 1.7
   }
 
   // Pixel bleed controls

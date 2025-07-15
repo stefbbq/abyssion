@@ -158,6 +158,10 @@ export type CrtScrollCorruptionParams = {
     enabled: boolean
     startThreshold: number
     maxIntensity: number
+    artifactBlockDensity?: number
+    artifactHeightJitter?: number
+    artifactHeightJitterMin?: number
+    artifactHeightJitterMax?: number
   }
 }
 
