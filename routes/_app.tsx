@@ -7,7 +7,6 @@ import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentUITheme } from '@lib/theme/index.ts'
-import ThemedBackground from '@islands/ThemedBackground.tsx'
 import videoManifest from '../static/videos/manifest.json' with { type: 'json' }
 import SinglePageScrollManager from '@islands/SinglePageScrollManager.tsx'
 
@@ -31,8 +30,6 @@ export default function App({ Component, url }: PageProps) {
         {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
       <body f-client-nav class='min-h-screen relative text-foreground bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
-        <ThemedBackground />
-
         <ThemeProvider />
 
         <DebugPanels />

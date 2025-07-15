@@ -43,17 +43,16 @@ export const createVideoBackground = (
 
     // Determine colors based on configuration
     const useThemeColors = selectiveColorization?.useThemeColors === true
-    const primaryColor = useThemeColors
-      ? new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
-      : selectiveColorization?.primaryTargetColor
-      ? new THREE.Color(selectiveColorization.primaryTargetColor)
-      : new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
 
-    const secondaryColor = useThemeColors
-      ? new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
-      : selectiveColorization?.secondaryTargetColor
-      ? new THREE.Color(selectiveColorization.secondaryTargetColor)
-      : new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
+    let primaryColor
+    if (useThemeColors) primaryColor = new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+    else if (selectiveColorization?.primaryTargetColor) primaryColor = new THREE.Color(selectiveColorization.primaryTargetColor)
+    else primaryColor = new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
+
+    let secondaryColor
+    if (useThemeColors) secondaryColor = new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
+    else if (selectiveColorization?.secondaryTargetColor) secondaryColor = new THREE.Color(selectiveColorization.secondaryTargetColor)
+    else secondaryColor = new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
 
     // Convert blend mode string to number
     const blendModeMap: { [key: string]: number } = { brightness: 0, saturation: 1, mixed: 2 }
@@ -83,6 +82,7 @@ export const createVideoBackground = (
     const mesh = new THREE.Mesh(geometry, material)
     mesh.name = name
     mesh.position.z = videoCycleConfig.position.z
+    // y position will be set in handleResize
     scene.add(mesh)
 
     return { mesh, material, geometry }
@@ -115,9 +115,7 @@ export const createVideoBackground = (
       lastThemeColors &&
       lastThemeColors.primary === currentThemeColors.primary &&
       lastThemeColors.accent === currentThemeColors.accent
-    ) {
-      return
-    }
+    ) return
 
     const primaryColor = new THREE.Color().setRGB(glTheme.primary.r, glTheme.primary.g, glTheme.primary.b)
     const secondaryColor = new THREE.Color().setRGB(glTheme.accent.r, glTheme.accent.g, glTheme.accent.b)
@@ -136,16 +134,16 @@ export const createVideoBackground = (
     lastThemeColors = currentThemeColors
   }
 
-  // Handle resize to update plane scales
+  // Handle resize to update plane scales and vertical offset
   const handleResize = () => {
-    const { cameraZ, fov } = getBaselineDimensions()
+    const { cameraZ, fov, videoPlaneHeight: newVideoPlaneHeight } = getBaselineDimensions()
 
     // Calculate the size needed to cover the current viewport
     const requiredSize = calculateFarPlaneSize(fov, cameraZ, videoCycleConfig.position.z)
 
     // Calculate scale factors based on current plane size vs required size
-    const scaleX = (requiredSize.width * 1.1) / videoPlaneWidth // 10% overflow
-    const scaleY = (requiredSize.height * 1.1) / videoPlaneHeight // 10% overflow
+    const scaleX = (requiredSize.width * videoCycleConfig.position.scale) / videoPlaneWidth // 10% overflow
+    const scaleY = (requiredSize.height * videoCycleConfig.position.scale) / videoPlaneHeight // 10% overflow
 
     // Use the larger scale to ensure full coverage
     const scale = Math.max(scaleX, scaleY)
@@ -155,6 +153,11 @@ export const createVideoBackground = (
     // Apply scale to both planes
     frontBuffer.mesh.scale.set(finalScale, finalScale, 1)
     backBuffer.mesh.scale.set(finalScale, finalScale, 1)
+    // Calculate and set y position for both planes
+    // 5% above, 95% below: so offset is (0.5 - 0.05) * planeHeight = 0.45 * planeHeight downward
+    const yOffset = -0.15 * newVideoPlaneHeight * finalScale
+    frontBuffer.mesh.position.y = yOffset
+    backBuffer.mesh.position.y = yOffset
   }
 
   // Initial scale setup

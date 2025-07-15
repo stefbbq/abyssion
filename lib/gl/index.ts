@@ -22,6 +22,7 @@ import {
 } from './setup/index.ts'
 import type { VideoBackgroundManager } from '@libgl/types.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
+import { getScrollCorruptionProgress } from './scene/utils/getScrollCorruptionProgress.ts'
 
 let glState: (RendererState & { sceneOrchestrator?: ReturnType<typeof createSceneOrchestrator> }) | null = null
 
@@ -317,6 +318,15 @@ const getResponsiveScrollSpeed = (width: number): number => {
 export const updateScrollCorruption = (scrollY: number, state: RendererState) => {
   if (!state) return
 
+  // Get CRT scroll corruption configuration
+  const { postProcessingConfig } = configScene as ConfigScene
+  const crtConfig = postProcessingConfig.crtScrollCorruption
+
+  // If CRT scroll corruption is disabled, skip all effects
+  if (!crtConfig?.enabled) {
+    return
+  }
+
   // Move camera down with responsive speed based on screen width
   if (state.camera) {
     const currentWidth = globalThis.innerWidth
@@ -337,16 +347,8 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     state.camera.updateProjectionMatrix()
   }
 
-  // Calculate scroll progress - corruption starts at 10% scroll and reaches full at 100%
-  const scrollProgress = Math.min(scrollY / (document.body.scrollHeight - window.innerHeight), 1.0)
-  const corruptionThreshold = 0.1 // Start corruption at 10% scroll
-
-  // Calculate corruption intensity using square root easing for aggressive ramp-up
-  let corruptionIntensity = 0.0
-  if (scrollProgress > corruptionThreshold) {
-    const normalizedProgress = (scrollProgress - corruptionThreshold) / (1.0 - corruptionThreshold)
-    corruptionIntensity = Math.sqrt(normalizedProgress) // Square root for aggressive early ramp
-  }
+  // Use the new utility for progress/intensity
+  const { progress: scrollProgress, intensity: corruptionIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
 
   log.debug(lc.GL, '📊 updateScrollCorruption:', {
     scrollY,
@@ -370,9 +372,75 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       // Update time for animation effects
       material.uniforms.time.value = performance.now() / 1000
 
+      // Enable and configure specific CRT effects based on corruption intensity
+      if (corruptionIntensity > 0.0) {
+        // RGB distortion
+        if (crtConfig.rgbDistortion.enabled) {
+          material.uniforms.rgbDistortionEnabled.value = 1.0
+          material.uniforms.rgbDistortionIntensity.value = crtConfig.rgbDistortion.minIntensity +
+            (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
+        }
+
+        // Block corruption
+        if (crtConfig.blockCorruption.enabled) {
+          material.uniforms.blockCorruptionEnabled.value = 1.0
+          material.uniforms.blockCorruptionRate.value = crtConfig.blockCorruption.minRate +
+            (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
+        }
+
+        // White noise
+        if (crtConfig.whiteNoise.enabled) {
+          material.uniforms.whiteNoiseEnabled.value = 1.0
+          material.uniforms.whiteNoiseIntensity.value = crtConfig.whiteNoise.minIntensity +
+            (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
+        }
+
+        // Wave noise
+        if (crtConfig.waveNoise.enabled) {
+          material.uniforms.waveNoiseEnabled.value = 1.0
+          material.uniforms.waveNoiseIntensity.value = crtConfig.waveNoise.minIntensity +
+            (corruptionIntensity * (crtConfig.waveNoise.maxIntensity - crtConfig.waveNoise.minIntensity))
+        }
+
+        // Static intensity
+        if (crtConfig.staticIntensity.enabled) {
+          material.uniforms.staticIntensity.value = crtConfig.staticIntensity.minIntensity +
+            (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
+        }
+
+        // Large block corruption (only activate after threshold)
+        if (crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold) {
+          const largeBlockProgress = (corruptionIntensity - crtConfig.largeBlockCorruption.startThreshold) /
+            (1.0 - crtConfig.largeBlockCorruption.startThreshold)
+          material.uniforms.largeBlockIntensity.value = largeBlockProgress * crtConfig.largeBlockCorruption.maxIntensity
+        }
+
+        // Artifact noise (only activate after threshold)
+        if (crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold) {
+          const artifactProgress = (corruptionIntensity - crtConfig.artifactNoise.startThreshold) /
+            (1.0 - crtConfig.artifactNoise.startThreshold)
+          material.uniforms.artifactNoiseIntensity.value = artifactProgress * crtConfig.artifactNoise.maxIntensity
+        }
+      } else {
+        // Disable all effects when corruption intensity is 0
+        material.uniforms.rgbDistortionEnabled.value = 0.0
+        material.uniforms.blockCorruptionEnabled.value = 0.0
+        material.uniforms.whiteNoiseEnabled.value = 0.0
+        material.uniforms.waveNoiseEnabled.value = 0.0
+        material.uniforms.staticIntensity.value = 0.0
+        material.uniforms.largeBlockIntensity.value = 0.0
+        material.uniforms.artifactNoiseIntensity.value = 0.0
+      }
+
       log.debug(lc.GL, '🎯 CRT Pass uniforms updated:', {
         corruptionIntensity: material.uniforms.corruptionIntensity.value,
         time: material.uniforms.time.value,
+        rgbDistortionEnabled: material.uniforms.rgbDistortionEnabled.value,
+        rgbDistortionIntensity: material.uniforms.rgbDistortionIntensity.value,
+        blockCorruptionEnabled: material.uniforms.blockCorruptionEnabled.value,
+        blockCorruptionRate: material.uniforms.blockCorruptionRate.value,
+        whiteNoiseEnabled: material.uniforms.whiteNoiseEnabled.value,
+        whiteNoiseIntensity: material.uniforms.whiteNoiseIntensity.value,
         resolution: material.uniforms.resolution?.value,
       })
     }

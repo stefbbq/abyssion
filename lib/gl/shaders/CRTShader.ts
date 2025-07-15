@@ -1,5 +1,6 @@
 import { ShaderMaterial } from 'three'
 import crtFragmentShader from './glsl/crt.frag.ts'
+import passthroughVertexShader from './glsl/passthrough.vert.ts'
 import pixelBleedFragmentShader from './glsl/pixelBleed.frag.ts'
 
 /**
@@ -59,14 +60,7 @@ export const CRTShader = {
     pixelBleedRegenerationRate: { value: 0.5 },
   },
 
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-
+  vertexShader: passthroughVertexShader,
   fragmentShader: crtFragmentShader,
 }
 
@@ -88,14 +82,7 @@ export const PixelBleedShader = {
     regenerationRate: { value: 0.5 },
   },
 
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-
+  vertexShader: passthroughVertexShader,
   fragmentShader: pixelBleedFragmentShader,
 }
 

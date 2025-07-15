@@ -72,6 +72,45 @@
       "enabled": false,
       "pixelSize": 16
     },
+    "crtScrollCorruption": {
+      "enabled": true,
+      "corruptionThreshold": 0.1,
+      "rgbDistortion": {
+        "enabled": true,
+        "minIntensity": 2.0,
+        "maxIntensity": 10.0
+      },
+      "blockCorruption": {
+        "enabled": false,
+        "minRate": 5.0,
+        "maxRate": 20.0
+      },
+      "whiteNoise": {
+        "enabled": true,
+        "minIntensity": 0.1,
+        "maxIntensity": 0.4
+      },
+      "waveNoise": {
+        "enabled": false,
+        "minIntensity": 0.05,
+        "maxIntensity": 0.2
+      },
+      "staticIntensity": {
+        "enabled": true,
+        "minIntensity": 0.5,
+        "maxIntensity": 1.0
+      },
+      "largeBlockCorruption": {
+        "enabled": false,
+        "startThreshold": 0.3,
+        "maxIntensity": 1.0
+      },
+      "artifactNoise": {
+        "enabled": true,
+        "startThreshold": 0.5,
+        "maxIntensity": 1.0
+      }
+    },
     "lensFlare": {
       "lightIntensity": 0.8,
       "lightDistance": 100,

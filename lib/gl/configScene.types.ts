@@ -111,6 +111,56 @@ export type PixelateParams = {
   pixelSize: number
 }
 
+/** Parameters for CRT scroll corruption effects */
+export type CrtScrollCorruptionParams = {
+  /** Whether CRT scroll corruption is enabled */
+  enabled: boolean
+  /** Scroll percentage threshold where corruption starts (0.0-1.0) */
+  corruptionThreshold: number
+  /** RGB distortion parameters */
+  rgbDistortion: {
+    enabled: boolean
+    minIntensity: number
+    maxIntensity: number
+  }
+  /** Block corruption parameters */
+  blockCorruption: {
+    enabled: boolean
+    minRate: number
+    maxRate: number
+  }
+  /** White noise parameters */
+  whiteNoise: {
+    enabled: boolean
+    minIntensity: number
+    maxIntensity: number
+  }
+  /** Wave noise parameters */
+  waveNoise: {
+    enabled: boolean
+    minIntensity: number
+    maxIntensity: number
+  }
+  /** Static intensity parameters */
+  staticIntensity: {
+    enabled: boolean
+    minIntensity: number
+    maxIntensity: number
+  }
+  /** Large block corruption parameters */
+  largeBlockCorruption: {
+    enabled: boolean
+    startThreshold: number
+    maxIntensity: number
+  }
+  /** Artifact noise parameters */
+  artifactNoise: {
+    enabled: boolean
+    startThreshold: number
+    maxIntensity: number
+  }
+}
+
 /** Parameters for selective colorization (grayscale with selective color preservation/remapping) */
 export type SelectiveColorizationParams = {
   /** Whether the selective colorization effect is enabled */
@@ -157,6 +207,8 @@ export type PostProcessingConfig = {
   sharpening: SharpeningParams
   /** Pixelation parameters */
   pixelate?: PixelateParams
+  /** CRT scroll corruption parameters */
+  crtScrollCorruption?: CrtScrollCorruptionParams
   /** Lens flare parameters */
   lensFlare: LensFlareParams
   /** Selective colorization parameters (grayscale with selective color preservation/remapping) */

@@ -20,7 +20,8 @@ const getRandomIndex = (exclude: number, length: number) => {
   return idx
 }
 
-const ThemedBackground = () => {
+// Accept intensity as a prop
+const ThemedBackground = ({ intensity = 0 }: { intensity?: number }) => {
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
   const isLight = currentThemeMode.value === 'light'
@@ -61,24 +62,27 @@ const ThemedBackground = () => {
 
   // background
   const backgroundClasses = 'bg-[var(--colors-background)]'
-  const backgroundOpacity = isHomePage ? 0 : (isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark)
+  const backgroundOpacity = isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark
+
+  const fadeOpacity = backgroundOpacity * (intensity * .9)
 
   // noise
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
-  const noiseOpacity = isHomePage ? 'opacity-0' : 'opacity-5'
+  // fade in noise with intensity (max 0.05 for opacity-5)
+  const noiseFadeOpacity = isHomePage ? 0 : 0.05 * intensity
 
   return (
     <>
       <div
         id='noise-background'
-        className={`${noiseClasses} ${noiseOpacity} ${zIndexClass}`}
-        style={{ backgroundImage: `url(${noiseImages[noiseIndex]})` }}
+        className={`${noiseClasses} ${zIndexClass}`}
+        style={{ backgroundImage: `url(${noiseImages[noiseIndex]})`, opacity: noiseFadeOpacity }}
         aria-hidden='true'
       />
       <div
         id='tint-background'
         className={`${baseClasses} ${backgroundClasses} ${zIndexClass} ${transitionClass}`}
-        style={{ opacity: backgroundOpacity }}
+        style={{ opacity: fadeOpacity }}
         aria-hidden='true'
       />
     </>

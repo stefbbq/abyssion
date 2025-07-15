@@ -336,36 +336,36 @@ void main() {
         }
 
         // === DEBUG VISUALIZATIONS ===
-        vec2 debugVerticalPosition = vec2(0.6, 0.65);
+        // vec2 debugVerticalPosition = vec2(0.6, 0.65);
 
-        vec2 intensityPosition = vec2(0.3, 0.35); // red
-        if (uv.x > intensityPosition.x && uv.x < intensityPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-            color.rgb = mix(color.rgb, vec3(1.0, 0.0, 0.0), strength);
-        }
+        // vec2 intensityPosition = vec2(0.3, 0.35); // red
+        // if (uv.x > intensityPosition.x && uv.x < intensityPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
+        //     color.rgb = mix(color.rgb, vec3(1.0, 0.0, 0.0), strength);
+        // }
         
-        vec2 timePosition = vec2(0.4, 0.45); // green
-        if (uv.x > timePosition.x && uv.x < timePosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-            float timeBar = mod(time * 0.1, 1.0);  // 0.0 to 1.0 cycle every 10 seconds
-            // Show time as a filling bar within the green box area
-            float relativeY = (uv.y - debugVerticalPosition.x) / (debugVerticalPosition.y - debugVerticalPosition.x);
-            if (relativeY < timeBar) {
-                color.rgb = mix(color.rgb, vec3(0.0, 1.0, 0.0), 0.8);
-            } else {
-                // Show time value as background color intensity (for debugging)
-                float timeDebug = mod(time * 0.05, 1.0); // Slower cycle for visibility
-                color.rgb = mix(color.rgb, vec3(0.0, timeDebug, 0.0), 0.3);
-            }
-        }
+        // vec2 timePosition = vec2(0.4, 0.45); // green
+        // if (uv.x > timePosition.x && uv.x < timePosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
+        //     float timeBar = mod(time * 0.1, 1.0);  // 0.0 to 1.0 cycle every 10 seconds
+        //     // Show time as a filling bar within the green box area
+        //     float relativeY = (uv.y - debugVerticalPosition.x) / (debugVerticalPosition.y - debugVerticalPosition.x);
+        //     if (relativeY < timeBar) {
+        //         color.rgb = mix(color.rgb, vec3(0.0, 1.0, 0.0), 0.8);
+        //     } else {
+        //         // Show time value as background color intensity (for debugging)
+        //         float timeDebug = mod(time * 0.05, 1.0); // Slower cycle for visibility
+        //         color.rgb = mix(color.rgb, vec3(0.0, timeDebug, 0.0), 0.3);
+        //     }
+        // }
 
-        vec2 blockCorruptionPosition = vec2(0.55, 0.6); // blue
-        if (uv.x > blockCorruptionPosition.x && uv.x < blockCorruptionPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-            color.rgb = mix(color.rgb, vec3(0.0, 0.0, 1.0), bnMask);
-        }
+        // vec2 blockCorruptionPosition = vec2(0.55, 0.6); // blue
+        // if (uv.x > blockCorruptionPosition.x && uv.x < blockCorruptionPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
+        //     color.rgb = mix(color.rgb, vec3(0.0, 0.0, 1.0), bnMask);
+        // }
         
-        vec2 blockCorruption2Position = vec2(0.65, 0.7); // yellow  
-        if (uv.x > blockCorruption2Position.x && uv.x < blockCorruption2Position.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-            color.rgb = mix(color.rgb, vec3(1.0, 1.0, 0.0), bnMask2);
-        }
+        // vec2 blockCorruption2Position = vec2(0.65, 0.7); // yellow  
+        // if (uv.x > blockCorruption2Position.x && uv.x < blockCorruption2Position.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
+        //     color.rgb = mix(color.rgb, vec3(1.0, 1.0, 0.0), bnMask2);
+        // }
     }
     
     gl_FragColor = color;

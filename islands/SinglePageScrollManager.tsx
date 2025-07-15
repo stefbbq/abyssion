@@ -5,6 +5,9 @@ import { getGLState, updateScrollCorruption, updateScrollMetrics } from '@lib/gl
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import { lc } from '@lib/logger/index.ts'
+import ThemedBackground from '@islands/ThemedBackground.tsx'
+import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
+import configScene from '@lib/gl/configScene.json' with { type: 'json' }
 
 const sectionIds = ['home', 'shows', 'bio', 'contact']
 
@@ -14,6 +17,7 @@ const sectionIds = ['home', 'shows', 'bio', 'contact']
  */
 export default function SinglePageScrollManager() {
   const [showGL, setShowGL] = useState(() => !isGLDisabled())
+  const [backgroundIntensity, setBackgroundIntensity] = useState(0)
   const ticking = useRef(false)
 
   initializeClientLogger(lc.GL, 'debug')
@@ -126,6 +130,11 @@ export default function SinglePageScrollManager() {
             }
           }
 
+          // Calculate background fade intensity using shared utility
+          const crtConfig = configScene.postProcessingConfig?.crtScrollCorruption ?? {}
+          const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
+          setBackgroundIntensity(intensity)
+
           ticking.current = false
         })
         ticking.current = true
@@ -139,13 +148,11 @@ export default function SinglePageScrollManager() {
     }
     globalThis.addEventListener('resize', handleResize)
 
-    // Initial scroll corruption update
-    if (isGLInitialized.value) {
-      const glState = getGLState()
-      if (glState) {
-        updateScrollCorruption(globalThis.scrollY, glState)
-      }
-    }
+    // Initial background intensity update
+    const scrollY = globalThis.scrollY
+    const crtConfig = configScene.postProcessingConfig?.crtScrollCorruption ?? {}
+    const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
+    setBackgroundIntensity(intensity)
 
     return () => {
       observer.disconnect()
@@ -156,6 +163,11 @@ export default function SinglePageScrollManager() {
     }
   }, [])
 
-  // Render GLCanvas if not disabled, fixed position
-  return showGL ? <GLCanvas /> : null
+  // Render ThemedBackground and GLCanvas if not disabled, fixed position
+  return (
+    <>
+      <ThemedBackground intensity={backgroundIntensity} />
+      {showGL ? <GLCanvas /> : null}
+    </>
+  )
 }
