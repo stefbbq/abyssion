@@ -35,6 +35,16 @@ export const neonGridOSLightTheme: BaseTheme = {
         boxShadow: '0 10px 20px rgba(0,0,0,.5)',
       },
     },
+    elevated: {
+      color: 'surface.700',
+      opacity: 0.9,
+      borderRadius: '9px',
+      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.3 },
+      effects: {
+        backdropBlur: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,.15)',
+      },
+    },
   },
   backgroundOpacity: { light: 0.8, dark: 0.85 },
   borderRadius: {

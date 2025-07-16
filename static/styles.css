@@ -41,6 +41,17 @@
   filter: var(--surfaces-header-filter);
 }
 
+.surface-elevated {
+  background-color: var(--surfaces-elevated-background);
+  border-width: var(--surfaces-elevated-border-width);
+  border-style: var(--surfaces-elevated-border-style);
+  border-color: var(--surfaces-elevated-border-color);
+  border-radius: var(--surfaces-elevated-borderRadius);
+  backdrop-filter: var(--surfaces-elevated-backdropBlur);
+  box-shadow: var(--surfaces-elevated-boxShadow);
+  filter: var(--surfaces-elevated-filter);
+}
+
 /* Interactive element utilities */
 .interactable {
   background-color: var(--colors-primary);

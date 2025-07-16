@@ -67,7 +67,6 @@ const replacePaletteRefs = (value: string, palette: ColorPalette): string => {
 const convertToUISurface = (
   surface: BaseSurface,
   palette: ColorPalette,
-  mode: 'light' | 'dark',
 ): UISurface => {
   // Resolve color reference to actual hex color
   const resolvedColor = resolveColorReference(surface.color, palette)
@@ -138,5 +137,6 @@ export const createUISurfaces = (
     main: convertToUISurface(baseSurfaces.main, palette, mode),
     shell: convertToUISurface(baseSurfaces.shell, palette, mode),
     header: convertToUISurface(baseSurfaces.header, palette, mode),
+    elevated: baseSurfaces.elevated ? convertToUISurface(baseSurfaces.elevated, palette, mode) : undefined,
   }
 }

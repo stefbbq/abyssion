@@ -52,6 +52,8 @@ export type UISurfaces = {
   shell: UISurface
   // Header
   header: UISurface
+  // Elevated (distinct/highlighted content items)
+  elevated?: UISurface
 }
 
 /**
@@ -229,6 +231,7 @@ export type BaseSurfaces = {
   main: BaseSurface
   shell: BaseSurface
   header: BaseSurface
+  elevated?: BaseSurface
 }
 
 /**

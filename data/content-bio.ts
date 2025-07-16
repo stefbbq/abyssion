@@ -1,11 +1,12 @@
 export const bio = {
   aboutTitle: 'about the band',
-  about:
-    `Abyssion is a **metal band** with technical proggy elements from the void. Founded in 2023 and currently based in the Toronto area, we explore the heavy and the heady with a sound that's both complex and crushing.
+  about: `**Abyssion** is a metal band from the depths of the Toronto area. 
+    
+Technical, proggy, loud as hell. Born in 2023, we mash chaos and complexity into riffy, brain-melting instrumental goodness. Think: *eldritch sorcerers with distortion pedals*, conjuring riffs to share the old great ones back out from the depths.
 
-We're proudly instrumental — for now. The hunt is on for a vocalist who fits the chaos. Until then, it's riffs, rhythm, and a relentless push into the unknown.
+Vocals? Not yet. We're summoning the right screamer to ride the storm. Until then, it's all groove, shred, and cosmic noise. The music shreds, the riffs get weird, and somehow nobody's mom is yelling at us to turn it down. We're not your cousin's basement band — we actually practice.
 
-> birthed in the void, engineered with riffs, dreamt by ancient machines
+> dreamt by ancient machines
 `,
   members: [
     {

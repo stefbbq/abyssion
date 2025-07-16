@@ -16,13 +16,13 @@ export const neonGridOSDarkTheme: BaseTheme = {
       },
     },
     shell: {
-      color: 'surface.500',
+      color: 'surface.700',
       opacity: 0.75,
       borderRadius: '12px',
-      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.2 },
+      border: { width: '0', style: 'none', color: 'foreground.500', opacity: 0.2 },
       effects: {
         backdropBlur: '6px',
-        boxShadow: '0 0 8px rgba(0,0,0,.2)',
+        boxShadow: '0 0 8px rgba(0,0,0,.1)',
       },
     },
     header: {
@@ -34,6 +34,13 @@ export const neonGridOSDarkTheme: BaseTheme = {
         backdropBlur: '8px',
         boxShadow: '0 10px 20px rgba(0,0,0,.5)',
       },
+    },
+    elevated: {
+      color: 'surface.300',
+      opacity: 1,
+      borderRadius: '9px',
+      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.2 },
+      effects: {},
     },
   },
   backgroundOpacity: { light: 0.85, dark: 0.8 },

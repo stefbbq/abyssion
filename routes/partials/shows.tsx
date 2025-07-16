@@ -9,6 +9,16 @@ type ShowData = {
   ticketLink: string
 }
 
+const ShowInfo = ({ show }: { show: ShowData }) => (
+  <div class='space-y-2'>
+    <h3 class='!text-xl !font-medium !text-[var(--colors-foreground)]'>{show.venue}</h3>
+    <p class='!-mt-1 !text-[var(--colors-foreground)] !opacity-70'>{show.location}</p>
+    <p class='!text-sm !text-[var(--colors-foreground)] !opacity-50'>
+      {new Date(show.date).toLocaleDateString()}
+    </p>
+  </div>
+)
+
 export default function ShowsSection() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -34,20 +44,12 @@ export default function ShowsSection() {
           {upcomingShows.map((show: ShowData, index: number) => (
             <div
               key={`upcoming-${index}`}
-              class='rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow bg-[var(--colors-surface-primary)] border border-[var(--colors-border-primary)]'
+              class='surface-elevated p-6 hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center md:justify-between gap-4'
             >
-              <div class='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <div class='space-y-2'>
-                  <h3 class='text-xl font-semibold text-[var(--colors-text-primary)]'>{show.venue}</h3>
-                  <p class='text-[var(--colors-text-secondary)]'>{show.venue} • {show.location}</p>
-                  <p class='text-sm text-[var(--colors-text-tertiary)]'>
-                    {new Date(show.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button href={show.ticketLink} variant='primary'>
-                  Get Tickets
-                </Button>
-              </div>
+              <ShowInfo show={show} />
+              <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-secondary)] text-[var(--colors-surface)] !text-sm !font-medium'>
+                Upcoming Event
+              </span>
             </div>
           ))}
         </div>
@@ -58,24 +60,11 @@ export default function ShowsSection() {
         <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>past shows</h2>
         <div class='space-y-4'>
           {pastShows.map((show: ShowData, index: number) => (
-            <div
-              key={`past-${index}`}
-              class='rounded-xl p-6 border border-dashed'
-              style={{
-                backgroundColor: 'rgba(var(--colors-surface-secondary-rgb), 0.5)',
-                borderColor: 'rgba(var(--colors-border-primary-rgb), 0.5)',
-              }}
-            >
-              <div class='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <div class='space-y-2'>
-                  <h3 class='text-lg font-medium text-[var(--colors-text-primary)]'>{show.venue}</h3>
-                  <p class='text-[var(--colors-text-secondary)]'>{show.venue} • {show.location}</p>
-                  <p class='text-sm text-[var(--colors-text-tertiary)]'>
-                    {new Date(show.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <span class='text-sm font-medium text-[var(--colors-text-tertiary)]'>Past Event</span>
-              </div>
+            <div key={`past-${index}`} class='surface-elevated p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+              <ShowInfo show={show} />
+              <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-foreground)] text-[var(--colors-surface)] !text-sm !font-medium'>
+                Past Event
+              </span>
             </div>
           ))}
         </div>
