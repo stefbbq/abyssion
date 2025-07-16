@@ -28,8 +28,6 @@ export type ActionZoneLayout = {
 export type ActionZoneConfig = {
   // collapsed state (home page)
   collapsed: ActionZoneLayout
-  // collapsed page state (sub pages with back button)
-  collapsedPage: ActionZoneLayout
   // expanded menu state
   expandedMenu: ActionZoneLayout
 }

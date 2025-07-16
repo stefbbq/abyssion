@@ -19,7 +19,7 @@ export const Section = ({ id, children, fullHeight = false, lastSection = false 
     <section
       id={id}
       ref={sectionRef}
-      className={`${fullHeight ? 'min-h-screen' : ''} ${lastSection ? 'pb-8' : ''}`}
+      className={`${fullHeight ? 'min-h-screen' : ''} ${lastSection ? 'pb-24 md:pb-8' : ''}`}
     >
       <div className='max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 relative z-10 space-y-8'>
         {children}

@@ -26,6 +26,8 @@ export default {
         'theme-lg': 'var(--borderRadius-lg)',
         'theme-xl': 'var(--borderRadius-xl)',
         'theme-full': 'var(--borderRadius-full)',
+        'shell-collapsed': 'var(--borderRadius-shellCollapsed)',
+        'shell-expanded': 'var(--borderRadius-shellExpanded)',
       },
     },
   },

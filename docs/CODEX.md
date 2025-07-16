@@ -433,6 +433,192 @@ In addition to standard utilities, two custom utility classes are available in `
 - **.glass-effect**: Used for primary content containers. It applies a lighter, more transparent blur.
 - **.frost-effect**: Used for primary navigation elements (`Header`, `ActionZone`). It applies a darker, more opaque blur for better readability.
 
+## ActionZone System
+
+The ActionZone is the mobile navigation system that provides context-aware navigation at the bottom of the screen. It follows the same architectural patterns as the Header for consistency and maintainability.
+
+### Architecture Overview
+
+The ActionZone system is built with a modular, state-driven architecture:
+
+- **ActionZone.tsx**: Main container component following Header's structure
+- **ActionZoneCollapsed.tsx**: Renders the collapsed navigation state (bio, shows, contact + menu)
+- **ActionZoneExpanded.tsx**: Renders the expanded menu state with all navigation and social links
+- **ActionZoneController.tsx**: Interactive island managing state, animations, and active section detection
+- **Unified Button Components**: Uses the base `Button.tsx` component for consistency
+
+### Container Structure
+
+The ActionZone follows the same encapsulated container pattern as the Header:
+
+```tsx
+<div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">  {/* Positioning wrapper */}
+  <Shell as="nav" className="max-w-sm mx-auto ...">              {/* Themed container */}
+    {/* State-specific content */}
+  </Shell>
+</div>
+```
+
+This structure provides:
+
+- **Consistent positioning**: Fixed bottom placement with responsive margins
+- **Theme integration**: Uses Shell component with `surface-header` styling
+- **Centered layout**: Max-width container with auto margins
+- **Mobile-first**: Hidden on desktop (`md:hidden`)
+
+### State Management
+
+The ActionZone has two distinct states managed by the controller:
+
+1. **`collapsed`**: Main navigation (bio, shows, contact + menu button)
+2. **`expanded`**: Full menu with all navigation items and social links
+
+States are determined by:
+- Menu open/close state in the controller
+- Current route and active section detection
+- Sequential animation timing for smooth transitions
+
+### Active Section Detection
+
+The ActionZone features intelligent active section detection:
+
+**Intersection Observer:**
+- Uses passive intersection observer to detect which section is currently visible
+- Smart threshold detection: tall sections (>120% viewport height) only need to intersect, normal sections need 50% visibility
+- Handles edge cases like very tall content (bio section) appropriately
+
+**Scroll Animation Handling:**
+- Pauses intersection observer during programmatic scrolling to prevent flickering
+- Immediate hash update when user clicks navigation for instant feedback
+- 1-second timeout to resume normal detection after scroll animation completes
+
+**Navigation Anchoring:**
+- Uses `nav-` prefixed IDs for navigation buttons to avoid conflicts with page section IDs
+- Proper anchor linking with scroll behavior for smooth navigation
+- Hash change detection for browser back/forward button support
+
+### Animation System
+
+The ActionZone features a sophisticated three-stage animation system:
+
+**Sequential Animation Stages:**
+1. **Stage 1 (0ms)**: Fade out current content (`showCollapsed/showExpanded = false`)
+2. **Stage 2 (200ms)**: Change container height (`containerExpanded` state)  
+3. **Stage 3 (300ms)**: Fade in new content
+
+**Height Transitions:**
+- Uses `maxHeight` transitions for smooth CSS animations
+- Collapsed: `maxHeight: 64px`
+- Expanded: `maxHeight: 400px` 
+- Sequential timing prevents jarring layout shifts
+
+**Opacity Transitions:**
+- Content uses absolute positioning with opacity fades
+- `transition-opacity duration-300` for smooth content swapping
+- Proper `pointer-events-none` handling during transitions
+- Anchored positioning keeps collapsed nav at bottom until fully faded
+
+### Button Architecture
+
+All ActionZone buttons use the unified `Button.tsx` component with active state styling:
+
+**ActionZoneButton:**
+- Uses base `Button` component with role-specific styling
+- Active state uses inverted colors (foreground background, background text)
+- Inline styles for higher specificity: `backgroundColor: 'var(--colors-foreground)'`
+- Pill-shaped design with `rounded-theme-full`
+
+**ActionZoneMenuButton:**
+- Simplified version for expanded menu items
+- Uses `Button` with variants (primary for active, ghost for inactive)
+- Supports both anchor links and action buttons
+
+### Role-Based Styling
+
+The system uses simplified role-based styling that integrates with the Button component:
+
+```typescript
+const getRoleClasses = (role: string) => {
+  switch (role) {
+    case 'nav-item':
+      return 'h-10 px-3 py-1.5 text-sm font-medium rounded-theme-full'
+    case 'action-button':
+      return 'h-10 w-10 p-0 rounded-theme-full'
+    default:
+      return ''
+  }
+}
+```
+
+Active states are handled via inline styles for higher CSS specificity:
+- **Active**: `backgroundColor: 'var(--colors-foreground)', color: 'var(--colors-background)'`
+- **Inactive**: Uses default button styling
+
+### Configuration System
+
+ActionZone configurations are generated by pure functions:
+
+- **`createCollapsedConfig()`**: Main navigation sections (bio, shows, contact + menu)
+- **`createExpandedMenuConfig()`**: All navigation items including home and social links
+- **`createActionZoneConfig()`**: Combines configurations based on current state
+- **Removed**: `collapsedPageConfig` - eliminated for cleaner two-state system
+
+### Controller Integration
+
+The ActionZoneController island manages all interactive behavior:
+
+**State Management:**
+```typescript
+const [isMenuOpen, setIsMenuOpen] = useState(false)
+const [currentHash, setCurrentHash] = useState('')
+const [showCollapsed, setShowCollapsed] = useState(true)
+const [showExpanded, setShowExpanded] = useState(false)
+const [containerExpanded, setContainerExpanded] = useState(false)
+```
+
+**Intersection Observer Setup:**
+- Observes all page sections for active state detection
+- Adaptive thresholds based on section height
+- Cleanup on component unmount
+
+**Animation Sequencing:**
+- `useRef` pattern to avoid stale closure issues
+- Timeout-based sequential state updates
+- Proper cleanup of timeouts and observers
+
+### Integration with Shell Component
+
+The ActionZone leverages the Shell component with dynamic styling:
+
+```tsx
+<Shell 
+  as="nav"                    
+  className="..."            
+  style={{ 
+    maxHeight: containerExpanded ? '400px' : '64px',
+    borderRadius: 'var(--borderRadius-shellCollapsed)'
+  }}
+>
+```
+
+The Shell component automatically:
+- Applies `surface-header` styling for navigation elements
+- Provides semantic HTML structure with proper ARIA attributes
+- Integrates with theme system for consistent styling and border radius
+
+### Benefits
+
+This refactored ActionZone system provides:
+
+1. **Smooth UX**: Sequential animations prevent jarring transitions
+2. **Smart Detection**: Adaptive intersection observer handles all section types
+3. **Performance**: Optimized scroll handling with proper cleanup
+4. **Consistency**: Follows Header component patterns exactly
+5. **Maintainability**: Clean two-state system without legacy complexity
+6. **Accessibility**: Semantic HTML with proper ARIA and keyboard support
+7. **Theme Integration**: Full theme system compatibility with active state styling
+8. **Responsive**: Intelligent handling of different viewport sizes and content heights
+
 ## Directory Structure
 
 - **`/routes`**: Pages & API
@@ -442,7 +628,7 @@ In addition to standard utilities, two custom utility classes are available in `
   - `/partials/*.tsx`: Page content for Fresh's partial navigation.
 
 - **`/islands`**: Interactive Components
-  - `ActionZoneController.tsx`: Interactive mobile navigation.
+  - `ActionZoneController.tsx`: Interactive mobile navigation controller.
   - `ThemeProvider.tsx`: Injects theme CSS variables and handles dynamic updates.
   - `ThemeVisualizer.tsx`: UI for visualizing themes.
   - `Header.tsx`, `GLCanvas.tsx` Other major interactive components.
@@ -452,11 +638,21 @@ In addition to standard utilities, two custom utility classes are available in `
   - `DebugInfo.tsx`: UI for debug info (bottom-left).
 
 - **`/components`**: Reusable UI Components
-  - `Shell.tsx`: A generic container for content sections with the `.glass-effect`.
+  - `Shell.tsx`: A flexible container component that can render as different HTML elements (`section`, `nav`, `div`) with automatic surface styling. Navigation shells use `surface-header`, sections use `surface-shell`.
   - `Card.tsx`: A flexible card component, supporting images and custom content, with the `.glass-effect`.
   - `ListItem.tsx`: A generic component for list items.
   - `ThemeSwitcher.tsx`: Displays current theme colors in a compact preview strip and cycles through available themes.
-  - `Button.tsx`, `Dropdown.tsx`, etc.
+  - `Button.tsx`: Unified button component used throughout the application. Supports multiple variants and can render as button or anchor.
+  - `Dropdown.tsx`, etc.
+
+- **`/components/actionZone`**: ActionZone System Components
+  - `ActionZone.tsx`: Main container component following Header's structure pattern.
+  - `ActionZoneCollapsed.tsx`: Renders collapsed navigation state (renamed from ActionZoneNav).
+  - `ActionZoneExpanded.tsx`: Renders expanded menu state (renamed from ActionZoneExpandedMenu).
+  - `ActionZoneButton.tsx`: Unified button component using base Button with role-specific styling.
+  - `ActionZoneMenuButton.tsx`: Simplified button for expanded menu items using base Button.
+  - `/config/`: Configuration functions for different ActionZone states.
+  - `/utils/`: Utility functions for button creation and layout configuration.
 
 - **`/data`**: Content & Configuration
   - `types.ts`: **Centralized TypeScript definitions** for all JSON data.

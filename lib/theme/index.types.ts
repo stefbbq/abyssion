@@ -71,6 +71,15 @@ export type UITheme = {
     lg: string
     xl: string
   }
+  borderRadius: {
+    sm: string
+    md: string
+    lg: string
+    xl: string
+    full: string
+    shellCollapsed: string
+    shellExpanded: string
+  }
   typography: {
     fontFamily: {
       heading: string
@@ -240,6 +249,8 @@ export type BaseTheme = {
   typography?: Partial<BaseTypography>
   /** Optional spacing scale (xs-xl) */
   spacing?: Partial<BaseSpacing>
+  /** Optional border radius scale */
+  borderRadius?: Partial<BaseBorderRadius>
   /** Optional themed background opacity overrides */
   backgroundOpacity?: Partial<BaseBackgroundOpacity>
 }
@@ -295,17 +306,17 @@ export type ThemeFamily = {
   dark: BaseTheme
 }
 
-// Legacy types for backward compatibility (deprecated)
 /**
- * @deprecated Use BaseSurfaces instead
+ * Border radius scale for a theme
  */
 export type BaseBorderRadius = {
-  none: string
   sm: string
   md: string
   lg: string
   xl: string
   full: string
+  shellCollapsed: string
+  shellExpanded: string
 }
 
 /**

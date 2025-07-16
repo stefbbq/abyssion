@@ -37,6 +37,15 @@ export const neonGridOSDarkTheme: BaseTheme = {
     },
   },
   backgroundOpacity: { light: 0.85, dark: 0.8 },
+  borderRadius: {
+    sm: '0.25rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+    full: '9999px',
+    shellCollapsed: '32px',
+    shellExpanded: '20px',
+  },
   typography: {
     fontFamily: {
       heading: '"Oxanium", sans-serif',

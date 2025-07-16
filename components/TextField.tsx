@@ -86,7 +86,7 @@ export const TextField = ({
     'aria-invalid': !!error,
     'aria-describedby': error ? `${name}-error` : undefined,
     class:
-      `block w-full px-3.5 pt-6 pb-2 text-base text-[var(--colors-text-primary)] bg-[var(--colors-surface-primary)] border border-[var(--colors-border-primary)] rounded-theme-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[var(--colors-interactive-primary)] focus:border-transparent transition-all duration-200 ${
+      `block w-full px-3.5 pt-6 pb-2 text-base text-[var(--colors-text-primary)] bg-[var(--colors-background)] border border-[var(--colors-border-primary)] rounded-theme-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[var(--colors-interactive-primary)] focus:border-transparent transition-all duration-200 ${
         error ? 'border-red-500' : ''
       } ${className}`,
   }
@@ -94,20 +94,10 @@ export const TextField = ({
   return (
     <div class={`relative ${className}`}>
       {/* textarea */}
-      {textarea && (
-        <textarea
-          {...{ ...sharedProps, rows }}
-          ref={textareaRef}
-        />
-      )}
+      {textarea && <textarea {...{ ...sharedProps, rows }} ref={textareaRef} />}
 
       {/* input */}
-      {!textarea && (
-        <input
-          {...{ ...sharedProps, type }}
-          ref={inputRef}
-        />
-      )}
+      {!textarea && <input {...{ ...sharedProps, type }} ref={inputRef} />}
 
       {/* label */}
       <label
@@ -118,12 +108,9 @@ export const TextField = ({
             ? 'top-2.5 left-2.5 text-xs text-[var(--colors-text-secondary)] opacity-40 translate-y-0'
             : 'top-4 left-3 text-base text-[var(--colors-text-tertiary)] opacity-100 -translate-y-0'
         }
-          bg-[var(--colors-surface-primary)] px-1
+          bg-[var(--colors-background)] px-1
         `}
-        style={{
-          zIndex: 2,
-          transitionProperty: 'top, left, font-size, opacity, color, background, transform',
-        }}
+        style={{ zIndex: 2, transitionProperty: 'top, left, font-size, opacity, color, background, transform' }}
       >
         {label}
       </label>

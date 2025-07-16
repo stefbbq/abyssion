@@ -12,7 +12,7 @@ export const createExpandedMenuConfig = (): ActionZoneLayout => {
   const navButtons = navData.mainNav.map((item, index) => {
     const positions: Array<'left' | 'center' | 'right'> = ['left', 'center', 'center', 'right'] // home=left, bio=center, shows=center, contact=right
     return createNavButton({
-      id: item.key,
+      id: `nav-${item.key}`,
       key: item.key,
       label: item.label,
       href: item.path,

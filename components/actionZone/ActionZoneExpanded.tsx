@@ -1,7 +1,6 @@
 import type { MenuItem, SocialLink } from '@data/types.ts'
 import { ActionZoneMenuButton } from '@components/actionZone/ActionZoneMenuButton.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
-import actionZoneAnimationConfig from '@components/actionZone/config/index.ts'
 import type { ActionZoneButton } from '@components/actionZone/types.ts'
 
 type SocialIconKey = keyof SocialIconMap
@@ -11,27 +10,19 @@ type Props = {
   socialLinks: SocialLink[]
   onMenuClose: () => void
   onAnchorLink: (path: string) => void
+  onAction: (action: ActionZoneButton['action']) => void
+  currentHash: string
+  buttons: ActionZoneButton[]
 }
 
 /**
- * ExpandedMenu organism
- * Handles the expanded menu state with social links and navigation items
+ * ActionZoneExpanded component
+ * Handles the expanded menu state with social links and navigation items.
+ * Provides full navigation menu functionality in expanded mode.
  */
-export const ActionZoneExpandedMenu = ({
-  menuItems,
-  socialLinks,
-  onMenuClose,
-  onAnchorLink,
-}: Props) => {
-  const navButtons: ActionZoneButton[] = actionZoneAnimationConfig.expandedMenu.buttons || []
-
-  const handleAction = (action: ActionZoneButton['action'], item: MenuItem) => {
-    if (action.href && action.href.startsWith('#')) {
-      onAnchorLink(action.href)
-    } else if (action.type === 'navigate') {
-      onMenuClose()
-    }
-  }
+export const ActionZoneExpanded = ({ socialLinks, onAction, buttons }: Props) => {
+  // Use the buttons passed from ActionZonController (already have active state applied)
+  const buttonsWithActiveState = buttons
 
   return (
     <div class='px-4 pb-4 space-y-4'>
@@ -60,13 +51,13 @@ export const ActionZoneExpandedMenu = ({
 
       {/* menu items */}
       <div className='space-y-0.5'>
-        {navButtons.map((button: ActionZoneButton) => (
+        {buttonsWithActiveState.map((button: ActionZoneButton) => (
           <ActionZoneMenuButton
             key={button.id}
             id={button.id}
             label={button.content.label}
             isActive={button.isActive}
-            onClick={() => handleAction(button.action, menuItems.find((item) => item.key === button.id) || menuItems[0])}
+            onClick={() => onAction(button.action)}
             action={button.action}
           />
         ))}

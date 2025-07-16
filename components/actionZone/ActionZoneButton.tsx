@@ -1,5 +1,6 @@
 import { BackIcon, MenuIcon } from '@components/icons/index.ts'
 import { CSSProperties } from 'preact/compat'
+import { Button } from '@components/Button.tsx'
 import type { ActionZoneButton as ActionZoneButtonConfig } from './types.ts'
 
 export type ActionZoneButtonType = {
@@ -29,71 +30,48 @@ type Props = {
 
 /**
  * ActionZoneButton molecule component
- * Combines Icon and BaseButton atoms with animation state management
+ * Uses the unified Button component with role-specific styling and behavior
  * Handles smooth morphing between different navigation roles
  * Uses theme-aware border radius for consistent styling
  */
-// role style configuration type
-type RoleStyle = {
-  base: string
-  hover?: string
-  colors?: string
-  border: string
+
+// simple role-specific style overrides
+const getRoleClasses = (role: string, variant: string) => {
+  const baseOverrides = 'h-10 transition-all duration-200'
+
+  switch (role) {
+    case 'nav-item':
+      const border = variant === 'outlined' ? 'border border-text-tertiary' : 'border-none'
+      return `${baseOverrides} px-3 py-1.5 text-sm font-medium rounded-theme-full ${border}`
+
+    case 'page-title':
+      return `${baseOverrides} px-3 py-1.5 text-sm font-normal lowercase rounded-theme-full border-none bg-foreground text-background`
+
+    case 'action-button':
+    case 'back-button':
+      return `${baseOverrides} w-10 p-0 rounded-theme-full border-none`
+
+    default:
+      return `${baseOverrides} px-3 py-1.5 text-sm font-medium rounded-theme-full`
+  }
 }
 
-// role-based styling configurations
-const roleStyles: Record<string, RoleStyle> = {
-  'nav-item': {
-    base: 'h-10 px-3 py-1.5 text-sm font-medium rounded-theme-full',
-    hover: 'hover:bg-interactive-ghostHover',
-    border: 'border border-text-tertiary',
-  },
-  'page-title': {
-    base: 'h-10 px-3 py-1.5 text-sm font-normal lowercase rounded-theme-full',
-    colors: 'bg-foreground text-background',
-    border: 'border-none',
-  },
-  'action-button': {
-    base: 'h-10 w-10 p-0 rounded-theme-full',
-    hover: 'hover:bg-interactive-ghostHover',
-    border: 'border-none',
-  },
-  'back-button': {
-    base: 'h-10 w-10 p-0 rounded-theme-full',
-    hover: 'hover:bg-interactive-ghostHover',
-    border: 'border-none',
-  },
-}
-
-export const ActionZoneButton = (
-  {
-    id,
-    state,
-    onAction,
-    style,
-    onMouseEnter,
-    onMouseLeave,
-    className,
-    flex,
-    transformOrigin,
-    variant = 'outlined',
-  }: Props,
-) => {
+export const ActionZoneButton = ({
+  id,
+  state,
+  onAction,
+  style,
+  onMouseEnter,
+  onMouseLeave,
+  className,
+  flex,
+  transformOrigin,
+  variant = 'outlined',
+}: Props) => {
   const { action: { type }, role, content: { label, icon }, isActive } = state
 
-  // base classes shared by all buttons
-  const baseClasses =
-    'inline-flex items-center justify-center disabled:cursor-not-allowed gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:outline-none active:ring-0'
-
-  // get role-specific styling
-  const roleStyle = roleStyles[role] || roleStyles['nav-item']
   const showText = role === 'nav-item' || role === 'page-title'
   const isLink = type === 'navigate'
-
-  // build complete class string - only show border for nav-items when not active
-  const shouldShowBorder = variant === 'outlined' && role === 'nav-item' && !isActive
-  const borderClass = shouldShowBorder ? roleStyle.border : 'border-none'
-  const colorClass = role === 'page-title' ? roleStyle.colors || '' : ''
 
   // only call onAction if the action is not 'none'
   const handleClick = (e?: Event) => {
@@ -118,40 +96,58 @@ export const ActionZoneButton = (
     </>
   )
 
-  const commonProps = {
+  // role-specific classes
+  const roleClasses = getRoleClasses(role, variant)
+  const combinedClasses = `${roleClasses} ${className || ''}`
+
+  // determine Button variant based on role
+  const buttonVariant = role === 'page-title' ? 'primary' : 'ghost'
+
+  // handle active state with inline styles (higher specificity than classes)
+  const activeStyle = isActive && role === 'nav-item'
+    ? {
+      backgroundColor: 'var(--colors-foreground)',
+      color: 'var(--colors-background)',
+    }
+    : {}
+
+  const buttonProps = {
     id,
-    className: `${baseClasses} ${roleStyle.base} ${borderClass} ${colorClass} ${className || ''}`,
+    class: combinedClasses,
     style: {
       ...style,
+      ...activeStyle,
       flex: flex || (role === 'page-title' ? '1 1 0%' : '0 0 auto'),
       transformOrigin: transformOrigin || 'center',
     },
     onMouseEnter,
     onMouseLeave,
+    onClick: handleClick,
+    disabled: state.action.type === 'none',
     'aria-label': state.content.label,
   }
 
-  if (isLink) {
+  if (isLink && state.action.href) {
+    // For anchor links, don't pass href to Button - let onClick handle navigation
+    const { href, ...propsWithoutHref } = buttonProps as any
     return (
-      <a
-        {...commonProps}
-        href={state.action.href}
-        f-client-nav={false}
-        onClick={handleClick}
+      <Button
+        {...propsWithoutHref}
+        variant={buttonVariant}
+        size='sm'
       >
         {getIconAndLabel()}
-      </a>
+      </Button>
     )
   }
 
   return (
-    <button
-      {...commonProps}
-      type='button'
-      onClick={handleClick}
-      disabled={state.action.type === 'none'}
+    <Button
+      {...buttonProps}
+      variant={buttonVariant}
+      size='sm'
     >
       {getIconAndLabel()}
-    </button>
+    </Button>
   )
 }

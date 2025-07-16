@@ -20,7 +20,7 @@ export const createCollapsedConfig = (): ActionZoneLayout => {
   const bioItem = navItems.find((item) => item.key === 'bio')
   if (bioItem) {
     navButtons.push(createNavButton({
-      id: 'bio',
+      id: 'nav-bio',
       key: 'bio',
       label: bioItem.label,
       href: bioItem.path,
@@ -33,7 +33,7 @@ export const createCollapsedConfig = (): ActionZoneLayout => {
   const showsItem = navItems.find((item) => item.key === 'shows')
   if (showsItem) {
     navButtons.push(createNavButton({
-      id: 'shows',
+      id: 'nav-shows',
       key: 'shows',
       label: showsItem.label,
       href: showsItem.path,
@@ -46,7 +46,7 @@ export const createCollapsedConfig = (): ActionZoneLayout => {
   const contactItem = navItems.find((item) => item.key === 'contact')
   if (contactItem) {
     navButtons.push(createNavButton({
-      id: 'contact',
+      id: 'nav-contact',
       key: 'contact',
       label: contactItem.label,
       href: contactItem.path,

@@ -1,6 +1,5 @@
 import type { ActionZoneConfig } from '../types.ts'
 import { createCollapsedConfig } from './collapsedConfig.ts'
-import { createCollapsedPageConfig } from './collapsedPageConfig.ts'
 import { createExpandedMenuConfig } from './expandedMenuConfig.ts'
 
 /**
@@ -9,7 +8,6 @@ import { createExpandedMenuConfig } from './expandedMenuConfig.ts'
  */
 export const createActionZoneConfig = (): ActionZoneConfig => ({
   collapsed: createCollapsedConfig(),
-  collapsedPage: createCollapsedPageConfig(),
   expandedMenu: createExpandedMenuConfig(),
 })
 

@@ -39,10 +39,13 @@ type AnchorElementProps =
 type Props = BaseProps & (ButtonElementProps | AnchorElementProps)
 
 const variantClasses = {
-  primary: 'bg-interactive-primary text-text-inverse hover:bg-interactive-primaryHover border-transparent',
-  secondary: 'bg-interactive-secondary text-text-primary hover:bg-interactive-secondaryHover border-border-primary',
-  outline: 'bg-transparent text-text-primary hover:bg-interactive-ghostHover border-border-primary',
-  ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-interactive-ghostHover border-transparent',
+  primary: 'bg-[var(--colors-primary)] text-[var(--colors-background)] hover:bg-[var(--colors-interactive-hover)] border-transparent',
+  secondary:
+    'bg-[var(--colors-secondary)] text-[var(--colors-background)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
+  outline:
+    'bg-transparent text-[var(--colors-foreground)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
+  ghost:
+    'bg-transparent text-[var(--colors-foreground)] hover:text-[var(--colors-primary)] hover:bg-[var(--colors-surface)] border-transparent',
 }
 
 const sizeClasses = {
@@ -74,7 +77,7 @@ export const Button = ({
   ...props
 }: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-border-focus disabled:opacity-50 disabled:cursor-not-allowed'
+    'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] disabled:opacity-50 disabled:cursor-not-allowed'
   const transitionClasses = 'transition-all duration-200'
   const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 

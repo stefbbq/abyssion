@@ -1,4 +1,5 @@
 import { CSSProperties } from 'preact/compat'
+import { Button, type ButtonVariant } from '@components/Button.tsx'
 import type { ActionZoneButton } from './types.ts'
 
 type Props = {
@@ -10,17 +11,14 @@ type Props = {
   action: ActionZoneButton['action']
 }
 
-const baseClass = 'w-full h-10 flex items-center justify-center rounded-theme-xl font-medium text-sm transition-colors'
-
 /**
  * ActionZoneMenuButton
- * Dedicated button for expanded menu items with proper active state styling
- * Uses theme-aware border radius for consistent styling
+ * Dedicated button for expanded menu items using the unified Button component
+ * Provides proper active state styling and theme-aware border radius
  */
 export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, style = {}, action }: Props) => {
-  const activeClass = isActive
-    ? 'bg-background-primary text-text-primary font-semibold'
-    : 'bg-transparent text-text-secondary font-medium hover:bg-interactive-ghostHover hover:text-text-primary'
+  // custom styling for menu buttons with shell-matching border radius
+  const menuButtonClasses = 'w-full h-10 flex items-center justify-center font-medium text-sm rounded-shell-expanded'
 
   const handleClick = (e?: Event) => {
     if (action.type === 'navigate' && action.href?.startsWith('#')) {
@@ -29,31 +27,35 @@ export const ActionZoneMenuButton = ({ id, label, isActive = false, onClick, sty
     onClick()
   }
 
+  // use ghost variant for all, handle active state with inline styles
+  const buttonVariant: ButtonVariant = 'ghost'
+
+  // active state with inline styles (higher specificity)
+  const customStyle = {
+    ...(isActive ? { backgroundColor: 'var(--colors-foreground)', color: 'var(--colors-background)' } : {}),
+    ...style,
+  }
+
+  const buttonProps = {
+    id,
+    class: menuButtonClasses,
+    style: customStyle,
+    onClick: handleClick,
+    variant: buttonVariant,
+    size: 'sm' as const,
+  }
+
   if (action?.type === 'navigate' && action.href) {
     return (
-      <a
-        key={id}
-        href={action.href}
-        className={`${baseClass} ${activeClass}`}
-        tabIndex={0}
-        f-client-nav={false}
-        onClick={handleClick}
-        style={style}
-      >
+      <Button {...buttonProps} href={action.href}>
         {label}
-      </a>
+      </Button>
     )
   }
+
   return (
-    <button
-      key={id}
-      className={`${baseClass} ${activeClass}`}
-      tabIndex={0}
-      type='button'
-      onClick={handleClick}
-      style={style}
-    >
+    <Button {...buttonProps}>
       {label}
-    </button>
+    </Button>
   )
 }

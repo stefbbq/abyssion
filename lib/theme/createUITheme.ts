@@ -9,7 +9,7 @@ import { resolveColorReference } from './utils/resolveColorReference.ts'
  * a minimal colors object, and surfaces that reference palette keys/shades directly.
  */
 export const createUITheme = (baseTheme: BaseTheme): UITheme => {
-  const { mode, palette, surfaces, typography, backgroundOpacity, spacing } = baseTheme
+  const { mode, palette, surfaces, typography, backgroundOpacity, spacing, borderRadius } = baseTheme
 
   // generate full palette with shades
   const fullPalette = {
@@ -59,6 +59,15 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
       md: spacing?.md ?? '1rem',
       lg: spacing?.lg ?? '1.5rem',
       xl: spacing?.xl ?? '2rem',
+    },
+    borderRadius: {
+      sm: borderRadius?.sm ?? '0.25rem',
+      md: borderRadius?.md ?? '0.5rem',
+      lg: borderRadius?.lg ?? '0.75rem',
+      xl: borderRadius?.xl ?? '1rem',
+      full: borderRadius?.full ?? '9999px',
+      shellCollapsed: borderRadius?.shellCollapsed ?? '32px',
+      shellExpanded: borderRadius?.shellExpanded ?? '20px',
     },
     typography: {
       fontFamily: {

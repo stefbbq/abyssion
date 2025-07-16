@@ -8,16 +8,18 @@ type Props = {
 }
 
 /**
- * ActionZoneNav component
- * Renders navigation buttons for the ActionZone, handling hover and active state.
- * Now supports flexible button layout for all nav buttons + menu button.
+ * ActionZoneCollapsed component
+ * Renders navigation buttons for the collapsed ActionZone state.
+ * Handles hover and active state for all collapsed navigation buttons.
+ * Supports flexible button layout for nav buttons + menu button.
  */
-export const ActionZoneNav = ({ buttons, onAction }: Props) => {
+export const ActionZoneCollapsed = ({ buttons, onAction }: Props) => {
   const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null)
 
-  // Separate nav buttons from menu button for proper layout
   const navButtons = buttons.filter((b) => b.role === 'nav-item')
   const menuButton = buttons.find((b) => b.role === 'action-button')
+  const hoverButtonClasses = 'bg-interactive-ghostHover text-text-primary'
+  const defaultButtonClasses = 'bg-transparent text-text-secondary'
 
   return (
     <div class='w-full flex items-center justify-center gap-1 px-4 h-full'>
@@ -25,17 +27,7 @@ export const ActionZoneNav = ({ buttons, onAction }: Props) => {
       {navButtons.map((button) => {
         const isHovered = hoveredButtonId === button.id
         const isActive = button.isActive
-        const isMenuButton = button.role === 'action-button'
-
-        // Active state: use theme colors (white bg, black text in dark mode)
-        let buttonClasses = ''
-        if (isActive && !isMenuButton) {
-          buttonClasses = 'bg-background-primary text-text-primary'
-        } else if (isHovered && !isActive) {
-          buttonClasses = 'bg-interactive-ghostHover text-text-primary'
-        } else {
-          buttonClasses = 'bg-transparent text-text-secondary'
-        }
+        const buttonClasses = isHovered && !isActive ? hoverButtonClasses : defaultButtonClasses
 
         return (
           <ActionZoneButtonComponent
@@ -57,15 +49,7 @@ export const ActionZoneNav = ({ buttons, onAction }: Props) => {
       {menuButton && (() => {
         const isHovered = hoveredButtonId === menuButton.id
         const isActive = menuButton.isActive
-        const isMenuButton = menuButton.role === 'action-button'
-
-        // Menu button styling
-        let buttonClasses = ''
-        if (isHovered && !isActive) {
-          buttonClasses = 'bg-interactive-ghostHover text-text-primary'
-        } else {
-          buttonClasses = 'bg-transparent text-text-secondary'
-        }
+        const buttonClasses = isHovered && !isActive ? hoverButtonClasses : defaultButtonClasses
 
         return (
           <ActionZoneButtonComponent

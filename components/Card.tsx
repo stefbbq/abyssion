@@ -42,14 +42,14 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
         <img
           src={imageUrl}
           alt={imageAlt || ''}
-          class='aspect-[9/21] w-full h-full object-cover'
+          class='aspect-[9/21] w-full h-full object-cover max-h-[50vh] md:max-h-none'
           onError={handleError}
         />
       )
     }
 
     return (
-      <div class='aspect-[9/21] bg-gradient-to-br from-[var(--colors-background-secondary)] to-[var(--colors-background-tertiary)] flex items-center justify-center'>
+      <div class='aspect-[9/21] max-h-[50vh] md:max-h-none bg-gradient-to-br from-[var(--colors-background-secondary)] to-[var(--colors-background-tertiary)] flex items-center justify-center'>
         {fallbackAvatarText && <span class='text-4xl font-bold text-[var(--colors-text-tertiary)]'>{fallbackAvatarText}</span>}
       </div>
     )

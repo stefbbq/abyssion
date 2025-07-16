@@ -36,7 +36,8 @@ export default function BioSection() {
       </section>
 
       {/* albums */}
-      <Shell>
+      {
+        /* <Shell>
         <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>{bio.albumsTitle}</h2>
         <div class='space-y-6'>
           {bio.albums.map((album, idx) => (
@@ -48,7 +49,8 @@ export default function BioSection() {
             />
           ))}
         </div>
-      </Shell>
+      </Shell> */
+      }
     </>
   )
 }
