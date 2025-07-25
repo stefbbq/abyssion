@@ -26,6 +26,7 @@ coverage/
 cov/
 coverage.lcov
 cov.lcov
+lcov.info
 
 # Misc
 *.bak
