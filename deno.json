@@ -12,7 +12,21 @@
     "build:shaders:to-ts": "deno run --allow-read --allow-write scripts/glsl-to-ts.ts",
     "build:shaders": "deno task build:shaders:preprocess && deno task build:shaders:to-ts",
     "dev": "deno task build:shaders && deno run --allow-all dev.ts",
-    "watch": "deno run --allow-read --allow-write --allow-run scripts/dev-watch.ts"
+    "watch": "deno run --allow-read --allow-write --allow-run scripts/dev-watch.ts",
+    "e2e": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts",
+    "e2e:all": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts all",
+    "e2e:quick": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts quick",
+    "e2e:ci": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts ci",
+    "e2e:core": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts category \"Core Functionality\"",
+    "e2e:performance": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts category \"Performance & Memory\"",
+    "e2e:errors": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts category \"Error Handling & Recovery\"",
+    "e2e:network": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts category \"Network Conditions\"",
+    "e2e:automated": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts automated",
+    "e2e:live": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts live",
+    "e2e:browser": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts browser",
+    "e2e:priority": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts priority",
+    "e2e:memory": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts tags memory-leaks",
+    "e2e:anti-repetition": "deno run --allow-net --allow-run --allow-read --allow-write --allow-env scripts/run-e2e-tests.ts tags anti-repetition"
   },
   "lint": {
     "rules": {
@@ -48,6 +62,7 @@
     "phosphor-react": "npm:phosphor-react@^1.4.1",
     "preact": "https://esm.sh/preact@10.22.0",
     "preact/": "https://esm.sh/preact@10.22.0/",
+    "puppeteer": "npm:puppeteer@^24.15.0",
     "react": "https://esm.sh/preact@10.22.0/compat",
     "react/jsx-runtime": "https://esm.sh/preact@10.22.0/jsx-runtime",
     "react-dom": "https://esm.sh/preact@10.22.0/compat",

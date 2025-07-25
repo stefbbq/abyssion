@@ -303,33 +303,45 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       state.videoBackground && typeof state.videoBackground.getDebugInfo === 'function',
     )
     if (state.videoBackground && state.videoBackground.getDebugInfo) {
-      const vDebug = state.videoBackground.getDebugInfo()
-      const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
-      const progressBar = createVideoProgressBar(vDebug)
+      // Get the comprehensive HTML debug info from the new video cycle system
+      const htmlDebugInfo = state.videoBackground.getDebugInfo()
+      
+      // Check if we got HTML debug info (new system) or legacy object (old system)
+      if (typeof htmlDebugInfo === 'string' && htmlDebugInfo.includes('video-cycle-debug')) {
+        // New HTML debug info - use it directly
+        videoInfo = htmlDebugInfo
+      } else {
+        // Legacy debug info - handle as before for backward compatibility
+        const vDebug = htmlDebugInfo as any
+        if (vDebug && typeof vDebug === 'object') {
+          const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
+          const progressBar = createVideoProgressBar(vDebug)
 
-      // Anti-repeat blocked videos
-      const blockedVideos = Array.from({ length: vDebug.totalVideos }, (_, i) => i)
-        .filter((i) => vDebug.recentIndices.includes(i) && i !== vDebug.currentVideoIndex)
-        .map((i) => `#${i}`)
-        .join(', ')
+          // Anti-repeat blocked videos
+          const blockedVideos = Array.from({ length: vDebug.totalVideos }, (_, i) => i)
+            .filter((i) => vDebug.recentIndices.includes(i) && i !== vDebug.currentVideoIndex)
+            .map((i) => `#${i}`)
+            .join(', ')
 
-      // Get next prepared video name
-      const nextPreparedInfo = vDebug.nextPreparedIndex !== null ? `#${vDebug.nextPreparedIndex}` : 'None'
+          // Get next prepared video name
+          const nextPreparedInfo = vDebug.nextPreparedIndex !== null ? `#${vDebug.nextPreparedIndex}` : 'None'
 
-      videoInfo = [
-        `<b>Video Background:</b>`,
-        `<b>Current:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}`,
-        `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'} ${vDebug.isTransitioning ? '(Transitioning)' : ''}`,
-        `<b>Segment:</b> ${(vDebug.timeSinceSwitch / 1000).toFixed(1)}s / ${vDebug.currentDuration.toFixed(1)}s (${
-          segmentProgress.toFixed(1)
-        }%)`,
-        `<b>Full Video:</b> ${vDebug.fullVideoDuration.toFixed(1)}s | Start: ${vDebug.videoStartTime.toFixed(1)}s`,
-        progressBar,
-        `<b>Next Prepared:</b> ${nextPreparedInfo}`,
-        `<b>Total Videos:</b> ${vDebug.totalVideos} loaded`,
-        `<b>Recent History:</b> [${vDebug.recentIndices.join(', ')}]`,
-        `<b>Anti-Repeat Blocked:</b> ${blockedVideos || 'None'}`,
-      ].join('<br>')
+          videoInfo = [
+            `<b>Video Background:</b>`,
+            `<b>Current:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}`,
+            `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'} ${vDebug.isTransitioning ? '(Transitioning)' : ''}`,
+            `<b>Segment:</b> ${(vDebug.timeSinceSwitch / 1000).toFixed(1)}s / ${vDebug.currentDuration.toFixed(1)}s (${
+              segmentProgress.toFixed(1)
+            }%)`,
+            `<b>Full Video:</b> ${vDebug.fullVideoDuration.toFixed(1)}s | Start: ${vDebug.videoStartTime.toFixed(1)}s`,
+            progressBar,
+            `<b>Next Prepared:</b> ${nextPreparedInfo}`,
+            `<b>Total Videos:</b> ${vDebug.totalVideos} loaded`,
+            `<b>Recent History:</b> [${vDebug.recentIndices.join(', ')}]`,
+            `<b>Anti-Repeat Blocked:</b> ${blockedVideos || 'None'}`,
+          ].join('<br>')
+        }
+      }
     } else {
       log.debug(lc.GL_DEBUG, 'Video background debug info not available. Reasons:')
       log.debug(lc.GL_DEBUG, '- state.videoBackground exists:', !!state.videoBackground)

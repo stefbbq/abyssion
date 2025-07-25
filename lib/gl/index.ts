@@ -9,7 +9,7 @@ import animationConfig from './configAnimation.json' with { type: 'json' }
 import controlsConfig from './configControls.json' with { type: 'json' }
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addLensFlares } from './scene/addLensFlares.ts'
-import { addVideoBackground } from './scene/addVideoBackground.ts'
+
 import { createControlsSystem } from './controls/index.ts'
 import { createUILayer } from './layers/UILayer.ts'
 import { createContentPageOrchestrator, createHomePageOrchestrator, createSceneOrchestrator } from './animation/index.ts'
@@ -72,15 +72,26 @@ export const initGL = async (options: InitOptions) => {
 
   log(lc.GL, 'Continuing initialization after test render...')
 
-  // Add video background
-  const videoBackground = await addVideoBackground(THREE, scene) as VideoBackgroundManager
-  log(lc.GL, 'Added video background:', videoBackground)
-  log(lc.GL, 'Video background has getDebugInfo:', videoBackground && typeof videoBackground.getDebugInfo === 'function')
+  // Add video background using new manager system
+  const { addVideoBackgroundWithManager } = await import('./scene/addVideoBackgroundWithManager.ts')
+  let videoBackground: VideoBackgroundManager | undefined
+
+  try {
+    videoBackground = await addVideoBackgroundWithManager(THREE, scene)
+    log(lc.GL, 'Added video background with new manager:', videoBackground)
+    log(lc.GL, 'Video background has getDebugInfo:', videoBackground && typeof videoBackground.getDebugInfo === 'function')
+  } catch (error) {
+    log.error(lc.GL, 'Failed to initialize new video background manager, falling back to legacy system:', error)
+    // Fallback to legacy system
+    const { addVideoBackground } = await import('./scene/addVideoBackground.ts')
+    videoBackground = await addVideoBackground(THREE, scene) as VideoBackgroundManager
+    log(lc.GL, 'Fallback: Added legacy video background:', videoBackground)
+  }
 
   // Set up post-processing effects
   let composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass
   if (configScene.postProcessingEnabled) {
-    ;({ composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass } =
+    ; ({ composer, bokehPass, bloomPass, finalPass, ditheringPass, sharpeningPass, pixelationPass, pixelBleedPass, crtPass } =
       await createPostProcessing(
         THREE,
         scene,
@@ -250,6 +261,11 @@ export const initGL = async (options: InitOptions) => {
   // Store the orchestrator on the glState
   glState = { ...state, sceneOrchestrator }
 
+  // Expose GL state globally for debugging and E2E testing
+  if (typeof globalThis !== 'undefined') {
+    (globalThis as any).glState = glState
+  }
+
   // Signal that GL initialization is complete
   isGLInitialized.value = true
 
@@ -382,21 +398,21 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       rgbDistortionEnabled: crtConfig.rgbDistortion.enabled,
       rgbDistortionIntensity: crtConfig.rgbDistortion.enabled
         ? crtConfig.rgbDistortion.minIntensity +
-          (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
+        (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
         : 0,
 
       // Block corruption
       blockCorruptionEnabled: crtConfig.blockCorruption.enabled,
       blockCorruptionRate: crtConfig.blockCorruption.enabled
         ? crtConfig.blockCorruption.minRate +
-          (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
+        (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
         : 0,
 
       // White noise
       whiteNoiseEnabled: crtConfig.whiteNoise.enabled,
       whiteNoiseIntensity: crtConfig.whiteNoise.enabled
         ? crtConfig.whiteNoise.minIntensity +
-          (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
+        (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
         : 0,
 
       // Wave noise
@@ -408,25 +424,25 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       // Static intensity
       staticIntensity: crtConfig.staticIntensity.enabled
         ? crtConfig.staticIntensity.minIntensity +
-          (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
+        (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
         : 0,
 
       // Large block corruption (only activate after threshold)
       largeBlockEnabled: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold,
       largeBlockIntensity: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold
         ? ((corruptionIntensity - crtConfig.largeBlockCorruption.startThreshold) / (1.0 - crtConfig.largeBlockCorruption.startThreshold)) *
-          crtConfig.largeBlockCorruption.maxIntensity
+        crtConfig.largeBlockCorruption.maxIntensity
         : 0,
 
       // Artifact noise (only activate after threshold)
       artifactNoiseEnabled: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold,
       artifactNoiseIntensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
         ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
-          crtConfig.artifactNoise.maxIntensity
+        crtConfig.artifactNoise.maxIntensity
         : 0,
       artifactBlockDensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
         ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
-          (crtConfig.artifactNoise.artifactBlockDensity ?? 0.7)
+        (crtConfig.artifactNoise.artifactBlockDensity ?? 0.7)
         : 0,
       artifactHeightJitter: crtConfig.artifactNoise.artifactHeightJitter,
       artifactHeightJitterMin: crtConfig.artifactNoise.artifactHeightJitterMin,

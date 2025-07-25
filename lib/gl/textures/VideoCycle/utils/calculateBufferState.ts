@@ -1,39 +1,26 @@
-// the buffer state input
-type BufferStateInput = {
-  // current video start time
-  readonly currentStartTime: number
-  // current video duration
-  readonly currentDuration: number
-  // current video element time
-  readonly currentVideoTime: number
-  // when transition should occur (0.0 to 1.0)
-  readonly transitionTriggerPoint: number
-  // whether next video is prepared
-  readonly isNextVideoPrepared: boolean
-}
-
-// the buffer state result
-type BufferStateResult = {
-  // elapsed time since video started
-  readonly elapsedTime: number
-  // progress through current video (0.0 to 1.0)
-  readonly progress: number
-  // whether video has looped
-  readonly hasLooped: boolean
-  // whether transition should occur
-  readonly shouldTransition: boolean
-  // whether next video should be prepared
-  readonly shouldPrepareNext: boolean
-  // time until next transition
-  readonly timeUntilTransition: number
-}
+import type { BufferState, BufferStateInput } from '../types.ts'
 
 /**
- * Calculates buffer state for video transitions
+ * Calculates buffer state to determine when to prepare next video and when to transition
  *
- * Pure function that determines when to swap video buffers
+ * This pure function determines the optimal timing for video preparation and transitions
+ * based on current playback progress and system state. It ensures smooth transitions
+ * by triggering next video preparation before the current segment ends.
+ *
+ * @param input - Buffer state calculation parameters
+ * @returns Buffer state with transition timing and progress information
+ *
+ * @example
+ * const bufferState = calculateBufferState({
+ *   currentStartTime: 2.5,
+ *   currentDuration: 5.0,
+ *   currentVideoTime: 4.0,
+ *   transitionTriggerPoint: 0.7,
+ *   isNextVideoPrepared: true
+ * })
+ * // Returns: { shouldPrepareNext: false, shouldTransition: true, playbackProgress: 0.6, timeRemaining: 1.5 }
  */
-export const calculateBufferState = (input: BufferStateInput): BufferStateResult => {
+export const calculateBufferState = (input: BufferStateInput): BufferState => {
   const {
     currentStartTime,
     currentDuration,
@@ -42,60 +29,37 @@ export const calculateBufferState = (input: BufferStateInput): BufferStateResult
     isNextVideoPrepared,
   } = input
 
-  const elapsedTime = currentVideoTime - currentStartTime
-  const hasLooped = currentVideoTime < currentStartTime
-  const progress = hasLooped ? 1.0 : Math.min(elapsedTime / currentDuration, 1.0)
+  // Handle edge case of zero duration
+  if (currentDuration <= 0) {
+    return {
+      shouldPrepareNext: false,
+      shouldTransition: isNextVideoPrepared,
+      playbackProgress: 1.0,
+      timeRemaining: 0.0,
+    }
+  }
 
-  const shouldTransition = hasLooped || (progress >= 1.0)
-  const shouldPrepareNext = !isNextVideoPrepared && (progress >= transitionTriggerPoint)
+  // Calculate the end time of the current segment
+  const segmentEndTime = currentStartTime + currentDuration
 
-  const timeUntilTransition = hasLooped ? 0 : Math.max(0, currentDuration - elapsedTime)
+  // Calculate progress within the current segment (0-1)
+  const segmentProgress = currentVideoTime < currentStartTime ? 0 : Math.min((currentVideoTime - currentStartTime) / currentDuration, 1)
+
+  // Calculate time remaining in the current segment
+  const timeRemaining = Math.max(segmentEndTime - currentVideoTime, 0)
+
+  // Determine if we should prepare the next video
+  // Prepare when we reach the trigger point and next video isn't ready yet
+  const shouldPrepareNext = segmentProgress >= transitionTriggerPoint && !isNextVideoPrepared
+
+  // Determine if we should transition to the next video
+  // Transition when segment is complete and next video is prepared
+  const shouldTransition = segmentProgress >= 1.0 && isNextVideoPrepared
 
   return {
-    elapsedTime,
-    progress,
-    hasLooped,
-    shouldTransition,
     shouldPrepareNext,
-    timeUntilTransition,
+    shouldTransition,
+    playbackProgress: segmentProgress,
+    timeRemaining,
   }
-}
-
-/**
- * Calculates optimal preparation timing for next video
- *
- * Returns when to start preparing next video (0.0 to 1.0 progress)
- */
-export const calculatePreparationTiming = (
-  currentDuration: number,
-  preparationTime: number = 1.0,
-): number => {
-  if (currentDuration <= preparationTime) return 0.5 // prepare halfway through short videos
-
-  const preparationProgress = 1.0 - (preparationTime / currentDuration)
-  return Math.max(0.3, preparationProgress) // never prepare before 30% through
-}
-
-/**
- * Calculates buffer opacity for smooth transitions
- *
- * Returns opacity values for active and hidden buffers
- */
-export const calculateBufferOpacity = (
-  transitionProgress: number,
-  baseOpacity: number = 0.78,
-): { activeOpacity: number; hiddenOpacity: number } => {
-  if (transitionProgress <= 0) {
-    return { activeOpacity: baseOpacity, hiddenOpacity: 0 }
-  }
-
-  if (transitionProgress >= 1) {
-    return { activeOpacity: 0, hiddenOpacity: baseOpacity }
-  }
-
-  // smooth crossfade
-  const activeOpacity = baseOpacity * (1 - transitionProgress)
-  const hiddenOpacity = baseOpacity * transitionProgress
-
-  return { activeOpacity, hiddenOpacity }
 }

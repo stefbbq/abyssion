@@ -16,9 +16,15 @@ export const getNewStartTimeAndDuration = (
   maxSegmentLength: number = 3,
   marginSeconds = 0.1,
 ): { startTime: number; duration: number } => {
+  // Check if video metadata is loaded
+  if (!video || video.readyState < 1) {
+    log.warn(lc.GL_VIDEO, 'Cannot calculate segment: video metadata not loaded (readyState:', video?.readyState || 'undefined', ')')
+    return { startTime: 0, duration: 0 }
+  }
+
   if (isNaN(video.duration) || video.duration <= 0) {
-    log.warn(lc.GL_VIDEO, 'Cannot calculate segment: video duration is not available')
-    return { startTime: 0, duration: video.duration || 0 }
+    log.warn(lc.GL_VIDEO, 'Cannot calculate segment: video duration is not available (duration:', video.duration, ')')
+    return { startTime: 0, duration: 0 }
   }
 
   const earliestStartTime = marginSeconds
@@ -60,8 +66,7 @@ export const getNewStartTimeAndDuration = (
   if (segmentEnd > video.duration - marginSeconds) {
     log.warn(
       lc.GL_VIDEO,
-      `Segment validation failed: ${startTime.toFixed(2)}s + ${duration.toFixed(2)}s = ${segmentEnd.toFixed(2)}s > ${
-        (video.duration - marginSeconds).toFixed(2)
+      `Segment validation failed: ${startTime.toFixed(2)}s + ${duration.toFixed(2)}s = ${segmentEnd.toFixed(2)}s > ${(video.duration - marginSeconds).toFixed(2)
       }s`,
     )
     // Fix the duration to fit

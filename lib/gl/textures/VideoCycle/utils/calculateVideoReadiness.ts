@@ -1,100 +1,67 @@
-// the video readiness state
-type VideoReadinessState = {
-  // whether video has enough data to play
-  readonly isReady: boolean
-  // video ready state value
-  readonly readyState: number
-  // whether video has valid duration
-  readonly hasValidDuration: boolean
-  // whether video has valid dimensions
-  readonly hasValidDimensions: boolean
-  // current time position
-  readonly currentTime: number
-  // video duration
-  readonly duration: number
-  // video dimensions
-  readonly dimensions: { width: number; height: number }
-}
-
-// the result of calculating video readiness
-type VideoReadinessResult = {
-  // the calculated readiness state
-  readonly readinessState: VideoReadinessState
-  // whether video is ready for playback
-  readonly canPlay: boolean
-  // whether video is ready for seeking
-  readonly canSeek: boolean
-  // whether video is fully loaded
-  readonly isFullyLoaded: boolean
-}
+import type { ReadinessInput, ReadinessState } from '../types.ts'
 
 /**
- * Calculates video readiness state for safe playback operations
- *
- * Pure function that determines if video is ready for various operations
+ * Calculates video readiness state to determine when system is ready for playback
+ * 
+ * This pure function determines when the video system has loaded enough videos
+ * to begin playback and transitions. It tracks loading progress and identifies
+ * the next video that should be loaded to maintain smooth operation.
+ * 
+ * @param input - Readiness calculation parameters including loaded videos and requirements
+ * @returns Readiness state with playback capability and next loading actions
+ * 
+ * @example
+ * const readiness = calculateVideoReadiness({
+ *   loadedVideos: [
+ *     { index: 0, filename: 'video1.mp4', url: '/videos/video1.mp4', loaded: true, duration: 30, element: videoEl1 },
+ *     { index: 1, filename: 'video2.mp4', url: '/videos/video2.mp4', loaded: true, duration: 25, element: videoEl2 },
+ *     { index: 2, filename: 'video3.mp4', url: '/videos/video3.mp4', loaded: false, duration: 0, element: null }
+ *   ],
+ *   minimumVideosRequired: 2,
+ *   currentlyLoading: ['video3.mp4']
+ * })
+ * // Returns: { isReadyForPlayback: true, canStartTransitions: true, nextVideoToLoad: null, loadingProgress: 0.67 }
  */
-export const calculateVideoReadiness = (video: HTMLVideoElement): VideoReadinessResult => {
-  const readinessState: VideoReadinessState = {
-    isReady: video.readyState >= 3, // HAVE_FUTURE_DATA
-    readyState: video.readyState,
-    hasValidDuration: !isNaN(video.duration) && video.duration > 0,
-    hasValidDimensions: video.videoWidth > 0 && video.videoHeight > 0,
-    currentTime: video.currentTime,
-    duration: video.duration || 0,
-    dimensions: {
-      width: video.videoWidth,
-      height: video.videoHeight,
-    },
+export const calculateVideoReadiness = (input: ReadinessInput): ReadinessState => {
+  const {
+    loadedVideos,
+    minimumVideosRequired,
+    currentlyLoading
+  } = input
+
+  // Count successfully loaded videos
+  const loadedCount = loadedVideos.filter(video => video.loaded).length
+  const totalVideos = loadedVideos.length
+
+  // Calculate loading progress (0-1)
+  const loadingProgress = totalVideos === 0 ? 0 : loadedCount / totalVideos
+
+  // Determine if ready for initial playback
+  const isReadyForPlayback = loadedCount >= minimumVideosRequired
+
+  // Determine if ready for smooth transitions (need at least 2 loaded videos)
+  const canStartTransitions = loadedCount >= Math.max(2, minimumVideosRequired)
+
+  // Find next video to load
+  let nextVideoToLoad: string | null = null
+
+  // Only suggest next video if we're not already loading too many
+  if (currentlyLoading.length < 2) {
+    // Find first unloaded video that's not currently being loaded
+    const currentlyLoadingSet = new Set(currentlyLoading)
+    
+    for (const video of loadedVideos) {
+      if (!video.loaded && !currentlyLoadingSet.has(video.filename)) {
+        nextVideoToLoad = video.filename
+        break
+      }
+    }
   }
-
-  const canPlay = readinessState.isReady &&
-    readinessState.hasValidDuration &&
-    readinessState.hasValidDimensions
-
-  const canSeek = readinessState.readyState >= 2 && // HAVE_CURRENT_DATA
-    readinessState.hasValidDuration
-
-  const isFullyLoaded = readinessState.readyState === 4 // HAVE_ENOUGH_DATA
 
   return {
-    readinessState,
-    canPlay,
-    canSeek,
-    isFullyLoaded,
-  }
-}
-
-/**
- * Calculates if video is ready for immediate playback without delays
- *
- * Stricter readiness check for smooth video transitions
- */
-export const calculateImmediatePlaybackReadiness = (video: HTMLVideoElement): boolean => {
-  const { canPlay, isFullyLoaded } = calculateVideoReadiness(video)
-  return canPlay && isFullyLoaded
-}
-
-/**
- * Calculates wait time needed for video to become ready
- *
- * Returns estimated wait time in milliseconds
- */
-export const calculateVideoWaitTime = (video: HTMLVideoElement): number => {
-  const { readinessState } = calculateVideoReadiness(video)
-
-  if (readinessState.isReady) return 0
-
-  // estimate based on ready state
-  switch (readinessState.readyState) {
-    case 0:
-      return 2000 // HAVE_NOTHING
-    case 1:
-      return 1500 // HAVE_METADATA
-    case 2:
-      return 1000 // HAVE_CURRENT_DATA
-    case 3:
-      return 500 // HAVE_FUTURE_DATA
-    default:
-      return 0
+    isReadyForPlayback,
+    canStartTransitions,
+    nextVideoToLoad,
+    loadingProgress
   }
 }
