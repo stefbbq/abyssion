@@ -5,8 +5,8 @@
     "maxSegmentLength": 6,
     "playbackSpeed": 1,
     "antiRepeat": 2,
-    "videoSwapTimeoutMs": 3000,
-    "videoLoadTimeoutMs": 10000
+    "videoSwapTimeoutMS": 3000,
+    "videoLoadTimeoutMS": 10000
   },
   "appearance": {
     "opacity": 1

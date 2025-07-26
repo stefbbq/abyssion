@@ -1,87 +1,19 @@
-import { pipe } from '@lib/utils/pipe.ts'
-import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
-
-// the video source calculation input
-type VideoSourceInput = {
-  // current video manifest index
-  readonly currentIndex: number
-  // recently played video indices to avoid
-  readonly recentIndices: readonly number[]
-  // manifest of available video files
-  readonly manifest: readonly string[]
-  // base video path
-  readonly basePath: string
-}
-
-// the result of calculating next video source
-type VideoSourceResult = {
-  // the calculated manifest index to load
-  readonly manifestIndex: number
-  // the full video file path
-  readonly videoPath: string
-  // the video filename
-  readonly filename: string
-  // updated recent indices including this selection
-  readonly updatedRecentIndices: readonly number[]
-}
-
 /**
+ * @description
  * Calculates which video source to load next based on anti-repetition rules
  *
- * Pure function that determines next video index avoiding recent selections
+ * @param input - The input object containing the current index, recent indices, manifest, and base path
+ * @returns The video source result object containing the manifest index, video path, filename, and updated recent indices
  */
-export const calculateNextVideoSource = (input: VideoSourceInput): VideoSourceResult => {
-  const { currentIndex, recentIndices, manifest, basePath } = input
-  const { cycling: { antiRepeat } } = videoCycleConfig
+export const selectNextVideoIndex = (availableIndecies: readonly number[], indeciesToAvoid: readonly number[] = []): number => {
+  const selectableIndecies = availableIndecies.filter((index) => !indeciesToAvoid.includes(index))
 
-  if (manifest.length === 0) {
-    return {
-      manifestIndex: 0,
-      videoPath: '',
-      filename: '',
-      updatedRecentIndices: recentIndices,
-    }
-  }
+  // if there are no videos, throw
+  if (selectableIndecies.length === 0) throw new Error('No videos found')
 
-  if (manifest.length === 1) {
-    return {
-      manifestIndex: 0,
-      videoPath: `${basePath}${manifest[0]}`,
-      filename: manifest[0],
-      updatedRecentIndices: [0],
-    }
-  }
+  // if there is only one video, return that video
+  if (selectableIndecies.length === 1) return selectableIndecies[0]
 
-  const calculateAvoidIndices = (current: number, recent: readonly number[]): readonly number[] => [current, ...recent].slice(0, antiRepeat)
-
-  const selectRandomIndex = (avoid: readonly number[], total: number): number => {
-    if (avoid.length >= total - 1) {
-      // fallback: just avoid current index
-      let nextIndex: number
-      do {
-        nextIndex = Math.floor(Math.random() * total)
-      } while (nextIndex === currentIndex)
-      return nextIndex
-    }
-
-    let nextIndex: number
-    do {
-      nextIndex = Math.floor(Math.random() * total)
-    } while (avoid.includes(nextIndex))
-
-    return nextIndex
-  }
-
-  const updateRecentIndices = (recent: readonly number[], newIndex: number): readonly number[] => [newIndex, ...recent].slice(0, antiRepeat)
-
-  return pipe(
-    calculateAvoidIndices(currentIndex, recentIndices),
-    (avoidIndices) => selectRandomIndex(avoidIndices, manifest.length),
-    (selectedIndex) => ({
-      manifestIndex: selectedIndex,
-      videoPath: `${basePath}${manifest[selectedIndex]}`,
-      filename: manifest[selectedIndex],
-      updatedRecentIndices: updateRecentIndices(recentIndices, selectedIndex),
-    }),
-  )
+  // if there are multiple videos, select a random index
+  return selectableIndecies[Math.floor(Math.random() * selectableIndecies.length)]
 }
