@@ -29,12 +29,16 @@ export const updateVideoPool = async (
   videoPool: VideoPool,
   countToLoad: number = 3,
 ): Promise<VideoPool> => {
-  log.debug(lc.GL_VIDEO, `Updating video pool with ${countToLoad} videos`)
-  log.debug(lc.GL_VIDEO, 'Manifest', videoPool.manifest)
+  log.trace(lc.GL_VIDEO, `Updating video pool with %c${countToLoad} video(s)%c`, 'font-weight: bold', 'font-weight: normal')
+  log.trace(lc.GL_VIDEO, `Videos remaining in manifest: %c${videoPool.manifest.length}%c`, 'font-weight: bold', 'font-weight: normal')
 
   const newVideos: HTMLVideoElement[] = Array.from({ length: countToLoad }, (_, i) => {
-    log.debug(lc.GL_VIDEO, `Creating video ${i + 1} of ${countToLoad}`)
-    log.debug(lc.GL_VIDEO, `Video path: ${videoPool.manifest[i]}`)
+    log.trace(
+      lc.GL_VIDEO,
+      `Creating video ${i + 1} of ${countToLoad} with path %c${videoPool.manifest[i]}%c`,
+      'font-weight: bold',
+      'font-weight: normal',
+    )
 
     const video = document.createElement('video')
     video.autoplay = false

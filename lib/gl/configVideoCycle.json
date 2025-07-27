@@ -2,7 +2,7 @@
   "enabled": true,
   "cycling": {
     "minSegmentLength": 2,
-    "maxSegmentLength": 6,
+    "maxSegmentLength": 4,
     "playbackSpeed": 1,
     "antiRepeat": 2,
     "videoSwapTimeoutMS": 3000,

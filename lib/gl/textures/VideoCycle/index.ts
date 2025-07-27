@@ -62,7 +62,10 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     timeout: number = 2000,
   ): Promise<boolean> => {
     try {
-      log.debug(lc.GL_VIDEO, `Seeking to ${targetTime.toFixed(2)}s (current: ${video.currentTime.toFixed(2)}s)`)
+      log.debug(
+        lc.GL_VIDEO,
+        `Seeking to ${targetTime.toFixed(2)}s (current: ${video.currentTime.toFixed(2)}s) with timeout: ${timeout}ms`,
+      )
 
       // If already at target time (within 0.1s), no need to seek
       if (Math.abs(video.currentTime - targetTime) < 0.1) {
@@ -102,7 +105,20 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
 
       return true
     } catch (error) {
-      log.error(lc.GL_VIDEO, `Failed to seek video to ${targetTime.toFixed(2)}s:`, error)
+      log.error(
+        lc.GL_VIDEO,
+        `Failed to seek video to ${targetTime.toFixed(2)}s:`,
+        error,
+        {
+          currentTime: video.currentTime,
+          readyState: video.readyState,
+          networkState: video.networkState,
+          error: video.error,
+          timeout,
+          type: error?.type,
+          message: error?.message,
+        },
+      )
       return false
     }
   }
@@ -121,8 +137,8 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
   }
   let activeBuffer: BufferObject = frontBuffer
   let hiddenBuffer: BufferObject = backBuffer
-  let nextVideoInterval
-  let isTransitioning = false
+  let nextVideoStartTime = new Date().getTime()
+  let bufferSwapTime = new Date().getTime() + 100
   let isLoading = false
   let initalized = false
 
@@ -131,6 +147,7 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     // Load manifest
     videoPool.manifest = await getManifest(manifestPath)
     log.debug(lc.GL_VIDEO, 'Manifest loaded:', videoPool.manifest)
+
     if (videoPool.manifest.length === 0) {
       log.error(lc.GL_VIDEO, 'No videos found in manifest')
       return
@@ -152,9 +169,6 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
       isNextVideoPrepared: false,
     }
 
-    // Set initial buffer opacity
-    activeBuffer.material.opacity = opacity
-    activeBuffer.material.needsUpdate = true
     log(lc.GL_TEXTURES, `Video cycle initialized with ${videoPool.manifest.length} videos`)
 
     // Wait for videos to load
@@ -162,7 +176,7 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
   }
 
   // Start playback with first video
-  const selectNextVideoAndPlay = async (): Promise<void> => {
+  const selectNextVideoAndPlay = async (buffer: BufferObject): Promise<void> => {
     // Check if playback has already started or no videos were found
     if (videoPool.videos.length === 0) {
       log.warn(lc.GL_VIDEO, 'No videos were found')
@@ -170,24 +184,20 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     }
 
     try {
-      log.debug(lc.GL_VIDEO, `Starting video playback`)
-      isTransitioning = true
-
-      // Select the first video to play
+      // Select a video to play
       const index = selectNextVideoIndex(videoPool.videos.map((_, index) => index), [])
-      log.debug(lc.GL_VIDEO, `First video source: ${index}, ${videoPool.videos[index].src}`)
-
       const activeVideo = videoPool.videos[index]
       const activeTexture = videoPool.textures[index]
 
       // Calculate segment timing
       const timing = getNewStartTimeAndDuration(activeVideo, minSegmentLength, maxSegmentLength)
+      nextVideoStartTime = new Date().getTime() + timing.duration * 1000 - 100
 
       // Seek to start time
-      const seekSuccess = await seekVideoSafely(activeVideo, timing.startTime)
+      const timeUntilNextVideo = Math.max(0, nextVideoStartTime - Date.now())
+      const seekSuccess = await seekVideoSafely(activeVideo, timing.startTime, timeUntilNextVideo)
       if (!seekSuccess) {
         log.error(lc.GL_VIDEO, 'Failed to seek to start time')
-        isTransitioning = false
         return
       }
 
@@ -195,19 +205,12 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
       const playSuccess = await playVideoSafely(activeVideo)
       if (!playSuccess) {
         log.error(lc.GL_VIDEO, 'Failed to start video playback')
-        isTransitioning = false
         return
       }
 
       // Update buffer material
-      if ('uniforms' in activeBuffer.material) {
-        activeBuffer.material.uniforms.videoTexture.value = activeTexture
-        activeBuffer.material.uniforms.opacity.value = opacity
-      } else {
-        activeBuffer.material.map = activeTexture
-        activeBuffer.material.opacity = opacity
-      }
-      activeBuffer.material.needsUpdate = true
+      buffer.material.uniforms.videoTexture.value = activeTexture
+      buffer.material.needsUpdate = true
 
       // Update playback state
       playbackState = {
@@ -220,11 +223,9 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
         timeSinceSwitch: 0,
       }
 
-      log.debug(lc.GL_TEXTURES, `Started playback with video ${index}`)
-      isTransitioning = false
+      log.trace(lc.GL_TEXTURES, `Started playback with video ${index}`)
     } catch (error) {
       log.error(lc.GL_TEXTURES, 'Error starting playback:', error)
-      isTransitioning = false
     }
   }
 
@@ -234,49 +235,41 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     if (!isLoading && videoPool.manifest.length > 0) {
       isLoading = true
       videoPool = await updateVideoPool(videoPool, 1)
+      log.trace(lc.GL_VIDEO, `Video pool updated with %c${videoPool.videos.length}%c videos`, 'font-weight: bold', 'font-weight: normal')
       isLoading = false
     }
 
-    // log.debug(lc.GL_VIDEO, 'Updating video cycle')
-    // if (!enabled || !playbackState.isPlaying || isTransitioning) return
+    // start next video in hidden buffer
+    if (new Date().getTime() > nextVideoStartTime) {
+      log.debug(
+        lc.GL_VIDEO,
+        `Starting next video in hidden buffer at %c${new Date().getTime().toString().slice(-5)}%c`,
+        'font-weight: bold',
+        'font-weight: normal',
+      )
+      await selectNextVideoAndPlay(hiddenBuffer)
+    }
 
-    // const activeVideo = videoPool.videos[videoPool.activeIndex]
-    // if (!activeVideo) {
-    //   log.warn(lc.GL_VIDEO, 'No active video found in update loop')
-    //   return
-    // }
+    // switch buffers
+    if (new Date().getTime() > bufferSwapTime) {
+      log.debug(
+        lc.GL_VIDEO,
+        `Switching buffers at %c${new Date().getTime().toString().slice(-5)}%c`,
+        'font-weight: bold',
+        'font-weight: normal',
+      )
+      const tempBuffer: BufferObject = activeBuffer
+      activeBuffer = hiddenBuffer
+      hiddenBuffer = tempBuffer
 
-    // // Calculate buffer state
-    // const bufferState = calculateBufferState({
-    //   currentStartTime: playbackState.currentStartTime,
-    //   currentDuration: playbackState.currentDuration,
-    //   currentVideoTime: activeVideo.currentTime,
-    //   transitionTriggerPoint: calculatePreparationTiming(playbackState.currentDuration),
-    //   isNextVideoPrepared: playbackState.isNextVideoPrepared,
-    // })
+      activeBuffer.material.uniforms.opacity.value = opacity
+      hiddenBuffer.material.uniforms.opacity.value = 0
 
-    // // Update timing
-    // playbackState = {
-    //   ...playbackState,
-    //   timeSinceSwitch: bufferState.elapsedTime * 1000,
-    // }
+      activeBuffer.material.needsUpdate = true
+      hiddenBuffer.material.needsUpdate = false
 
-    // // Prepare next video if needed
-    // if (bufferState.shouldPrepareNext) {
-    //   log.debug(lc.GL_VIDEO, `Preparing next video at ${(bufferState.progress * 100).toFixed(1)}% progress`)
-    //   await prepareNextVideo()
-    // }
-
-    // // Transition if needed
-    // if (bufferState.shouldTransition) {
-    //   log.debug(
-    //     lc.GL_VIDEO,
-    //     `Video transition triggered: ${bufferState.hasLooped ? 'looped' : 'duration exceeded'} (progress: ${
-    //       (bufferState.progress * 100).toFixed(1)
-    //     }%)`,
-    //   )
-    //   await transitionToNext()
-    // }
+      bufferSwapTime = nextVideoStartTime + 200
+    }
   }
 
   /**
@@ -325,7 +318,6 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
       // nextPreparedVideoName: playbackState?.isNextVideoPrepared
       //   ? videoPool?.videos[videoPool.nextIndex]?.src?.split('/').pop() || null
       //   : null,
-      isTransitioning,
       loadingProgress: {
         loaded: 3, // Always 3 video elements in pool
         total: videoPool.manifest.length || 0,
@@ -339,9 +331,10 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
 
     if (initalized) {
       log.debug(lc.GL_VIDEO, 'Video cycle initialized with videos preloaded: ', videoPool.videos)
-      await selectNextVideoAndPlay()
+      await selectNextVideoAndPlay(activeBuffer)
     } else {
-      log.warn(lc.GL_VIDEO, 'Video cycle not initialized or preloaded')
+      log.error(lc.GL_VIDEO, 'Video cycle not initialized or preloaded')
+      throw new Error('Video cycle cannot proceed without initialization')
     }
   })()
 

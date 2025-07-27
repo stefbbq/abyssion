@@ -35,6 +35,7 @@ export type LogFunction = {
   error: (ctx: LogContext | null, ...args: unknown[]) => void
   critical: (ctx: LogContext | null, ...args: unknown[]) => void
   group: (ctx: LogContext | null, ...args: unknown[]) => void
+  groupCollapsed: (ctx: LogContext | null, ...args: unknown[]) => void
   groupEnd: () => void
 }
 
@@ -69,6 +70,7 @@ export const createClientLogger = (
     else if (level === 'info') method = 'log'
     else if (level === 'trace') method = 'log'
     else if (level === 'group') method = 'group'
+    else if (level === 'groupCollapsed') method = 'groupCollapsed'
     else method = level as keyof Console
     if (typeof con[method] !== 'function') method = 'log'
 
@@ -80,6 +82,8 @@ export const createClientLogger = (
     // Output to console with proper typing
     const consoleMethod = con[method] as (...args: unknown[]) => void
     if (args[0] && typeof args[0] === 'string') {
+      // Debug: log the arguments being passed to the console
+      // console.log('LOGGER DEBUG:', `${prefix} ${args[0]}`, cStyle, lStyle, ...args.slice(1))
       consoleMethod(`${prefix} ${args[0]}`, cStyle, lStyle, ...args.slice(1))
     } else {
       consoleMethod(prefix, cStyle, 'color: inherit;', ...args)
@@ -100,6 +104,7 @@ export const createClientLogger = (
   log.critical = (ctx: LogContext | null, ...args: unknown[]): void => _log('critical', ctx, ...args)
 
   // Grouping methods
+  log.groupCollapsed = (ctx: LogContext | null, ...args: unknown[]): void => _log('group', ctx, ...args)
   log.group = (ctx: LogContext | null, ...args: unknown[]): void => _log('group', ctx, ...args)
   log.groupEnd = (): void => globalThis.console.groupEnd()
 

@@ -26,21 +26,37 @@ export const getNewStartTimeAndDuration = (
   const maxDurationTime = video.duration - marginSeconds * 2
 
   const startTime = Math.random() * (latestStartTime - earliestStartTime) + earliestStartTime
-  let duration = Math.random() * (maxSegmentLength - minSegmentLength) + minSegmentLength
+  let duration = Number((Math.random() * (maxSegmentLength - minSegmentLength) + minSegmentLength).toFixed(2))
+  const originalDuration = duration
 
-  if (duration + startTime > latestStartTime) duration = minSegmentLength
+  if (duration + startTime > video.duration - marginSeconds) duration = minSegmentLength
 
-  log.group(lc.GL_VIDEO, 'getNewStartTimeAndDuration')
-  log.debug(lc.GL_VIDEO, 'video.duration', video.duration)
-  log.debug(lc.GL_VIDEO, 'earliestStartTime', earliestStartTime)
-  log.debug(lc.GL_VIDEO, 'minSegmentLength', minSegmentLength)
-  log.debug(lc.GL_VIDEO, 'maxSegmentLength', maxSegmentLength)
-  log.debug(lc.GL_VIDEO, 'maxDurationTime', maxDurationTime)
-  log.debug(lc.GL_VIDEO, 'latestStartTime', latestStartTime)
-  log.groupEnd()
-
-  log.debug(lc.GL_VIDEO, 'generated duration', duration)
-  log.debug(lc.GL_VIDEO, 'generated startTime', startTime)
+  // log.groupCollapsed(lc.GL_VIDEO, 'getNewStartTimeAndDuration')
+  log.trace(
+    lc.GL_VIDEO,
+    `video duration max: %c${video.duration.toFixed(2)}%c, calculated max: %c${maxDurationTime.toFixed(2)}%c and latest start time: %c${
+      latestStartTime.toFixed(2)
+    }%c`,
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+  )
+  log.trace(
+    lc.GL_VIDEO,
+    `generated duration: %c${duration.toFixed(2)}%c vs original: %c${originalDuration.toFixed(2)}%c, generated start time: %c${
+      startTime.toFixed(2)
+    }%c`,
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+    'font-weight: bold',
+    'font-weight: normal; color: #aaa',
+  )
+  // log.groupEnd()
 
   // If even the minimum length can't fit, return whatever could work
   if (maxDurationTime < minSegmentLength) {
@@ -70,6 +86,8 @@ export const getNewStartTimeAndDuration = (
     return { startTime, duration: safeDuration }
   }
 
-  log.debug(lc.GL_VIDEO, `Calculated segment: ${startTime.toFixed(2)}s for ${duration.toFixed(2)}s`)
-  return { startTime, duration }
+  return {
+    startTime: Number(startTime.toFixed(2)),
+    duration: Number(duration.toFixed(2)),
+  }
 }
