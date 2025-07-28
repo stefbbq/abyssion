@@ -1,4 +1,24 @@
 import * as Three from 'three'
+import type { Mesh } from 'three'
+import type { VideoPool } from './utils/updateVideoPool.ts'
+
+/**
+ * Video cycle manager API type
+ */
+export type VideoBackgroundManager = {
+  // RAF update function
+  readonly update: (_delta: number) => void
+  // dispose function
+  readonly dispose: () => void
+  // video texture mesh
+  readonly mesh: Mesh
+  // handle resize function
+  readonly handleResize: () => void
+  // update theme colors function in real-time
+  readonly updateThemeColors?: () => void
+  // get debug information function
+  readonly getDebugInfo?: () => VideoCycleDebugInfo
+}
 
 /**
  * Represents a video element paired with its corresponding Three.js texture
@@ -66,4 +86,43 @@ export type BufferObject = {
   _plannedVideoIndex?: number
   /** Actual time when playback started */
   _playStartTime?: number
+}
+
+// Video cycle debug information
+export type VideoCycleDebugInfo = {
+  // whether a video is playing
+  isPlaying: boolean
+  // number in the manifest
+  currentVideoIndex: number
+  // name of the current video
+  currentVideoName: string
+  // source of the current video
+  currentVideoSrc: string
+  // time since the last video switch
+  timeSinceSwitch: number // in milliseconds
+  // duration of the current video
+  currentDuration: number // in seconds (visible segment duration)
+  // duration of the current video
+  fullVideoDuration: number // in seconds (actual video file duration)
+  // start time of the current video
+  videoStartTime: number // in seconds (where the visible segment starts)
+  // total number of videos in the manifest
+  totalVideos: number
+  // recent indices of the videos
+  recentIndices: readonly number[]
+  // index of the next prepared video
+  nextPreparedIndex: number | null
+  // name of the next prepared video
+  nextPreparedVideoName: string | null
+  // loading progress of the videos
+  loadingProgress: VideoCycleLoadingProgress
+}
+
+export type VideoCycleLoadingProgress = {
+  // number of videos loaded
+  loaded: number
+  // total number of videos in the manifest
+  total: number
+  // whether there are more videos to load
+  hasMoreToLoad: boolean
 }

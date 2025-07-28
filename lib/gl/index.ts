@@ -23,7 +23,7 @@ import {
   setupResponsiveHandling,
   setupTextureLoading,
 } from './setup/index.ts'
-import type { VideoBackgroundManager } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
 import { getScrollCorruptionProgress } from './scene/utils/getScrollCorruptionProgress.ts'
 import { ShaderMaterial } from 'three'

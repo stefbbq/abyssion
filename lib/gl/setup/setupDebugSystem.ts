@@ -3,7 +3,8 @@ import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene } from '@libgl/configScene.types.ts'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
-import type { RendererState, VideoDebugInfo } from '@libgl/types.ts'
+import type { RendererState } from '@libgl/types.ts'
+import type { VideoCycleDebugInfo } from '@libgl/textures/VideoCycle/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import { rgbToHex } from '@lib/theme/colorUtils/rgbToHex.ts'
@@ -319,7 +320,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       videoInfo = [
         `<b>Video Background:</b>`,
         `<b>Current:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}`,
-        `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'} ${vDebug.isTransitioning ? '(Transitioning)' : ''}`,
+        `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'}`,
         `<b>Segment:</b> ${(vDebug.timeSinceSwitch / 1000).toFixed(1)}s / ${vDebug.currentDuration.toFixed(1)}s (${
           segmentProgress.toFixed(1)
         }%)`,
@@ -364,7 +365,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
   }
 
   // Create a visual progress bar showing video segment within full video
-  const createVideoProgressBar = (vDebug: VideoDebugInfo) => {
+  const createVideoProgressBar = (vDebug: VideoCycleDebugInfo) => {
     const barWidth = 40 // characters
 
     // Calculate positions within the full video (0-1 range)

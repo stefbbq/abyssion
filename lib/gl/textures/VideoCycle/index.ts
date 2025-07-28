@@ -1,24 +1,25 @@
 import ms from 'ms'
+import * as THREE from 'three'
 
 import { lc, log } from '@lib/logger/index.ts'
 import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
-import type { VideoBackgroundManager } from '@libgl/types.ts'
-import type { BufferObject, PlaybackState, VideoDebugInfo } from './types.ts'
+import type { BufferObject, PlaybackState, VideoBackgroundManager } from './types.ts'
 import { selectNextVideoIndex } from './utils/calculateNextVideoSource.ts'
 // import { calculateBufferState, calculatePreparationTiming } from './utils/calculateBufferState.ts'
 import { getNewStartTimeAndDuration } from './utils/getNewStartTimeAndDuration.ts'
 import { updateVideoPool, type VideoPool } from './utils/updateVideoPool.ts'
 import { getManifest } from './utils/getManifest.ts'
+import { getDebugInfo } from './utils/getDebugInfo.ts'
 
 /**
  * Creates an efficient video cycle system with 2-3 video elements maximum
  *
  * Uses pure utility functions for calculations and keeps Three.js mutations isolated
  */
-export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferObject): Promise<VideoBackgroundManager> => {
+export const createVideoCycle = async (frontBuffer: BufferObject, backBuffer: BufferObject): Promise<VideoBackgroundManager> => {
   const {
     enabled,
-    cycling: { minSegmentLength, maxSegmentLength, antiRepeat, videoSwapTimeoutMS, videoLoadTimeoutMS },
+    cycling: { minSegmentLength, maxSegmentLength, antiRepeat, videoSwapTimeoutMS },
     appearance: { opacity },
     videos: { path: manifestPath },
   } = videoCycleConfig
@@ -123,8 +124,19 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     }
   }
 
-  // Initialize state
+  // Initialize global vars
   let videoPool: VideoPool = { videos: [], textures: [], manifest: [] }
+  let activeBuffer: BufferObject = frontBuffer
+  let hiddenBuffer: BufferObject = backBuffer
+  let activeVideo: HTMLVideoElement
+  let nextVideoIndex: number
+  let activeTexture: THREE.Texture
+  let nextVideoStartTime = new Date().getTime()
+  let bufferSwapTime = new Date().getTime() + 200
+  let isLoading = false
+  let isInitialized = false
+
+  // Initialize state
   let playbackState: PlaybackState = {
     videoPool,
     currentManifestIndex: -1,
@@ -135,16 +147,15 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     isPlaying: false,
     isNextVideoPrepared: false,
   }
-  let activeBuffer: BufferObject = frontBuffer
-  let hiddenBuffer: BufferObject = backBuffer
-  let nextVideoStartTime = new Date().getTime()
-  let bufferSwapTime = new Date().getTime() + 100
-  let isLoading = false
-  let initalized = false
 
-  // Initialize the system
+  /**
+   * @description
+   * Initializes the video cycle system by loading the manifest and creating the video pool
+   *
+   * @returns {void}
+   */
   const initialize = async (): Promise<void> => {
-    // Load manifest
+    // load manifest
     videoPool.manifest = await getManifest(manifestPath)
     log.debug(lc.GL_VIDEO, 'Manifest loaded:', videoPool.manifest)
 
@@ -153,84 +164,105 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
       return
     }
 
-    // Create initial video pool
+    // create initial video pool
     videoPool = await updateVideoPool(videoPool)
     log.debug(lc.GL_VIDEO, 'Video pool created:', videoPool)
 
-    // Initialize playback state
-    playbackState = {
-      videoPool,
-      currentManifestIndex: -1,
-      recentIndices: [],
-      timeSinceSwitch: 0,
-      currentDuration: 0,
-      currentStartTime: 0,
-      isPlaying: false,
-      isNextVideoPrepared: false,
-    }
+    // update playback state
+    playbackState = { ...playbackState, videoPool }
 
     log(lc.GL_TEXTURES, `Video cycle initialized with ${videoPool.manifest.length} videos`)
 
-    // Wait for videos to load
-    initalized = true
+    // wait for videos to load
+    isInitialized = true
   }
 
-  // Start playback with first video
-  const selectNextVideoAndPlay = async (buffer: BufferObject): Promise<void> => {
-    // Check if playback has already started or no videos were found
+  /**
+   * @description
+   * Selects the next video and seeks to the start time
+   * We do this to ensure that the next video is ready to play when the buffer is swapped 🤞
+   *
+   * @returns {boolean}
+   */
+  const selectNextVideoAndSeek = async (): Promise<boolean> => {
+    // check if playback has already started or no videos were found
     if (videoPool.videos.length === 0) {
       log.warn(lc.GL_VIDEO, 'No videos were found')
-      return
+      return false
+    }
+
+    // select a video to play
+    const index = selectNextVideoIndex(videoPool.videos.map((_, index) => index), [])
+    nextVideoIndex = index
+
+    // calculate segment timing
+    const timing = getNewStartTimeAndDuration(videoPool.videos[nextVideoIndex], minSegmentLength, maxSegmentLength)
+    nextVideoStartTime = new Date().getTime() + timing.duration * 1000 - 100
+
+    // seek to start time
+    const timeUntilNextVideo = Math.max(0, nextVideoStartTime - Date.now())
+    const seekSuccess = await seekVideoSafely(videoPool.videos[nextVideoIndex], timing.startTime, timeUntilNextVideo)
+    if (!seekSuccess) {
+      log.error(lc.GL_VIDEO, 'Failed to seek to start time')
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * @description
+   * Plays the next video in the buffer and updates the buffer material
+   *
+   * @param buffer the buffer to play the video in (usually the hidden buffer)
+   * @returns {boolean}
+   */
+  const playNextVideo = async (buffer: BufferObject): Promise<boolean> => {
+    if (!nextVideoIndex) {
+      log.warn(lc.GL_VIDEO, 'No next video found')
+      return false
     }
 
     try {
-      // Select a video to play
-      const index = selectNextVideoIndex(videoPool.videos.map((_, index) => index), [])
-      const activeVideo = videoPool.videos[index]
-      const activeTexture = videoPool.textures[index]
+      activeVideo = videoPool.videos[nextVideoIndex]
+      activeTexture = videoPool.textures[nextVideoIndex]
 
-      // Calculate segment timing
-      const timing = getNewStartTimeAndDuration(activeVideo, minSegmentLength, maxSegmentLength)
-      nextVideoStartTime = new Date().getTime() + timing.duration * 1000 - 100
-
-      // Seek to start time
-      const timeUntilNextVideo = Math.max(0, nextVideoStartTime - Date.now())
-      const seekSuccess = await seekVideoSafely(activeVideo, timing.startTime, timeUntilNextVideo)
-      if (!seekSuccess) {
-        log.error(lc.GL_VIDEO, 'Failed to seek to start time')
-        return
-      }
-
-      // Start playing
+      // start playing
       const playSuccess = await playVideoSafely(activeVideo)
       if (!playSuccess) {
         log.error(lc.GL_VIDEO, 'Failed to start video playback')
-        return
+        return false
       }
 
-      // Update buffer material
+      // update buffer material
       buffer.material.uniforms.videoTexture.value = activeTexture
       buffer.material.needsUpdate = true
 
-      // Update playback state
-      playbackState = {
-        ...playbackState,
-        currentManifestIndex: index,
-        recentIndices: [index],
-        currentDuration: timing.duration,
-        currentStartTime: timing.startTime,
-        isPlaying: true,
-        timeSinceSwitch: 0,
-      }
-
-      log.trace(lc.GL_TEXTURES, `Started playback with video ${index}`)
+      log.trace(lc.GL_TEXTURES, `Started playback with video ${activeVideo.src}`)
     } catch (error) {
       log.error(lc.GL_TEXTURES, 'Error starting playback:', error)
+      return false
     }
+
+    return true
   }
 
-  // Main update loop
+  /**
+   * @description
+   * Main update loop, runs each frame
+   *
+   * This function is responsible for:
+   * - Loading more videos until the list of unloaded videos is empty
+   * - Starting the next video in the hidden buffer
+   * - Swapping active/hidden buffers
+   * - Updating the buffer material
+   *
+   * @param _delta the delta time
+   * @returns {void}
+   */
   const update = async (_delta: number): Promise<void> => {
+    if (!isInitialized) return
+
     // load more videos until all are exhaused
     if (!isLoading && videoPool.manifest.length > 0) {
       isLoading = true
@@ -247,7 +279,8 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
         'font-weight: bold',
         'font-weight: normal',
       )
-      await selectNextVideoAndPlay(hiddenBuffer)
+      await playNextVideo(hiddenBuffer)
+      await selectNextVideoAndSeek()
     }
 
     // switch buffers
@@ -259,13 +292,13 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
         'font-weight: normal',
       )
       const tempBuffer: BufferObject = activeBuffer
+
       activeBuffer = hiddenBuffer
-      hiddenBuffer = tempBuffer
-
       activeBuffer.material.uniforms.opacity.value = opacity
-      hiddenBuffer.material.uniforms.opacity.value = 0
-
       activeBuffer.material.needsUpdate = true
+
+      hiddenBuffer = tempBuffer
+      hiddenBuffer.material.uniforms.opacity.value = 0
       hiddenBuffer.material.needsUpdate = false
 
       bufferSwapTime = nextVideoStartTime + 200
@@ -291,47 +324,18 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     })
 
     videoPool.textures.forEach((texture) => texture.dispose())
-  }
-
-  /**
-   * @description
-   * This function returns debug info for the video cycle
-   *
-   * @returns {VideoDebugInfo}
-   */
-  const getDebugInfo = (): VideoDebugInfo => {
-    const activeVideo = playbackState.currentManifestIndex !== -1 ? videoPool.videos[playbackState.currentManifestIndex] : null
-    const currentVideoName = activeVideo?.src?.split('/').pop() || 'Unknown'
-
-    return {
-      isPlaying: playbackState?.isPlaying || false,
-      currentVideoIndex: playbackState?.currentManifestIndex || -1,
-      currentVideoName,
-      currentVideoSrc: activeVideo?.src || '',
-      timeSinceSwitch: playbackState?.timeSinceSwitch || 0,
-      currentDuration: playbackState?.currentDuration || 0,
-      fullVideoDuration: activeVideo?.duration || 0,
-      videoStartTime: playbackState?.currentStartTime || 0,
-      totalVideos: videoPool.manifest.length || 0,
-      recentIndices: playbackState?.recentIndices || [],
-      // nextPreparedIndex: playbackState?.isNextVideoPrepared ? videoPool?.nextIndex : null,
-      // nextPreparedVideoName: playbackState?.isNextVideoPrepared
-      //   ? videoPool?.videos[videoPool.nextIndex]?.src?.split('/').pop() || null
-      //   : null,
-      loadingProgress: {
-        loaded: 3, // Always 3 video elements in pool
-        total: videoPool.manifest.length || 0,
-        hasMoreToLoad: false,
-      },
-    }
   } //
    // Initialize and start
   ;(async () => {
+    if (!enabled) {
+      log.warn(lc.GL_VIDEO, 'Video cycle is disabled')
+      return
+    }
+
     await initialize()
 
-    if (initalized) {
+    if (isInitialized) {
       log.debug(lc.GL_VIDEO, 'Video cycle initialized with videos preloaded: ', videoPool.videos)
-      await selectNextVideoAndPlay(activeBuffer)
     } else {
       log.error(lc.GL_VIDEO, 'Video cycle not initialized or preloaded')
       throw new Error('Video cycle cannot proceed without initialization')
@@ -343,6 +347,6 @@ export const createVideoCycle = (frontBuffer: BufferObject, backBuffer: BufferOb
     dispose,
     mesh: activeBuffer.mesh,
     handleResize: () => {},
-    getDebugInfo,
+    getDebugInfo: () => getDebugInfo(playbackState, videoPool, nextVideoIndex),
   }
 }

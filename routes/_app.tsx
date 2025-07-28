@@ -27,7 +27,6 @@ export default function App({ Component, url }: PageProps) {
         <link rel='preconnect' href='https://fonts.googleapis.com' />
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
         <link rel='stylesheet' href='/styles.css' />
-        {preloadVideos.map((filename) => <link rel='preload' as='video' href={`/videos/${filename}`} key={filename} />)}
       </Head>
       <body f-client-nav class='min-h-screen relative text-foreground bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
         {/** global theme state and CSS custom properties */}

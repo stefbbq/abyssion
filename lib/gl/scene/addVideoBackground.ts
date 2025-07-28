@@ -5,9 +5,9 @@ import type { VideoBackgroundManager } from '@libgl/types.ts'
 /**
  * Create video background for the scene
  */
-export const addVideoBackground = (
+export const addVideoBackground = async (
   THREE: typeof Three,
   scene: Three.Scene,
-): VideoBackgroundManager | undefined => {
-  return createVideoBackground(THREE, scene)
+): Promise<VideoBackgroundManager | undefined> => {
+  return await createVideoBackground(THREE, scene)
 }

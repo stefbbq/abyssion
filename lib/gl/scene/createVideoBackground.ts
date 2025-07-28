@@ -19,10 +19,10 @@ import { lc, log } from '@lib/logger/index.ts'
  * update and disposal methods for the complete video background lifecycle.
  * Returns undefined if video bac kgrounds are disabled in configuration.
  */
-export const createVideoBackground = (
+export const createVideoBackground = async (
   THREE: typeof Three,
   scene: Three.Scene,
-): VideoBackgroundManager | undefined => {
+): Promise<VideoBackgroundManager | undefined> => {
   if (!videoCycleConfig.enabled) {
     log.info(lc.GL, 'Video cycle is disabled in config')
     return undefined
@@ -167,7 +167,7 @@ export const createVideoBackground = (
   globalThis.addEventListener('resize', handleResize)
 
   // Now pass the planes to VideoCycle for texture management
-  const videoCycle = createVideoCycle(frontBuffer, backBuffer)
+  const videoCycle = await createVideoCycle(frontBuffer, backBuffer)
   log.info(lc.GL, 'Created video cycle:', videoCycle)
   log.debug(lc.GL, 'Video cycle has getDebugInfo:', videoCycle && typeof videoCycle.getDebugInfo === 'function')
 
@@ -193,6 +193,6 @@ export const createVideoBackground = (
     mesh: frontBuffer.mesh,
     handleResize,
     updateThemeColors,
-    getDebugInfo: videoCycle.getDebugInfo,
-  }
+    getDebugInfo: videoCycle.getDebugInfo, // type: () => VideoCycleDebugInfo
+  } as const
 }
