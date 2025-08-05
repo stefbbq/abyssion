@@ -8,6 +8,7 @@ import type { VideoBackgroundManager } from '@libgl/types.ts'
 export const addVideoBackground = async (
   THREE: typeof Three,
   scene: Three.Scene,
+  onReadyToStream?: () => void,
 ): Promise<VideoBackgroundManager | undefined> => {
-  return await createVideoBackground(THREE, scene)
+  return await createVideoBackground(THREE, scene, onReadyToStream)
 }

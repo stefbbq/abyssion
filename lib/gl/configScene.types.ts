@@ -1,5 +1,3 @@
-import { PostProcessingConfig } from './configPostProcessing.types.ts'
-
 /** Renderer configuration */
 export type RendererConfig = {
   /** Pixel ratio multiplier */

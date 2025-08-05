@@ -1,12 +1,18 @@
 {
-  "enabled": true,
+  "mode": "single",
   "cycling": {
     "minSegmentLength": 2,
     "maxSegmentLength": 4,
     "playbackSpeed": 1,
     "antiRepeat": 2,
     "videoSwapTimeoutMS": 3000,
-    "videoLoadTimeoutMS": 10000
+    "videoLoadTimeoutMS": 30000,
+    "path": "/videos/manifest.json"
+  },
+  "single": {
+    "path": "/videos/background.mp4",
+    "playbackSpeed": 1,
+    "videoLoadTimeoutMS": 30000
   },
   "appearance": {
     "opacity": 1
@@ -14,8 +20,5 @@
   "position": {
     "z": -15,
     "scale": 1.23
-  },
-  "videos": {
-    "path": "/videos/"
   }
 }

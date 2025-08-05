@@ -92,30 +92,57 @@ export type BufferObject = {
 export type VideoCycleDebugInfo = {
   // whether a video is playing
   isPlaying: boolean
-  // number in the manifest
-  currentVideoIndex: number
-  // name of the current video
-  currentVideoName: string
-  // source of the current video
-  currentVideoSrc: string
-  // time since the last video switch
-  timeSinceSwitch: number // in milliseconds
-  // duration of the current video
+  // whether the video is transitioning between videos
+  isTransitioning: boolean
+
+  // Current video information
+  currentVideoIndex: number // number in the manifest
+  currentVideoName: string // name of the current video
+  currentVideoSrc: string // source of the current video
   currentDuration: number // in seconds (visible segment duration)
-  // duration of the current video
+  currentStartTime: number // in seconds (where the visible segment starts)
+  currentSegmentEndTime: number // in seconds (where the visible segment ends)
   fullVideoDuration: number // in seconds (actual video file duration)
-  // start time of the current video
-  videoStartTime: number // in seconds (where the visible segment starts)
-  // total number of videos in the manifest
-  totalVideos: number
-  // recent indices of the videos
-  recentIndices: readonly number[]
-  // index of the next prepared video
-  nextPreparedIndex: number | null
-  // name of the next prepared video
-  nextPreparedVideoName: string | null
-  // loading progress of the videos
+
+  // Timing information
+  timeSinceSwitch: number // in milliseconds
+  segmentProgressPercent: number // 0-100 percent through current segment
+  nextVideoTriggerTime: number // absolute timestamp when next video will trigger
+  timeUntilNextVideo: number // milliseconds until next video triggers
+  bufferSwapTime: number // absolute timestamp when buffers will swap
+  timeUntilBufferSwap: number // milliseconds until buffer swap
+
+  // Next video information
+  nextPreparedIndex: number | null // index of the next prepared video
+  nextPreparedVideoName: string | null // name of the next prepared video
+  nextPreparedVideoSrc: string | null // source of the next prepared video
+  nextVideoStartTime: number | null // start time for next video segment
+  nextVideoDuration: number | null // duration for next video segment
+  nextVideoFullDuration: number | null // full duration of next video file
+
+  // History and anti-repeat
+  recentIndices: readonly number[] // recent indices of the videos
+  antiRepeatCount: number // how many videos are blocked by anti-repeat
+
+  // Buffer states
+  activeBuffer: {
+    name: string // 'front' or 'back'
+    opacity: number // current opacity value
+    videoIndex: number | null // which video is in this buffer
+    videoName: string | null // name of video in this buffer
+  }
+  hiddenBuffer: {
+    name: string // 'front' or 'back'
+    opacity: number // current opacity value
+    videoIndex: number | null // which video is in this buffer
+    videoName: string | null // name of video in this buffer
+  }
+
+  // Pool and loading information
+  totalVideos: number // total number of videos in the manifest
   loadingProgress: VideoCycleLoadingProgress
+  poolSize: number // number of videos currently loaded in pool
+  manifestRemaining: number // number of videos not yet loaded
 }
 
 export type VideoCycleLoadingProgress = {

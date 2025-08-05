@@ -66,7 +66,9 @@ export type LogoController = {
  * Creates and manages the core logo layer system
  * Returns a single object with all necessary methods for working with layers
  */
+
 export const createLogoLayer = (THREE: typeof Three): LogoController => {
+  console.log('🎨 Creating logo layer (the main one)')
   return {
     /**
      * Get all layers (static + random)

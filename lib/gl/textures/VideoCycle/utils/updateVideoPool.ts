@@ -1,7 +1,10 @@
 import * as Three from 'three'
 
 import { lc, log } from '@lib/logger/index.ts'
-import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfigRaw from '@libgl/configVideoCycle.json' with { type: 'json' }
+import type { VideoCycleConfig } from '@libgl/configVideoCycle.types.ts'
+
+const videoCycleConfig = videoCycleConfigRaw as unknown as VideoCycleConfig
 
 /**
  * Represents a video pool for efficient memory management
@@ -42,7 +45,7 @@ export const updateVideoPool = async (
 
     const video = document.createElement('video')
     video.autoplay = false
-    video.loop = true
+    video.loop = false
     video.muted = true
     video.crossOrigin = 'anonymous'
     video.playsInline = true
@@ -62,16 +65,51 @@ export const updateVideoPool = async (
 
   const remainingManifest = videoPool.manifest.slice(countToLoad)
 
-  // Wait for all new videos to be fully loaded (canplaythrough)
+  // Wait for all new videos to be fully loaded (100% downloaded)
   await Promise.all(
     newVideos.map(
       (video) =>
-        new Promise<void>((resolve) => {
-          const onCanPlayThrough = () => {
-            video.removeEventListener('canplaythrough', onCanPlayThrough)
-            resolve()
+        new Promise<void>((resolve, reject) => {
+          const videoName = video.src.split('/').pop()
+
+          const checkFullDownload = () => {
+            if (
+              video.readyState === 4 &&
+              video.networkState === 1 // NETWORK_IDLE means download complete
+            ) {
+              cleanup()
+              log.debug(lc.GL_VIDEO, `Video download complete: ${videoName}`)
+              resolve()
+              return
+            }
+
+            // Show progress...
           }
-          video.addEventListener('canplaythrough', onCanPlayThrough)
+
+          // Polling backup - check every 500ms in case events don't fire frequently enough
+          const pollInterval = setInterval(checkFullDownload, 500)
+
+          const onError = (event: Event) => {
+            cleanup()
+            log.error(lc.GL_VIDEO, `Video loading error for ${videoName}:`, event)
+            reject(new Error(`Video loading error: ${videoName}`))
+          }
+
+          const cleanup = () => {
+            clearInterval(pollInterval)
+            video.removeEventListener('loadedmetadata', checkFullDownload)
+            video.removeEventListener('progress', checkFullDownload)
+            video.removeEventListener('canplaythrough', checkFullDownload)
+            video.removeEventListener('error', onError)
+          }
+
+          video.addEventListener('loadedmetadata', checkFullDownload)
+          video.addEventListener('progress', checkFullDownload)
+          video.addEventListener('canplaythrough', checkFullDownload)
+          video.addEventListener('error', onError)
+
+          // In case it's already loaded
+          checkFullDownload()
         }),
     ),
   )

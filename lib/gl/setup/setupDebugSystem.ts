@@ -140,7 +140,16 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       // Update pixel bleed shader uniforms AND enable/disable the pass
       if (state.pixelBleedPass && state.pixelBleedPass.material) {
         const material = state.pixelBleedPass.material as Three.ShaderMaterial
-        updatePixelBleedShaderUniforms(material, params)
+        const pixelBleedConfig = {
+          intensity: params.pixelBleedIntensity,
+          chunkSize: params.pixelBleedChunkSize,
+          chunkRandomness: params.pixelBleedChunkRandomness,
+          stretchDistance: params.pixelBleedStretchDistance,
+          geometryComplexity: params.pixelBleedGeometryComplexity,
+          persistence: params.pixelBleedPersistence,
+          regenerationRate: params.pixelBleedRegenerationRate,
+        }
+        updatePixelBleedShaderUniforms(material, pixelBleedConfig)
 
         // Enable/disable the pixel bleed pass based on the pixelBleedEnabled flag
         state.pixelBleedPass.enabled = params.pixelBleedEnabled && params.enabled
@@ -295,52 +304,6 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       `<b>Camera FOV:</b> ${cameraFOV}°`,
     ].join('<br>')
 
-    // Video background information
-    let videoInfo = '<b>Video Background:</b> Not available'
-    log.debug(lc.GL_DEBUG, 'Debug system checking video background:', state.videoBackground)
-    log.debug(
-      lc.GL_DEBUG,
-      'Video background has getDebugInfo:',
-      state.videoBackground && typeof state.videoBackground.getDebugInfo === 'function',
-    )
-    if (state.videoBackground && state.videoBackground.getDebugInfo) {
-      const vDebug = state.videoBackground.getDebugInfo()
-      const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
-      const progressBar = createVideoProgressBar(vDebug)
-
-      // Anti-repeat blocked videos
-      const blockedVideos = Array.from({ length: vDebug.totalVideos }, (_, i) => i)
-        .filter((i) => vDebug.recentIndices.includes(i) && i !== vDebug.currentVideoIndex)
-        .map((i) => `#${i}`)
-        .join(', ')
-
-      // Get next prepared video name
-      const nextPreparedInfo = vDebug.nextPreparedIndex !== null ? `#${vDebug.nextPreparedIndex}` : 'None'
-
-      videoInfo = [
-        `<b>Video Background:</b>`,
-        `<b>Current:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}`,
-        `<b>Status:</b> ${vDebug.isPlaying ? 'Playing' : 'Paused'}`,
-        `<b>Segment:</b> ${(vDebug.timeSinceSwitch / 1000).toFixed(1)}s / ${vDebug.currentDuration.toFixed(1)}s (${
-          segmentProgress.toFixed(1)
-        }%)`,
-        `<b>Full Video:</b> ${vDebug.fullVideoDuration.toFixed(1)}s | Start: ${vDebug.videoStartTime.toFixed(1)}s`,
-        progressBar,
-        `<b>Next Prepared:</b> ${nextPreparedInfo}`,
-        `<b>Total Videos:</b> ${vDebug.totalVideos} loaded`,
-        `<b>Recent History:</b> [${vDebug.recentIndices.join(', ')}]`,
-        `<b>Anti-Repeat Blocked:</b> ${blockedVideos || 'None'}`,
-      ].join('<br>')
-    } else {
-      log.debug(lc.GL_DEBUG, 'Video background debug info not available. Reasons:')
-      log.debug(lc.GL_DEBUG, '- state.videoBackground exists:', !!state.videoBackground)
-      log.debug(
-        lc.GL_DEBUG,
-        '- state.videoBackground.getDebugInfo exists:',
-        state.videoBackground && typeof state.videoBackground.getDebugInfo === 'function',
-      )
-    }
-
     // Scene elements information
     const sceneElements = scene.children
       .map((child: Three.Object3D, index: number) => {
@@ -355,37 +318,130 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
 
     const debugContent = [
       cameraInfo,
-      '<br/>',
-      videoInfo,
       '<br/><b>Scene Elements:</b>',
       sceneElements || 'No scene elements',
     ].join('<br>')
 
     debugPanelsAPI.setDebugInfo(debugContent)
+
+    // Handle video debug info separately
+    updateVideoDebugInfo()
   }
 
-  // Create a visual progress bar showing video segment within full video
-  const createVideoProgressBar = (vDebug: VideoCycleDebugInfo) => {
-    const barWidth = 40 // characters
+  // Separate video debug info updater with comprehensive information
+  const updateVideoDebugInfo = () => {
+    let videoInfo = '<b>Video Background:</b> Not available'
+
+    if (state.videoBackground && state.videoBackground.getDebugInfo) {
+      try {
+        const vDebug = state.videoBackground.getDebugInfo()
+
+        // Format timing values for display
+        const formatTime = (ms: number) => `${(ms / 1000).toFixed(1)}s`
+        const formatMs = (ms: number) => `${ms.toFixed(0)}ms`
+
+        // Create detailed progress bar
+        const progressBar = createEnhancedVideoProgressBar(vDebug)
+
+        // Anti-repeat blocked videos
+        const blockedVideos = Array.from({ length: vDebug.poolSize }, (_, i) => i)
+          .filter((i) => vDebug.recentIndices.includes(i) && i !== vDebug.currentVideoIndex)
+          .map((i) => `#${i}`)
+          .join(', ')
+
+        // Current video section
+        const currentVideoSection = `<div style="background: rgba(0,150,255,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
+          <div><b><u>CURRENT VIDEO</u></b></div>
+          <div><b>Video:</b> #${vDebug.currentVideoIndex} - ${vDebug.currentVideoName}</div>
+          <div><b>Status:</b> ${vDebug.isPlaying ? '▶️ Playing' : '⏸️ Paused'}</div>
+          <div><b>Segment:</b> ${formatTime(vDebug.timeSinceSwitch)} / ${formatTime(vDebug.currentDuration * 1000)} (${
+          vDebug.segmentProgressPercent.toFixed(1)
+        }%)</div>
+          <div><b>Segment Range:</b> ${vDebug.currentStartTime.toFixed(1)}s - ${vDebug.currentSegmentEndTime.toFixed(1)}s</div>
+          <div><b>Full Video Length:</b> ${vDebug.fullVideoDuration.toFixed(1)}s</div>
+          ${progressBar}
+        </div>`
+
+        // Next video section
+        const nextVideoSection = `<div style="background: rgba(255,150,0,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
+          <div><b><u>NEXT VIDEO</u></b></div>
+          <div>${
+          vDebug.nextPreparedIndex !== null
+            ? `<b>Queued:</b> #${vDebug.nextPreparedIndex} - ${vDebug.nextPreparedVideoName}`
+            : `<b>Queued:</b> None prepared`
+        }</div>
+          <div>${
+          vDebug.nextVideoFullDuration ? `<b>Duration:</b> ${vDebug.nextVideoFullDuration.toFixed(1)}s` : `<b>Duration:</b> Unknown`
+        }</div>
+          <div><b>Triggers in:</b> ${formatMs(vDebug.timeUntilNextVideo)}</div>
+          <div><b>Buffer swap in:</b> ${formatMs(vDebug.timeUntilBufferSwap)}</div>
+        </div>`
+
+        // Buffer states section
+        const bufferSection = `<div style="background: rgba(150,255,0,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
+          <div><b><u>BUFFER STATES</u></b></div>
+          <div><b>Active (${vDebug.activeBuffer.name}):</b> ${vDebug.activeBuffer.videoName || 'Empty'} (opacity: ${
+          vDebug.activeBuffer.opacity.toFixed(2)
+        })</div>
+          <div><b>Hidden (${vDebug.hiddenBuffer.name}):</b> ${vDebug.hiddenBuffer.videoName || 'Empty'} (opacity: ${
+          vDebug.hiddenBuffer.opacity.toFixed(2)
+        })</div>
+        </div>`
+
+        // History and anti-repeat section
+        const historySection = `<div style="background: rgba(255,0,150,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
+          <div><b><u>HISTORY & ANTI-REPEAT</u></b></div>
+          <div><b>Recent History:</b> [${vDebug.recentIndices.join(', ')}]</div>
+          <div><b>Anti-Repeat Blocked:</b> ${blockedVideos || 'None'} (${vDebug.antiRepeatCount} videos)</div>
+        </div>`
+
+        // Pool status section
+        const poolSection = `<div style="background: rgba(150,0,255,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
+          <div><b><u>VIDEO POOL</u></b></div>
+          <div><b>Pool Size:</b> ${vDebug.poolSize} videos loaded</div>
+          <div><b>Manifest Remaining:</b> ${vDebug.manifestRemaining} videos</div>
+          <div><b>Total Available:</b> ${vDebug.totalVideos} videos</div>
+          <div><b>Loading:</b> ${vDebug.loadingProgress.hasMoreToLoad ? '🔄 In Progress' : '✅ Complete'}</div>
+        </div>`
+
+        videoInfo = [
+          currentVideoSection,
+          nextVideoSection,
+          bufferSection,
+          historySection,
+          poolSection,
+        ].join('')
+      } catch (error) {
+        log.error(lc.GL_DEBUG, 'Error getting video debug info:', error)
+        videoInfo = '<b>Video Background:</b> Error retrieving debug info'
+      }
+    }
+
+    debugPanelsAPI.setVideoDebugInfo(videoInfo)
+  }
+
+  // Create an enhanced visual progress bar showing video segment within full video
+  const createEnhancedVideoProgressBar = (vDebug: VideoCycleDebugInfo) => {
+    const barWidth = 50 // characters
 
     // Calculate positions within the full video (0-1 range)
-    const segmentStart = vDebug.videoStartTime / vDebug.fullVideoDuration
-    const segmentEnd = (vDebug.videoStartTime + vDebug.currentDuration) / vDebug.fullVideoDuration
-    const currentPos = (vDebug.videoStartTime + (vDebug.timeSinceSwitch / 1000)) / vDebug.fullVideoDuration
+    const segmentStart = vDebug.currentStartTime / vDebug.fullVideoDuration
+    const segmentEnd = vDebug.currentSegmentEndTime / vDebug.fullVideoDuration
+    const currentPos = (vDebug.currentStartTime + (vDebug.timeSinceSwitch / 1000)) / vDebug.fullVideoDuration
 
     // Clamp values to prevent overflow
     const clampedSegmentStart = Math.max(0, Math.min(1, segmentStart))
     const clampedSegmentEnd = Math.max(0, Math.min(1, segmentEnd))
     const clampedCurrentPos = Math.max(0, Math.min(1, currentPos))
 
-    // Create the full video bar using a simpler approach
+    // Create the full video bar
     let bar = ''
     for (let i = 0; i < barWidth; i++) {
-      const pos = i / barWidth // Simplified position calculation
+      const pos = i / barWidth
 
       if (pos < clampedSegmentStart || pos > clampedSegmentEnd) {
         // Outside visible segment
-        bar += `<span style="color: #666666;">░</span>` // Hidden
+        bar += `<span style="color: #444444;">░</span>` // Hidden
       } else if (pos <= clampedCurrentPos) {
         // Within segment and played
         bar += `<span style="color: #00ff00;">█</span>` // Played portion of segment
@@ -395,15 +451,15 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
       }
     }
 
-    const segmentProgress = vDebug.timeSinceSwitch / (vDebug.currentDuration * 1000) * 100
-
     return [
-      `<div style="font-family: monospace; background: rgba(0,100,255,0.1); padding: 4px 6px; border-radius: 4px; margin: 2px 0;">`,
-      `<div style="display: inline-block; margin-right: 8px;"><span style="color: #00ff00;">█</span> Played</div>`,
-      `<div style="display: inline-block; margin-right: 8px;"><span style="color: #ffaa00;">▓</span> Segment</div>`,
-      `<div style="display: inline-block;"><span style="color: #666666;">░</span> Hidden</div>`,
-      `<div style="letter-spacing: 1px; margin-top: 4px;">${bar}</div>`,
-      `<div style="font-size: 10px; margin-top: 2px;">Segment: ${segmentProgress.toFixed(1)}% complete</div>`,
+      `<div style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 4px; margin: 4px 0; border: 1px solid rgba(255,255,255,0.1);">`,
+      `<div style="display: flex; gap: 12px; font-size: 10px; margin-bottom: 2px;">`,
+      `<span><span style="color: #00ff00;">█</span> Played</span>`,
+      `<span><span style="color: #ffaa00;">▓</span> Remaining</span>`,
+      `<span><span style="color: #444444;">░</span> Hidden</span>`,
+      `</div>`,
+      `<div style="letter-spacing: 0.5px; margin: 2px 0;">${bar}</div>`,
+      `<div style="font-size: 9px; color: #aaa;">Progress: ${vDebug.segmentProgressPercent.toFixed(1)}%</div>`,
       `</div>`,
     ].join('')
   }

@@ -14,6 +14,7 @@ import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $shows from './routes/shows.tsx'
 import * as $theme from './routes/theme.tsx'
+import * as $videos_path_ from './routes/videos/[...path].ts'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
@@ -39,6 +40,7 @@ const manifest = {
     './routes/partials/shows.tsx': $partials_shows,
     './routes/shows.tsx': $shows,
     './routes/theme.tsx': $theme,
+    './routes/videos/[...path].ts': $videos_path_,
   },
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,

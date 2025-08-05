@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'preact/hooks'
 import { signal } from '@preact/signals'
 import { DebugInfo } from '@components/debug/DebugInfo.tsx'
+import { VideoDebugInfo } from '@components/debug/VideoDebugInfo.tsx'
 import { DebugControls } from '@islands/DebugControls.tsx'
 import { isDebugModeEnabled, loadDebugSettings, resetDebugSettings, saveDebugSettings, setDebugMode } from '@lib/debug/index.ts'
 import { lc, log } from '@lib/logger/index.ts'
@@ -108,6 +109,7 @@ type DOFMeta = {
 // global signals for debug state
 const debugVisible = signal(false)
 const debugInfoContent = signal('')
+const videoDebugInfoContent = signal('')
 const dofParams = signal({ focus: 5.0, aperture: 0.025, maxblur: 0.01, liveFocusDistance: 5.0 })
 const finalPassParams = signal({ chromaStrength: 0.002, gain: 1.0, contrast: 1.0 })
 const selectiveColorizationParams = signal<SelectiveColorizationParams>({
@@ -416,10 +418,18 @@ export const DebugPanels = (props: Props) => {
         onVideoBackgroundOpacityChange={handleVideoBackgroundOpacityChange}
         liveFocusDistance={dofParams.value.liveFocusDistance}
       />
-      <DebugInfo
-        visible={debugVisible.value}
-        content={debugInfoContent.value}
-      />
+      {debugVisible.value && (
+        <div className='fixed bottom-4 left-4 flex flex-col gap-4 z-50'>
+          <VideoDebugInfo
+            visible={debugVisible.value}
+            content={videoDebugInfoContent.value}
+          />
+          <DebugInfo
+            visible={debugVisible.value}
+            content={debugInfoContent.value}
+          />
+        </div>
+      )}
     </>
   )
 }
@@ -450,6 +460,10 @@ export const debugPanelsAPI = {
   // set debug info content
   setDebugInfo: (content: string) => {
     debugInfoContent.value = content
+  },
+  // set video debug info content
+  setVideoDebugInfo: (content: string) => {
+    videoDebugInfoContent.value = content
   },
   // set callbacks
   setCallbacks: (callbacks: {

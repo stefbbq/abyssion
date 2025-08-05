@@ -1,4 +1,5 @@
 import * as Three from 'three'
+
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { randomLayerConfig } from '@libgl/layers/config.ts'
 import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
@@ -8,7 +9,7 @@ import { currentGLTheme } from '@lib/theme/index.ts'
 /**
  * Generate a random layer with position based on index
  */
-export const createLogoLayer = (): LogoLayer => {
+export const createRandomLogoLayer = (): LogoLayer => {
   const {
     cyanProbability,
     magentaProbability,
@@ -18,6 +19,7 @@ export const createLogoLayer = (): LogoLayer => {
     noiseScaleBase,
     frontBias,
   } = randomLayerConfig
+  console.log('🎨 Creating random logo layer')
 
   const theme = currentGLTheme.value
 

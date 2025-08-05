@@ -1,7 +1,8 @@
 import * as Three from 'three'
 import { getResponsiveCameraZ } from '../scene/utils/getResponsiveCameraZ.ts'
-import { debugMobileResponsiveness } from '../scene/utils/mobileDebugHelper.ts'
-import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
+import { debugMobileResponsiveness } from '../scene/utils/debugMobileResponsiveness.ts'
+import type { UIOverlay } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 import type { RendererConfig } from '@libgl/configScene.types.ts'
 
 type ResponsiveConfig = {
@@ -14,46 +15,42 @@ type ResponsiveConfig = {
 
 /**
  * Creates a responsive resize handler that updates camera, composer, and UI elements
+ *
+ * @param {ResponsiveConfig} config - The configuration for the responsive handling
+ * @returns {Function} - A function to remove the event listener
  */
 export const setupResponsiveHandling = (config: ResponsiveConfig) => {
   const { camera, composer, uiLayer, videoBackground, rendererConfig } = config
 
+  /**
+   * Handle the resize event
+   * Update the camera, composer, and UI elements
+   * Update the video background
+   * Debug the new responsive settings
+   *
+   * @returns {Function} - A function to remove the event listener
+   */
   const handleResize = () => {
-    // Use the same dimensions the renderer is using
     const w = globalThis.innerWidth
     const h = globalThis.innerHeight
     const aspect = w / h
 
-    // Update camera aspect ratio to match renderer dimensions
     camera.aspect = aspect
-
-    // Apply responsive camera Z positioning
     camera.position.z = getResponsiveCameraZ(aspect)
     camera.updateProjectionMatrix()
-
-    // Update overlay camera and dimensions
     uiLayer.resize(globalThis.innerWidth, globalThis.innerHeight)
-
-    // Composer needs to be resized as well
     composer.setSize(globalThis.innerWidth, globalThis.innerHeight)
-
-    // Set the same high pixel ratio for the composer
     composer.setPixelRatio(Math.min(
       globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
       rendererConfig.pixelRatioMax,
     ))
-
-    // Update video background scaling with new camera position
     if (videoBackground?.handleResize) videoBackground.handleResize()
 
-    // Debug the new responsive settings
     debugMobileResponsiveness()
   }
 
-  // Attach the event listener
   globalThis.addEventListener('resize', handleResize)
 
-  // Return cleanup function
   return () => {
     globalThis.removeEventListener('resize', handleResize)
   }

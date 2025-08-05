@@ -1,5 +1,7 @@
 import * as Three from 'three'
-import type { UIOverlay, VideoBackgroundManager } from '@libgl/types.ts'
+
+import type { UIOverlay } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 import type { EffectComposer, OrbitControls, WebGLRenderer } from 'three'
 import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import { lc, log } from '@lib/logger/index.ts'

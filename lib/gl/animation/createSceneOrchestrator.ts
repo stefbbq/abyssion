@@ -9,6 +9,7 @@ import { switchToPage } from './orchestrators/switchToPage.ts'
 import { stepOrchestrators } from './orchestrators/stepOrchestrators.ts'
 import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
 import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
+import type { SceneOrchestrator } from './types.ts'
 
 const { animationConfig: animation } = animationConfig
 
@@ -18,7 +19,10 @@ type OrchestratorRegistry = Record<string, () => AnimationOrchestrator>
  * Scene orchestrator runner: manages animation systems, shared behaviors, and transitions
  * All state transitions are pure; only side effects (DOM, listeners, RAF) are here
  */
-export const createSceneOrchestrator = (state: RendererState, orchestratorRegistry: OrchestratorRegistry) => {
+export const createSceneOrchestrator = (
+  state: RendererState,
+  orchestratorRegistry: OrchestratorRegistry,
+): SceneOrchestrator => {
   let time = 0
   let lastTime = 0
   let lastRenderTime = 0

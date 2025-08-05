@@ -29,3 +29,11 @@ export type AnimationEngineState<T> = {
   readonly frameCount: number
   readonly lastTime: number
 }
+
+export type SceneOrchestrator = {
+  registerOrchestrator: (name: string) => void
+  unregisterOrchestrator: (name: string) => void
+  switchToPage: (pageName: string) => void
+  getActiveOrchestrators: () => string[]
+  dispose: () => void
+}

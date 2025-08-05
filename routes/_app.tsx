@@ -7,7 +7,6 @@ import pagesConfig from '@data/pages.json' with { type: 'json' }
 import type { PagesConfig } from '@data/types.ts'
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentUITheme } from '@lib/theme/index.ts'
-import videoManifest from '../static/videos/manifest.json' with { type: 'json' }
 import SinglePageScrollManager from '@islands/SinglePageScrollManager.tsx'
 
 export default function App({ Component, url }: PageProps) {
@@ -16,7 +15,6 @@ export default function App({ Component, url }: PageProps) {
   const showHeader = config.showHeader !== false // Default to true
   const showActionZone = config.showActionZone !== false // Default to true
   const theme = currentUITheme.value
-  const preloadVideos = (videoManifest as string[]).slice(0, 2)
 
   return (
     <html lang='en'>

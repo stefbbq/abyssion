@@ -1,6 +1,8 @@
 import { lc, log } from '@lib/logger/index.ts'
-import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfigRaw from '@libgl/configVideoCycle.json' with { type: 'json' }
+import type { VideoCycleConfig } from '@libgl/configVideoCycle.types.ts'
 
+const videoCycleConfig = videoCycleConfigRaw as unknown as VideoCycleConfig
 const { cycling: { antiRepeat } } = videoCycleConfig
 
 /**

@@ -13,6 +13,10 @@ import * as Three from 'three'
  * Manages logo layers, regeneration, and post-processing effects
  */
 export const createHomePageOrchestrator = (logoController: LogoController): AnimationOrchestrator => {
+  if (!logoController) {
+    throw new Error('logoController not available when creating home page orchestrator')
+  }
+
   let lastRegenerateTime = 0
   let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
   let bloomOverrideActive = false
@@ -21,8 +25,11 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
   /**
    * Updates dashed orbit rotations for slow random rotation
    */
-  const updateDashedOrbitRotations = (scene: Three.Scene, time: number) => {
+  const updateDashedOrbitRotations = (scene: Three.Scene) => {
     scene.traverse((child: Three.Object3D) => {
+      // if the child is not a group, return
+      if (child.type !== 'Group') return
+
       // Look for dashed orbit groups
       if (child.type === 'Group' && child.children) {
         child.children.forEach((orbitHolder: Three.Object3D) => {

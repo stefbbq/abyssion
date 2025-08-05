@@ -25,14 +25,27 @@ export const getNewStartTimeAndDuration = (
   const latestStartTime = video.duration - marginSeconds - minSegmentLength
   const maxDurationTime = video.duration - marginSeconds * 2
 
+  // Ensure we have a valid range
+  if (latestStartTime < earliestStartTime) {
+    log.warn(lc.GL_VIDEO, `Video too short for minimum segment length: ${video.duration}s`)
+    return { startTime: marginSeconds, duration: Math.max(0, video.duration - marginSeconds * 2) }
+  }
+
   const startTime = Math.random() * (latestStartTime - earliestStartTime) + earliestStartTime
-  let duration = Number((Math.random() * (maxSegmentLength - minSegmentLength) + minSegmentLength).toFixed(2))
+
+  // Calculate max possible duration from this start time
+  const maxPossibleDuration = video.duration - startTime - marginSeconds
+  let duration = Math.min(
+    maxSegmentLength,
+    Math.max(minSegmentLength, maxPossibleDuration),
+  )
+
   const originalDuration = duration
 
   if (duration + startTime > video.duration - marginSeconds) duration = minSegmentLength
 
-  // log.groupCollapsed(lc.GL_VIDEO, 'getNewStartTimeAndDuration')
-  log.trace(
+  log.groupCollapsed(lc.GL_VIDEO, 'getNewStartTimeAndDuration')
+  log.debug(
     lc.GL_VIDEO,
     `video duration max: %c${video.duration.toFixed(2)}%c, calculated max: %c${maxDurationTime.toFixed(2)}%c and latest start time: %c${
       latestStartTime.toFixed(2)
@@ -44,7 +57,7 @@ export const getNewStartTimeAndDuration = (
     'font-weight: bold',
     'font-weight: normal; color: #aaa',
   )
-  log.trace(
+  log.debug(
     lc.GL_VIDEO,
     `generated duration: %c${duration.toFixed(2)}%c vs original: %c${originalDuration.toFixed(2)}%c, generated start time: %c${
       startTime.toFixed(2)
@@ -56,7 +69,7 @@ export const getNewStartTimeAndDuration = (
     'font-weight: bold',
     'font-weight: normal; color: #aaa',
   )
-  // log.groupEnd()
+  log.groupEnd()
 
   // If even the minimum length can't fit, return whatever could work
   if (maxDurationTime < minSegmentLength) {

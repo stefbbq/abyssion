@@ -21,7 +21,7 @@ export default function SinglePageScrollManager() {
   const ticking = useRef(false)
 
   useEffect(() => {
-    initializeClientLogger(lc.GL_VIDEO, 'debug')
+    initializeClientLogger('', 'debug')
   }, [])
 
   useEffect(() => {
@@ -29,12 +29,13 @@ export default function SinglePageScrollManager() {
     if (isGLDisabled()) {
       setShowGL(false)
       return
-    } else {
-      setShowGL(true)
-    }
+    } else setShowGL(true)
+
     const sections = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el))
+
+    // If no sections, don't do anything
     if (!sections.length) return
 
     // IntersectionObserver to update hash and switch GL scene
@@ -72,6 +73,7 @@ export default function SinglePageScrollManager() {
             }
             ticking.current = false
           })
+
           ticking.current = true
         }
       },
@@ -90,15 +92,16 @@ export default function SinglePageScrollManager() {
     // Smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {
       const hash = globalThis.location.hash
+
       if (hash && sectionIds.includes(hash.replace('#', ''))) {
         const el = document.getElementById(hash.replace('#', ''))
+
         if (el) {
           const offsetTop = el.offsetTop - getScrollOffset()
           globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
         }
       }
     }
-    globalThis.addEventListener('hashchange', handleHashChange)
 
     // Intercept anchor clicks for smooth scroll
     const handleClick = (e: MouseEvent) => {
@@ -116,7 +119,6 @@ export default function SinglePageScrollManager() {
         }
       }
     }
-    document.addEventListener('click', handleClick)
 
     // Scroll corruption tracking
     const handleScroll = () => {
@@ -127,9 +129,7 @@ export default function SinglePageScrollManager() {
           // Update scroll corruption effect if GL is initialized
           if (isGLInitialized.value) {
             const glState = getGLState()
-            if (glState) {
-              updateScrollCorruption(scrollY, glState)
-            }
+            if (glState) updateScrollCorruption(scrollY, glState)
           }
 
           // Calculate background fade intensity using shared utility
@@ -139,16 +139,20 @@ export default function SinglePageScrollManager() {
 
           ticking.current = false
         })
+
         ticking.current = true
       }
     }
-    globalThis.addEventListener('scroll', handleScroll)
 
     // Update scroll metrics when layout changes
     const handleResize = () => {
       updateScrollMetrics(0)
     }
+
+    globalThis.addEventListener('scroll', handleScroll)
     globalThis.addEventListener('resize', handleResize)
+    globalThis.addEventListener('hashchange', handleHashChange)
+    document.addEventListener('click', handleClick)
 
     // Initial background intensity update
     const scrollY = globalThis.scrollY

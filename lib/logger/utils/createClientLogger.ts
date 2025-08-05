@@ -93,7 +93,7 @@ export const createClientLogger = (
   /**
    * Log a message at the 'info' level with a given context
    */
-  const log = (ctx: LogContext | null, ...args: unknown[]): void => _log('info', ctx, ...args)
+  const log = (ctx: LogContext | null, ...args: unknown[]): void => _log('trace', ctx, ...args)
 
   // Attach level methods
   log.trace = (ctx: LogContext | null, ...args: unknown[]): void => _log('trace', ctx, ...args)

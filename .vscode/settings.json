@@ -17,10 +17,17 @@
   "css.customData": [".vscode/tailwind.json"],
   "editor.formatOnSave": true,
   "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.turbo": true,
     "node_modules": true,
     "_fresh": true
   },
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
+  "explorerExclude.backup": {},
 }

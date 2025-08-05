@@ -1,13 +1,16 @@
 import * as Three from 'three'
-import videoCycleConfig from '@libgl/configVideoCycle.json' with { type: 'json' }
+import videoCycleConfigRaw from '@libgl/configVideoCycle.json' with { type: 'json' }
+import type { VideoCycleConfig } from '@libgl/configVideoCycle.types.ts'
 import { getBaselineDimensions } from './utils/getBaselineDimensions.ts'
 import { calculateFarPlaneSize } from './utils/calculateFarPlaneSize.ts'
 import { createVideoCycle } from '@libgl/textures/VideoCycle/index.ts'
-import type { VideoBackgroundManager } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 import { passthroughVertexShader, selectiveVideoBackgroundFragmentShader } from '@libgl/shaders/SelectiveVideoBackgroundShader.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 import configPostProcessing from '@libgl/configPostProcessing.json' with { type: 'json' }
 import { lc, log } from '@lib/logger/index.ts'
+
+const videoCycleConfig = videoCycleConfigRaw as unknown as VideoCycleConfig
 
 /**
  * Creates a dual-buffer video background system with seamless cycling and responsive scaling.
@@ -22,8 +25,9 @@ import { lc, log } from '@lib/logger/index.ts'
 export const createVideoBackground = async (
   THREE: typeof Three,
   scene: Three.Scene,
+  onReadyToStream?: () => void,
 ): Promise<VideoBackgroundManager | undefined> => {
-  if (!videoCycleConfig.enabled) {
+  if (videoCycleConfig.mode === 'off') {
     log.info(lc.GL, 'Video cycle is disabled in config')
     return undefined
   }
@@ -167,7 +171,7 @@ export const createVideoBackground = async (
   globalThis.addEventListener('resize', handleResize)
 
   // Now pass the planes to VideoCycle for texture management
-  const videoCycle = await createVideoCycle(frontBuffer, backBuffer)
+  const videoCycle = await createVideoCycle(frontBuffer, backBuffer, onReadyToStream)
   log.info(lc.GL, 'Created video cycle:', videoCycle)
   log.debug(lc.GL, 'Video cycle has getDebugInfo:', videoCycle && typeof videoCycle.getDebugInfo === 'function')
 
