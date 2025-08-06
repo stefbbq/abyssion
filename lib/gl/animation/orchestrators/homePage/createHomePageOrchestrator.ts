@@ -7,6 +7,7 @@ import type { LogoController } from '@libgl/layers/LogoLayer.ts'
 import ms from 'ms'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
 import * as Three from 'three'
+import { scrollState } from '@libgl/animation/state/scrollState.ts'
 
 /**
  * Home page animation orchestrator (formerly logo page)
@@ -51,6 +52,7 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
   }
 
   const update = (context: AnimationContext) => {
+    console.log('update', context)
     const { state, time } = context
 
     // Check layer regeneration timing
@@ -82,7 +84,7 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
       if (!layer) return
 
       // Calculate fade multiplier (0..1) for this layer
-      const scrollY = globalThis.scrollY || 0
+      const scrollY = scrollState.y
       const scrollProgress = Math.min(scrollY / globalThis.innerHeight, 1.0)
       const fadeResult = calculateFadeOpacity({
         scrollProgress,
@@ -209,7 +211,7 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
     }
 
     // Update dashed orbit rotations
-    updateDashedOrbitRotations(state.scene, time)
+    updateDashedOrbitRotations(state.scene)
   }
 
   const dispose = (context: AnimationContext) => {

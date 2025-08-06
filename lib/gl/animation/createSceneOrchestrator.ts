@@ -7,8 +7,11 @@ import { registerOrchestrator } from './orchestrators/registerOrchestrator.ts'
 import { unregisterOrchestrator } from './orchestrators/unregisterOrchestrator.ts'
 import { switchToPage } from './orchestrators/switchToPage.ts'
 import { stepOrchestrators } from './orchestrators/stepOrchestrators.ts'
-import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
-import { debugPanelsAPI } from '@islands/DebugPanels.tsx'
+import { createAnimationLoop } from './loop/createAnimationLoop.ts'
+import { createVisibilityHandler } from './events/createVisibilityHandler.ts'
+import { createFocusHandlers } from './events/createFocusHandlers.ts'
+import { attachEventListeners } from './events/attachEventListeners.ts'
+import { createFrameEffects } from './effects/createFrameEffects.ts'
 import type { SceneOrchestrator } from './types.ts'
 
 const { animationConfig: animation } = animationConfig
@@ -23,15 +26,8 @@ export const createSceneOrchestrator = (
   state: RendererState,
   orchestratorRegistry: OrchestratorRegistry,
 ): SceneOrchestrator => {
-  let time = 0
-  let lastTime = 0
-  let lastRenderTime = 0
-  let animationId: number
-  let isPaused = false
-
-  // 24 FPS = 1000ms / 24 = ~41.67ms between frames
-  const TARGET_FPS = 60
-  const FRAME_INTERVAL = 1000 / TARGET_FPS
+  // Mutable reference to renderer state
+  let currentState = state
 
   // Create shared behaviors that persist across page changes
   const shared = createSharedBehaviors()
@@ -47,134 +43,90 @@ export const createSceneOrchestrator = (
     },
   }
 
-  /**
-   * Main animation loop (side effect)
-   */
-  const animate = (timestamp: number) => {
-    // Align focus plane if present
-    // deno-lint-ignore no-explicit-any
-    if (typeof window !== 'undefined' && typeof (window as any).alignFocusPlane === 'function') {
-      // deno-lint-ignore no-explicit-any
-      ;(window as any).alignFocusPlane()
-    }
+  // Create animation loop
+  const loop = createAnimationLoop(
+    60, // TARGET_FPS
+    animation.timeIncrement,
+    {
+      onFrame: (loopContext) => {
+        // Skip frame if composer not ready
+        if (!currentState.composer) return
 
-    animationId = requestAnimationFrame(animate)
+        // Update state time
+        currentState.time = loopContext.time
 
-    // FPS limiting - only render if enough time has passed
-    const timeSinceLastRender = timestamp - lastRenderTime
-    if (timeSinceLastRender < FRAME_INTERVAL) {
-      return // Skip this frame
-    }
+        // Create frame effects handler dynamically to use current state
+        const applyFrameEffects = createFrameEffects(currentState, shared)
 
-    lastRenderTime = timestamp
-    const deltaTime = timestamp - lastTime
-    lastTime = timestamp
-    time += animation.timeIncrement
-    state.controls?.update()
-    if (!isMobileDevice()) shared.applyMouseRotation(state.scene)
+        // Apply all frame effects
+        const context: AnimationContext = {
+          state: currentState,
+          shared,
+          time: loopContext.time,
+          deltaTime: loopContext.deltaTime,
+        }
+        applyFrameEffects(context)
 
-    // dynamically set bokeh focus to always focus on logo at z=0
-    if (state.bokehPass && state.camera) {
-      // logo is at (0,0,0) in world space
-      const logoWorldPosition = new state.THREE.Vector3(0, 0, 0)
-      const cameraPosition = state.camera.position
-      const focusDistance = cameraPosition.distanceTo(logoWorldPosition)
-      if (state.bokehPass.materialBokeh && state.bokehPass.materialBokeh.uniforms.focus) {
-        state.bokehPass.materialBokeh.uniforms.focus.value = focusDistance
-        // update debug panels with live focus distance
-        debugPanelsAPI.updateDOFParams({
-          focus: state.bokehPass.materialBokeh.uniforms.focus.value,
-          aperture: state.bokehPass.materialBokeh.uniforms.aperture.value,
-          maxblur: state.bokehPass.materialBokeh.uniforms.maxblur.value,
-          liveFocusDistance: focusDistance,
-        })
-      }
-    }
+        // Step orchestrators
+        sceneState = stepOrchestrators(sceneState, context)
 
-    if (state.videoBackground) shared.updateVideoBackground(state.videoBackground, deltaTime)
-    const context: AnimationContext = { state, shared, time, deltaTime }
-    sceneState = stepOrchestrators(sceneState, context)
-    state.composer.render()
-  }
+        // Render if composer is available
+        currentState.composer.render()
+      },
+    },
+  )
 
-  // Start animation loop
-  animate(0)
-
-  // Pause/resume logic
+  // Pause/resume handlers with logging
   const pause = () => {
-    log(lc.GL_ANIMATION, 'pause() called, isPaused:', isPaused)
-
-    if (!isPaused) {
-      cancelAnimationFrame(animationId)
-      isPaused = true
-      log(lc.GL_ANIMATION, 'Paused animation loop (window not focused)')
-    }
+    log(lc.GL_ANIMATION, 'Pausing animation loop')
+    loop.pause()
   }
 
   const resume = () => {
-    log(lc.GL_ANIMATION, 'resume() called, isPaused:', isPaused)
-    console
-    if (isPaused) {
-      isPaused = false
-      lastTime = performance.now()
-      animate(lastTime)
-      log(lc.GL_ANIMATION, 'Resumed animation loop (window focused)')
-    }
+    log(lc.GL_ANIMATION, 'Resuming animation loop')
+    loop.resume()
   }
 
-  const handleVisibilityChange = () => {
-    log(lc.GL_ANIMATION, 'handleVisibilityChange() called, document.hidden:', document.hidden)
-    if (document.hidden) pause()
-    else resume()
-  }
+  // Create event handlers
+  const visibilityHandler = createVisibilityHandler(pause, resume)
+  const { handleBlur, handleFocus } = createFocusHandlers(pause, resume)
 
-  const handleWindowBlur = () => {
-    log(lc.GL_ANIMATION, 'handleWindowBlur() called')
-    pause()
-  }
+  // Attach event listeners and get cleanup function
+  const cleanupListeners = attachEventListeners(
+    visibilityHandler,
+    handleBlur,
+    handleFocus,
+  )
 
-  const handleWindowFocus = () => {
-    log(lc.GL_ANIMATION, 'handleWindowFocus() called')
-    resume()
-  }
+  // Start animation loop
+  loop.start()
 
-  if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-  }
-
-  if (typeof window !== 'undefined') {
-    globalThis.addEventListener('blur', handleWindowBlur)
-    globalThis.addEventListener('focus', handleWindowFocus)
-  }
-
+  /**
+   * Return the orchestrator
+   */
   return {
     registerOrchestrator: (name: string) => {
       sceneState = registerOrchestrator(sceneState, orchestratorRegistry, name)
     },
     unregisterOrchestrator: (name: string) => {
-      const context: AnimationContext = { state, shared, time, deltaTime: 0 }
+      const context: AnimationContext = { state: currentState, shared, time: loop.getTime(), deltaTime: 0 }
       sceneState = unregisterOrchestrator(sceneState, name, context)
     },
     switchToPage: (pageName: string) => {
-      const context: AnimationContext = { state, shared, time, deltaTime: 0 }
+      const context: AnimationContext = { state: currentState, shared, time: loop.getTime(), deltaTime: 0 }
       sceneState = switchToPage(sceneState, orchestratorRegistry, pageName, context)
     },
-    getActiveOrchestrators: () => Array.from(sceneState.activeOrchestrators.keys()),
+    setRenderState: (newState: RendererState) => {
+      currentState = newState
+    },
+    getActiveOrchestrators: () => Array.from(sceneState.activeOrchestrators.keys()) as string[],
     dispose: () => {
-      cancelAnimationFrame(animationId)
+      loop.dispose()
       shared.mouseTracking.cleanup()
-      const context: AnimationContext = { state, shared, time, deltaTime: 0 }
+      const context: AnimationContext = { state: currentState, shared, time: loop.getTime(), deltaTime: 0 }
       sceneState.activeOrchestrators.forEach((orchestrator) => orchestrator.dispose(context))
       sceneState.activeOrchestrators.clear()
-
-      // remove event listeners
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-      }
-      if (typeof window !== 'undefined') {
-        globalThis.removeEventListener('blur', handleWindowBlur)
-        globalThis.removeEventListener('focus', handleWindowFocus)
-      }
+      cleanupListeners()
     },
   }
 }

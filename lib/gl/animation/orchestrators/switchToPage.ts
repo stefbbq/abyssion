@@ -17,6 +17,7 @@ export const switchToPage = (
   for (const name of sceneState.activeOrchestrators.keys()) {
     newState = unregisterOrchestrator(newState, name, context)
   }
+
   const targetPage = registry[pageName] ? pageName : 'content-page'
   return registerOrchestrator(newState, registry, targetPage)
 }

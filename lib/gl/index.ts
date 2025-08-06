@@ -150,8 +150,10 @@ export const initGL = async (options: InitOptions) => {
       }
     }
 
-    // setup the orchestrator
-    // if (glState?.sceneOrchestrator) glState.sceneOrchestrator = setupOrchestrators(glState)
+    // update the orchestrator with the fully initialized state
+    if (glState?.sceneOrchestrator) {
+      glState.sceneOrchestrator.setRenderState(glState)
+    }
   }
 
   // setup the core renderingn and assign the scene, camera, and renderer to glState

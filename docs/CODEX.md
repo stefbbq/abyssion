@@ -263,7 +263,7 @@ The video cycle system (`/lib/gl/textures/VideoCycle/`) manages dynamic video ba
 
 ### Architecture
 
-```
+```text
 /lib/gl/textures/VideoCycle/
   index.ts                      # Main video cycle manager
   types.ts                      # TypeScript type definitions
@@ -388,40 +388,129 @@ const debugInfo = videoCycle.getDebugInfo()
 
 ## Animation System
 
-The animation system is designed for maximum modularity, testability, and functional purity.
+The animation system follows strict functional programming principles with complete separation of concerns.
 
-### Architecture
+### Architecture Overview
 
-- **/animation/core/**: Pure animation engine functions (e.g., createAnimationEngine, updateAnimationEngine)
-- **/animation/calculations/**: Pure calculation functions (e.g., calculateMouseRotation, calculateStaticLayerPosition)
-- **/animation/utils/**: Pure utility functions (e.g., smoothRotationInterpolation, getRandomInterval)
-- **/animation/createLogoAnimator.ts**: Main orchestrator (side effects isolated here)
-- **/animation/types.ts**: Type definitions
+The system is organized into focused, single-purpose modules:
+
+```text
+/lib/gl/animation/
+  /calculations/           # Pure calculation functions
+    calculateMouseRotation.ts
+    calculateScrollProgress.ts
+    calculateShaderTime.ts
+    calculateRotationInterpolation.ts
+    calculateFocusDistance.ts
+    shouldSkipFrame.ts
+  /effects/               # Side effect functions
+    alignFocusPlane.ts
+    updateBokehFocus.ts
+    createFrameEffects.ts
+  /events/                # Event handler factories
+    createVisibilityHandler.ts
+    createFocusHandlers.ts
+    attachEventListeners.ts
+  /loop/                  # Animation loop management
+    createAnimationLoop.ts
+  /state/                 # Shared state modules
+    scrollState.ts
+  /orchestrators/         # Page-specific orchestrators
+    /homePage/
+      createHomePageOrchestrator.ts
+      /calculations/      # Home page specific calculations
+    /contentPage/
+      createContentPageOrchestrator.ts
+    /loadingState/
+      createLoadingStateOrchestrator.ts
+  createSceneOrchestrator.ts  # Main orchestrator
+  types.ts                    # Type definitions
+```
 
 ### Core Principles
 
 - **Pure functions only**: All calculations are deterministic and side-effect free
 - **One function per file**: Each function lives in its own file for modularity
 - **Immutable data**: No mutation, always return new values
-- **Side effect isolation**: Only orchestrators perform DOM/Three.js mutations
+- **Side effect isolation**: Effects are clearly separated from calculations
 - **Composable**: Pure functions are easy to combine for new behaviors
+- **State synchronization**: Shared state modules for cross-component communication
+
+### Key Components
+
+#### Scene Orchestrator
+
+The main orchestrator manages the animation loop and coordinates all subsystems:
+
+```typescript
+import { createSceneOrchestrator } from '@libgl/animation'
+
+const orchestrator = createSceneOrchestrator(rendererState, orchestratorRegistry)
+orchestrator.setRenderState(updatedState) // Update state after initialization
+```
+
+#### Animation Loop
+
+Encapsulated RAF management with pause/resume capabilities:
+
+```typescript
+const loop = createAnimationLoop(targetFPS, timeIncrement, {
+  onFrame: (context) => {
+    // Frame logic here
+  },
+  onPreFrame: () => { /* Optional pre-frame hook */ },
+  onPostFrame: () => { /* Optional post-frame hook */ }
+})
+```
+
+#### Shared State
+
+Scroll position is synchronized across components:
+
+```typescript
+import { scrollState, updateScrollState } from '@libgl/animation/state/scrollState'
+
+// Update scroll position
+updateScrollState(window.scrollY)
+
+// Read scroll position in animation
+const scrollY = scrollState.y
+const velocity = scrollState.velocity
+```
+
+#### Event Handling
+
+Clean event management with automatic cleanup:
+
+```typescript
+const visibilityHandler = createVisibilityHandler(onPause, onResume)
+const { handleBlur, handleFocus } = createFocusHandlers(onPause, onResume)
+
+const cleanup = attachEventListeners(visibilityHandler, handleBlur, handleFocus)
+```
 
 ### API Usage
-
-- Import orchestrators to run animation systems:
-
-  ```typescript
-  import { createLogoAnimator } from './animation'
-  const animator = createLogoAnimator(dependencies)
-  const cleanup = animator.start()
-  ```
 
 - Use pure calculation utilities for testable math:
 
   ```typescript
-  import { calculateStaticLayerPosition } from './animation'
-  const position = calculateStaticLayerPosition(1000, 0, 5, false)
-  // Returns: { rotationX: 0, rotationY: 0, positionZ: 5.02 }
+  import { calculateMouseRotation } from '@libgl/animation/calculations'
+  const rotation = calculateMouseRotation(0.5, 0.3, 2.0)
+  // Returns: { targetRotationX: 0.6, targetRotationY: 1.0 }
+  
+  import { shouldSkipFrame } from '@libgl/animation/calculations'
+  const skip = shouldSkipFrame(timeSinceLastRender, targetFPS)
+  // Returns: true if frame should be skipped
+  ```
+
+- Apply side effects through dedicated functions:
+
+  ```typescript
+  import { updateBokehFocus } from '@libgl/animation/effects'
+  updateBokehFocus(bokehPass, focusDistance)
+  
+  import { alignFocusPlane } from '@libgl/animation/effects'
+  alignFocusPlane() // Aligns focus plane if available
   ```
 
 - Compose your own pure functions and use them in orchestrators for custom behaviors.
@@ -691,7 +780,13 @@ This refactored ActionZone system provides:
   - `/gl/scene/`: Core scene setup including video background with selective colorization
   - `/gl/shaders/`: Custom GLSL shaders including pixel bleed, CRT effects, and selective video background processing
   - `/gl/textures/VideoCycle/`: Advanced video background management with efficient memory usage, smooth transitions, and pure function design
-  - `/gl/animation/`: Functional animation system with pure calculations and side-effect isolation
+  - `/gl/animation/`: Functional animation system with complete separation of concerns:
+    - `/calculations/`: Pure mathematical functions
+    - `/effects/`: Side effect functions
+    - `/events/`: Event handler factories
+    - `/loop/`: Animation loop management
+    - `/state/`: Shared state modules
+    - `/orchestrators/`: Page-specific animation logic
   - `/gl/layers/`: Dynamic layer management for geometric shapes and logo animations
   - `/gl/controls/`: Mouse and keyboard interaction systems
 
@@ -776,119 +871,7 @@ The codebase uses a structured, color-coded logger utility for all diagnostic an
 - Use log levels to control verbosity in development vs. production.
 - Use context filtering to focus on specific subsystems during debugging.
 
-## Animation System
-
-### Overview
-
-The animation system has been refactored following strict functional programming principles:
-
-- **One function per file** for maximum modularity
-- **Pure functions only** - no side effects in calculations
-- **Immutable data structures** throughout
-- **Clear separation** between pure calculations and necessary side effects
-- **Orchestrator pattern** - side effects isolated to orchestrator functions
-
-### Architecture
-
-```
-/lib/gl/animation/
-  /core/                    # Pure animation engine functions
-    /createAnimationEngine.ts
-    /updateAnimationEngine.ts
-    /addBehavior.ts
-    /removeBehavior.ts
-  /calculations/           # Pure calculation functions
-    /calculateMouseRotation.ts
-    /calculateScrollProgress.ts
-    /calculateShaderTime.ts
-    /calculateRotationInterpolation.ts
-  /orchestrators/          # Main orchestrators with side effects
-    /homePage/
-      /createHomePageOrchestrator.ts
-      /calculations/       # Home page specific calculations
-        /calculateBloomEffect.ts
-        /calculateFadeOpacity.ts
-        /calculatePlaneUpdate.ts
-        /calculatePostProcessingUpdate.ts
-    /contentPage/
-      /createContentPageOrchestrator.ts
-  /utils/                  # Pure utility functions
-    /smoothRotationInterpolation.ts
-    /getRandomInterval.ts
-    /timeUtils.ts
-    /interpolationUtils.ts
-  /createSceneOrchestrator.ts   # Main scene orchestrator
-  /types.ts                     # Type definitions
-```
-
-## Core Principles
-
-### Pure Calculations
-
-All math and position calculations are pure functions:
-
-```typescript
-// Pure function - deterministic output for given inputs
-const position = calculateStaticLayerPosition(time, index, baseZPos, isStencil)
-```
-
-### Side Effect Isolation
-
-Side effects (DOM mutations, Three.js updates) are isolated to the main orchestrator:
-
-```typescript
-// Side effects happen only in orchestrator
-plane.position.x = position.positionX // Necessary side effect
-```
-
-### One Function Per File
-
-Each function has its own file for maximum modularity:
-
-```typescript
-// /calculations/calculateMouseRotation.ts
-export const calculateMouseRotation = (mouseX, mouseY, coefficient) => ({
-  targetRotationX: mouseY * coefficient,
-  targetRotationY: mouseX * coefficient
-})
-```
-
-## Usage
-
-### Basic Setup
-
-```typescript
-import { createSceneOrchestrator } from '@libgl/animation'
-
-const orchestrator = createSceneOrchestrator(dependencies)
-const cleanup = orchestrator.start()
-```
-
-### Pure Calculations (Testable)
-
-```typescript
-import { calculateMouseRotation } from '@libgl/animation/calculations'
-
-// Pure function - easy to test
-const rotation = calculateMouseRotation(0.5, 0.3, 0.1)
-// Returns: { targetRotationX: 0.03, targetRotationY: 0.05 }
-```
-
-### Custom Calculations
-
-```typescript
-// Create your own pure calculation
-const calculateCustomRotation = (time, intensity) => ({
-  rotationX: Math.sin(time * 0.001) * intensity,
-  rotationY: Math.cos(time * 0.001) * intensity
-})
-
-// Use in your own orchestrator
-const customRotation = calculateCustomRotation(totalTime, 0.1)
-logoController.setRotation(customRotation.rotationX, customRotation.rotationY)
-```
-
-## Benefits
+### Benefits
 
 1. **Highly Testable**: Pure functions are easy to unit test
 2. **Predictable**: No hidden side effects or state mutations
@@ -897,18 +880,72 @@ logoController.setRotation(customRotation.rotationX, customRotation.rotationY)
 5. **Debuggable**: Clear data flow makes debugging simple
 6. **Performance**: Pure calculations can be optimized and memoized
 7. **Maintainable**: Clear separation between calculations and side effects
+8. **Responsive**: Proper pause/resume handling for performance optimization
 
-## File Organization
+## Animation System Details
 
-Following the guide's "one function per file" principle:
+### Scene Orchestrator
 
-- Each calculation is a separate file
-- Each utility is a separate file  
-- Each core function is a separate file
-- Page-specific orchestrators handle different contexts
-- Main orchestrator combines them all
+The main scene orchestrator (`createSceneOrchestrator.ts`) coordinates all animation subsystems:
 
-This makes the codebase highly modular and follows pure FP principles while keeping the necessary side effects (Three.js mutations) clearly isolated in orchestrator functions.
+- **State Management**: Uses mutable reference for renderer state updates
+- **Animation Loop**: Encapsulated RAF loop with FPS limiting
+- **Event Handling**: Automatic pause/resume on visibility/focus changes
+- **Frame Effects**: Applies all per-frame side effects in order
+- **Orchestrator Switching**: Dynamic page-based orchestrator management
+
+### Orchestrator Pattern
+
+Each page has its own orchestrator with specific behaviors:
+
+```typescript
+// Loading State Orchestrator
+createLoadingStateOrchestrator(onComplete, getVideoStatus)
+
+// Home Page Orchestrator  
+createHomePageOrchestrator(logoController)
+
+// Content Page Orchestrator
+createContentPageOrchestrator()
+```
+
+### Frame Effects Pipeline
+
+All frame-based side effects are centralized:
+
+1. **Align Focus Plane**: Updates global focus plane if available
+2. **Update Controls**: Processes user input
+3. **Apply Mouse Rotation**: Updates scene rotation based on mouse
+4. **Update Bokeh Focus**: Calculates and applies DOF effects
+5. **Update Video Background**: Manages video cycling
+
+### State Synchronization
+
+The system uses shared state modules for cross-component communication:
+
+- **Scroll State**: Synchronizes scroll position between UI and GL
+- **Renderer State**: Mutable reference updated after initialization
+- **Scene State**: Immutable state for orchestrator management
+
+### Performance Optimizations
+
+- **FPS Limiting**: Configurable target FPS with frame skipping
+- **Visibility API**: Pauses animation when tab is not visible
+- **Focus Tracking**: Pauses on window blur for battery savings
+- **Lazy Effect Creation**: Frame effects created only when needed
+- **Efficient State Updates**: Minimal object creation per frame
+
+### Recent Improvements
+
+The animation system was recently refactored to address several critical issues:
+
+1. **Null Safety**: Added guards to prevent crashes when composer isn't ready
+2. **State Updates**: Added `setRenderState` method for post-initialization updates
+3. **Time Advancement**: Fixed time not updating by explicitly setting `state.time`
+4. **Scroll Synchronization**: Created shared scroll state for proper position tracking
+5. **Modular Architecture**: Separated concerns into focused, testable modules
+
+These improvements ensure the animation system is more robust, maintainable, and performant.
 
 > **Note:** All theme shape types (`BaseTheme`, `BaseTypography`, `BaseSpacing`) are now defined in `lib/theme/themes/types.ts` alongside the theme objects themselves. They are re-exported from `lib/theme/types.ts` for convenience. This keeps type definitions close to the data and supports feature-based organization.
 

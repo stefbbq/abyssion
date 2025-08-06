@@ -6,6 +6,7 @@ import { getScrollCorruptionProgress } from '../scene/utils/getScrollCorruptionP
 import { getResponsiveScrollSpeed } from '../utils/getResponsiveScrollSpeed.ts'
 import { type CorruptionParams, updateCRTShaderUniforms } from '../shaders/CRTShader.ts'
 import type { PostProcessingConfig } from '../configPostProcessing.types.ts'
+import { scrollState } from '../animation/state/scrollState.ts'
 
 const ppConfig = configPostProcessing as PostProcessingConfig
 
@@ -125,9 +126,12 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 export const updateScrollMetrics = (scrollVelocity: number, glState: RendererState | null) => {
   if (!glState) return
 
+  // Use scroll velocity from shared state if not provided
+  const velocity = scrollVelocity || scrollState.velocity
+
   if (glState.ditheringPass?.uniforms) {
     const baseIntensity = 0.8
-    const velocityMultiplier = Math.min(Math.abs(scrollVelocity) * 0.1, 2.0)
+    const velocityMultiplier = Math.min(Math.abs(velocity) * 0.0001, 2.0) // Adjusted for pixels/second
     glState.ditheringPass.uniforms.intensity.value = baseIntensity + velocityMultiplier
   }
 }

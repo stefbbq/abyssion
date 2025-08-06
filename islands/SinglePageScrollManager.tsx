@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { isGLDisabled } from '@lib/debug/index.ts'
 import { isGLInitialized } from '@lib/gl/state.ts'
 import { getGLState, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
+import { updateScrollState } from '@lib/gl/animation/state/scrollState.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import { lc } from '@lib/logger/index.ts'
@@ -21,7 +22,7 @@ export default function SinglePageScrollManager() {
   const ticking = useRef(false)
 
   useEffect(() => {
-    initializeClientLogger('', 'debug')
+    initializeClientLogger(lc.GL, 'debug')
   }, [])
 
   useEffect(() => {
@@ -126,6 +127,9 @@ export default function SinglePageScrollManager() {
         requestAnimationFrame(() => {
           const scrollY = globalThis.scrollY
 
+          // Update shared scroll state
+          updateScrollState(scrollY)
+
           // Update scroll corruption effect if GL is initialized
           if (isGLInitialized.value) {
             const glState = getGLState()
@@ -146,7 +150,10 @@ export default function SinglePageScrollManager() {
 
     // Update scroll metrics when layout changes
     const handleResize = () => {
-      updateScrollMetrics(0)
+      if (isGLInitialized.value) {
+        const glState = getGLState()
+        if (glState) updateScrollMetrics(0, glState)
+      }
     }
 
     globalThis.addEventListener('scroll', handleScroll)
@@ -156,6 +163,7 @@ export default function SinglePageScrollManager() {
 
     // Initial background intensity update
     const scrollY = globalThis.scrollY
+    updateScrollState(scrollY)
     const crtConfig = configPostProcessing.crtScrollCorruption ?? {}
     const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
     setBackgroundIntensity(intensity)
