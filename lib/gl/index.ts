@@ -4,14 +4,7 @@ import type { InitOptions, RendererState } from './types.ts'
 import { lc, log } from '../logger/index.ts'
 import { isDebugModeEnabled } from '../debug/index.ts'
 import { isGLInitialized } from './state.ts'
-import {
-  createCleanupFunction,
-  setupCoreRendering,
-  setupDebugSystem,
-  setupLayerSystem,
-  setupResponsiveHandling,
-  setupTextureLoading,
-} from './setup/index.ts'
+import { setupCoreRendering, setupDebugSystem, setupLayerSystem, setupResponsiveHandling, setupTextureLoading } from './setup/index.ts'
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
 import { createUILayer } from './layers/UILayer.ts'
@@ -57,6 +50,7 @@ export const initGL = async (options: InitOptions) => {
    * This will setup the scene and log a message
    */
   const onVideoReady = async () => {
+    log(lc.GL, 'Video ready callback triggered, setting up scene...')
     await setupScene()
     log(lc.GL, 'Video and scene setup complete')
   }
@@ -76,7 +70,11 @@ export const initGL = async (options: InitOptions) => {
 
     // if the post processing is enabled, create the post processing
     if (postProcessingConfig.enabled) {
+      log(lc.GL, 'Creating post-processing...')
       Object.assign(glState, await createPostProcessing(THREE, scene, camera, renderer, width, height, postProcessingConfig))
+      log(lc.GL, 'Post-processing created, composer available:', !!glState.composer)
+    } else {
+      log.warn(lc.GL, 'Post-processing disabled in config')
     }
 
     // create the UI layer
@@ -99,8 +97,10 @@ export const initGL = async (options: InitOptions) => {
     Object.assign(glState, textures)
 
     // setup the layer system
+    log(lc.GL, 'Setting up layer system...')
     const layerSystem = setupLayerSystem(THREE, scene, textures.outlineTexture, textures.stencilTexture)
     Object.assign(glState, layerSystem)
+    log(lc.GL, 'Layer system setup complete, logoController available:', !!glState.logoController)
 
     // setup the debug system
     if (glState?.logoController) {
@@ -150,9 +150,13 @@ export const initGL = async (options: InitOptions) => {
       }
     }
 
-    // update the orchestrator with the fully initialized state
+    // update the orchestrator with the fully initialized state and start it
     if (glState?.sceneOrchestrator) {
+      log(lc.GL, 'Scene setup complete, updating orchestrator state and starting animation')
       glState.sceneOrchestrator.setRenderState(glState)
+      glState.sceneOrchestrator.start()
+    } else {
+      log.error(lc.GL, 'Scene orchestrator not available after setup!')
     }
   }
 
@@ -162,39 +166,64 @@ export const initGL = async (options: InitOptions) => {
   glState.camera = core.camera
   glState.renderer = core.renderer
 
+  // setup the orchestrator BEFORE adding video background to avoid race condition
+  glState.sceneOrchestrator = setupOrchestrators(glState)
+
   // add the video background
   try {
+    log(lc.GL, 'Adding video background...')
     glState.videoBackground = await addVideoBackground(THREE, core.scene, onVideoReady)
+    log(lc.GL, 'Video background added, waiting for video ready callback...')
   } catch (error) {
     log.error(lc.GL, 'Failed to load video background:', error)
   }
 
-  // setup the orchestrator
-  glState.sceneOrchestrator = setupOrchestrators(glState)
-
   // set the GL initialized flag
   isGLInitialized.value = true
 
-  if (glState.logoController && glState.uiOverlay && glState.videoBackground) {
-    return createCleanupFunction({
-      animationCleanup: glState.sceneOrchestrator.dispose,
-      responsiveCleanup: glState.responsiveCleanup || (() => {}),
-      controlsSystem: glState.controls ? { orbitControls: glState.controls, dispose: () => {} } : null,
-      videoBackground: glState.videoBackground,
-      logoController: glState.logoController,
-      scene: glState.scene,
-      logoPlanes: glState.logoPlanes,
-      shapeLayer: glState.shapeLayer,
-      shadowLayer: glState.shadowLayer,
-      uiLayer: glState.uiOverlay,
-      controls: glState.controls,
-      renderer: glState.renderer,
-      composer: glState.composer,
-    })
-  }
+  // Return cleanup function that will use glState when called
+  // Don't check for logoController here as it's created asynchronously in setupScene
+  log(lc.GL, 'Returning cleanup function')
+  return () => {
+    if (!glState) return
 
-  log.error(lc.GL, 'GL cleanup function failed due to missing dependencies')
-  return () => {}
+    log(lc.GL, 'Cleanup function called')
+
+    // Cleanup orchestrator
+    glState.sceneOrchestrator?.dispose()
+
+    // Cleanup responsive handler
+    glState.responsiveCleanup?.()
+
+    // Cleanup video background
+    glState.videoBackground?.dispose()
+
+    // Cleanup controls
+    if (glState.controls) {
+      glState.controls.dispose()
+    }
+
+    // Cleanup logo controller
+    if (glState.logoController && glState.scene && glState.logoPlanes) {
+      glState.logoController.dispose(glState.scene, glState.logoPlanes)
+    }
+
+    // Cleanup layers
+    if (glState.scene) {
+      if (glState.shapeLayer) glState.scene.remove(glState.shapeLayer)
+      if (glState.shadowLayer?.mesh) glState.scene.remove(glState.shadowLayer.mesh)
+      if (glState.uiOverlay?.scene) glState.scene.remove(glState.uiOverlay.scene)
+    }
+
+    // Cleanup composer
+    glState.composer?.dispose()
+
+    // Cleanup renderer
+    glState.renderer?.dispose()
+
+    // Clear state
+    glState = null
+  }
 }
 
 export const getSceneOrchestrator = () => glState?.sceneOrchestrator

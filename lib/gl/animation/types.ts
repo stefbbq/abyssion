@@ -36,5 +36,6 @@ export type SceneOrchestrator = {
   switchToPage: (pageName: string) => void
   setRenderState: (state: import('../types.ts').RendererState) => void
   getActiveOrchestrators: () => string[]
+  start: () => void
   dispose: () => void
 }

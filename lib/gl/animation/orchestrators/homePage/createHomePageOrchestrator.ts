@@ -8,12 +8,15 @@ import ms from 'ms'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
 import * as Three from 'three'
 import { scrollState } from '@libgl/animation/state/scrollState.ts'
+import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Home page animation orchestrator (formerly logo page)
  * Manages logo layers, regeneration, and post-processing effects
  */
 export const createHomePageOrchestrator = (logoController: LogoController): AnimationOrchestrator => {
+  log(lc.GL_ANIMATION, 'Creating home page orchestrator')
+
   if (!logoController) {
     throw new Error('logoController not available when creating home page orchestrator')
   }
@@ -52,7 +55,7 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
   }
 
   const update = (context: AnimationContext) => {
-    console.log('update', context)
+    log.debug(lc.GL_ANIMATION, 'HomePage orchestrator update called')
     const { state, time } = context
 
     // Check layer regeneration timing
@@ -234,6 +237,8 @@ export const createHomePageOrchestrator = (logoController: LogoController): Anim
     lastRegenerateTime = 0
     bloomOverrideActive = false
   }
+
+  log(lc.GL_ANIMATION, 'Home page orchestrator created successfully')
 
   return {
     name: 'home-page',

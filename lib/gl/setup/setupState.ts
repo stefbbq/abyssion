@@ -49,7 +49,9 @@ export const createInitialGLState = (
     controls: null as THREE.OrbitControls | null,
     sceneOrchestrator: null as SceneOrchestrator | null,
     get isReady() {
-      return !!this.videoBackground?.getDebugInfo?.().isPlaying && !!this.logoController
+      // Check if video background exists and has debug info (indicates it's initialized)
+      // Don't require isPlaying as video might be ready but not playing yet
+      return !!this.videoBackground?.getDebugInfo && !!this.logoController
     },
   }
 }

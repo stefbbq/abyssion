@@ -37,7 +37,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 
   const { progress: scrollProgress, intensity: corruptionIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
 
-  log.debug(lc.GL, '📊 updateScrollCorruption:', {
+  log.trace(lc.GL, '📊 updateScrollCorruption:', {
     scrollY,
     cameraY: state.camera?.position.y,
     scrollSpeed: getResponsiveScrollSpeed(globalThis.innerWidth),

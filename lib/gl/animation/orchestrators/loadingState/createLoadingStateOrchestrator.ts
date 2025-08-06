@@ -18,10 +18,13 @@ export const createLoadingStateOrchestrator = (
   onLoadingComplete: () => void,
   getVideoStatus: () => VideoStatus,
 ): AnimationOrchestrator => {
+  log(lc.GL_ANIMATION, 'Creating loading state orchestrator')
+
   let isVideoReady = false
-  const loadingStartTime = Date.now()
+  let loadingStartTime: number | null = null
   let hasTransitioned = false
   let loadingGeometry: Three.Mesh | null = null
+  let frameCount = 0
 
   log.debug(lc.GL_VIDEO, 'Loading state orchestrator started')
 
@@ -29,6 +32,7 @@ export const createLoadingStateOrchestrator = (
   const createLoadingGeometry = (context: AnimationContext) => {
     const { state } = context
     if (!loadingGeometry && state.THREE) {
+      log.debug(lc.GL_ANIMATION, 'Creating loading geometry...')
       const geometry = new state.THREE.PlaneGeometry(4, 4) // Bigger
       const material = new state.THREE.MeshBasicMaterial({
         color: 0x00ffff,
@@ -48,14 +52,36 @@ export const createLoadingStateOrchestrator = (
   const update = (context: AnimationContext) => {
     const { time } = context
     const currentTime = Date.now()
+    frameCount++
+
+    // Initialize loading start time on first frame
+    if (loadingStartTime === null) {
+      loadingStartTime = currentTime
+      log(lc.GL_ANIMATION, 'Loading state initialized, starting timer')
+    }
+
+    // Log first few frames to confirm update is being called
+    if (time < 0.1) {
+      log.debug(lc.GL_ANIMATION, `Loading state update called, time: ${time}`)
+    }
 
     // Create loading geometry if it doesn't exist
     createLoadingGeometry(context)
 
     // Check video status
-    const { isReadyToStream } = getVideoStatus()
+    const videoStatus = getVideoStatus()
+    const { isReadyToStream } = videoStatus
 
-    if (!isVideoReady && isReadyToStream) {
+    // Log detailed status every 2 seconds
+    if (currentTime % 2000 < 50) {
+      log.debug(lc.GL_ANIMATION, 'Video status:', {
+        videoBackground: !!videoStatus.videoBackground,
+        isReadyToStream,
+        isVideoReady,
+      })
+    }
+
+    if (!isVideoReady && videoStatus.videoBackground) {
       isVideoReady = true
       log(lc.GL_VIDEO, 'Video is ready to stream!')
     }
@@ -64,15 +90,15 @@ export const createLoadingStateOrchestrator = (
     const loadingProgress = calculateLoadingProgress({
       startTime: loadingStartTime,
       currentTime,
-      isVideoReady,
-      minimumLoadingTime: 500, // At least 0.5 seconds of loading for UX
+      isVideoReady: isVideoReady && isReadyToStream, // Both video AND scene must be ready
+      minimumLoadingTime: 2000, // At least 2 seconds of loading to ensure scene is ready
     })
 
     // Minimal logging for debugging
     if (currentTime % 2000 < 50) { // Log every 2 seconds
       log.debug(
         lc.GL_VIDEO,
-        `Loading... videoReady=${isVideoReady}, sceneReady=${isReadyToStream}, elapsed=${loadingProgress.elapsedTime}ms, progress=${
+        `Loading... videoReady=${isVideoReady}, fullyReady=${isReadyToStream}, elapsed=${loadingProgress.elapsedTime}ms, progress=${
           Math.round(loadingProgress.progress * 100)
         }%`,
       )
@@ -101,12 +127,22 @@ export const createLoadingStateOrchestrator = (
       loadingGeometry.scale.setScalar(scale)
     }
 
+    // Log transition state for debugging
+    if (frameCount % 60 === 1) {
+      log.debug(lc.GL_ANIMATION, 'Transition state:', {
+        isComplete: loadingProgress.isComplete,
+        hasTransitioned,
+        progress: loadingProgress.progress,
+        elapsedTime: loadingProgress.elapsedTime,
+      })
+    }
+
     // Transition to main scene when loading is complete
     if (loadingProgress.isComplete && !hasTransitioned) {
       hasTransitioned = true
       log(
         lc.GL_VIDEO,
-        `Loading complete! Video ready: ${isVideoReady}, scene ready: ${isReadyToStream}, elapsed: ${loadingProgress.elapsedTime}ms - transitioning to main scene`,
+        `Loading complete! Video ready: ${isVideoReady}, full scene ready: ${isReadyToStream}, elapsed: ${loadingProgress.elapsedTime}ms - transitioning to main scene`,
       )
       onLoadingComplete()
     }
@@ -125,6 +161,8 @@ export const createLoadingStateOrchestrator = (
     }
     log.debug(lc.GL_VIDEO, 'Loading state orchestrator disposed')
   }
+
+  log(lc.GL_ANIMATION, 'Loading state orchestrator created successfully')
 
   return {
     name: 'loading-state',

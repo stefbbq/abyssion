@@ -22,7 +22,7 @@ export default function SinglePageScrollManager() {
   const ticking = useRef(false)
 
   useEffect(() => {
-    initializeClientLogger(lc.GL, 'debug')
+    initializeClientLogger('', 'debug')
   }, [])
 
   useEffect(() => {

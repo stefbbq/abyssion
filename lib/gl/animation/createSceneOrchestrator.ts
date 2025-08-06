@@ -43,6 +43,9 @@ export const createSceneOrchestrator = (
     },
   }
 
+  // Deferred page switch to avoid modifying state during iteration
+  let pendingPageSwitch: string | null = null
+
   // Create animation loop
   const loop = createAnimationLoop(
     60, // TARGET_FPS
@@ -50,7 +53,10 @@ export const createSceneOrchestrator = (
     {
       onFrame: (loopContext) => {
         // Skip frame if composer not ready
-        if (!currentState.composer) return
+        if (!currentState.composer) {
+          log.warn(lc.GL_ANIMATION, 'Skipping frame - composer not ready')
+          return
+        }
 
         // Update state time
         currentState.time = loopContext.time
@@ -69,6 +75,13 @@ export const createSceneOrchestrator = (
 
         // Step orchestrators
         sceneState = stepOrchestrators(sceneState, context)
+
+        // Handle deferred page switch after orchestrator updates
+        if (pendingPageSwitch) {
+          log(lc.GL_ANIMATION, `Executing deferred page switch to: ${pendingPageSwitch}`)
+          sceneState = switchToPage(sceneState, orchestratorRegistry, pendingPageSwitch, context)
+          pendingPageSwitch = null
+        }
 
         // Render if composer is available
         currentState.composer.render()
@@ -98,8 +111,8 @@ export const createSceneOrchestrator = (
     handleFocus,
   )
 
-  // Start animation loop
-  loop.start()
+  // Track if animation has started
+  let hasStarted = false
 
   /**
    * Return the orchestrator
@@ -113,13 +126,23 @@ export const createSceneOrchestrator = (
       sceneState = unregisterOrchestrator(sceneState, name, context)
     },
     switchToPage: (pageName: string) => {
-      const context: AnimationContext = { state: currentState, shared, time: loop.getTime(), deltaTime: 0 }
-      sceneState = switchToPage(sceneState, orchestratorRegistry, pageName, context)
+      log(lc.GL_ANIMATION, `Queueing page switch to: ${pageName}`)
+      pendingPageSwitch = pageName
     },
     setRenderState: (newState: RendererState) => {
       currentState = newState
     },
     getActiveOrchestrators: () => Array.from(sceneState.activeOrchestrators.keys()) as string[],
+    start: () => {
+      if (!hasStarted) {
+        hasStarted = true
+        const activeNames = Array.from(sceneState.activeOrchestrators.keys())
+        log(lc.GL_ANIMATION, `Starting animation loop with active orchestrators: [${activeNames.join(', ')}]`)
+        loop.start()
+      } else {
+        log.warn(lc.GL_ANIMATION, 'Animation loop already started')
+      }
+    },
     dispose: () => {
       loop.dispose()
       shared.mouseTracking.cleanup()
