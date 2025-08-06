@@ -10,10 +10,19 @@ import * as Three from 'three'
  * Manages the loading screen and video preparation state
  */
 type VideoStatus = {
+  // the video background manager
   videoBackground: VideoBackgroundManager | undefined
+  // whether the video is ready to stream
   isReadyToStream: boolean
 }
 
+/**
+ * Return the loading state orchestrator
+ *
+ * This will create a simple loading geometry and animate it
+ * It will also check the video status and transition to the main scene when the video is ready
+ * It will also log the loading progress and status
+ */
 export const createLoadingStateOrchestrator = (
   onLoadingComplete: () => void,
   getVideoStatus: () => VideoStatus,

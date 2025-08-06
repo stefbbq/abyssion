@@ -4,11 +4,12 @@
  */
 export const getResponsiveScrollSpeed = (width: number): number => {
   const breakpoints = [
-    { width: 800, speed: -0.003 },
+    { width: 440, speed: -0.0075 },
+    { width: 800, speed: -0.0035 },
     { width: 1200, speed: -0.0020 },
-    { width: 1440, speed: -0.0022 },
-    { width: 1920, speed: -0.0023 },
-    { width: 2560, speed: -0.0024 },
+    { width: 1440, speed: -0.0018 },
+    { width: 1920, speed: -0.0019 },
+    { width: 2560, speed: -0.0020 },
   ]
 
   // Find the appropriate speed range for interpolation

@@ -26,25 +26,6 @@ let glState: RendererState | null = null
  * @returns A cleanup function
  */
 export const initGL = async (options: InitOptions) => {
-  const { canvas, stencilTexturePath, outlineTexturePath } = options
-  const rendererConfig = (await import('./configScene.json')).default.rendererConfig
-  const postProcessingConfig = (await import('./configPostProcessing.json')).default as PostProcessingConfig
-  const controlsConfig = (await import('./configControls.json')).default
-  const animationConfig = (await import('./configAnimation.json')).default
-
-  /**
-   * Debug the mobile responsiveness such as camera position, composer size, and UI layer size
-   */
-  if (isDebugModeEnabled()) {
-    const { debugMobileResponsiveness } = await import('./scene/utils/debugMobileResponsiveness.ts')
-    debugMobileResponsiveness()
-  }
-
-  /**
-   * Create the initial GL state with default values
-   */
-  glState = createInitialGLState(THREE)
-
   /**
    * Callback function for when the video is ready
    * This will setup the scene and log a message
@@ -160,13 +141,25 @@ export const initGL = async (options: InitOptions) => {
     }
   }
 
-  // setup the core renderingn and assign the scene, camera, and renderer to glState
+  // pull configs and options
+  const { canvas, stencilTexturePath, outlineTexturePath } = options
+  const rendererConfig = (await import('./configScene.json')).default.rendererConfig
+  const postProcessingConfig = (await import('./configPostProcessing.json')).default as PostProcessingConfig
+  const controlsConfig = (await import('./configControls.json')).default
+  const animationConfig = (await import('./configAnimation.json')).default
+
+  // on debug mode, debug mobile responsiveness such as camera position, composer size, and UI layer size
+  if (isDebugModeEnabled()) {
+    const { debugMobileResponsiveness } = await import('./scene/utils/debugMobileResponsiveness.ts')
+    debugMobileResponsiveness()
+  }
+
+  // setup the core rendering and assign the scene, camera, and renderer to glState
+  glState = createInitialGLState(THREE)
   const core = await setupCoreRendering(THREE, options)
   glState.scene = core.scene
   glState.camera = core.camera
   glState.renderer = core.renderer
-
-  // setup the orchestrator BEFORE adding video background to avoid race condition
   glState.sceneOrchestrator = setupOrchestrators(glState)
 
   // add the video background

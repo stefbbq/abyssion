@@ -86,7 +86,7 @@ export const createVideoBackground = async (
     const mesh = new THREE.Mesh(geometry, material)
     mesh.name = name
     mesh.position.z = videoCycleConfig.position.z
-    // y position will be set in handleResize
+    // y position will be set in handleResie
     scene.add(mesh)
 
     return { mesh, material, geometry }
