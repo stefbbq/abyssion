@@ -8,7 +8,16 @@ import type { BufferObject, VideoBackgroundManager, VideoCycleDebugInfo } from '
 const videoCycleConfig = videoCycleConfigRaw as unknown as VideoCycleConfig
 
 /**
- * Creates a single video loop system that plays one video on repeat
+ * @module VideoCycle
+ * @description Creates a single video loop system that plays one video on repeat
+ * @example
+ * Usage:
+ *   import { createSingleVideoManager } from '@libgl/textures/VideoCycle/createSingleVideoManager.ts'
+ *   const singleVideoManager = createSingleVideoManager(frontBuffer, backBuffer)
+ *   singleVideoManager.update()
+ *   singleVideoManager.dispose()
+ *   singleVideoManager.getDebugInfo()
+ *   singleVideoManager.handleResize()
  */
 export const createSingleVideoManager = async (
   frontBuffer: BufferObject,

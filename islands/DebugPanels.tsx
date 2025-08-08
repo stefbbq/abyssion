@@ -323,10 +323,25 @@ export const DebugPanels = (props: Props) => {
     if (!isGLDisabled.value && debugVisible.value && typeof window !== 'undefined') {
       try {
         const mod = await import('@lib/gl/index.ts')
+        const glState = mod.getGLState()
         const orchestrator = mod.getSceneOrchestrator()
-        if (orchestrator) orchestrator.switchToPage(scene)
-      } catch {
-        log.error(lc.GL, 'Error switching scene:', scene)
+
+        if (orchestrator && glState) {
+          // create the appropriate orchestrator based on scene name
+          if (scene === 'home-page') {
+            const { createHomePageOrchestrator } = await import('@lib/gl/animation/orchestrators/homePage/createHomePageOrchestrator.ts')
+            const homeOrchestrator = createHomePageOrchestrator(glState)
+            orchestrator.switchToOrchestrator(homeOrchestrator)
+          } else if (scene === 'content-page') {
+            const { createContentPageOrchestrator } = await import(
+              '@lib/gl/animation/orchestrators/contentPage/createContentPageOrchestrator.ts'
+            )
+            const contentOrchestrator = createContentPageOrchestrator(glState)
+            orchestrator.switchToOrchestrator(contentOrchestrator)
+          }
+        }
+      } catch (error) {
+        log.error(lc.GL, 'Error switching scene:', scene, error)
       }
     }
   }

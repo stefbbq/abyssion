@@ -1,37 +1,20 @@
 import type { AnimationContext, AnimationOrchestrator } from '@libgl/animation/core/types.ts'
-import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
-import { calculateLoadingProgress } from './calculations/calculateLoadingProgress.ts'
+import type { RendererState } from '@libgl/types.ts'
 import { calculateLoadingEffects } from './calculations/calculateLoadingEffects.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import * as Three from 'three'
 
 /**
  * Loading state animation orchestrator
- * Manages the loading screen and video preparation state
- */
-type VideoStatus = {
-  // the video background manager
-  videoBackground: VideoBackgroundManager | undefined
-  // whether the video is ready to stream
-  isReadyToStream: boolean
-}
-
-/**
- * Return the loading state orchestrator
- *
- * This will create a simple loading geometry and animate it
- * It will also check the video status and transition to the main scene when the video is ready
- * It will also log the loading progress and status
+ * Manages the loading screen animation
+ * Displays loading indicator until switched to another orchestrator
  */
 export const createLoadingStateOrchestrator = (
-  onLoadingComplete: () => void,
-  getVideoStatus: () => VideoStatus,
+  _glState: RendererState,
 ): AnimationOrchestrator => {
   log(lc.GL_ANIMATION, 'Creating loading state orchestrator')
 
-  let isVideoReady = false
   let loadingStartTime: number | null = null
-  let hasTransitioned = false
   let loadingGeometry: Three.Mesh | null = null
   let frameCount = 0
 
@@ -77,47 +60,20 @@ export const createLoadingStateOrchestrator = (
     // Create loading geometry if it doesn't exist
     createLoadingGeometry(context)
 
-    // Check video status
-    const videoStatus = getVideoStatus()
-    const { isReadyToStream } = videoStatus
+    // Simple loading progress based on time
+    const elapsedTime = currentTime - loadingStartTime
+    const loadingProgress = Math.min(elapsedTime / 3000, 1) // 3 second loading animation
 
-    // Log detailed status every 2 seconds
+    // Log every 2 seconds
     if (currentTime % 2000 < 50) {
-      log.debug(lc.GL_ANIMATION, 'Video status:', {
-        videoBackground: !!videoStatus.videoBackground,
-        isReadyToStream,
-        isVideoReady,
-      })
-    }
-
-    if (!isVideoReady && videoStatus.videoBackground) {
-      isVideoReady = true
-      log(lc.GL_VIDEO, 'Video is ready to stream!')
-    }
-
-    // Calculate loading progress
-    const loadingProgress = calculateLoadingProgress({
-      startTime: loadingStartTime,
-      currentTime,
-      isVideoReady: isVideoReady && isReadyToStream, // Both video AND scene must be ready
-      minimumLoadingTime: 2000, // At least 2 seconds of loading to ensure scene is ready
-    })
-
-    // Minimal logging for debugging
-    if (currentTime % 2000 < 50) { // Log every 2 seconds
-      log.debug(
-        lc.GL_VIDEO,
-        `Loading... videoReady=${isVideoReady}, fullyReady=${isReadyToStream}, elapsed=${loadingProgress.elapsedTime}ms, progress=${
-          Math.round(loadingProgress.progress * 100)
-        }%`,
-      )
+      log.debug(lc.GL_ANIMATION, `Loading animation... elapsed: ${elapsedTime}ms`)
     }
 
     // Apply loading effects to scene elements
     const effects = calculateLoadingEffects({
-      progress: loadingProgress.progress,
+      progress: loadingProgress,
       time,
-      isComplete: loadingProgress.isComplete,
+      isComplete: false, // Never complete, just keep animating
     })
 
     // Animate loading geometry
@@ -134,26 +90,6 @@ export const createLoadingStateOrchestrator = (
       // Scale based on progress
       const scale = 0.5 + effects.pulseIntensity * 0.5
       loadingGeometry.scale.setScalar(scale)
-    }
-
-    // Log transition state for debugging
-    if (frameCount % 60 === 1) {
-      log.debug(lc.GL_ANIMATION, 'Transition state:', {
-        isComplete: loadingProgress.isComplete,
-        hasTransitioned,
-        progress: loadingProgress.progress,
-        elapsedTime: loadingProgress.elapsedTime,
-      })
-    }
-
-    // Transition to main scene when loading is complete
-    if (loadingProgress.isComplete && !hasTransitioned) {
-      hasTransitioned = true
-      log(
-        lc.GL_VIDEO,
-        `Loading complete! Video ready: ${isVideoReady}, full scene ready: ${isReadyToStream}, elapsed: ${loadingProgress.elapsedTime}ms - transitioning to main scene`,
-      )
-      onLoadingComplete()
     }
   }
 

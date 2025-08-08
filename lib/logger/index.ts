@@ -1,8 +1,7 @@
 /**
  * @module Logger
- *
- * Utility for structured, color-coded console output with context and log level support.
- *
+ * @description Utility for structured, color-coded console output with context and log level support.
+ * @example
  * Usage:
  *   import { log, lc } from '@logger/Log';
  *   log(lc.GL, 'Hello GL!');
@@ -19,6 +18,7 @@
  * Log levels are available as static methods: log.trace, log.debug, log.info, log.warn, log.error, log.critical
  * Contexts are defined in LogContext (imported as lc).
  */
+
 import { LOG_LEVELS, LogContext, type LogLevel } from './constants.ts'
 import { type ContextFilter, createContextFilter } from './utils/createContextFilter.ts'
 import { createServerLogger } from './utils/createServerLogger.ts'

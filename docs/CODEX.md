@@ -445,9 +445,34 @@ The main orchestrator manages the animation loop and coordinates all subsystems:
 ```typescript
 import { createSceneOrchestrator } from '@libgl/animation'
 
-const orchestrator = createSceneOrchestrator(rendererState, orchestratorRegistry)
+const orchestrator = createSceneOrchestrator(rendererState)
 orchestrator.setRenderState(updatedState) // Update state after initialization
 ```
+
+#### Orchestrator Pattern
+
+Each page has its own orchestrator with specific behaviors:
+
+```typescript
+// Loading State Orchestrator (visual-only)
+createLoadingStateOrchestrator(glState)
+
+// Home Page Orchestrator  
+createHomePageOrchestrator(glState)
+
+// Content Page Orchestrator
+createContentPageOrchestrator(glState)
+```
+
+#### Loading and Transition Flow (current)
+
+- **Instance-based API**: No registry. You create orchestrator instances and pass them to the scene orchestrator
+  - `registerOrchestrator(orchestrator)`
+  - `switchToOrchestrator(orchestrator)`
+- **Early start**: The animation loop starts immediately with the loading orchestrator so the loading animation renders while the video loads
+- **Basic render fallback**: If the composer is not yet available, the loop uses `renderer.render(scene, camera)` so loading visuals still display
+- **Lazy home init**: After `onVideoReady` triggers `setupScene()` and the scene is fully initialized (e.g., `logoController` created), the home orchestrator is created and switched in
+- **Separation of concerns**: The loading orchestrator is visual-only; page switching is coordinated by the GL entrypoint (`lib/gl/index.ts`) after scene setup
 
 #### Animation Loop
 
@@ -899,15 +924,25 @@ The main scene orchestrator (`createSceneOrchestrator.ts`) coordinates all anima
 Each page has its own orchestrator with specific behaviors:
 
 ```typescript
-// Loading State Orchestrator
-createLoadingStateOrchestrator(onComplete, getVideoStatus)
+// Loading State Orchestrator (visual-only)
+createLoadingStateOrchestrator(glState)
 
 // Home Page Orchestrator  
-createHomePageOrchestrator(logoController)
+createHomePageOrchestrator(glState)
 
 // Content Page Orchestrator
-createContentPageOrchestrator()
+createContentPageOrchestrator(glState)
 ```
+
+### Loading and Transition Flow (current)
+
+- **Instance-based API**: No registry. You create orchestrator instances and pass them to the scene orchestrator
+  - `registerOrchestrator(orchestrator)`
+  - `switchToOrchestrator(orchestrator)`
+- **Early start**: The animation loop starts immediately with the loading orchestrator so the loading animation renders while the video loads
+- **Basic render fallback**: If the composer is not yet available, the loop uses `renderer.render(scene, camera)` so loading visuals still display
+- **Lazy home init**: After `onVideoReady` triggers `setupScene()` and the scene is fully initialized (e.g., `logoController` created), the home orchestrator is created and switched in
+- **Separation of concerns**: The loading orchestrator is visual-only; page switching is coordinated by the GL entrypoint (`lib/gl/index.ts`) after scene setup
 
 ### Frame Effects Pipeline
 

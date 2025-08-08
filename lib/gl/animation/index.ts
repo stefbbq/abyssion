@@ -1,6 +1,6 @@
 /**
- * Animation system
- * Scene orchestrator with composable page-specific animation systems
+ * @module Animation system
+ * @description Scene orchestrator with composable page-specific animation systems
  */
 
 export { createSceneOrchestrator } from './createSceneOrchestrator.ts'
@@ -16,3 +16,4 @@ export { calculateRotationInterpolation } from './calculations/calculateRotation
 export { calculateScrollProgress } from './calculations/calculateScrollProgress.ts'
 export { calculateShaderTime } from './calculations/calculateShaderTime.ts'
 export { calculateMouseRotation } from './calculations/calculateMouseRotation.ts'
+;``

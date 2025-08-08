@@ -14,6 +14,15 @@ const videoCycleConfig = videoCycleConfigRaw as unknown as VideoCycleConfig
 
 /**
  * Creates a cycling video system that switches between multiple videos
+ * @example
+ * Usage:
+ *   import { createCycleVideoManager } from '@libgl/textures/VideoCycle/createCycleVideoManager.ts'
+ *   const cycleVideoManager = createCycleVideoManager(frontBuffer, backBuffer)
+ *   cycleVideoManager.update()
+ *   cycleVideoManager.dispose()
+ *   cycleVideoManager.getDebugInfo()
+ *   cycleVideoManager.handleResize()
+ *   cycleVideoManager.getDebugInfo()
  */
 export const createCycleVideoManager = async (
   frontBuffer: BufferObject,

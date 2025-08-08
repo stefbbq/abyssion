@@ -1,7 +1,11 @@
 /**
  * @module Geometry
- *
- * Provides various geometric shapes and utilities for the 3D logo
+ * @description Provides various geometric shapes and utilities for the 3D logo
+ * @example
+ * Usage:
+ *   import { createCircleOutline } from '@libgl/geometry/index.ts'
+ *   const circle = createCircleOutline()
+ *   scene.add(circle)
  */
 
 export * from './createCircleOutline.ts'

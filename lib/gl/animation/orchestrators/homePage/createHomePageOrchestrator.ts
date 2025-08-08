@@ -1,24 +1,27 @@
+import * as Three from 'three'
+import ms from 'ms'
+
 import type { AnimationContext, AnimationOrchestrator } from '@libgl/animation/core/types.ts'
+import type { RendererState } from '@libgl/types.ts'
 import { calculateRegenerationTiming } from './calculations/calculateRegenerationTiming.ts'
 import { calculatePlaneUpdate } from './calculations/calculatePlaneUpdate.ts'
 import { calculatePostProcessingUpdate } from './calculations/calculatePostProcessingUpdate.ts'
 import { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
-import type { LogoController } from '@libgl/layers/LogoLayer.ts'
-import ms from 'ms'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
-import * as Three from 'three'
 import { scrollState } from '@libgl/animation/state/scrollState.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
 /**
  * Home page animation orchestrator (formerly logo page)
  * Manages logo layers, regeneration, and post-processing effects
+ * Requires logoController to be available in glState
  */
-export const createHomePageOrchestrator = (logoController: LogoController): AnimationOrchestrator => {
+export const createHomePageOrchestrator = (glState: RendererState): AnimationOrchestrator => {
   log(lc.GL_ANIMATION, 'Creating home page orchestrator')
 
+  const logoController = glState.logoController
   if (!logoController) {
-    throw new Error('logoController not available when creating home page orchestrator')
+    throw new Error('logoController not available in glState when creating home page orchestrator')
   }
 
   let lastRegenerateTime = 0

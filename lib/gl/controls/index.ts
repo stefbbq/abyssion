@@ -1,12 +1,20 @@
 /**
- * Controls module
- * Provides camera orbit controls, mouse tracking, and keyboard shortcuts
+ * @module Controls
+ * @description Provides camera orbit controls, mouse tracking, and keyboard shortcuts
  *
  * Follows functional programming principles:
  * - Pure functions for calculations
  * - Immutable state management
  * - Composable architecture
  * - Clean separation of concerns
+ *
+ * @example
+ * Usage:
+ *   import { createControlsSystem } from '@libgl/controls/index.ts'
+ *   const controls = createControlsSystem(camera, domElement)
+ *   controls.activate()
+ *   controls.deactivate()
+ *   controls.cleanup()
  */
 
 // Main orchestrator

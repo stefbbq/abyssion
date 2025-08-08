@@ -15,10 +15,10 @@
     "videoLoadTimeoutMS": 30000
   },
   "appearance": {
-    "opacity": 1
+    "opacity": 0.82
   },
   "position": {
-    "z": -3000,
-    "scale": 1.23
+    "z": -100,
+    "scale": 1.13
   }
 }

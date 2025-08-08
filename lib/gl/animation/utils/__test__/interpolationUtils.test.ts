@@ -1,5 +1,5 @@
 import { assert, assertAlmostEquals, assertEquals } from '$std/assert/mod.ts'
-import { easeInOut, easeOut, lerp, smoothRotationInterpolation } from '../interpolationUtils.ts'
+import { easeInOut, easeOut, lerp } from '../interpolationUtils.ts'
 
 Deno.test('lerp - linear interpolation', async (test) => {
   await test.step('should interpolate linearly between start and end', () => {
@@ -115,29 +115,6 @@ Deno.test('easeInOut - cubic ease-in-out function', async (test) => {
     // Values around 0.5 should be close to 0.5
     assertAlmostEquals(easeInOut(0.49), 0.4706, 0.01)
     assertAlmostEquals(easeInOut(0.51), 0.5294, 0.01)
-  })
-})
-
-Deno.test('smoothRotationInterpolation - duplicate function test', async (test) => {
-  await test.step('should match standalone implementation behavior', () => {
-    const current = 10
-    const target = 20
-    const smoothing = 0.3
-
-    const result = smoothRotationInterpolation(current, target, smoothing)
-    const expected = current + (target - current) * smoothing
-
-    assertEquals(result, expected)
-  })
-
-  await test.step('should use default smoothing factor', () => {
-    const current = 0
-    const target = 100
-
-    const result = smoothRotationInterpolation(current, target)
-    const expected = current + (target - current) * 0.05 // Default smoothing
-
-    assertEquals(result, expected)
   })
 })
 

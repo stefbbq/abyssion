@@ -159,7 +159,7 @@ export const createVideoBackground = async (
     backBuffer.mesh.scale.set(finalScale, finalScale, 1)
     // Calculate and set y position for both planes
     // 5% above, 95% below: so offset is (0.5 - 0.05) * planeHeight = 0.45 * planeHeight downward
-    const yOffset = -0.15 * newVideoPlaneHeight * finalScale
+    const yOffset = -0.09 * newVideoPlaneHeight * finalScale
     frontBuffer.mesh.position.y = yOffset
     backBuffer.mesh.position.y = yOffset
   }

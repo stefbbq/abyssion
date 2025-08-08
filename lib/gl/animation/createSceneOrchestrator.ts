@@ -5,7 +5,7 @@ import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import { lc, log } from '@lib/logger/index.ts'
 import { registerOrchestrator } from './orchestrators/registerOrchestrator.ts'
 import { unregisterOrchestrator } from './orchestrators/unregisterOrchestrator.ts'
-import { switchToPage } from './orchestrators/switchToPage.ts'
+import { switchToOrchestrator } from './orchestrators/switchToOrchestrator.ts'
 import { stepOrchestrators } from './orchestrators/stepOrchestrators.ts'
 import { createAnimationLoop } from './loop/createAnimationLoop.ts'
 import { createVisibilityHandler } from './events/createVisibilityHandler.ts'
@@ -16,20 +16,15 @@ import type { SceneOrchestrator } from './types.ts'
 
 const { animationConfig: animation } = animationConfig
 
-type OrchestratorRegistry = Record<string, () => AnimationOrchestrator>
-
 /**
  * Scene orchestrator runner: manages animation systems, shared behaviors, and transitions
  * All state transitions are pure; only side effects (DOM, listeners, RAF) are here
  */
 export const createSceneOrchestrator = (
   state: RendererState,
-  orchestratorRegistry: OrchestratorRegistry,
 ): SceneOrchestrator => {
-  // Mutable reference to renderer state
   let currentState = state
 
-  // Create shared behaviors that persist across page changes
   const shared = createSharedBehaviors()
 
   // Scene state (immutable, but held in closure for runner)
@@ -43,8 +38,8 @@ export const createSceneOrchestrator = (
     },
   }
 
-  // Deferred page switch to avoid modifying state during iteration
-  let pendingPageSwitch: string | null = null
+  // Deferred orchestrator switch to avoid modifying state during iteration
+  let pendingOrchestrator: AnimationOrchestrator | null = null
 
   // Create animation loop
   const loop = createAnimationLoop(
@@ -52,9 +47,9 @@ export const createSceneOrchestrator = (
     animation.timeIncrement,
     {
       onFrame: (loopContext) => {
-        // Skip frame if composer not ready
-        if (!currentState.composer) {
-          log.warn(lc.GL_ANIMATION, 'Skipping frame - composer not ready')
+        // Check if we have basic rendering capability
+        if (!currentState.renderer || !currentState.scene || !currentState.camera) {
+          log.warn(lc.GL_ANIMATION, 'Skipping frame - basic rendering not ready')
           return
         }
 
@@ -76,15 +71,20 @@ export const createSceneOrchestrator = (
         // Step orchestrators
         sceneState = stepOrchestrators(sceneState, context)
 
-        // Handle deferred page switch after orchestrator updates
-        if (pendingPageSwitch) {
-          log(lc.GL_ANIMATION, `Executing deferred page switch to: ${pendingPageSwitch}`)
-          sceneState = switchToPage(sceneState, orchestratorRegistry, pendingPageSwitch, context)
-          pendingPageSwitch = null
+        // Handle deferred orchestrator switch after orchestrator updates
+        if (pendingOrchestrator) {
+          log(lc.GL_ANIMATION, `Executing deferred orchestrator switch to: ${pendingOrchestrator.name}`)
+          sceneState = switchToOrchestrator(sceneState, pendingOrchestrator, context)
+          pendingOrchestrator = null
         }
 
-        // Render if composer is available
-        currentState.composer.render()
+        // Render using composer if available, otherwise use basic renderer
+        if (currentState.composer) {
+          currentState.composer.render()
+        } else {
+          // Basic rendering for loading state
+          currentState.renderer.render(currentState.scene, currentState.camera)
+        }
       },
     },
   )
@@ -118,16 +118,16 @@ export const createSceneOrchestrator = (
    * Return the orchestrator
    */
   return {
-    registerOrchestrator: (name: string) => {
-      sceneState = registerOrchestrator(sceneState, orchestratorRegistry, name)
+    registerOrchestrator: (orchestrator: AnimationOrchestrator) => {
+      sceneState = registerOrchestrator(sceneState, orchestrator)
     },
     unregisterOrchestrator: (name: string) => {
       const context: AnimationContext = { state: currentState, shared, time: loop.getTime(), deltaTime: 0 }
       sceneState = unregisterOrchestrator(sceneState, name, context)
     },
-    switchToPage: (pageName: string) => {
-      log(lc.GL_ANIMATION, `Queueing page switch to: ${pageName}`)
-      pendingPageSwitch = pageName
+    switchToOrchestrator: (orchestrator: AnimationOrchestrator) => {
+      log.debug(lc.GL_ANIMATION, `Queueing orchestrator switch to: ${orchestrator.name}`)
+      pendingOrchestrator = orchestrator
     },
     setRenderState: (newState: RendererState) => {
       currentState = newState

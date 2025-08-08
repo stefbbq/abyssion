@@ -1,6 +1,6 @@
 /**
  * @module Theme System
- * Unified theme API for UI and GL layers.
+ * @description Unified theme API for UI and GL layers.
  *
  * Exports:
  * - Theme state and signals (mode, base theme, toggles)
@@ -11,6 +11,7 @@
  *
  * Import from this module for all theme-related needs.
  */
+
 import { computed } from '@preact/signals'
 import { currentBaseTheme } from './state.ts'
 import { createUITheme } from './createUITheme.ts'
@@ -19,6 +20,11 @@ import { createGLTheme } from './createGLTheme.ts'
 /**
  * Computed signal for the current UITheme
  * Automatically updates when the base theme changes
+ *
+ * @example
+ * Usage:
+ *   import { currentUITheme } from '@lib/theme/index.ts'
+ *   currentUITheme.value.colors.primary
  */
 export const currentUITheme = computed<ReturnType<typeof createUITheme>>(() => createUITheme(currentBaseTheme.value))
 
@@ -26,6 +32,11 @@ export const currentUITheme = computed<ReturnType<typeof createUITheme>>(() => c
  * Computed signal for the current GLTheme
  * Automatically updates when the base theme changes
  * Use for all theme-aware 3D/GL rendering logic
+ *
+ * @example
+ * Usage:
+ *   import { currentGLTheme } from '@lib/theme/index.ts'
+ *   currentGLTheme.value.primary
  */
 export const currentGLTheme = computed<ReturnType<typeof createGLTheme>>(() => createGLTheme(currentBaseTheme.value))
 

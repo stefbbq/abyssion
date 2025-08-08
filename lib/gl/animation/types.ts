@@ -1,4 +1,5 @@
 import type { RendererState } from '../types.ts'
+import type { AnimationOrchestrator } from './core/types.ts'
 
 /**
  * Animation frame callback for backward compatibility
@@ -31,9 +32,9 @@ export type AnimationEngineState<T> = {
 }
 
 export type SceneOrchestrator = {
-  registerOrchestrator: (name: string) => void
+  registerOrchestrator: (orchestrator: AnimationOrchestrator) => void
   unregisterOrchestrator: (name: string) => void
-  switchToPage: (pageName: string) => void
+  switchToOrchestrator: (orchestrator: AnimationOrchestrator) => void
   setRenderState: (state: import('../types.ts').RendererState) => void
   getActiveOrchestrators: () => string[]
   start: () => void

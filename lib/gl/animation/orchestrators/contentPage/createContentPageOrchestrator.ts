@@ -1,11 +1,12 @@
 import type { AnimationContext, AnimationOrchestrator } from '../../core/types.ts'
+import type { RendererState } from '@libgl/types.ts'
 
 /**
  * An orchestrator for pages with no special GL animations.
  * When active, enables a strong pixelation post-process effect.
  * Disables the effect on dispose.
  */
-export const createContentPageOrchestrator = (): AnimationOrchestrator => {
+export const createContentPageOrchestrator = (_glState: RendererState): AnimationOrchestrator => {
   return {
     name: 'content-page',
     update: (context: AnimationContext) => {

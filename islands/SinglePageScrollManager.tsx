@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { isGLDisabled } from '@lib/debug/index.ts'
-import { isGLInitialized } from '@lib/gl/state.ts'
-import { getGLState, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
+import { getGLState, isGLInitialized, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
 import { updateScrollState } from '@lib/gl/animation/state/scrollState.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
