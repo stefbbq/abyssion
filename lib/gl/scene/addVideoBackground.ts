@@ -1,6 +1,6 @@
 import * as Three from 'three'
 import { createVideoBackground } from './createVideoBackground.ts'
-import type { VideoBackgroundManager } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 
 /**
  * Create video background for the scene

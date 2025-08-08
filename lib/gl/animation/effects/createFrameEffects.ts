@@ -27,11 +27,7 @@ export const createFrameEffects = (
 
   // update bokeh focus distance
   if (state.bokehPass && state.camera && state.THREE) {
-    const focusDistance = calculateFocusDistance(
-      state.camera,
-      state.THREE.Vector3,
-      state.THREE.Vector3,
-    )
+    const focusDistance = calculateFocusDistance(state.camera)
     updateBokehFocus(state.bokehPass, focusDistance)
   }
 

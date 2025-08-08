@@ -401,7 +401,11 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
           <div><b>Pool Size:</b> ${vDebug.poolSize} videos loaded</div>
           <div><b>Manifest Remaining:</b> ${vDebug.manifestRemaining} videos</div>
           <div><b>Total Available:</b> ${vDebug.totalVideos} videos</div>
-          <div><b>Loading:</b> ${vDebug.loadingProgress.hasMoreToLoad ? '🔄 In Progress' : '✅ Complete'}</div>
+          <div><b>Loading:</b> ${
+          'loadingProgress' in vDebug && (vDebug.loadingProgress as { hasMoreToLoad: boolean } | undefined)?.hasMoreToLoad
+            ? '🔄 In Progress'
+            : '✅ Complete'
+        }</div>
         </div>`
 
         videoInfo = [

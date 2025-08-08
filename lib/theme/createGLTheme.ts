@@ -35,10 +35,10 @@ export const createGLTheme = (baseTheme: BaseTheme): GLTheme => {
   const accent = hexStringToRGB('#' + accentHex.toString(16).padStart(6, '0'))
 
   return {
-    ...baseTheme,
     primary,
     secondary,
     accent,
+    background: resolveColorReference('background.500', fullPalette),
     stencilColor: { r: 1, g: 1, b: 1 },
     baseLayerColor: isDarkMode ? { r: 0.1, g: 0.1, b: 0.1 } : { r: 0.9, g: 0.9, b: 0.9 },
     outlineColor: { r: 1, g: 1, b: 1 },

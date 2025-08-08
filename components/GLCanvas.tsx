@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks'
+import type { CSSProperties } from 'preact/compat'
 import { initGL, type InitOptions } from '@lib/gl/index.ts'
 
 /**
@@ -6,7 +7,7 @@ import { initGL, type InitOptions } from '@lib/gl/index.ts'
  * Only renders if GL is not disabled (debug signal)
  * Accepts a style prop for parallax transform.
  */
-export const GLCanvas = ({ style }: { style?: any }) => {
+export const GLCanvas = ({ style }: { style?: CSSProperties }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {

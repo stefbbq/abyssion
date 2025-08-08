@@ -130,13 +130,11 @@ const convertToUISurface = (
 export const createUISurfaces = (
   baseSurfaces: BaseSurfaces,
   palette: ColorPalette,
-  _colorRoles: undefined, // unused, for compatibility
-  mode: 'light' | 'dark',
 ): UISurfaces => {
   return {
-    main: convertToUISurface(baseSurfaces.main, palette, mode),
-    shell: convertToUISurface(baseSurfaces.shell, palette, mode),
-    header: convertToUISurface(baseSurfaces.header, palette, mode),
-    elevated: baseSurfaces.elevated ? convertToUISurface(baseSurfaces.elevated, palette, mode) : undefined,
+    main: convertToUISurface(baseSurfaces.main, palette),
+    shell: convertToUISurface(baseSurfaces.shell, palette),
+    header: convertToUISurface(baseSurfaces.header, palette),
+    elevated: baseSurfaces.elevated ? convertToUISurface(baseSurfaces.elevated, palette) : undefined,
   }
 }

@@ -4,7 +4,6 @@ import { getGLState, isGLInitialized, updateScrollCorruption, updateScrollMetric
 import { updateScrollState } from '@lib/gl/animation/state/scrollState.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
-import { lc } from '@lib/logger/index.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
 import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
 import configPostProcessing from '@lib/gl/configPostProcessing.json' with { type: 'json' }
@@ -21,7 +20,7 @@ export default function SinglePageScrollManager() {
   const ticking = useRef(false)
 
   useEffect(() => {
-    initializeClientLogger('', 'debug')
+    initializeClientLogger(undefined, 'debug')
   }, [])
 
   useEffect(() => {
@@ -106,8 +105,9 @@ export default function SinglePageScrollManager() {
     // Intercept anchor clicks for smooth scroll
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (target.tagName === 'A' && target.getAttribute('href')?.startsWith('#')) {
-        const hash = target.getAttribute('href')!
+      const anchor = target.closest ? target.closest('a') as HTMLAnchorElement | null : null
+      if (anchor && anchor.getAttribute('href')?.startsWith('#')) {
+        const hash = anchor.getAttribute('href')!
         if (sectionIds.includes(hash.replace('#', ''))) {
           e.preventDefault()
           const el = document.getElementById(hash.replace('#', ''))
@@ -160,12 +160,16 @@ export default function SinglePageScrollManager() {
     globalThis.addEventListener('hashchange', handleHashChange)
     document.addEventListener('click', handleClick)
 
-    // Initial background intensity update
+    // Initial background intensity update and camera sync to current scroll
     const scrollY = globalThis.scrollY
     updateScrollState(scrollY)
     const crtConfig = configPostProcessing.crtScrollCorruption ?? {}
     const { intensity } = getScrollCorruptionProgress(scrollY, crtConfig)
     setBackgroundIntensity(intensity)
+    if (isGLInitialized.value) {
+      const glState = getGLState()
+      if (glState) updateScrollCorruption(scrollY, glState)
+    }
 
     return () => {
       observer.disconnect()

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { ComponentChildren } from 'preact'
 import { Shell } from '@components/Shell.tsx'
 
@@ -24,7 +24,6 @@ export const ActionZone = ({
   expandedChildren,
   layoutConfig = {},
 }: Props) => {
-  const navRef = useRef<HTMLElement>(null)
   const [showCollapsed, setShowCollapsed] = useState(true)
   const [showExpanded, setShowExpanded] = useState(false)
   const [containerExpanded, setContainerExpanded] = useState(false)

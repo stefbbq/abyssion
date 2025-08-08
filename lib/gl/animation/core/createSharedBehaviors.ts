@@ -2,7 +2,7 @@ import { createMouseTracking } from '@libgl/controls/index.ts'
 import { calculateRotationInterpolation } from '../calculations/calculateRotationInterpolation.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import * as Three from 'three'
-import type { RendererState, VideoBackgroundManager } from '@libgl/types.ts'
+import type { VideoBackgroundManager } from '@libgl/textures/VideoCycle/types.ts'
 
 /**
  * Shared behaviors available to all animation orchestrators

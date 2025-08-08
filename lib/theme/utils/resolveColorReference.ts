@@ -103,10 +103,13 @@ export const createPaletteWithShades = (baseColors: {
       300: lighten(0.4),
       400: lighten(0.2),
       500: baseColor,
+      neutral: baseColor,
       600: darken(0.8),
       700: darken(0.6),
       800: darken(0.4),
       900: darken(0.2),
+      950: darken(0.1),
+      1000: darken(0.05),
     }
   }
 
@@ -131,13 +134,13 @@ export const createPaletteWithShades = (baseColors: {
   }
 
   const neutralShades = {
-    0: 0xffffff,
     50: lightenNeutral(0.95),
     100: lightenNeutral(0.85),
     200: lightenNeutral(0.7),
     300: lightenNeutral(0.5),
     400: lightenNeutral(0.3),
     500: neutral,
+    neutral: neutral,
     600: darkenNeutral(0.8),
     700: darkenNeutral(0.6),
     800: darkenNeutral(0.4),
@@ -149,8 +152,10 @@ export const createPaletteWithShades = (baseColors: {
   return {
     primary: createShades(baseColors.primary),
     secondary: createShades(baseColors.secondary),
-    accent: createShades(baseColors.accent),
-    neutral: neutralShades,
+    tertiary: createShades(baseColors.accent),
+    foreground: neutralShades,
+    background: neutralShades,
+    surface: neutralShades,
     semantic: {
       success: 0x10b981, // Green
       warning: 0xf59e0b, // Amber

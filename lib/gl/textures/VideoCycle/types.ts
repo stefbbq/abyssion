@@ -194,6 +194,8 @@ export type VideoCycleDebugInfo = {
   poolSize: number
   // number of videos not yet loaded
   manifestRemaining: number
+  // optional loading progress
+  loadingProgress?: VideoCycleLoadingProgress
 }
 
 /**

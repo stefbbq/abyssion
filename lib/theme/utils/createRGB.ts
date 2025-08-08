@@ -1,4 +1,4 @@
-import type { RGBColor } from '../types.ts'
+import type { RGBColor } from '../index.types.ts'
 
 /**
  * Create normalized RGB color object from 0-1 values

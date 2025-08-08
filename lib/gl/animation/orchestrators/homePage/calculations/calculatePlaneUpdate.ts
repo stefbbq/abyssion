@@ -2,8 +2,6 @@ import type { RendererState } from '@libgl/types.ts'
 import { calculateStaticLayerPosition } from './calculateStaticLayerPosition.ts'
 import { calculateRandomLayerPosition } from './calculateRandomLayerPosition.ts'
 import { calculateShaderTime } from '@libgl/animation/calculations/calculateShaderTime.ts'
-import { calculateFadeOpacity } from './calculateFadeOpacity.ts'
-import * as Three from 'three'
 
 // layer configuration for plane update
 type LayerConfig = {
@@ -79,7 +77,7 @@ type PlaneUpdateResult = {
  * Returns data that the orchestrator can apply
  */
 export const calculatePlaneUpdate = (config: PlaneUpdateConfig): PlaneUpdateResult => {
-  const { time, planeIndex, layer, totalLayers, state, lastUpdateTime } = config
+  const { time, planeIndex, layer, totalLayers, lastUpdateTime } = config
 
   // Calculate shader time
   const shaderResult = calculateShaderTime(

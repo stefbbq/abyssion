@@ -1,6 +1,6 @@
 import { useClientLocation } from '@lib/utils/clientLocation.ts'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { currentThemeMode, currentUITheme } from '@lib/theme/index.ts'
+import { currentUITheme } from '@lib/theme/index.ts'
 
 const noiseImages = [
   '/images/noiseB.png',

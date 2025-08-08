@@ -314,6 +314,14 @@ export const initGL = async (options: InitOptions) => {
   // mark as initialized
   isGLInitialized.value = true
 
+  // ensure initial camera position reflects current scroll on first load
+  try {
+    const currentScrollY = typeof globalThis !== 'undefined' ? globalThis.scrollY : 0
+    if (glState) updateScrollCorruption(currentScrollY, glState)
+  } catch (error) {
+    log.warn(lc.GL, 'Failed to apply initial scroll-based camera update:', error)
+  }
+
   // return cleanup function
   return createCleanupFunction()
 }

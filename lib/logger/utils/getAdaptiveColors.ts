@@ -48,6 +48,7 @@ const DARK_LOG_LEVEL_STYLES: Record<LogLevel, string> = {
   error: 'color: #ff6b6b; font-weight: bold;', // Light red
   critical: 'color: #ff6b6b; font-weight: bold; text-decoration: underline;',
   group: 'color: #87ceeb; font-weight: bold;', // Light blue for grouping
+  groupCollapsed: 'color: #87ceeb; font-weight: bold;',
   off: '',
 }
 
@@ -62,6 +63,7 @@ const LIGHT_LOG_LEVEL_STYLES: Record<LogLevel, string> = {
   error: 'color: #cc0000; font-weight: bold;', // Dark red
   critical: 'color: #cc0000; font-weight: bold; text-decoration: underline;',
   group: 'color: #4169e1; font-weight: bold;', // Royal blue for grouping
+  groupCollapsed: 'color: #4169e1; font-weight: bold;',
   off: '',
 }
 

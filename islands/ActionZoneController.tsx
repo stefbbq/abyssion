@@ -5,6 +5,7 @@ import { ActionZone } from '@components/actionZone/ActionZone.tsx'
 import { ActionZoneCollapsed } from '@components/actionZone/ActionZoneCollapsed.tsx'
 import { createActionZoneConfig } from '@components/actionZone/config/index.ts'
 import type { NavButtonState } from '@data/types.ts'
+import type { ActionZoneLayout } from '@components/actionZone/types.ts'
 
 export default function ActionZoneController() {
   const [isMounted, setIsMounted] = useState(false)
@@ -166,7 +167,7 @@ export default function ActionZoneController() {
   // Separate configs for collapsed and expanded states
   const actionZoneConfig = createActionZoneConfig()
 
-  const getConfigWithActiveState = (config: any) => {
+  const getConfigWithActiveState = (config: ActionZoneLayout) => {
     if (!Array.isArray(config.buttons)) return { buttons: [], layout: {} }
 
     // Mark active buttons based on current hash

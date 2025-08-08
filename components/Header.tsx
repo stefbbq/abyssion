@@ -77,7 +77,7 @@ export const Header = () => {
         {/* Logo */}
         <h1 class='flex items-center m-0'>
           <HeaderLink
-            href='/'
+            href='#home'
             className={`text-xl font-semibold ${getFocusClass()}`}
             ariaLabel='Abyssion home'
           >

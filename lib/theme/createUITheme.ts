@@ -44,7 +44,7 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
   }
 
   // generate UI surfaces (allowing direct palette references)
-  const uiSurfaces = createUISurfaces(surfaces || createDefaultSurfaces(), fullPalette, undefined, mode)
+  const uiSurfaces = createUISurfaces(surfaces || createDefaultSurfaces(), fullPalette)
 
   return {
     colors,

@@ -40,9 +40,10 @@ const getRoleClasses = (role: string, variant: string) => {
   const baseOverrides = 'h-10 transition-all duration-200'
 
   switch (role) {
-    case 'nav-item':
+    case 'nav-item': {
       const border = variant === 'outlined' ? 'border border-text-tertiary' : 'border-none'
       return `${baseOverrides} px-3 py-1.5 text-sm font-medium rounded-theme-full ${border}`
+    }
 
     case 'page-title':
       return `${baseOverrides} px-3 py-1.5 text-sm font-normal lowercase rounded-theme-full border-none bg-foreground text-background`
@@ -71,7 +72,6 @@ export const ActionZoneButton = ({
   const { action: { type }, role, content: { label, icon }, isActive } = state
 
   const showText = role === 'nav-item' || role === 'page-title'
-  const isLink = type === 'navigate'
 
   // only call onAction if the action is not 'none'
   const handleClick = (e?: Event) => {
@@ -125,20 +125,6 @@ export const ActionZoneButton = ({
     onClick: handleClick,
     disabled: state.action.type === 'none',
     'aria-label': state.content.label,
-  }
-
-  if (isLink && state.action.href) {
-    // For anchor links, don't pass href to Button - let onClick handle navigation
-    const { href, ...propsWithoutHref } = buttonProps as any
-    return (
-      <Button
-        {...propsWithoutHref}
-        variant={buttonVariant}
-        size='sm'
-      >
-        {getIconAndLabel()}
-      </Button>
-    )
   }
 
   return (

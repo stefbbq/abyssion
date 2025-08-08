@@ -1,4 +1,4 @@
-import type { HexColor } from '../types.ts'
+import type { HexColor } from '../index.types.ts'
 
 /**
  * Convert CSS hex string to hex number
