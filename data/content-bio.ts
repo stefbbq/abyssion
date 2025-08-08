@@ -2,9 +2,9 @@ export const bio = {
   aboutTitle: 'about the band',
   about: `**Abyssion** is a metal band from the depths of the Toronto area. 
     
-Technical, proggy, loud as hell. Born in 2023, we mash chaos and complexity into riffy, brain-melting instrumental goodness. Think: *eldritch sorcerers with distortion pedals*, conjuring riffs to share the old great ones back out from the depths.
+Technical, heavy as sin, a 'lil proggy, but most definitely loud as hell. Born in 2023, we mash chaos and complexity into riffy, brain-melting instrumental goodness. Think *eldritch sorcerers with distortion pedals*, conjuring riffs to coax the old great ones back out from the depths.
 
-Vocals? Not yet. We're summoning the right screamer to ride the storm. Until then, it's all groove, shred, and cosmic noise. The music shreds, the riffs get weird, and somehow nobody's mom is yelling at us to turn it down. We're not your cousin's basement band — we actually practice.
+Vocals? Not yet. We're summoning the right screamer to ride the storm. Until then, it's all groove, shred, and cosmic noise. We're not your cousin's basement band — we actually practice.
 
 > dreamt by ancient machines
 `,

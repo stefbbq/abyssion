@@ -5,15 +5,11 @@
 import * as $_404 from './routes/_404.tsx'
 import * as $_app from './routes/_app.tsx'
 import * as $_middleware from './routes/_middleware.ts'
-import * as $bio from './routes/bio.tsx'
-import * as $contact from './routes/contact.tsx'
 import * as $index from './routes/index.tsx'
 import * as $partials_bio from './routes/partials/bio.tsx'
 import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
-import * as $shows from './routes/shows.tsx'
-import * as $theme from './routes/theme.tsx'
 import * as $videos_path_ from './routes/videos/[...path].ts'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
@@ -31,15 +27,11 @@ const manifest = {
     './routes/_404.tsx': $_404,
     './routes/_app.tsx': $_app,
     './routes/_middleware.ts': $_middleware,
-    './routes/bio.tsx': $bio,
-    './routes/contact.tsx': $contact,
     './routes/index.tsx': $index,
     './routes/partials/bio.tsx': $partials_bio,
     './routes/partials/contact.tsx': $partials_contact,
     './routes/partials/home.tsx': $partials_home,
     './routes/partials/shows.tsx': $partials_shows,
-    './routes/shows.tsx': $shows,
-    './routes/theme.tsx': $theme,
     './routes/videos/[...path].ts': $videos_path_,
   },
   islands: {

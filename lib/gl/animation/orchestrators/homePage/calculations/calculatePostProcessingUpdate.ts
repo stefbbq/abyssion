@@ -1,14 +1,15 @@
+import ms from 'ms'
+
 import { calculateBloomEffect } from './calculateBloomEffect.ts'
 import animationConfig from '@libgl/configAnimation.json' with { type: 'json' }
 import configPostProcessing from '@libgl/configPostProcessing.json' with { type: 'json' }
 import type { PostProcessingConfig as PostProcessingConfigType } from '@libgl/configPostProcessing.types.ts'
-import ms from 'ms'
 
 const { animationConfig: animation } = animationConfig
 const postProcessingConfig = configPostProcessing as PostProcessingConfigType
 
 // configuration for post-processing calculation
-type PostProcessingConfig = {
+export type PostProcessingConfig = {
   // current time for effects
   currentTime: number
   // whether bloom override is active
@@ -23,7 +24,7 @@ type PostProcessingConfig = {
 }
 
 // result of post-processing calculation
-type PostProcessingResult = {
+export type PostProcessingResult = {
   // final pass updates
   finalPass: {
     // shader time value
@@ -68,7 +69,7 @@ export const calculatePostProcessingUpdate = (config: PostProcessingConfig): Pos
   const {
     currentTime,
     bloomOverrideActive,
-    bloomOverrideTimeout,
+    bloomOverrideTimeout: _bloomOverrideTimeout,
     currentChromaStrength,
     rendererWidth,
     rendererHeight,

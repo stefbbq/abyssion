@@ -1,5 +1,5 @@
 import * as Three from 'three'
-import type { RGBColor } from '@libtheme/types.ts'
+import type { RGBColor } from '@lib/theme/index.types.ts'
 
 /**
  * Generate a random color from seed color and randomness percentage

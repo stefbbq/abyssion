@@ -24,7 +24,6 @@ const getRandomIndex = (exclude: number, length: number) => {
 const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: number; showNoise?: boolean }) => {
   const [currentPath] = useClientLocation()
   const isHomePage = currentPath === '/'
-  const isLight = currentThemeMode.value === 'light'
   const theme = currentUITheme.value
   const [noiseIndex, setNoiseIndex] = useState(0)
   const timeoutRef = useRef<number | null>(null)
@@ -64,7 +63,7 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
 
   // background
   const backgroundClasses = 'bg-[var(--colors-background)]'
-  const backgroundOpacity = isLight ? theme.backgroundOpacity.light : theme.backgroundOpacity.dark
+  const backgroundOpacity = theme.backgroundOpacity
 
   const fadeOpacity = backgroundOpacity * (intensity * .9)
 

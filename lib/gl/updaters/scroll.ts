@@ -10,38 +10,49 @@ import { scrollState } from '../animation/state/scrollState.ts'
 
 const ppConfig = configPostProcessing as PostProcessingConfig
 
+/**
+ * updates camera position and post-processing shader uniforms based on scroll position
+ */
 export const updateScrollCorruption = (scrollY: number, state: RendererState) => {
-  if (!state) return
-
-  const crtConfig = ppConfig.crtScrollCorruption
-
-  if (!crtConfig?.enabled) {
+  // check if state is provided; no state means no update
+  if (!state) {
+    log.error(lc.GL, 'updateScrollCorruption: No state provided')
     return
   }
 
+  // get the CRT scroll corruption config
+  const crtConfig = ppConfig.crtScrollCorruption
+
+  // if the CRT scroll corruption is disabled, return
+  if (!crtConfig?.enabled) {
+    log.debug(lc.GL, 'updateScrollCorruption: CRT scroll corruption is disabled')
+    return
+  }
+
+  // update the camera position and lookAt target based on scrollY
   if (state.camera) {
     const currentWidth = globalThis.innerWidth
-    const scrollSpeed = getResponsiveScrollSpeed(currentWidth)
+    const currentHeight = globalThis.innerHeight
+    const scrollSpeed = getResponsiveScrollSpeed(currentWidth, currentHeight)
     const cameraYOffset = scrollY * scrollSpeed
-    console.log('cameraYOffset', cameraYOffset)
 
     state.camera.position.y = cameraYOffset
     const lookAtTarget = cameraYOffset
     state.camera.lookAt(0, lookAtTarget, 0)
 
-    if (state.controls && state.controls.target) {
-      state.controls.target.set(0, lookAtTarget, 0)
-    }
+    if (state.controls?.target) state.controls.target.set(0, lookAtTarget, 0)
 
     state.camera.updateProjectionMatrix()
   }
 
+  // get scroll corruption progress and intensity
   const { progress: scrollProgress, intensity: corruptionIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
 
+  // log the scroll corruption progress and intensity
   log.trace(lc.GL, '📊 updateScrollCorruption:', {
     scrollY,
     cameraY: state.camera?.position.y,
-    scrollSpeed: getResponsiveScrollSpeed(globalThis.innerWidth),
+    scrollSpeed: getResponsiveScrollSpeed(globalThis.innerWidth, globalThis.innerHeight),
     screenWidth: globalThis.innerWidth,
     scrollProgress: scrollProgress.toFixed(3),
     corruptionIntensity: corruptionIntensity.toFixed(3),
@@ -50,49 +61,83 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
   })
 
-  if (state.crtPass && state.crtPass.material) {
+  // update the CRT shader uniforms if the material is available
+  if (state.crtPass?.material) {
     const material = state.crtPass.material as ShaderMaterial
+
+    // compute readable, intermediate values instead of ternaries
+    const rgbDistortionEnabled = crtConfig.rgbDistortion.enabled
+    let rgbDistortionIntensity = 0
+    if (rgbDistortionEnabled) {
+      const { minIntensity, maxIntensity } = crtConfig.rgbDistortion
+      rgbDistortionIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+    }
+
+    const blockCorruptionEnabled = crtConfig.blockCorruption.enabled
+    let blockCorruptionRate = 0
+    if (blockCorruptionEnabled) {
+      const { minRate, maxRate } = crtConfig.blockCorruption
+      blockCorruptionRate = minRate + (corruptionIntensity * (maxRate - minRate))
+    }
+
+    const whiteNoiseEnabled = crtConfig.whiteNoise.enabled
+    let whiteNoiseIntensity = 0
+    if (whiteNoiseEnabled) {
+      const { minIntensity, maxIntensity } = crtConfig.whiteNoise
+      whiteNoiseIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+    }
+
+    const waveNoiseEnabled = crtConfig.waveNoise.enabled
+    let waveNoiseIntensity = 0
+    if (waveNoiseEnabled) {
+      const { minIntensity, maxIntensity } = crtConfig.waveNoise
+      waveNoiseIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+    }
+
+    let staticIntensity = 0
+    if (crtConfig.staticIntensity.enabled) {
+      const { minIntensity, maxIntensity } = crtConfig.staticIntensity
+      staticIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+    }
+
+    const largeBlockEnabled = crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold
+    let largeBlockIntensity = 0
+    if (largeBlockEnabled) {
+      const { startThreshold, maxIntensity } = crtConfig.largeBlockCorruption
+      const t = (corruptionIntensity - startThreshold) / (1.0 - startThreshold)
+      largeBlockIntensity = t * maxIntensity
+    }
+
+    const artifactNoiseEnabled = crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
+    let artifactNoiseIntensity = 0
+    let artifactBlockDensity = 0
+    if (artifactNoiseEnabled) {
+      const { startThreshold, maxIntensity, artifactBlockDensity: defaultDensity } = crtConfig.artifactNoise
+      const t = (corruptionIntensity - startThreshold) / (1.0 - startThreshold)
+      artifactNoiseIntensity = t * maxIntensity
+      const density = defaultDensity ?? 0.7
+      artifactBlockDensity = t * density
+    }
+
+    // update the CRT shader uniforms
     const corruptionParams: CorruptionParams = {
       enabled: corruptionIntensity > 0.0,
       intensity: corruptionIntensity,
       timeEnabled: true,
-      rgbDistortionEnabled: crtConfig.rgbDistortion.enabled,
-      rgbDistortionIntensity: crtConfig.rgbDistortion.enabled
-        ? crtConfig.rgbDistortion.minIntensity +
-          (corruptionIntensity * (crtConfig.rgbDistortion.maxIntensity - crtConfig.rgbDistortion.minIntensity))
-        : 0,
-      blockCorruptionEnabled: crtConfig.blockCorruption.enabled,
-      blockCorruptionRate: crtConfig.blockCorruption.enabled
-        ? crtConfig.blockCorruption.minRate +
-          (corruptionIntensity * (crtConfig.blockCorruption.maxRate - crtConfig.blockCorruption.minRate))
-        : 0,
-      whiteNoiseEnabled: crtConfig.whiteNoise.enabled,
-      whiteNoiseIntensity: crtConfig.whiteNoise.enabled
-        ? crtConfig.whiteNoise.minIntensity +
-          (corruptionIntensity * (crtConfig.whiteNoise.maxIntensity - crtConfig.whiteNoise.minIntensity))
-        : 0,
-      waveNoiseEnabled: crtConfig.waveNoise.enabled,
-      waveNoiseIntensity: crtConfig.waveNoise.enabled
-        ? crtConfig.waveNoise.minIntensity + (corruptionIntensity * (crtConfig.waveNoise.maxIntensity - crtConfig.waveNoise.minIntensity))
-        : 0,
-      staticIntensity: crtConfig.staticIntensity.enabled
-        ? crtConfig.staticIntensity.minIntensity +
-          (corruptionIntensity * (crtConfig.staticIntensity.maxIntensity - crtConfig.staticIntensity.minIntensity))
-        : 0,
-      largeBlockEnabled: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold,
-      largeBlockIntensity: crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold
-        ? ((corruptionIntensity - crtConfig.largeBlockCorruption.startThreshold) / (1.0 - crtConfig.largeBlockCorruption.startThreshold)) *
-          crtConfig.largeBlockCorruption.maxIntensity
-        : 0,
-      artifactNoiseEnabled: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold,
-      artifactNoiseIntensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
-        ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
-          crtConfig.artifactNoise.maxIntensity
-        : 0,
-      artifactBlockDensity: crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
-        ? ((corruptionIntensity - crtConfig.artifactNoise.startThreshold) / (1.0 - crtConfig.artifactNoise.startThreshold)) *
-          (crtConfig.artifactNoise.artifactBlockDensity ?? 0.7)
-        : 0,
+      rgbDistortionEnabled,
+      rgbDistortionIntensity,
+      blockCorruptionEnabled,
+      blockCorruptionRate,
+      whiteNoiseEnabled,
+      whiteNoiseIntensity,
+      waveNoiseEnabled,
+      waveNoiseIntensity,
+      staticIntensity,
+      largeBlockEnabled,
+      largeBlockIntensity,
+      artifactNoiseEnabled,
+      artifactNoiseIntensity,
+      artifactBlockDensity,
       artifactHeightJitter: crtConfig.artifactNoise.artifactHeightJitter,
       artifactHeightJitterMin: crtConfig.artifactNoise.artifactHeightJitterMin,
       artifactHeightJitterMax: crtConfig.artifactNoise.artifactHeightJitterMax,
@@ -125,7 +170,10 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 }
 
 export const updateScrollMetrics = (scrollVelocity: number, glState: RendererState | null) => {
-  if (!glState) return
+  if (!glState) {
+    log.error(lc.GL, 'updateScrollMetrics: No state provided')
+    return
+  }
 
   // Use scroll velocity from shared state if not provided
   const velocity = scrollVelocity || scrollState.velocity

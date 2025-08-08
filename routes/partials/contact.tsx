@@ -1,18 +1,20 @@
 import { Shell } from '@components/Shell.tsx'
 import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '@components/icons/index.ts'
-import ContactForm from '@islands/ContactForm.tsx'
+// import ContactForm from '@islands/ContactForm.tsx'
 
 export default function ContactSection() {
   return (
     <>
       {/* Send us a message */}
-      <div class='grid gap-8 lg:grid-cols-2'>
-        <Shell>
+      <div class='grid gap-8 lg:grid-cols-1'>
+        {
+          /* <Shell>
           <ContactForm />
-        </Shell>
+        </Shell> */
+        }
 
         <Shell>
-          <h2 class='text-2xl font-bold mb-6 text-[var(--colors-text-primary)]'>get in touch</h2>
+          <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>get in touch</h2>
           <div class='space-y-4'>
             <div class='flex items-center space-x-3'>
               <div class='flex-shrink-0'>
@@ -31,7 +33,7 @@ export default function ContactSection() {
                 </svg>
               </div>
               <div>
-                <p class='text-[var(--colors-text-primary)]'>hello@abyssion.com</p>
+                <a class='text-[var(--colors-text-primary)]' href='mailto:hello@abyssion.com'>hello@abyssion.com</a>
               </div>
             </div>
             <div class='flex items-center space-x-3'>
@@ -59,7 +61,7 @@ export default function ContactSection() {
           </div>
 
           {/* Follow us section moved here */}
-          <h2 class='text-2xl font-bold mb-6 mt-10 text-[var(--colors-text-primary)]'>follow us</h2>
+          <h2 class='text-3xl font-bold mb-6 mt-10 text-[var(--colors-text-primary)]'>follow us</h2>
           <div class='grid grid-cols-2 gap-4'>
             <a
               href='#'

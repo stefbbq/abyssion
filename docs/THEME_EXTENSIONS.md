@@ -93,18 +93,20 @@ const frostOpacity = currentTheme.value.frost.opacity.light
 
 ### Theme Definition
 
-Control the opacity of the themed background overlay for both light and dark modes:
+Control the opacity of the themed background overlay (per mode theme file):
 
 ```typescript
-export const myTheme = createBaseTheme({
+export const myDarkTheme = {
   // ... other theme properties
-  
-  // Themed background overlay opacity
-  backgroundOpacity: {
-    light: 0.8,  // Background overlay opacity in light mode
-    dark: 0.6,   // Background overlay opacity in dark mode
-  },
-})
+  mode: 'dark',
+  backgroundOpacity: 0.6, // overlay opacity used for this mode
+}
+
+export const myLightTheme = {
+  // ... other theme properties
+  mode: 'light',
+  backgroundOpacity: 0.8,
+}
 ```
 
 ### Usage
@@ -116,14 +118,12 @@ The themed background opacity is automatically applied by the `ThemedBackground`
 import { currentTheme } from '@lib/theme/state.ts'
 
 const backgroundOpacity = currentTheme.value.backgroundOpacity
-const lightOpacity = backgroundOpacity.light
-const darkOpacity = backgroundOpacity.dark
 
 // Use in custom components with theme-aware opacity
 <div 
   style={{ 
     backgroundColor: 'var(--colors-background-primary)',
-    opacity: theme.backgroundOpacity.light 
+    opacity: theme.backgroundOpacity 
   }}
 >
   Custom background with theme opacity
@@ -134,7 +134,7 @@ const darkOpacity = backgroundOpacity.dark
 
 - **Homepage**: Background overlay is hidden (opacity 0) to show GL canvas
 - **Content Pages**: Background overlay uses theme-specific opacity values
-- **Mode Switching**: Opacity automatically updates when switching between light/dark modes
+- **Mode Switching**: Opacity automatically updates when switching between light/dark modes (each mode defines its own value)
 - **Theme Switching**: Opacity values update instantly when changing theme families
 
 ## Filter Effects

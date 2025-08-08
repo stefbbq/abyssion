@@ -6,6 +6,7 @@
 
 import * as Three from 'three'
 import type { Mesh } from 'three'
+
 import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
 import { shadowFragmentShader, shadowVertexShader } from '@libgl/shaders/ShadowShader.ts'
 

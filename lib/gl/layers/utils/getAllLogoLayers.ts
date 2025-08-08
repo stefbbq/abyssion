@@ -18,8 +18,7 @@ export const getAllLogoLayers = (): LogoLayer[] => {
   const randomLayers = createRandomLogoLayers()
 
   // Combine and sort all non-stencil layers by z-position
-  const sortedNonStencilLayers = [...staticLayers, ...randomLayers]
-    .sort((a, b) => a.zPos - b.zPos)
+  const sortedNonStencilLayers = [...staticLayers, ...randomLayers].sort((a, b) => a.zPos - b.zPos)
 
   // Always put stencil layer first, regardless of z-position
   return stencilLayer ? [stencilLayer, ...sortedNonStencilLayers] : sortedNonStencilLayers

@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-unused-vars
 /**
  * @module GeometricLayer
+ * @description Creates a cosmic-themed 3D layer that surrounds the logo with orbital rings and celestial elements
  */
 
 import * as Three from 'three'

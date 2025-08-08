@@ -1,7 +1,6 @@
 import { bio } from '@data/content-bio.ts'
 import { Shell } from '@components/Shell.tsx'
 import { Card } from '@components/Card.tsx'
-import { ListItem } from '@components/ListItem.tsx'
 import { TextBlock } from '@components/TextBlock.tsx'
 
 export default function BioSection() {

@@ -19,7 +19,6 @@ export const createRandomLogoLayer = (): LogoLayer => {
     noiseScaleBase,
     frontBias,
   } = randomLayerConfig
-  console.log('🎨 Creating random logo layer')
 
   const theme = currentGLTheme.value
 

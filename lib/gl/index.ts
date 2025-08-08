@@ -49,6 +49,10 @@ export const isGLInitialized = signal(false)
 
 let glState: RendererState | null = null
 
+/**
+ * Creates a cleanup function to dispose of all GL resources
+ * @returns A cleanup function
+ */
 const createCleanupFunction = () => {
   return () => {
     if (!glState) return
@@ -83,6 +87,7 @@ const createCleanupFunction = () => {
 
 /**
  * Manages initialization readiness state for scene and video components
+ * @returns A readiness manager object
  */
 const createReadinessManager = () => {
   let sceneReady = false

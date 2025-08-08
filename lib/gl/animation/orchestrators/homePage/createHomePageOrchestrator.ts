@@ -1,5 +1,5 @@
-import * as Three from 'three'
 import ms from 'ms'
+import * as Three from 'three'
 
 import type { AnimationContext, AnimationOrchestrator } from '@libgl/animation/core/types.ts'
 import type { RendererState } from '@libgl/types.ts'
@@ -8,6 +8,12 @@ import { calculatePlaneUpdate } from './calculations/calculatePlaneUpdate.ts'
 import { calculatePostProcessingUpdate } from './calculations/calculatePostProcessingUpdate.ts'
 import { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
+import { calculateScrollProgress } from '@libgl/animation/calculations/calculateScrollProgress.ts'
+import { updateDashedOrbitRotations } from './utils/updateDashedOrbitRotations.ts'
+import { applyPlaneUpdate } from './utils/applyPlaneUpdate.ts'
+import { applyPostProcessingResult } from './utils/applyPostProcessingResult.ts'
+import type { PostProcessingResult as _PostProcessingResult } from './calculations/calculatePostProcessingUpdate.ts'
+import type { BloomOverrideState } from './orchestrator.types.ts'
 import { scrollState } from '@libgl/animation/state/scrollState.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
@@ -24,74 +30,66 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
     throw new Error('logoController not available in glState when creating home page orchestrator')
   }
 
-  let lastRegenerateTime = 0
-  let nextRegenerateInterval = ms('1s') + Math.random() * ms('3s')
-  let bloomOverrideActive = false
-  let bloomOverrideTimeout: ReturnType<typeof setTimeout> | null = null
+  const stateLocal: BloomOverrideState = {
+    lastRegenerateTime: 0,
+    nextRegenerateInterval: ms('1s') + Math.random() * ms('3s'),
+    bloomOverrideActive: false,
+    bloomOverrideTimeout: null,
+  }
 
-  /**
-   * Updates dashed orbit rotations for slow random rotation
-   */
-  const updateDashedOrbitRotations = (scene: Three.Scene) => {
-    scene.traverse((child: Three.Object3D) => {
-      // if the child is not a group, return
-      if (child.type !== 'Group') return
+  const applyGlobalFadeToDashedOrbits = (root: Three.Object3D | null, fadeMultiplier: number) => {
+    if (!root) return
 
-      // Look for dashed orbit groups
-      if (child.type === 'Group' && child.children) {
-        child.children.forEach((orbitHolder: Three.Object3D) => {
-          if (orbitHolder.userData && orbitHolder.userData.rotationSpeed) {
-            const { rotationSpeed, rotationAxis } = orbitHolder.userData
+    root.traverse((obj: Three.Object3D) => {
+      if (!(obj instanceof Three.Mesh)) return
+      const mesh = obj as Three.Mesh
 
-            // Apply rotation based on the stored axis and speed
-            if (rotationAxis === 'x') {
-              orbitHolder.rotation.x += rotationSpeed
-            } else if (rotationAxis === 'y') {
-              orbitHolder.rotation.y += rotationSpeed
-            } else if (rotationAxis === 'z') {
-              orbitHolder.rotation.z += rotationSpeed
-            }
-          }
-        })
+      // detect membership in dashed orbit by walking up ancestry to a holder with rotation metadata
+      let ancestor: Three.Object3D | null = mesh.parent
+      let belongsToDashedOrbit = false
+      while (ancestor) {
+        const hasRotationData = typeof (ancestor.userData?.rotationSpeed) === 'number'
+        if (hasRotationData) {
+          belongsToDashedOrbit = true
+          break
+        }
+        ancestor = ancestor.parent
       }
+      if (!belongsToDashedOrbit) return
+
+      const materials: Three.Material[] = Array.isArray(mesh.material)
+        ? (mesh.material as Three.Material[])
+        : [mesh.material as Three.Material]
+      // initialize base opacities once
+      const existingBase: number[] | undefined = mesh.userData.baseOpacities as number[] | undefined
+      if (!existingBase) {
+        mesh.userData.baseOpacities = materials.map((m: Three.Material) => m.opacity)
+      }
+      const baseOpacities: number[] = mesh.userData.baseOpacities as number[]
+      materials.forEach((mat: Three.Material, idx: number) => {
+        if (typeof mat.opacity === 'number') mat.opacity = baseOpacities[idx] * fadeMultiplier
+      })
     })
   }
 
-  const update = (context: AnimationContext) => {
-    log.debug(lc.GL_ANIMATION, 'HomePage orchestrator update called')
-    const { state, time } = context
+  const applyGlobalFadeToShadow = (shadowLayer: RendererState['shadowLayer'], fadeMultiplier: number) => {
+    if (!shadowLayer?.mesh) return
+    const material = shadowLayer.mesh.material
+    if (!(material instanceof Three.ShaderMaterial)) return
+    const uniforms = material.uniforms
+    if (!uniforms?.opacity) return
 
-    // Check layer regeneration timing
-    const currentTime = Date.now()
-    const regenerationResult = calculateRegenerationTiming(
-      currentTime,
-      lastRegenerateTime,
-      nextRegenerateInterval,
-    )
-
-    if (regenerationResult.shouldRegenerate) {
-      const { planes, layers } = logoController.regenerate(
-        state.scene,
-        state.logoPlanes,
-        state.planeGeometry,
-        state.outlineTexture,
-        state.stencilTexture,
-      )
-
-      state.logoPlanes = planes
-      state.logoLayers = layers
-      lastRegenerateTime = currentTime
-      nextRegenerateInterval = regenerationResult.newInterval
+    if (typeof shadowLayer.mesh.userData.baseShadowOpacity !== 'number') {
+      shadowLayer.mesh.userData.baseShadowOpacity = uniforms.opacity.value as number
     }
+    uniforms.opacity.value = (shadowLayer.mesh.userData.baseShadowOpacity as number) * fadeMultiplier
+  }
 
-    // Update each plane using pure calculation functions
+  const updateLogoPlanes = (state: RendererState, time: number, scrollProgress: number) => {
     state.logoPlanes.forEach((plane, i) => {
       const layer = state.logoLayers[i]
       if (!layer) return
 
-      // Calculate fade multiplier (0..1) for this layer
-      const scrollY = scrollState.y
-      const scrollProgress = Math.min(scrollY / globalThis.innerHeight, 1.0)
       const fadeResult = calculateFadeOpacity({
         scrollProgress,
         fadeStartThreshold: 0.65,
@@ -100,7 +98,6 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
         totalLayers: state.logoLayers.length,
       })
 
-      // Get base plane update (animation, flicker, etc.)
       const updateResult = calculatePlaneUpdate({
         time,
         planeIndex: i,
@@ -117,107 +114,79 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
         lastUpdateTime: plane.lastUpdateTime || 0,
       })
 
-      // Apply shader time update
-      if (updateResult.shaderTime.shouldUpdate && plane.material?.uniforms?.time) {
-        plane.material.uniforms.time.value = updateResult.shaderTime.newTime
-        plane.lastUpdateTime = updateResult.shaderTime.lastUpdateTime
-      }
-
-      // Apply position and rotation
-      plane.position.set(
-        updateResult.position.x,
-        updateResult.position.y,
-        updateResult.position.z,
+      applyPlaneUpdate(
+        plane,
+        i,
+        layer,
+        state.logoLayers.length,
+        time,
+        updateResult,
+        fadeResult.fadeMultiplier,
+        calculateRandomLayerPosition,
       )
-      plane.rotation.x = updateResult.position.rotationX
-      plane.rotation.y = updateResult.position.rotationY
-
-      // Apply burst effect if needed
-      if (updateResult.burstEffect.shouldApply) {
-        plane.position.x += updateResult.burstEffect.offsetX
-        plane.position.y += updateResult.burstEffect.offsetY
-
-        // Schedule burst reset
-        setTimeout(() => {
-          if (plane) {
-            const resetPosition = calculateRandomLayerPosition(
-              time,
-              i,
-              layer.zPos,
-              state.logoLayers.length,
-            )
-            plane.position.x = resetPosition.x
-            plane.position.y = resetPosition.y
-          }
-        }, updateResult.burstEffect.duration)
-      }
-
-      // Apply opacity (base opacity * fade multiplier)
-      if (plane.material?.uniforms?.opacity) {
-        plane.material.uniforms.opacity.value = updateResult.opacity * fadeResult.fadeMultiplier
-      }
     })
+  }
+
+  const update = (context: AnimationContext) => {
+    const { state, time } = context
+
+    // Check layer regeneration timing
+    const currentTime = Date.now()
+    const regenerationResult = calculateRegenerationTiming(currentTime, stateLocal.lastRegenerateTime, stateLocal.nextRegenerateInterval)
+
+    if (regenerationResult.shouldRegenerate) {
+      const { planes, layers } = logoController.regenerate(
+        state.scene,
+        state.logoPlanes,
+        state.planeGeometry,
+        state.outlineTexture,
+        state.stencilTexture,
+      )
+
+      state.logoPlanes = planes
+      state.logoLayers = layers
+      stateLocal.lastRegenerateTime = currentTime
+      stateLocal.nextRegenerateInterval = regenerationResult.newInterval
+    }
+
+    // calculate scroll fade shared by non-logo elements
+    const scrollProgress = calculateScrollProgress(scrollState.y, globalThis.innerHeight)
+    const globalFade = calculateFadeOpacity({
+      scrollProgress,
+      fadeStartThreshold: 0.65,
+      fadeEndThreshold: 0.80,
+      layerIndex: 0,
+      totalLayers: 1,
+    }).fadeMultiplier
+
+    // Update logo planes
+    updateLogoPlanes(state, time, scrollProgress)
 
     // Update post-processing effects using pure calculation functions
     const postProcessingResult = calculatePostProcessingUpdate({
       currentTime: time,
-      bloomOverrideActive,
-      bloomOverrideTimeout,
+      bloomOverrideActive: stateLocal.bloomOverrideActive,
+      bloomOverrideTimeout: stateLocal.bloomOverrideTimeout,
       currentChromaStrength: state.finalPass?.uniforms?.chromaStrength?.value || 0,
       rendererWidth: state.renderer.domElement.width,
       rendererHeight: state.renderer.domElement.height,
     })
 
-    // Apply final pass updates
-    if (state.finalPass?.uniforms) {
-      state.finalPass.uniforms.time.value = postProcessingResult.finalPass.timeValue
-      state.finalPass.uniforms.chromaStrength.value = postProcessingResult.finalPass.chromaStrength
-
-      // Schedule chroma reset if needed
-      if (postProcessingResult.finalPass.scheduleChromaReset) {
-        setTimeout(() => {
-          if (state.finalPass?.uniforms) {
-            state.finalPass.uniforms.chromaStrength.value = postProcessingResult.finalPass.chromaResetValue
-          }
-        }, postProcessingResult.finalPass.chromaResetDelay)
-      }
-    }
-
-    // Apply bloom pass updates
-    if (state.bloomPass) {
-      state.bloomPass.strength = postProcessingResult.bloomPass.strength
-
-      // Activate bloom override if needed
-      if (postProcessingResult.bloomPass.activateOverride) {
-        bloomOverrideActive = true
-        if (bloomOverrideTimeout) clearTimeout(bloomOverrideTimeout)
-
-        bloomOverrideTimeout = setTimeout(() => {
-          bloomOverrideActive = false
-        }, postProcessingResult.bloomPass.overrideDuration)
-      }
-    }
-
-    // Apply dithering pass updates
-    if (state.ditheringPass?.uniforms) {
-      state.ditheringPass.uniforms.time.value = postProcessingResult.ditheringPass.timeValue
-    }
-
-    // Apply CRT pass time updates (for continuous animation)
-    if (state.crtPass?.material?.uniforms?.time) {
-      state.crtPass.material.uniforms.time.value = performance.now() / 1000
-    }
-
-    // Apply sharpening pass updates
-    if (state.sharpeningPass?.uniforms?.resolution) {
-      state.sharpeningPass.uniforms.resolution.value.set(
-        postProcessingResult.sharpeningPass.resolutionWidth,
-        postProcessingResult.sharpeningPass.resolutionHeight,
-      )
-    }
+    const { bloomOverrideActive, bloomOverrideTimeout } = applyPostProcessingResult(
+      state,
+      postProcessingResult,
+      stateLocal.bloomOverrideActive,
+      stateLocal.bloomOverrideTimeout,
+    )
+    stateLocal.bloomOverrideActive = bloomOverrideActive
+    stateLocal.bloomOverrideTimeout = bloomOverrideTimeout
 
     // Update dashed orbit rotations
     updateDashedOrbitRotations(state.scene)
+
+    // Apply scroll-based fade to dashed orbits and shadow layer
+    applyGlobalFadeToDashedOrbits(state.shapeLayer ?? state.scene, globalFade)
+    applyGlobalFadeToShadow(state.shadowLayer, globalFade)
   }
 
   const dispose = (context: AnimationContext) => {
@@ -231,14 +200,14 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
     state.logoLayers = []
 
     // Clean up timeouts
-    if (bloomOverrideTimeout) {
-      clearTimeout(bloomOverrideTimeout)
-      bloomOverrideTimeout = null
+    if (stateLocal.bloomOverrideTimeout) {
+      clearTimeout(stateLocal.bloomOverrideTimeout)
+      stateLocal.bloomOverrideTimeout = null
     }
 
     // Reset local state of the orchestrator
-    lastRegenerateTime = 0
-    bloomOverrideActive = false
+    stateLocal.lastRegenerateTime = 0
+    stateLocal.bloomOverrideActive = false
   }
 
   log(lc.GL_ANIMATION, 'Home page orchestrator created successfully')

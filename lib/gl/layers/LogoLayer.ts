@@ -6,6 +6,7 @@
  */
 
 import * as Three from 'three'
+
 import { getAllLogoLayers } from './utils/getAllLogoLayers.ts'
 import { createPlanesFromLayers } from './utils/createPlanesFromLayers.ts'
 import { recreateRandomLogoLayers } from './utils/recreateRandomLogoLayers.ts'
@@ -68,7 +69,6 @@ export type LogoController = {
  */
 
 export const createLogoLayer = (THREE: typeof Three): LogoController => {
-  console.log('🎨 Creating logo layer (the main one)')
   return {
     /**
      * Get all layers (static + random)

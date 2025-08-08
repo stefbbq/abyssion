@@ -16,9 +16,9 @@ export const neonGridOSDarkTheme: BaseTheme = {
       },
     },
     shell: {
-      color: 'surface.700',
+      color: 'surface.950',
       opacity: 0.75,
-      borderRadius: '12px',
+      borderRadius: '16px',
       border: { width: '0', style: 'none', color: 'foreground.500', opacity: 0.2 },
       effects: {
         backdropBlur: '6px',
@@ -36,14 +36,14 @@ export const neonGridOSDarkTheme: BaseTheme = {
       },
     },
     elevated: {
-      color: 'surface.300',
+      color: 'surface.600',
       opacity: 1,
       borderRadius: '9px',
       border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.2 },
       effects: {},
     },
   },
-  backgroundOpacity: { light: 0.85, dark: 0.8 },
+  backgroundOpacity: 0.8,
   borderRadius: {
     sm: '0.25rem',
     md: '0.5rem',

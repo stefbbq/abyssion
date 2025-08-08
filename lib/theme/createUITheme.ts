@@ -49,10 +49,7 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
   return {
     colors,
     surfaces: uiSurfaces,
-    backgroundOpacity: {
-      light: backgroundOpacity?.light ?? 0.85,
-      dark: backgroundOpacity?.dark ?? 0.88,
-    },
+    backgroundOpacity: typeof backgroundOpacity === 'number' ? backgroundOpacity : mode === 'light' ? 0.85 : 0.88,
     spacing: {
       xs: spacing?.xs ?? '0.25rem',
       sm: spacing?.sm ?? '0.5rem',

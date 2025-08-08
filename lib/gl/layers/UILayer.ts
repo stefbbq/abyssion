@@ -1,7 +1,6 @@
 /**
  * @module UILayer
- *
- * Creates a responsive 3D shape layer that surrounds the logo
+ * @description Creates a responsive 3D shape layer that surrounds the logo with tech shapes
  */
 
 import * as Three from 'three'

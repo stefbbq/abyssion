@@ -46,7 +46,7 @@ export const neonGridOSLightTheme: BaseTheme = {
       },
     },
   },
-  backgroundOpacity: { light: 0.8, dark: 0.85 },
+  backgroundOpacity: 0.8,
   borderRadius: {
     sm: '0.25rem',
     md: '0.5rem',

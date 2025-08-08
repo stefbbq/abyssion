@@ -1,7 +1,7 @@
+import { isDebugModeEnabled } from '@lib/debug/isDebugModeEnabled.ts'
 import type { AnimationContext, SceneState } from '../core/types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
-// Track frame count for debugging
 let frameCount = 0
 
 /**
@@ -14,15 +14,19 @@ export const stepOrchestrators = (
 ): SceneState => {
   frameCount++
 
-  if (frameCount % 60 === 1) { // Log every 60 frames (roughly 1 second)
-    const activeNames = Array.from(sceneState.activeOrchestrators.keys())
-    if (activeNames.length > 0) {
-      log.debug(lc.GL_ANIMATION, `Frame ${frameCount}: Stepping orchestrators: [${activeNames.join(', ')}]`)
-    } else {
-      log.warn(lc.GL_ANIMATION, `Frame ${frameCount}: No active orchestrators!`)
+  // log the active orchestrators every second if debug mode is enabled
+  if (isDebugModeEnabled()) {
+    if (frameCount % 60 === 1) { // Log every 60 frames (roughly 1 second)
+      const activeNames = Array.from(sceneState.activeOrchestrators.keys())
+      if (activeNames.length > 0) {
+        log.debug(lc.GL_ANIMATION, `Frame ${frameCount}: Stepping orchestrators: [${activeNames.join(', ')}]`)
+      } else {
+        log.warn(lc.GL_ANIMATION, `Frame ${frameCount}: No active orchestrators!`)
+      }
     }
   }
 
+  // run the update function on all active orchestrators each frame
   sceneState.activeOrchestrators.forEach((orchestrator) => {
     try {
       orchestrator.update(context)

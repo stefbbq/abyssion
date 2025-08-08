@@ -60,12 +60,33 @@ export type UISurfaces = {
  * UI-specific theme extensions
  */
 export type UITheme = {
-  colors: ColorPalette
-  surfaces: UISurfaces
-  backgroundOpacity: {
-    light: number
-    dark: number
+  /**
+   * minimal css-ready colors for ui usage
+   */
+  colors: {
+    primary: string
+    secondary: string
+    tertiary: string
+    foreground: string
+    background: string
+    surface: string
+    border: {
+      primary: string
+      hover: string
+    }
+    interactive: {
+      primary: string
+      focus: string
+      hover: string
+      active: string
+      disabled: string
+    }
   }
+  surfaces: UISurfaces
+  /**
+   * themed background overlay opacity for the current mode
+   */
+  backgroundOpacity: number
   spacing: {
     xs: string
     sm: string
@@ -254,8 +275,10 @@ export type BaseTheme = {
   spacing?: Partial<BaseSpacing>
   /** Optional border radius scale */
   borderRadius?: Partial<BaseBorderRadius>
-  /** Optional themed background opacity overrides */
-  backgroundOpacity?: Partial<BaseBackgroundOpacity>
+  /**
+   * optional themed background opacity override for this mode
+   */
+  backgroundOpacity?: number
 }
 
 /**

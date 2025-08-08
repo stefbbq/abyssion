@@ -6,9 +6,9 @@
     "maxblur": 2
   },
   "bloom": {
-    "bloomStrength": 0,
-    "bloomThreshold": 0.2,
-    "bloomRadius": 0.8,
+    "bloomStrength": 0.2,
+    "bloomThreshold": 1,
+    "bloomRadius": 0.2,
     "bloomStrengthMultiplier": 3,
     "bloomThresholdMultiplier": 0.3,
     "thresholdOverride": 0,
@@ -24,7 +24,7 @@
   },
   "film": {
     "noiseIntensity": 0.05,
-    "scanlineIntensity": 1.5,
+    "scanlineIntensity": 2,
     "scanlineCount": 2000,
     "grayscale": false
   },

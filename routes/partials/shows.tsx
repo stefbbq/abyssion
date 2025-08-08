@@ -1,4 +1,3 @@
-import { Button } from '@components/Button.tsx'
 import shows from '@data/content-shows.json' with { type: 'json' }
 import { Shell } from '@components/Shell.tsx'
 
@@ -47,9 +46,11 @@ export default function ShowsSection() {
               class='surface-elevated p-6 hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center md:justify-between gap-4'
             >
               <ShowInfo show={show} />
-              <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-secondary)] text-[var(--colors-surface)] !text-sm !font-medium'>
+              {
+                /* <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-secondary)] text-[var(--colors-surface)] !text-sm !font-medium'>
                 Upcoming Event
-              </span>
+              </span> */
+              }
             </div>
           ))}
         </div>
@@ -62,9 +63,11 @@ export default function ShowsSection() {
           {pastShows.map((show: ShowData, index: number) => (
             <div key={`past-${index}`} class='surface-elevated p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
               <ShowInfo show={show} />
-              <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-foreground)] text-[var(--colors-surface)] !text-sm !font-medium'>
+              {
+                /* <span class='inline-block flex-shrink-0 self-start w-fit px-3 py-1.5 opacity-70 rounded-theme-md bg-[var(--colors-foreground)] text-[var(--colors-surface)] !text-sm !font-medium'>
                 Past Event
-              </span>
+              </span> */
+              }
             </div>
           ))}
         </div>

@@ -21,7 +21,7 @@ export default function ContactForm() {
   // For now, just render the fields
   return (
     <div>
-      <h2 class='text-2xl font-bold mb-6 text-[var(--colors-text-primary)]'>send us a message</h2>
+      <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>send us a message</h2>
       <form class='space-y-6'>
         <TextField
           label='Name'
