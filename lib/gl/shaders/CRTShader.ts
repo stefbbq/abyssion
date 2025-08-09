@@ -65,12 +65,27 @@ export type CorruptionParams = {
   rgbDistortionEnabled: boolean
   // Intensity of RGB channel offset (0.0 to 50.0)
   rgbDistortionIntensity?: number
+  // Update frequency for RGB distortion animation (FPS). 0 = continuous
+  rgbDistortionFPS?: number
+  // Large scale wave multiplier for Y
+  rgbWaveLargeScale?: number
+  // Fine scale wave multiplier for Y
+  rgbWaveFineScale?: number
+  // Line wave frequencies
+  rgbLineFrequency1?: number
+  rgbLineFrequency2?: number
+  // Shape mode selector (0=sine,1=triangle,2=block)
+  rgbShapeMode?: number
+  // Separation amplitude scale
+  rgbSeparationScale?: number
 
   // White Noise Effects
   // Enable random white noise overlay
   whiteNoiseEnabled: boolean
   // Intensity of white noise static (0.0 to 2.0)
   whiteNoiseIntensity?: number
+  // Update frequency for white noise animation (FPS). 0 = continuous
+  whiteNoiseFPS?: number
 
   // Block Corruption Effects
   // Enable rectangular block corruption artifacts
@@ -83,6 +98,8 @@ export type CorruptionParams = {
   waveNoiseEnabled: boolean
   // Intensity of wave distortion (0.0 to 2.0)
   waveNoiseIntensity?: number
+  // Update frequency for wave distortion (FPS). 0 = continuous
+  waveNoiseFPS?: number
 
   // Screen Shake Effects
   // Enable screen shake/vibration
@@ -157,10 +174,21 @@ export const CRTShader = {
     // RGB distortion controls - DISABLED BY DEFAULT
     rgbDistortionIntensity: { value: 0.0 },
     rgbDistortionEnabled: { value: 0.0 },
+    rgbDistortionFPS: { value: 0.0 },
+    rgbWaveLargeScale: { value: 0.01 },
+    rgbWaveFineScale: { value: 0.02 },
+    rgbLineFrequency1: { value: 1.6 },
+    rgbLineFrequency2: { value: 2.0 },
+    rgbShapeMode: { value: 0.0 },
+    rgbSeparationScale: { value: 1.0 },
+    rgbWaveAmplitude: { value: 1.0 },
+    rgbLineThreshold1: { value: 0.999 },
+    rgbLineThreshold2: { value: 0.9995 },
 
     // White noise controls - DISABLED BY DEFAULT
     whiteNoiseIntensity: { value: 0.0 },
     whiteNoiseEnabled: { value: 0.0 },
+    whiteNoiseFPS: { value: 0.0 },
 
     // Block corruption controls - DISABLED BY DEFAULT
     blockCorruptionRate: { value: 0.0 },
@@ -169,6 +197,7 @@ export const CRTShader = {
     // Wave distortion controls - DISABLED BY DEFAULT
     waveNoiseIntensity: { value: 0.0 },
     waveNoiseEnabled: { value: 0.0 },
+    waveNoiseFPS: { value: 0.0 },
 
     // Screen shake controls - DISABLED BY DEFAULT
     shakeIntensity: { value: 0.0 },
@@ -188,6 +217,15 @@ export const CRTShader = {
     artifactHeightJitter: { value: 0.5 }, // how much the height of each block can vary
     artifactHeightJitterMin: { value: 0.3 }, // min jitter multiplier
     artifactHeightJitterMax: { value: 1.7 }, // max jitter multiplier
+
+    // Debug overlay toggle
+    debugOverlayEnabled: { value: 0.0 },
+
+    // Theme colors for artifact tinting
+    artifactUseTheme: { value: 0.0 },
+    themePrimary: { value: [1, 1, 1] },
+    themeAccent: { value: [1, 1, 1] },
+    themeSecondary: { value: [1, 1, 1] },
   },
 
   vertexShader: passthroughVertexShader,
@@ -240,16 +278,25 @@ export const updateCRTShaderUniforms = (material: ShaderMaterial, params: Corrup
     rgbDistortionIntensity,
     whiteNoiseEnabled,
     whiteNoiseIntensity,
+    whiteNoiseFPS,
     blockCorruptionEnabled,
     blockCorruptionRate,
     waveNoiseEnabled,
     waveNoiseIntensity,
+    waveNoiseFPS,
     shakeEnabled,
     shakeIntensity,
     largeBlockEnabled,
     largeBlockIntensity,
     largeBlockSize,
     largeBlockFPS,
+    rgbDistortionFPS,
+    rgbWaveLargeScale,
+    rgbWaveFineScale,
+    rgbLineFrequency1,
+    rgbLineFrequency2,
+    rgbShapeMode,
+    rgbSeparationScale,
     artifactNoiseEnabled,
     artifactNoiseIntensity,
     artifactChunkSize,
@@ -271,10 +318,18 @@ export const updateCRTShaderUniforms = (material: ShaderMaterial, params: Corrup
   // RGB distortion
   if (uniforms.rgbDistortionEnabled) uniforms.rgbDistortionEnabled.value = rgbDistortionEnabled ? 1.0 : 0.0
   if (uniforms.rgbDistortionIntensity) uniforms.rgbDistortionIntensity.value = rgbDistortionIntensity ?? 0.0
+  if (uniforms.rgbDistortionFPS) uniforms.rgbDistortionFPS.value = rgbDistortionFPS ?? 0.0
+  if (uniforms.rgbWaveLargeScale) uniforms.rgbWaveLargeScale.value = rgbWaveLargeScale ?? 0.01
+  if (uniforms.rgbWaveFineScale) uniforms.rgbWaveFineScale.value = rgbWaveFineScale ?? 0.02
+  if (uniforms.rgbLineFrequency1) uniforms.rgbLineFrequency1.value = rgbLineFrequency1 ?? 1.6
+  if (uniforms.rgbLineFrequency2) uniforms.rgbLineFrequency2.value = rgbLineFrequency2 ?? 2.0
+  if (uniforms.rgbShapeMode) uniforms.rgbShapeMode.value = rgbShapeMode ?? 0.0
+  if (uniforms.rgbSeparationScale) uniforms.rgbSeparationScale.value = rgbSeparationScale ?? 1.0
 
   // White noise
   if (uniforms.whiteNoiseEnabled) uniforms.whiteNoiseEnabled.value = whiteNoiseEnabled ? 1.0 : 0.0
   if (uniforms.whiteNoiseIntensity) uniforms.whiteNoiseIntensity.value = whiteNoiseIntensity ?? 0.0
+  if (uniforms.whiteNoiseFPS) uniforms.whiteNoiseFPS.value = whiteNoiseFPS ?? 0.0
 
   // Block corruption
   if (uniforms.blockCorruptionEnabled) uniforms.blockCorruptionEnabled.value = blockCorruptionEnabled ? 1.0 : 0.0
@@ -283,6 +338,7 @@ export const updateCRTShaderUniforms = (material: ShaderMaterial, params: Corrup
   // Wave noise
   if (uniforms.waveNoiseEnabled) uniforms.waveNoiseEnabled.value = waveNoiseEnabled ? 1.0 : 0.0
   if (uniforms.waveNoiseIntensity) uniforms.waveNoiseIntensity.value = waveNoiseIntensity ?? 0.0
+  if (uniforms.waveNoiseFPS) uniforms.waveNoiseFPS.value = waveNoiseFPS ?? 0.0
 
   // Screen shake
   if (uniforms.shakeEnabled) uniforms.shakeEnabled.value = shakeEnabled ? 1.0 : 0.0

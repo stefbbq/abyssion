@@ -67,43 +67,61 @@
     "rgbDistortion": {
       "enabled": true,
       "minIntensity": 2.0,
-      "maxIntensity": 10.0
+      "maxIntensity": 10.0,
+      "fps": 2,
+      "waveLargeScale": 0.0001,
+      "waveFineScale": 0.0001,
+      "waveAmplitude": 0.1,
+      "lineFrequency1": 0.1,
+      "lineFrequency2": 0.01,
+      "shapeMode": "block",
+      "separationScale": 0.1,
+      "lineThreshold1": 0,
+      "lineThreshold2": 0.9995
     },
     "blockCorruption": {
       "enabled": false,
       "minRate": 5.0,
-      "maxRate": 20.0
+      "maxRate": 20.0,
+      "fps": 12
     },
     "whiteNoise": {
       "enabled": true,
-      "minIntensity": 0.1,
-      "maxIntensity": 0.4
+      "minIntensity": 0.05,
+      "maxIntensity": 0.2,
+      "fps": 6
     },
     "waveNoise": {
       "enabled": false,
       "minIntensity": 0.05,
-      "maxIntensity": 0.2
+      "maxIntensity": 0.2,
+      "fps": 6
     },
     "staticIntensity": {
-      "enabled": true,
+      "enabled": false,
       "minIntensity": 0.5,
-      "maxIntensity": 1.0
+      "maxIntensity": 1.0,
+      "fps": 10
     },
     "largeBlockCorruption": {
       "enabled": false,
       "startThreshold": 0.3,
-      "maxIntensity": 1.0
+      "maxIntensity": 1.0,
+      "fps": 8
     },
     "artifactNoise": {
       "enabled": true,
-      "startThreshold": 0.5,
-      "maxIntensity": 0.5,
+      "startThreshold": 0.1,
+      "maxIntensity": 0.2,
       "artifactBlockDensity": 0.7,
-      "artifactHeightJitter": 0.5,
-      "artifactHeightJitterMin": 0.3,
-      "artifactHeightJitterMax": 10,
-      "artifactNoiseFPS": 6.0
-    }
+      "artifactHeightJitter": 1,
+      "artifactHeightJitterMin": 2,
+      "artifactHeightJitterMax": 50,
+      "artifactNoiseFPS": 1,
+      "fps": 3,
+      "useThemeColors": true
+    },
+    "debugOverlay": { "enabled": true }
   },
   "lensFlare": {
     "lightIntensity": 0.8,

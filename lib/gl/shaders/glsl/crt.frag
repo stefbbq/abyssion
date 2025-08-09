@@ -15,10 +15,21 @@ uniform float staticIntensity;        // How strong the static effect is (0.0 to
 // RGB distortion controls
 uniform float rgbDistortionIntensity; // How strong RGB distortion is (0.0 to 50.0)
 uniform float rgbDistortionEnabled;   // Whether RGB distortion is enabled (0.0 or 1.0)
+uniform float rgbDistortionFPS;       // FPS for rgb distortion (0.0 = continuous)
+uniform float rgbWaveLargeScale;      // Large scale wave multiplier for Y
+uniform float rgbWaveFineScale;       // Fine scale wave multiplier for Y
+uniform float rgbLineFrequency1;      // Line wave frequency 1
+uniform float rgbLineFrequency2;      // Line wave frequency 2
+uniform float rgbShapeMode;           // 0=sine,1=triangle,2=block
+uniform float rgbSeparationScale;     // overall separation amplitude scale
+uniform float rgbWaveAmplitude;       // overall wave displacement amplitude
+uniform float rgbLineThreshold1;      // threshold for line 1
+uniform float rgbLineThreshold2;      // threshold for line 2
 
 // White noise controls
 uniform float whiteNoiseIntensity;    // How strong white noise is (0.0 to 2.0)
 uniform float whiteNoiseEnabled;      // Whether white noise is enabled (0.0 or 1.0)
+uniform float whiteNoiseFPS;          // FPS for white noise (0.0 = continuous)
 
 // Block corruption controls
 uniform float blockCorruptionRate;    // How fast block corruption changes (1.0 to 50.0)
@@ -27,6 +38,7 @@ uniform float blockCorruptionEnabled; // Whether block corruption is enabled (0.
 // Wave distortion controls
 uniform float waveNoiseIntensity;     // How strong wave distortion is (0.0 to 2.0)
 uniform float waveNoiseEnabled;       // Whether wave distortion is enabled (0.0 or 1.0)
+uniform float waveNoiseFPS;           // FPS for wave distortion (0.0 = continuous)
 
 // Screen shake controls
 uniform float shakeIntensity;         // How strong screen shake is (0.0 to 50.0)
@@ -46,6 +58,12 @@ uniform float artifactBlockDensity;   // Probability a strip is an artifact (0.0
 uniform float artifactHeightJitter;   // How much the height of each block can vary (0.0 to 1.0)
 uniform float artifactHeightJitterMin; // Minimum jitter multiplier
 uniform float artifactHeightJitterMax; // Maximum jitter multiplier
+uniform float artifactUseTheme;        // 1.0 to tint artifacts with theme colors
+uniform vec3 themePrimary;             // theme primary color
+uniform vec3 themeAccent;              // theme accent color
+uniform vec3 themeSecondary;           // theme secondary color
+// Debug overlay toggle
+uniform float debugOverlayEnabled;
 
 // VARYING INPUTS (like interpolated values from vertex shader)
 // These change per pixel - think of them as coordinates passed down from vertex processing
@@ -110,21 +128,39 @@ void main() {
         
         if (rgbDistortionEnabled > 0.5) {
             float y = vUv.y * resolution.y; // Convert to pixel Y coordinate
+
+            // Quantize time by FPS if specified (> 0)
+            float localTime = time;
+            if (rgbDistortionFPS > 0.0) {
+                float stepT = 1.0 / rgbDistortionFPS;
+                localTime = floor(time / stepT) * stepT;
+            }
             
             // Create complex wave pattern using noise for horizontal RGB shift
             // This makes the distortion look organic and TV-like
-            float rgbWave = (
-                // Large scale noise for broad waves
-                snoise3(vec3(0.0, y * 0.01, time * 200.0)) * (strength * rgbDistortionIntensity)
-                // Smaller scale noise for fine detail
-                * snoise3(vec3(0.0, y * 0.02, time * 100.0)) * (strength * 5.0)
-                // Sharp horizontal lines (like TV scan line errors)
-                + step(0.999, sin(y * 0.005 + time * 1.6)) * 8.0 * strength
-                + step(0.9995, sin(y * 0.005 + time * 2.0)) * -12.0 * strength
-            ) / resolution.x; // Normalize to pixel size
+            float waveLarge = snoise3(vec3(0.0, y * max(0.0001, rgbWaveLargeScale), localTime * 200.0));
+            float waveFine = snoise3(vec3(0.0, y * max(0.0001, rgbWaveFineScale), localTime * 100.0));
+            float line1 = sin(y * 0.005 + localTime * rgbLineFrequency1);
+            float line2 = sin(y * 0.005 + localTime * rgbLineFrequency2);
+            float baseWave = (waveLarge * (strength * rgbDistortionIntensity) * waveFine * (strength * 5.0) * rgbWaveAmplitude
+                              + step(rgbLineThreshold1, line1) * 8.0 * strength
+                              + step(rgbLineThreshold2, line2) * -12.0 * strength);
+
+            // shape selection
+            float shapedWave = baseWave;
+            if (rgbShapeMode > 0.5 && rgbShapeMode < 1.5) {
+                // triangle-ish using asin(sin())
+                shapedWave = asin(sin(baseWave)) * 1.2732395447351628; // 4/PI approx
+            } else if (rgbShapeMode >= 1.5) {
+                // blocky using sign of sine
+                shapedWave = sign(sin(baseWave));
+            }
+
+            float rgbWave = (shapedWave * rgbSeparationScale) / resolution.x; // Normalize to pixel size
             
             // Additional RGB separation with high-frequency noise
-            float rgbDiff = (strength * rgbDistortionIntensity + sin(time * 300.0 + vUv.y * 20.0) * (10.0 * strength)) / resolution.x;
+            float rgbDiff = (strength * rgbDistortionIntensity * rgbSeparationScale
+                            + sin(localTime * 300.0 + vUv.y * 20.0) * (10.0 * strength)) / resolution.x;
             float rgbUvX = vUv.x + rgbWave;
             
             // Sample each color channel at slightly different positions
@@ -138,7 +174,12 @@ void main() {
         // Add random static noise like old TV snow
         float whiteNoise = 0.0;
         if (whiteNoiseEnabled > 0.5) {
-            whiteNoise = randomRange(vUv + mod(time, 10.0), -whiteNoiseIntensity, whiteNoiseIntensity) * strength;
+            float wnTime = time;
+            if (whiteNoiseFPS > 0.0) {
+                float stepT = 1.0 / whiteNoiseFPS;
+                wnTime = floor(time / stepT) * stepT;
+            }
+            whiteNoise = randomRange(vUv + mod(wnTime, 10.0), -whiteNoiseIntensity, whiteNoiseIntensity) * strength;
         }
         
         // === EFFECT 4: BLOCK CORRUPTION ===
@@ -186,7 +227,12 @@ void main() {
         // Add subtle wave-like distortion across the image
         float waveNoise = 0.0;
         if (waveNoiseEnabled > 0.5) {
-            waveNoise = (sin(vUv.y * 800.0 + time * 50.0) + 1.0) / 2.0 * (waveNoiseIntensity * strength);
+            float wTime = time;
+            if (waveNoiseFPS > 0.0) {
+                float stepT = 1.0 / waveNoiseFPS;
+                wTime = floor(time / stepT) * stepT;
+            }
+            waveNoise = (sin(vUv.y * 800.0 + wTime * 50.0) + 1.0) / 2.0 * (waveNoiseIntensity * strength);
         }
         
         // === COMBINE ALL EFFECTS ===
@@ -332,7 +378,17 @@ void main() {
                     float finalIntensity = artifactNoiseIntensity * strength * sideStrength;
 
                     // FULL REPLACEMENT: Use the shifted image as base
-                    color.rgb = mix(color.rgb, shiftedColor.rgb, artifactMask * finalIntensity);
+                    vec3 baseColor = shiftedColor.rgb;
+
+                    // optional theme tint
+                    if (artifactUseTheme > 0.5) {
+                        float choice = fract(sin(stripY * 1234.567 + artifactSeed) * 43758.5453);
+                        vec3 tint = choice < 0.33 ? themePrimary : (choice < 0.66 ? themeAccent : themeSecondary);
+                        // mix towards theme tint
+                        baseColor = mix(baseColor, tint, 0.5 * finalIntensity);
+                    }
+
+                    color.rgb = mix(color.rgb, baseColor, artifactMask * finalIntensity);
 
                     // BLENDED COLOR EFFECT: Add color shift as a separate overlay
                     vec3 colorShift = vec3(
@@ -348,36 +404,53 @@ void main() {
         }
 
         // === DEBUG VISUALIZATIONS ===
-        // vec2 debugVerticalPosition = vec2(0.6, 0.65);
+        if (debugOverlayEnabled > 0.5) {
+            // small overlay bars at top-left to visualize stepping of each effect
+            // red: rgbDistortion (quantized by rgbDistortionFPS)
+            // green: whiteNoise (whiteNoiseFPS)
+            // blue: waveNoise (waveNoiseFPS)
+            vec2 barOrigin = vec2(0.02, 0.96);
+            float barWidth = 0.12;
+            float barHeight = 0.02;
 
-        // vec2 intensityPosition = vec2(0.3, 0.35); // red
-        // if (uv.x > intensityPosition.x && uv.x < intensityPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-        //     color.rgb = mix(color.rgb, vec3(1.0, 0.0, 0.0), strength);
-        // }
-        
-        // vec2 timePosition = vec2(0.4, 0.45); // green
-        // if (uv.x > timePosition.x && uv.x < timePosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-        //     float timeBar = mod(time * 0.1, 1.0);  // 0.0 to 1.0 cycle every 10 seconds
-        //     // Show time as a filling bar within the green box area
-        //     float relativeY = (uv.y - debugVerticalPosition.x) / (debugVerticalPosition.y - debugVerticalPosition.x);
-        //     if (relativeY < timeBar) {
-        //         color.rgb = mix(color.rgb, vec3(0.0, 1.0, 0.0), 0.8);
-        //     } else {
-        //         // Show time value as background color intensity (for debugging)
-        //         float timeDebug = mod(time * 0.05, 1.0); // Slower cycle for visibility
-        //         color.rgb = mix(color.rgb, vec3(0.0, timeDebug, 0.0), 0.3);
-        //     }
-        // }
+            // compute quantized times
+            float stepRgb = rgbDistortionFPS > 0.0 ? floor(time * rgbDistortionFPS) / rgbDistortionFPS : time;
+            float stepWhite = whiteNoiseFPS > 0.0 ? floor(time * whiteNoiseFPS) / whiteNoiseFPS : time;
+            float stepWave = waveNoiseFPS > 0.0 ? floor(time * waveNoiseFPS) / waveNoiseFPS : time;
 
-        // vec2 blockCorruptionPosition = vec2(0.55, 0.6); // blue
-        // if (uv.x > blockCorruptionPosition.x && uv.x < blockCorruptionPosition.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-        //     color.rgb = mix(color.rgb, vec3(0.0, 0.0, 1.0), bnMask);
-        // }
-        
-        // vec2 blockCorruption2Position = vec2(0.65, 0.7); // yellow  
-        // if (uv.x > blockCorruption2Position.x && uv.x < blockCorruption2Position.y && uv.y > debugVerticalPosition.x && uv.y < debugVerticalPosition.y) {
-        //     color.rgb = mix(color.rgb, vec3(1.0, 1.0, 0.0), bnMask2);
-        // }
+            // normalized progress within 1-second window for each
+            float rgbProg = mod(stepRgb, 1.0);
+            float whiteProg = mod(stepWhite, 1.0);
+            float waveProg = mod(stepWave, 1.0);
+
+            // three stacked bars (outlines)
+            float rgbBar = step(barOrigin.x, uv.x) * step(uv.x, barOrigin.x + barWidth)
+                         * step(barOrigin.y - barHeight, uv.y) * step(uv.y, barOrigin.y);
+            vec2 whiteOrigin = barOrigin - vec2(0.0, barHeight + 0.01);
+            float whiteBar = step(whiteOrigin.x, uv.x) * step(uv.x, whiteOrigin.x + barWidth)
+                           * step(whiteOrigin.y - barHeight, uv.y) * step(uv.y, whiteOrigin.y);
+            vec2 waveOrigin = barOrigin - vec2(0.0, 2.0 * (barHeight + 0.01));
+            float waveBar = step(waveOrigin.x, uv.x) * step(uv.x, waveOrigin.x + barWidth)
+                          * step(waveOrigin.y - barHeight, uv.y) * step(uv.y, waveOrigin.y);
+
+            // fill amount for each bar
+            float rgbFill = step(barOrigin.x, uv.x) * step(uv.x, barOrigin.x + (barWidth * rgbProg))
+                          * step(barOrigin.y - barHeight, uv.y) * step(uv.y, barOrigin.y);
+            float whiteFill = step(whiteOrigin.x, uv.x) * step(uv.x, whiteOrigin.x + (barWidth * whiteProg))
+                            * step(whiteOrigin.y - barHeight, uv.y) * step(uv.y, whiteOrigin.y);
+            float waveFill = step(waveOrigin.x, uv.x) * step(uv.x, waveOrigin.x + (barWidth * waveProg))
+                           * step(waveOrigin.y - barHeight, uv.y) * step(uv.y, waveOrigin.y);
+
+            // outlines (dim)
+            color.rgb = mix(color.rgb, vec3(0.2, 0.2, 0.2), rgbBar * 0.7);
+            color.rgb = mix(color.rgb, vec3(0.2, 0.2, 0.2), whiteBar * 0.7);
+            color.rgb = mix(color.rgb, vec3(0.2, 0.2, 0.2), waveBar * 0.7);
+
+            // fills
+            color.rgb = mix(color.rgb, vec3(1.0, 0.0, 0.0), rgbFill);
+            color.rgb = mix(color.rgb, vec3(0.0, 1.0, 0.0), whiteFill);
+            color.rgb = mix(color.rgb, vec3(0.0, 0.0, 1.0), waveFill);
+        }
     }
     
     gl_FragColor = color;

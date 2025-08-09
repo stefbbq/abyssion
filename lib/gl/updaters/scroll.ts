@@ -68,55 +68,125 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     // compute readable, intermediate values instead of ternaries
     const rgbDistortionEnabled = crtConfig.rgbDistortion.enabled
     let rgbDistortionIntensity = 0
+    let rgbDistortionFPS: number | undefined
     if (rgbDistortionEnabled) {
-      const { minIntensity, maxIntensity } = crtConfig.rgbDistortion
-      rgbDistortionIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      const { minIntensity, maxIntensity, fps } = crtConfig.rgbDistortion as typeof crtConfig.rgbDistortion & { fps?: number }
+      // apply per-effect FPS stepping if provided (for CPU-side modulation)
+      const t = fps && fps > 0 ? Math.floor(performance.now() / (1000 / fps)) * (1000 / fps) : performance.now()
+      const phase = (t % 1000) / 1000
+      rgbDistortionIntensity = minIntensity +
+        (corruptionIntensity * (maxIntensity - minIntensity)) * (0.7 + 0.3 * Math.sin(phase * Math.PI * 2))
+      rgbDistortionFPS = fps
+      // Push rgb wave/shape controls to shader uniforms from config
+      if (material.uniforms.rgbWaveLargeScale) material.uniforms.rgbWaveLargeScale.value = crtConfig.rgbDistortion.waveLargeScale ?? 0.01
+      if (material.uniforms.rgbWaveFineScale) material.uniforms.rgbWaveFineScale.value = crtConfig.rgbDistortion.waveFineScale ?? 0.02
+      if (material.uniforms.rgbLineFrequency1) material.uniforms.rgbLineFrequency1.value = crtConfig.rgbDistortion.lineFrequency1 ?? 1.6
+      if (material.uniforms.rgbLineFrequency2) material.uniforms.rgbLineFrequency2.value = crtConfig.rgbDistortion.lineFrequency2 ?? 2.0
+      if (material.uniforms.rgbSeparationScale) material.uniforms.rgbSeparationScale.value = crtConfig.rgbDistortion.separationScale ?? 1.0
+      if (material.uniforms.rgbWaveAmplitude) material.uniforms.rgbWaveAmplitude.value = crtConfig.rgbDistortion.waveAmplitude ?? 1.0
+      if (material.uniforms.rgbLineThreshold1) material.uniforms.rgbLineThreshold1.value = crtConfig.rgbDistortion.lineThreshold1 ?? 0.999
+      if (material.uniforms.rgbLineThreshold2) material.uniforms.rgbLineThreshold2.value = crtConfig.rgbDistortion.lineThreshold2 ?? 0.9995
+      if (material.uniforms.rgbShapeMode) {
+        const m = crtConfig.rgbDistortion.shapeMode
+        material.uniforms.rgbShapeMode.value = m === 'triangle' ? 1.0 : m === 'block' ? 2.0 : 0.0
+      }
     }
 
     const blockCorruptionEnabled = crtConfig.blockCorruption.enabled
     let blockCorruptionRate = 0
     if (blockCorruptionEnabled) {
-      const { minRate, maxRate } = crtConfig.blockCorruption
-      blockCorruptionRate = minRate + (corruptionIntensity * (maxRate - minRate))
+      const { minRate, maxRate, fps } = crtConfig.blockCorruption as typeof crtConfig.blockCorruption & { fps?: number }
+      const baseRate = minRate + (corruptionIntensity * (maxRate - minRate))
+      if (fps && fps > 0) {
+        const step = 1 / fps
+        blockCorruptionRate = Math.max(1, Math.round(baseRate * step) / step)
+      } else {
+        blockCorruptionRate = baseRate
+      }
     }
 
     const whiteNoiseEnabled = crtConfig.whiteNoise.enabled
     let whiteNoiseIntensity = 0
+    let whiteNoiseFPS: number | undefined
     if (whiteNoiseEnabled) {
-      const { minIntensity, maxIntensity } = crtConfig.whiteNoise
-      whiteNoiseIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      const { minIntensity, maxIntensity, fps } = crtConfig.whiteNoise as typeof crtConfig.whiteNoise & { fps?: number }
+      const base = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      if (fps && fps > 0) {
+        const t = Math.floor(performance.now() / (1000 / fps))
+        // pseudo-random step between base*0.8..base*1.2 to avoid too repetitive
+        const jitter = ((t % 7) - 3) * 0.05
+        whiteNoiseIntensity = Math.max(0, base * (1 + jitter))
+      } else {
+        whiteNoiseIntensity = base
+      }
+      whiteNoiseFPS = fps
     }
 
     const waveNoiseEnabled = crtConfig.waveNoise.enabled
     let waveNoiseIntensity = 0
+    let waveNoiseFPS: number | undefined
     if (waveNoiseEnabled) {
-      const { minIntensity, maxIntensity } = crtConfig.waveNoise
-      waveNoiseIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      const { minIntensity, maxIntensity, fps } = crtConfig.waveNoise as typeof crtConfig.waveNoise & { fps?: number }
+      const base = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      if (fps && fps > 0) {
+        const t = Math.floor(performance.now() / (1000 / fps))
+        // subtle stepping wave
+        waveNoiseIntensity = base * (0.9 + 0.2 * ((t % 5) / 4))
+      } else {
+        waveNoiseIntensity = base
+      }
+      waveNoiseFPS = fps
     }
 
     let staticIntensity = 0
     if (crtConfig.staticIntensity.enabled) {
-      const { minIntensity, maxIntensity } = crtConfig.staticIntensity
-      staticIntensity = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      const { minIntensity, maxIntensity, fps } = crtConfig.staticIntensity as typeof crtConfig.staticIntensity & { fps?: number }
+      const base = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
+      if (fps && fps > 0) {
+        const t = Math.floor(performance.now() / (1000 / fps))
+        const toggle = (t % 2) === 0 ? 0.95 : 1.05
+        staticIntensity = base * toggle
+      } else {
+        staticIntensity = base
+      }
     }
 
     const largeBlockEnabled = crtConfig.largeBlockCorruption.enabled && corruptionIntensity > crtConfig.largeBlockCorruption.startThreshold
     let largeBlockIntensity = 0
     if (largeBlockEnabled) {
-      const { startThreshold, maxIntensity } = crtConfig.largeBlockCorruption
+      const { startThreshold, maxIntensity, fps } = crtConfig.largeBlockCorruption as typeof crtConfig.largeBlockCorruption & {
+        fps?: number
+      }
       const t = (corruptionIntensity - startThreshold) / (1.0 - startThreshold)
-      largeBlockIntensity = t * maxIntensity
+      const base = t * maxIntensity
+      if (fps && fps > 0) {
+        const step = 1 / fps
+        largeBlockIntensity = Math.round(base / step) * step
+      } else {
+        largeBlockIntensity = base
+      }
     }
 
     const artifactNoiseEnabled = crtConfig.artifactNoise.enabled && corruptionIntensity > crtConfig.artifactNoise.startThreshold
     let artifactNoiseIntensity = 0
     let artifactBlockDensity = 0
     if (artifactNoiseEnabled) {
-      const { startThreshold, maxIntensity, artifactBlockDensity: defaultDensity } = crtConfig.artifactNoise
+      const { startThreshold, maxIntensity, artifactBlockDensity: defaultDensity, fps } = crtConfig.artifactNoise as
+        & typeof crtConfig.artifactNoise
+        & { fps?: number }
       const t = (corruptionIntensity - startThreshold) / (1.0 - startThreshold)
-      artifactNoiseIntensity = t * maxIntensity
+      const base = t * maxIntensity
+      artifactNoiseIntensity = base
       const density = defaultDensity ?? 0.7
       artifactBlockDensity = t * density
+
+      // if fps specified, prefer it as the driving frequency
+      if (typeof fps === 'number' && fps > 0) {
+        material.uniforms.artifactNoiseFPS && (material.uniforms.artifactNoiseFPS.value = fps)
+      }
+      // theme tinting control
+      const useTheme = (ppConfig.crtScrollCorruption as PostProcessingConfig['crtScrollCorruption'])?.artifactNoise?.useThemeColors
+      if (material.uniforms.artifactUseTheme) material.uniforms.artifactUseTheme.value = useTheme ? 1.0 : 0.0
     }
 
     // update the CRT shader uniforms
@@ -126,12 +196,15 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       timeEnabled: true,
       rgbDistortionEnabled,
       rgbDistortionIntensity,
+      rgbDistortionFPS,
       blockCorruptionEnabled,
       blockCorruptionRate,
       whiteNoiseEnabled,
       whiteNoiseIntensity,
+      whiteNoiseFPS,
       waveNoiseEnabled,
       waveNoiseIntensity,
+      waveNoiseFPS,
       staticIntensity,
       largeBlockEnabled,
       largeBlockIntensity,
@@ -145,6 +218,29 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       shakeEnabled: false,
     }
     updateCRTShaderUniforms(material, corruptionParams)
+
+    // set debug overlay state
+    if (material.uniforms.debugOverlayEnabled) {
+      const debugEnabled = (ppConfig.crtScrollCorruption as PostProcessingConfig['crtScrollCorruption'])?.debugOverlay?.enabled
+      material.uniforms.debugOverlayEnabled.value = debugEnabled ? 1.0 : 0.0
+    }
+
+    // keep theme colors in sync for artifact tinting on every update (theme can change live)
+    try {
+      // inline import to avoid circular deps at module top
+      // deno-lint-ignore no-explicit-any
+      const themeMod: any = (globalThis as any).__abyssionThemeMod || (globalThis as any).abyssionThemeMod
+      if (themeMod?.currentGLTheme) {
+        const glTheme = themeMod.currentGLTheme.value
+        // deno-lint-ignore no-explicit-any
+        const THREE: any = (globalThis as any).THREE || undefined
+        if (THREE) {
+          if (material.uniforms.themePrimary) material.uniforms.themePrimary.value = new THREE.Color(glTheme.primary).toArray()
+          if (material.uniforms.themeAccent) material.uniforms.themeAccent.value = new THREE.Color(glTheme.accent).toArray()
+          if (material.uniforms.themeSecondary) material.uniforms.themeSecondary.value = new THREE.Color(glTheme.secondary).toArray()
+        }
+      }
+    } catch (_) { /* no-op */ }
   }
 
   if (state.pixelBleedPass && state.pixelBleedPass.material) {

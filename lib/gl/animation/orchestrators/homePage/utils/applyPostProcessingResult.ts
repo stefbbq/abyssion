@@ -44,7 +44,7 @@ export const applyPostProcessingResult = (
     state.ditheringPass.uniforms.time.value = result.ditheringPass.timeValue
   }
 
-  // crt time update (continuous animation)
+  // crt time update remains continuous; FPS quantization is handled per-effect in shader via fps uniforms
   if (state.crtPass?.material?.uniforms?.time) {
     state.crtPass.material.uniforms.time.value = performance.now() / 1000
   }

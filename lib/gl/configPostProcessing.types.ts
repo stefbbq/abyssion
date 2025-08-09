@@ -122,36 +122,66 @@ export type CrtScrollCorruptionParams = {
     enabled: boolean
     minIntensity: number
     maxIntensity: number
+    /** Update frequency for rgb distortion (FPS). Use 0 for continuous */
+    fps?: number
+    /** Large scale wave multiplier for Y (default 0.01) */
+    waveLargeScale?: number
+    /** Fine scale wave multiplier for Y (default 0.02) */
+    waveFineScale?: number
+    /** Line wave frequency 1 (default 1.6) */
+    lineFrequency1?: number
+    /** Line wave frequency 2 (default 2.0) */
+    lineFrequency2?: number
+    /** Shape mode: 'sine' | 'triangle' | 'block' (default 'sine') */
+    shapeMode?: 'sine' | 'triangle' | 'block'
+    /** Overall separation amplitude scale (default 1.0) */
+    separationScale?: number
+    /** Wave displacement amplitude multiplier (default 1.0) */
+    waveAmplitude?: number
+    /** Threshold for line 1 spikes (0.0-1.0, default 0.999) */
+    lineThreshold1?: number
+    /** Threshold for line 2 spikes (0.0-1.0, default 0.9995) */
+    lineThreshold2?: number
   }
   /** Block corruption parameters */
   blockCorruption: {
     enabled: boolean
     minRate: number
     maxRate: number
+    /** Update frequency for block corruption state changes (FPS). Use 0 for continuous */
+    fps?: number
   }
   /** White noise parameters */
   whiteNoise: {
     enabled: boolean
     minIntensity: number
     maxIntensity: number
+    /** Update frequency for white noise (FPS). Use 0 for continuous */
+    fps?: number
   }
   /** Wave noise parameters */
   waveNoise: {
     enabled: boolean
     minIntensity: number
     maxIntensity: number
+    /** Update frequency for wave noise (FPS). Use 0 for continuous */
+    fps?: number
   }
   /** Static intensity parameters */
   staticIntensity: {
     enabled: boolean
     minIntensity: number
     maxIntensity: number
+    /** Update frequency for static pattern generation (FPS). Use 0 for continuous */
+    fps?: number
   }
   /** Large block corruption parameters */
   largeBlockCorruption: {
     enabled: boolean
     startThreshold: number
     maxIntensity: number
+    /** Update frequency for large block corruption (FPS). */
+    fps?: number
   }
   /** Artifact noise parameters */
   artifactNoise: {
@@ -163,6 +193,14 @@ export type CrtScrollCorruptionParams = {
     artifactHeightJitterMin?: number
     artifactHeightJitterMax?: number
     artifactNoiseFPS?: number
+    /** Update frequency for artifact noise (FPS). Alias for artifactNoiseFPS. */
+    fps?: number
+    /** Use theme colors to tint artifact noise */
+    useThemeColors?: boolean
+  }
+  /** Debug overlay for visualizing per-effect FPS and stepping */
+  debugOverlay?: {
+    enabled: boolean
   }
 }
 

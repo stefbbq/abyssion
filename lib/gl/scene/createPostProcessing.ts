@@ -156,6 +156,62 @@ export const createPostProcessing = async (
   if (crtPass.material && crtPass.material.uniforms.resolution) {
     crtPass.material.uniforms.resolution.value = new THREE.Vector2(width, height)
   }
+  // seed theme colors into CRT pass for artifact tinting
+  if (crtPass.material && crtPass.material.uniforms) {
+    const u = crtPass.material.uniforms
+    const glTheme = currentGLTheme.value
+    const themePrimaryColor = new THREE.Color(glTheme.primary)
+    const themeAccentColor = new THREE.Color(glTheme.accent)
+    const themeSecondaryColor = new THREE.Color(glTheme.secondary)
+    if (u.themePrimary) u.themePrimary.value = themePrimaryColor.toArray()
+    if (u.themeAccent) u.themeAccent.value = themeAccentColor.toArray()
+    if (u.themeSecondary) u.themeSecondary.value = themeSecondaryColor.toArray()
+  }
+
+  console.log('crtPass', postProcessingConfig.crtScrollCorruption)
+
+  // Initialize CRT per-effect FPS uniforms from config so effects respect FPS even before first scroll
+  const crtCfg = postProcessingConfig.crtScrollCorruption
+  console.log('crtPass', crtCfg?.rgbDistortion?.fps)
+  if (crtPass.material && crtPass.material.uniforms && crtCfg) {
+    const u = crtPass.material.uniforms
+    if (u.rgbDistortionFPS) u.rgbDistortionFPS.value = crtCfg.rgbDistortion?.fps ?? 0
+    // initialize rgb distortion shape/size controls
+    if (u.rgbWaveLargeScale && crtCfg.rgbDistortion?.waveLargeScale !== undefined) {
+      u.rgbWaveLargeScale.value = crtCfg.rgbDistortion.waveLargeScale
+    }
+    if (u.rgbWaveFineScale && crtCfg.rgbDistortion?.waveFineScale !== undefined) {
+      u.rgbWaveFineScale.value = crtCfg.rgbDistortion.waveFineScale
+    }
+    if (u.rgbLineFrequency1 && crtCfg.rgbDistortion?.lineFrequency1 !== undefined) {
+      u.rgbLineFrequency1.value = crtCfg.rgbDistortion.lineFrequency1
+    }
+    if (u.rgbLineFrequency2 && crtCfg.rgbDistortion?.lineFrequency2 !== undefined) {
+      u.rgbLineFrequency2.value = crtCfg.rgbDistortion.lineFrequency2
+    }
+    if (u.rgbSeparationScale && crtCfg.rgbDistortion?.separationScale !== undefined) {
+      u.rgbSeparationScale.value = crtCfg.rgbDistortion.separationScale
+    }
+    if (u.rgbShapeMode && crtCfg.rgbDistortion?.shapeMode !== undefined) {
+      const m = crtCfg.rgbDistortion.shapeMode
+      u.rgbShapeMode.value = m === 'triangle' ? 1.0 : m === 'block' ? 2.0 : 0.0
+    }
+    if (u.rgbWaveAmplitude && crtCfg.rgbDistortion?.waveAmplitude !== undefined) {
+      u.rgbWaveAmplitude.value = crtCfg.rgbDistortion.waveAmplitude
+    }
+    if (u.rgbLineThreshold1 && crtCfg.rgbDistortion?.lineThreshold1 !== undefined) {
+      u.rgbLineThreshold1.value = crtCfg.rgbDistortion.lineThreshold1
+    }
+    if (u.rgbLineThreshold2 && crtCfg.rgbDistortion?.lineThreshold2 !== undefined) {
+      u.rgbLineThreshold2.value = crtCfg.rgbDistortion.lineThreshold2
+    }
+    if (u.whiteNoiseFPS) u.whiteNoiseFPS.value = crtCfg.whiteNoise?.fps ?? 0
+    if (u.waveNoiseFPS) u.waveNoiseFPS.value = crtCfg.waveNoise?.fps ?? 0
+    if (u.largeBlockFPS) u.largeBlockFPS.value = crtCfg.largeBlockCorruption?.fps ?? u.largeBlockFPS.value
+    if (u.artifactNoiseFPS) {
+      u.artifactNoiseFPS.value = crtCfg.artifactNoise?.fps ?? crtCfg.artifactNoise?.artifactNoiseFPS ?? u.artifactNoiseFPS.value
+    }
+  }
 
   composer.addPass(crtPass)
 

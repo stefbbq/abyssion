@@ -65,10 +65,11 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
   const backgroundClasses = 'bg-[var(--colors-background)]'
   const backgroundOpacity = theme.backgroundOpacity
 
-  const fadeOpacity = backgroundOpacity * (intensity * .9)
+  const fadeOpacity = backgroundOpacity * intensity
 
   // noise
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
+
   // fade in noise with intensity (max 0.05 for opacity-5)
   const noiseFadeOpacity = isHomePage ? 0 : 0.05 * intensity
 
