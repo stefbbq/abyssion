@@ -366,13 +366,9 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
         const nextVideoSection = `<div style="background: rgba(255,150,0,0.1); padding: 4px 6px; border-radius: 4px; margin: 1px 0;">
           <div><b><u>NEXT VIDEO</u></b></div>
           <div>${
-          vDebug.nextPreparedIndex !== null
-            ? `<b>Queued:</b> #${vDebug.nextPreparedIndex} - ${vDebug.nextPreparedVideoName}`
-            : `<b>Queued:</b> None prepared`
+          vDebug.nextPreparedIndex !== null ? `<b>Queued:</b> #${vDebug.nextPreparedIndex} - ${vDebug.nextPreparedVideoName}` : `<b>Queued:</b> None prepared`
         }</div>
-          <div>${
-          vDebug.nextVideoFullDuration ? `<b>Duration:</b> ${vDebug.nextVideoFullDuration.toFixed(1)}s` : `<b>Duration:</b> Unknown`
-        }</div>
+          <div>${vDebug.nextVideoFullDuration ? `<b>Duration:</b> ${vDebug.nextVideoFullDuration.toFixed(1)}s` : `<b>Duration:</b> Unknown`}</div>
           <div><b>Triggers in:</b> ${formatMs(vDebug.timeUntilNextVideo)}</div>
           <div><b>Buffer swap in:</b> ${formatMs(vDebug.timeUntilBufferSwap)}</div>
         </div>`
@@ -402,9 +398,7 @@ export const setupDebugSystem = (config: DebugSystemConfig): DebugSystemResult =
           <div><b>Manifest Remaining:</b> ${vDebug.manifestRemaining} videos</div>
           <div><b>Total Available:</b> ${vDebug.totalVideos} videos</div>
           <div><b>Loading:</b> ${
-          'loadingProgress' in vDebug && (vDebug.loadingProgress as { hasMoreToLoad: boolean } | undefined)?.hasMoreToLoad
-            ? '🔄 In Progress'
-            : '✅ Complete'
+          'loadingProgress' in vDebug && (vDebug.loadingProgress as { hasMoreToLoad: boolean } | undefined)?.hasMoreToLoad ? '🔄 In Progress' : '✅ Complete'
         }</div>
         </div>`
 

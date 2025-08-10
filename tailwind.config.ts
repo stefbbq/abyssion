@@ -15,6 +15,20 @@ export default {
         background: 'var(--colors-background)',
         surface: 'var(--colors-surface)',
       },
+      fontSize: {
+        xs: 'var(--typography-fontSizes-xs)',
+        sm: 'var(--typography-fontSizes-sm)',
+        // alias commonly used but non-standard tailwind size
+        md: 'var(--typography-fontSizes-base)',
+        base: 'var(--typography-fontSizes-base)',
+        lg: 'var(--typography-fontSizes-lg)',
+        xl: 'var(--typography-fontSizes-xl)',
+        '2xl': 'var(--typography-fontSizes-2xl)',
+        '3xl': 'var(--typography-fontSizes-3xl)',
+        '4xl': 'var(--typography-fontSizes-4xl)',
+        '5xl': 'var(--typography-fontSizes-5xl)',
+        '6xl': 'var(--typography-fontSizes-6xl)',
+      },
       fontFamily: {
         heading: 'var(--typography-fontFamily-heading)',
         sans: 'var(--typography-fontFamily-body)',

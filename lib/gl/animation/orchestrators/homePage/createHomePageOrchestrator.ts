@@ -57,9 +57,7 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
       }
       if (!belongsToDashedOrbit) return
 
-      const materials: Three.Material[] = Array.isArray(mesh.material)
-        ? (mesh.material as Three.Material[])
-        : [mesh.material as Three.Material]
+      const materials: Three.Material[] = Array.isArray(mesh.material) ? (mesh.material as Three.Material[]) : [mesh.material as Three.Material]
       // initialize base opacities once
       const existingBase: number[] | undefined = mesh.userData.baseOpacities as number[] | undefined
       if (!existingBase) {

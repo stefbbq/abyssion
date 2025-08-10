@@ -33,11 +33,4 @@ export { calculateMouseRotationTarget } from './calculations/calculateMouseRotat
 export { defaultOrbitControlsConfig } from './config/defaultOrbitControlsConfig.ts'
 
 // Types
-export type {
-  ControlsDependencies,
-  KeyboardInputConfig,
-  MousePosition,
-  MouseRotationTarget,
-  MouseTrackingState,
-  OrbitControlsConfig,
-} from './types.ts'
+export type { ControlsDependencies, KeyboardInputConfig, MousePosition, MouseRotationTarget, MouseTrackingState, OrbitControlsConfig } from './types.ts'

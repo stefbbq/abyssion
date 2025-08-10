@@ -61,9 +61,13 @@ export const techscapeLightTheme: BaseTheme = {
   },
   typography: {
     fontFamily: {
-      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      heading: '"Oxanium", sans-serif',
+      body: '"Oxanium", sans-serif',
+      quote: '"EB Garamond", serif',
     },
+    fontUrls: [
+      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&display=swap',
+      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap',
+    ],
   },
 }

@@ -163,11 +163,7 @@ export const DebugControls = (props: Props) => {
 
   const handleColorizationChange = (field: string) => (e: Event) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement
-    const value = target.type === 'checkbox'
-      ? (target as HTMLInputElement).checked
-      : target.type === 'range'
-      ? parseFloat(target.value)
-      : target.value
+    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.type === 'range' ? parseFloat(target.value) : target.value
 
     if (field.includes('.')) {
       const [parentField, childField] = field.split('.')
@@ -357,8 +353,7 @@ export const DebugControls = (props: Props) => {
             <div className='text-text-tertiary text-xs'>
               Current:{' '}
               <span className='font-semibold'>
-                {currentTheme.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}{' '}
-                ({currentThemeMode.value === 'dark' ? 'Dark' : 'Light'})
+                {currentTheme.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} ({currentThemeMode.value === 'dark' ? 'Dark' : 'Light'})
               </span>
             </div>
           </>

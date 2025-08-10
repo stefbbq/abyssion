@@ -59,9 +59,7 @@ export const getNewStartTimeAndDuration = (
   )
   log.debug(
     lc.GL_VIDEO,
-    `generated duration: %c${duration.toFixed(2)}%c vs original: %c${originalDuration.toFixed(2)}%c, generated start time: %c${
-      startTime.toFixed(2)
-    }%c`,
+    `generated duration: %c${duration.toFixed(2)}%c vs original: %c${originalDuration.toFixed(2)}%c, generated start time: %c${startTime.toFixed(2)}%c`,
     'font-weight: bold',
     'font-weight: normal; color: #aaa',
     'font-weight: bold',

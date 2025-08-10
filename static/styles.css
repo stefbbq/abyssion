@@ -28,6 +28,7 @@
   backdrop-filter: var(--surfaces-shell-backdropBlur);
   box-shadow: var(--surfaces-shell-boxShadow);
   filter: var(--surfaces-shell-filter);
+  overflow: hidden;
 }
 
 .surface-header {
@@ -50,6 +51,18 @@
   backdrop-filter: var(--surfaces-elevated-backdropBlur);
   box-shadow: var(--surfaces-elevated-boxShadow);
   filter: var(--surfaces-elevated-filter);
+}
+
+/* Title surface for inline heading labels */
+.surface-title {
+  background-color: var(--surfaces-title-background);
+  border-width: var(--surfaces-title-border-width);
+  border-style: var(--surfaces-title-border-style);
+  border-color: var(--surfaces-title-border-color);
+  border-radius: var(--surfaces-title-borderRadius);
+  backdrop-filter: var(--surfaces-title-backdropBlur);
+  box-shadow: var(--surfaces-title-boxShadow);
+  filter: var(--surfaces-title-filter);
 }
 
 /* Interactive element utilities */

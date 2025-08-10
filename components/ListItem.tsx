@@ -23,9 +23,7 @@ type Props = {
 export const ListItem = ({ leftSection, mainSection, rightSection, className }: Props) => {
   return (
     <div
-      class={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-theme-lg transition-colors hover:bg-background-secondary ${
-        className || ''
-      }`}
+      class={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-theme-lg transition-colors hover:bg-background-secondary ${className || ''}`}
     >
       {leftSection && (
         <div class='font-semibold md:w-24 flex-shrink-0 text-text-primary'>

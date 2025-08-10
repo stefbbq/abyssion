@@ -2,16 +2,36 @@ import { bio } from '@data/content-bio.ts'
 import { Shell } from '@components/Shell.tsx'
 import { Card } from '@components/Card.tsx'
 import { TextBlock } from '@components/TextBlock.tsx'
+import { Title } from '@components/Title.tsx'
+import { RichLineItem } from '@components/RichLineItem.tsx'
 
 export default function BioSection() {
   return (
     <>
       {/* about */}
       <Shell>
-        <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>{bio.aboutTitle}</h2>
+        <Title className='mb-6'>{bio.aboutTitle}</Title>
         <TextBlock>
           {bio.about}
         </TextBlock>
+      </Shell>
+
+      {/* albums */}
+      <Shell>
+        <Title>{bio.albumsTitle}</Title>
+        <div class='space-y-6'>
+          {bio.albums.map((album, idx) => (
+            <RichLineItem
+              key={idx}
+              left={<span class='text-2xl md:text-3xl text-[var(--colors-foreground)]'>{album.year}</span>}
+              main={
+                <div>
+                  <p class='text-md text-[var(--colors-text-tertiary)]'>{album.description}</p>
+                </div>
+              }
+            />
+          ))}
+        </div>
       </Shell>
 
       {/* members */}
@@ -23,7 +43,7 @@ export default function BioSection() {
             imageAlt={member.name}
             fallbackAvatarText={member.name.split(' ').map((n) => n[0]).join('')}
           >
-            <h3 class='text-3xl font-semibold text-[var(--colors-text-primary)]'>{member.name}</h3>
+            <h3 class='text-4xl font-semibold text-[var(--colors-text-primary)]'>{member.name}</h3>
             <p class='text-md mb-0 text-[var(--colors-text-tertiary)]'>{member.role.toUpperCase()}</p>
             {
               /* <TextBlock className='mt-2'>
@@ -33,23 +53,6 @@ export default function BioSection() {
           </Card>
         ))}
       </section>
-
-      {/* albums */}
-      {
-        /* <Shell>
-        <h2 class='text-3xl font-bold mb-8 text-[var(--colors-text-primary)]'>{bio.albumsTitle}</h2>
-        <div class='space-y-6'>
-          {bio.albums.map((album, idx) => (
-            <ListItem
-              key={idx}
-              leftSection={album.year}
-              mainSection={`"${album.title}"`}
-              rightSection={`${album.type}  ${album.tracks} tracks`}
-            />
-          ))}
-        </div>
-      </Shell> */
-      }
     </>
   )
 }

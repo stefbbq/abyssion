@@ -1,11 +1,12 @@
 import { Shell } from '@components/Shell.tsx'
 import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '@components/icons/index.ts'
+import { Title } from '@components/Title.tsx'
 // import ContactForm from '@islands/ContactForm.tsx'
 
 export default function ContactSection() {
   return (
     <>
-      {/* Send us a message */}
+      {/* send us a message */}
       <div class='grid gap-8 lg:grid-cols-1'>
         {
           /* <Shell>
@@ -14,7 +15,7 @@ export default function ContactSection() {
         }
 
         <Shell>
-          <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>get in touch</h2>
+          <Title>get in touch</Title>
           <div class='space-y-4'>
             <div class='flex items-center space-x-3'>
               <div class='flex-shrink-0'>
@@ -59,9 +60,11 @@ export default function ContactSection() {
               </div>
             </div>
           </div>
+        </Shell>
 
-          {/* Follow us section moved here */}
-          <h2 class='text-3xl font-bold mb-6 mt-10 text-[var(--colors-text-primary)]'>follow us</h2>
+        <Shell>
+          {/* follow us section moved here */}
+          <Title>follow us</Title>
           <div class='grid grid-cols-2 gap-4'>
             <a
               href='#'

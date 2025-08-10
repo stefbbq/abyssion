@@ -112,12 +112,12 @@
     "artifactNoise": {
       "enabled": true,
       "startThreshold": 0.1,
-      "maxIntensity": 0.2,
+      "maxIntensity": 0.3,
       "artifactBlockDensity": 0.7,
       "artifactHeightJitter": 1,
       "artifactHeightJitterMin": 2,
-      "artifactHeightJitterMax": 50,
-      "artifactNoiseFPS": 1,
+      "artifactHeightJitterMax": 30,
+      "artifactNoiseFPS": 2,
       "fps": 3,
       "useThemeColors": true
     },

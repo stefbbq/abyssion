@@ -2,7 +2,7 @@
  * root colors for the techscape palette
  */
 export const techscapeDarkPalette = {
-  primary: 0xffffff,
+  primary: 0x00ffd5,
   secondary: 0x00cccc,
   tertiary: 0x66e680,
   foreground: 0xffffff,

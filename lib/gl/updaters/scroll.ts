@@ -7,6 +7,7 @@ import { getResponsiveScrollSpeed } from '../utils/getResponsiveScrollSpeed.ts'
 import { type CorruptionParams, updateCRTShaderUniforms } from '../shaders/CRTShader.ts'
 import type { PostProcessingConfig } from '../configPostProcessing.types.ts'
 import { scrollState } from '../animation/state/scrollState.ts'
+import { isDebugModeEnabled } from '../../debug/index.ts'
 
 const ppConfig = configPostProcessing as PostProcessingConfig
 
@@ -219,10 +220,11 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     }
     updateCRTShaderUniforms(material, corruptionParams)
 
-    // set debug overlay state
+    // set debug overlay state: only on when global debug mode is enabled AND config allows it
     if (material.uniforms.debugOverlayEnabled) {
-      const debugEnabled = (ppConfig.crtScrollCorruption as PostProcessingConfig['crtScrollCorruption'])?.debugOverlay?.enabled
-      material.uniforms.debugOverlayEnabled.value = debugEnabled ? 1.0 : 0.0
+      const overlayConfigured = (ppConfig.crtScrollCorruption as PostProcessingConfig['crtScrollCorruption'])?.debugOverlay?.enabled
+      const isDebug = isDebugModeEnabled()
+      material.uniforms.debugOverlayEnabled.value = isDebug && !!overlayConfigured ? 1.0 : 0.0
     }
 
     // keep theme colors in sync for artifact tinting on every update (theme can change live)

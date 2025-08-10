@@ -10,6 +10,7 @@ import { CRTShader } from '@lib/gl/shaders/CRTShader.ts'
 import passthroughVertexShader from '@lib/gl/shaders/glsl/passthrough.vert.ts'
 import type { PostProcessingConfig } from '@libgl/configPostProcessing.types.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
+import { isDebugModeEnabled } from '@lib/debug/index.ts'
 
 /**
  * Creates a comprehensive post-processing pipeline with cinematic effects.
@@ -211,6 +212,13 @@ export const createPostProcessing = async (
     if (u.artifactNoiseFPS) {
       u.artifactNoiseFPS.value = crtCfg.artifactNoise?.fps ?? crtCfg.artifactNoise?.artifactNoiseFPS ?? u.artifactNoiseFPS.value
     }
+  }
+
+  // ensure crt debug overlay indicators are disabled unless debug mode is on
+  if (crtPass.material && crtPass.material.uniforms && crtPass.material.uniforms.debugOverlayEnabled) {
+    const debugOverlayConfigured = (postProcessingConfig.crtScrollCorruption as PostProcessingConfig['crtScrollCorruption'])?.debugOverlay?.enabled
+    const isDebug = isDebugModeEnabled()
+    crtPass.material.uniforms.debugOverlayEnabled.value = isDebug && !!debugOverlayConfigured ? 1.0 : 0.0
   }
 
   composer.addPass(crtPass)

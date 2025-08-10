@@ -41,9 +41,7 @@ export const ActionZoneExpanded = ({ socialLinks, onAction, buttons }: Props) =>
           >
             {(() => {
               const IconComponent = SocialIcons[icon]
-              return IconComponent
-                ? <IconComponent className='w-6 h-6 opacity-60' />
-                : <div class='w-6 h-6 rounded bg-current opacity-30' />
+              return IconComponent ? <IconComponent className='w-6 h-6 opacity-60' /> : <div class='w-6 h-6 rounded bg-current opacity-30' />
             })()}
           </a>
         ))}

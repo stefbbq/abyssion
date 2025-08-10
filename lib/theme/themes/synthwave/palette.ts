@@ -2,7 +2,7 @@
  * root colors for the synthwave palette
  */
 export const synthwaveDarkPalette = {
-  primary: 0xffffff,
+  primary: 0xff66cc,
   secondary: 0xcc4dff,
   tertiary: 0xff3399,
   foreground: 0xffffff,
@@ -14,7 +14,7 @@ export const synthwaveDarkPalette = {
  * root colors for the synthwave palette (light)
  */
 export const synthwaveLightPalette = {
-  primary: 0x1a0033,
+  primary: 0xcc0099,
   secondary: 0x6600cc,
   tertiary: 0x990033,
   foreground: 0x1a0033,

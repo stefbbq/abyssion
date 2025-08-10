@@ -40,12 +40,9 @@ type Props = BaseProps & (ButtonElementProps | AnchorElementProps)
 
 const variantClasses = {
   primary: 'bg-[var(--colors-primary)] text-[var(--colors-background)] hover:bg-[var(--colors-interactive-hover)] border-transparent',
-  secondary:
-    'bg-[var(--colors-secondary)] text-[var(--colors-background)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
-  outline:
-    'bg-transparent text-[var(--colors-foreground)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
-  ghost:
-    'bg-transparent text-[var(--colors-foreground)] hover:text-[var(--colors-primary)] hover:bg-[var(--colors-surface)] border-transparent',
+  secondary: 'bg-[var(--colors-secondary)] text-[var(--colors-background)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
+  outline: 'bg-transparent text-[var(--colors-foreground)] hover:bg-[var(--colors-interactive-hover)] border-[var(--colors-border-primary)]',
+  ghost: 'bg-transparent text-[var(--colors-foreground)] hover:text-[var(--colors-primary)] hover:bg-[var(--colors-surface)] border-transparent',
 }
 
 const sizeClasses = {

@@ -37,6 +37,7 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
   }
 
   const ImageSection = () => {
+    // return image, if available
     if (imageUrl) {
       return (
         <img
@@ -48,6 +49,7 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
       )
     }
 
+    // return fallback text
     return (
       <div class='aspect-[9/21] max-h-[50vh] md:max-h-none bg-gradient-to-br from-[var(--colors-background-secondary)] to-[var(--colors-background-tertiary)] flex items-center justify-center'>
         {fallbackAvatarText && <span class='text-4xl font-bold text-[var(--colors-text-tertiary)]'>{fallbackAvatarText}</span>}
@@ -56,13 +58,9 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
   }
 
   return (
-    <div
-      class={`surface-shell overflow-hidden flex flex-col ${className || ''}`}
-    >
+    <div class={`surface-shell overflow-hidden flex flex-col ${className || ''}`}>
       <ImageSection />
-      <div class='p-6 text-center text-[var(--colors-text-primary)]'>
-        {children}
-      </div>
+      <div class='p-6 text-center text-[var(--colors-text-primary)]'>{children}</div>
     </div>
   )
 }

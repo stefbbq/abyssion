@@ -54,6 +54,8 @@ export type UISurfaces = {
   header: UISurface
   // Elevated (distinct/highlighted content items)
   elevated?: UISurface
+  // Title blocks (inline heading labels)
+  title?: UISurface
 }
 
 /**
@@ -108,6 +110,15 @@ export type UITheme = {
       heading: string
       body: string
       quote: string
+      /** optional font families for specific feature areas */
+      shows?: {
+        /** font family for the date block in shows list */
+        date?: string
+        /** font family for the venue line in shows list */
+        venue?: string
+        /** font family for the meta/secondary line in shows list */
+        meta?: string
+      }
     }
     fontUrls?: string[]
     fontWeights: {
@@ -115,6 +126,19 @@ export type UITheme = {
       medium: number
       semibold: number
       bold: number
+    }
+    /** semantic font sizes for ui usage (rem units recommended) */
+    fontSizes: {
+      xs: string
+      sm: string
+      base: string
+      lg: string
+      xl: string
+      '2xl': string
+      '3xl': string
+      '4xl': string
+      '5xl': string
+      '6xl': string
     }
   }
 }
@@ -253,6 +277,7 @@ export type BaseSurfaces = {
   shell: BaseSurface
   header: BaseSurface
   elevated?: BaseSurface
+  title?: BaseSurface
 }
 
 /**
@@ -289,6 +314,11 @@ export type BaseTypography = {
     heading?: string
     body?: string
     quote?: string
+    shows?: {
+      date?: string
+      venue?: string
+      meta?: string
+    }
   }
   fontUrls?: string[]
   fontWeights: {
@@ -297,6 +327,18 @@ export type BaseTypography = {
     semibold: number
     bold: number
   }
+  fontSizes?: Partial<{
+    xs: string
+    sm: string
+    base: string
+    lg: string
+    xl: string
+    '2xl': string
+    '3xl': string
+    '4xl': string
+    '5xl': string
+    '6xl': string
+  }>
 }
 
 /**

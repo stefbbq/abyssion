@@ -50,6 +50,17 @@ export const createDefaultSurfaces = (): BaseSurfaces => ({
       backdropBlur: '24px',
     },
   },
+  title: {
+    color: 'surface.100',
+    opacity: 1,
+    borderRadius: '0.375rem',
+    border: {
+      width: '1px',
+      style: 'solid',
+      color: 'surface.700',
+    },
+    effects: {},
+  },
 })
 
 // Utility: replace palette references in a string with resolved CSS color
@@ -72,9 +83,7 @@ const convertToUISurface = (
   const resolvedColor = resolveColorReference(surface.color, palette)
 
   // Resolve border color if specified
-  const borderColor = surface.border?.color
-    ? resolveColorReference(surface.border.color, palette)
-    : resolveColorReference('surface.700', palette)
+  const borderColor = surface.border?.color ? resolveColorReference(surface.border.color, palette) : resolveColorReference('surface.700', palette)
 
   // Handle border opacity by converting to rgba if needed
   const borderOpacity = surface.border?.opacity || 1
@@ -136,5 +145,6 @@ export const createUISurfaces = (
     shell: convertToUISurface(baseSurfaces.shell, palette),
     header: convertToUISurface(baseSurfaces.header, palette),
     elevated: baseSurfaces.elevated ? convertToUISurface(baseSurfaces.elevated, palette) : undefined,
+    title: baseSurfaces.title ? convertToUISurface(baseSurfaces.title, palette) : undefined,
   }
 }

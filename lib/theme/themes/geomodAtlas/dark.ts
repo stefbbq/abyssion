@@ -13,40 +13,57 @@ export const geomodAtlasDarkTheme: BaseTheme = {
   },
   surfaces: {
     main: {
-      color: 'surface.500',
+      color: 'background.950',
+      opacity: 0.9,
+      borderRadius: '6px',
+      border: { width: '2px', style: 'solid', color: 'primary.600', opacity: 0.35 },
       effects: {
-        filter: 'brightness(1.02) contrast(1.04) saturate(1.05)',
+        filter: 'contrast(1.2) saturate(1.15)',
+        boxShadow: '0 0 22px primary.600',
       },
     },
     shell: {
-      color: 'surface.950',
-      opacity: 0.82,
-      borderRadius: '16px',
-      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.18 },
+      color: 'background.900',
+      opacity: 0.92,
+      borderRadius: '8px',
+      border: { width: '2px', style: 'solid', color: 'primary.600', opacity: 0.45 },
       effects: {
-        backdropBlur: '8px',
-        boxShadow: '0 0 12px rgba(0,0,0,.18)',
+        backdropBlur: '6px',
+        boxShadow: '0 0 28px primary.600',
+        filter: 'contrast(1.15) saturate(1.1)',
       },
     },
     header: {
-      color: 'surface.1000',
-      opacity: 0.92,
-      borderRadius: '12px',
-      border: { width: '0px', style: 'none' },
+      // inverted block for titles/navigation
+      color: 'foreground.500',
+      opacity: 1,
+      borderRadius: '6px',
+      border: { width: '2px', style: 'solid', color: 'foreground.500', opacity: 1 },
       effects: {
-        backdropBlur: '10px',
-        boxShadow: '0 14px 22px rgba(0,0,0,.5)',
+        boxShadow: '0 0 18px primary.500',
+        filter: 'contrast(1.1) saturate(1.1)',
+      },
+    },
+    title: {
+      color: 'foreground.500',
+      opacity: 1,
+      borderRadius: '6px',
+      border: { width: '2px', style: 'solid', color: 'foreground.500', opacity: 1 },
+      effects: {
+        boxShadow: '0 0 16px primary.500',
       },
     },
     elevated: {
-      color: 'surface.600',
-      opacity: 1,
-      borderRadius: '10px',
-      border: { width: '1px', style: 'solid', color: 'foreground.500', opacity: 0.2 },
-      effects: {},
+      color: 'background.950',
+      opacity: 0.95,
+      borderRadius: '6px',
+      border: { width: '2px', style: 'solid', color: 'primary.600', opacity: 0.5 },
+      effects: {
+        boxShadow: '0 0 20px primary.600',
+      },
     },
   },
-  backgroundOpacity: 0.8,
+  backgroundOpacity: 0.85,
   borderRadius: {
     sm: '0.25rem',
     md: '0.5rem',
@@ -58,9 +75,9 @@ export const geomodAtlasDarkTheme: BaseTheme = {
   },
   typography: {
     fontFamily: {
-      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      heading: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+      body: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+      quote: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
     },
   },
 }

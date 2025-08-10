@@ -2,7 +2,7 @@
  * root colors for the deep space hud palette
  */
 export const deepSpaceHUDDarkPalette = {
-  primary: 0x4263eb,
+  primary: 0x3558e6,
   secondary: 0x7c3aed,
   tertiary: 0xff2d55,
   foreground: 0xffffff,
@@ -14,7 +14,7 @@ export const deepSpaceHUDDarkPalette = {
  * root colors for the deep space hud palette (light)
  */
 export const deepSpaceHUDLightPalette = {
-  primary: 0x4263eb,
+  primary: 0x2a50e0,
   secondary: 0x7c3aed,
   tertiary: 0xff2d55,
   foreground: 0x000000,

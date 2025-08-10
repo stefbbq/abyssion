@@ -1,5 +1,6 @@
 import { TextField } from '@components/TextField.tsx'
 import { Button } from '@components/Button.tsx'
+import { Title } from '@components/Title.tsx'
 
 const validateEmail = (value: string) => {
   if (!value) return 'Email is required'
@@ -17,11 +18,11 @@ const validateRequired = (label: string) => (value: string) => {
  * All form elements use theme-aware border radius and styling
  */
 export default function ContactForm() {
-  // Optionally, manage form state here if you want to handle submission
-  // For now, just render the fields
+  // optionally, manage form state here if you want to handle submission
+  // for now, just render the fields
   return (
     <div>
-      <h2 class='text-3xl font-bold mb-6 text-[var(--colors-text-primary)]'>send us a message</h2>
+      <Title>send us a message</Title>
       <form class='space-y-6'>
         <TextField
           label='Name'

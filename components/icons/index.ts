@@ -7,6 +7,7 @@ export { BackIcon } from './BackIcon.tsx'
 export { MenuIcon } from './MenuIcon.tsx'
 export { SunIcon } from './SunIcon.tsx'
 export { MoonIcon } from './MoonIcon.tsx'
+export { WarningIcon } from './WarningIcon.tsx'
 
 import { FacebookIcon } from './FacebookIcon.tsx'
 import { InstagramIcon } from './InstagramIcon.tsx'
@@ -17,6 +18,7 @@ import { BackIcon } from './BackIcon.tsx'
 import { MenuIcon } from './MenuIcon.tsx'
 import { SunIcon } from './SunIcon.tsx'
 import { MoonIcon } from './MoonIcon.tsx'
+import { WarningIcon } from './WarningIcon.tsx'
 
 export const icons = {
   FacebookIcon,
@@ -28,6 +30,7 @@ export const icons = {
   MenuIcon,
   SunIcon,
   MoonIcon,
+  WarningIcon,
 }
 
 export type SocialIconMap = typeof icons

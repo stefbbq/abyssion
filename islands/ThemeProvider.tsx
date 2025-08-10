@@ -2,6 +2,7 @@
 import { Head } from '$fresh/runtime.ts'
 import { useSignalEffect } from '@preact/signals'
 import { currentUITheme } from '@lib/theme/index.ts'
+import { currentThemeFamilyName, currentThemeMode } from '@lib/theme/state.ts'
 import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
 
 /**
@@ -18,6 +19,11 @@ export default function ThemeProvider() {
     styleElement.id = 'theme-variables'
     styleElement.innerHTML = createThemeVariables(currentUITheme.value)
     document.head.appendChild(styleElement)
+
+    // Set theme metadata on the root element for CSS scoping
+    const kebab = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    document.documentElement.setAttribute('data-theme-family', kebab(currentThemeFamilyName.value))
+    document.documentElement.setAttribute('data-theme-mode', currentThemeMode.value)
 
     // Inject font links dynamically
     fontUrls.forEach((url) => {

@@ -29,8 +29,7 @@ Vocals? Not yet. We're summoning the right screamer to ride the storm. Until the
       id: '3',
       name: 'Dez',
       role: 'Guitar',
-      bio:
-        `Dez brings the heavy riffs.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
+      bio: `Dez brings the heavy riffs.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
       image: '/images/dez.webp',
     },
     {
@@ -39,22 +38,17 @@ Vocals? Not yet. We're summoning the right screamer to ride the storm. Until the
       role: 'Drums',
       bio:
         `Stef is the heartbeat of Abyssion.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`,
-      image: '',
+      image: '/images/stef.webp',
     },
   ],
   albumsTitle: 'Albums',
   albums: [
     {
-      year: '2021',
-      title: 'Dolor Sit Amet',
+      year: '??',
+      title: "It's a secret",
+      description: "... to be announced (we're not ready yet)",
       type: 'Album',
       tracks: 12,
-    },
-    {
-      year: '2019',
-      title: 'Lorem Ipsum Dolor',
-      type: 'EP',
-      tracks: 5,
     },
   ],
 }

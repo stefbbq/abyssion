@@ -71,6 +71,11 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
         heading: typography?.fontFamily?.heading || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         body: typography?.fontFamily?.body || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         quote: typography?.fontFamily?.quote || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        shows: {
+          date: typography?.fontFamily?.shows?.date || typography?.fontFamily?.heading || undefined,
+          venue: typography?.fontFamily?.shows?.venue || typography?.fontFamily?.heading || undefined,
+          meta: typography?.fontFamily?.shows?.meta || typography?.fontFamily?.body || undefined,
+        },
       },
       fontUrls: typography?.fontUrls,
       fontWeights: {
@@ -78,6 +83,18 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
         medium: 500,
         semibold: 600,
         bold: 700,
+      },
+      fontSizes: {
+        xs: typography?.fontSizes?.xs || '0.75rem',
+        sm: typography?.fontSizes?.sm || '0.875rem',
+        base: typography?.fontSizes?.base || '1rem',
+        lg: typography?.fontSizes?.lg || '1.125rem',
+        xl: typography?.fontSizes?.xl || '1.25rem',
+        '2xl': typography?.fontSizes?.['2xl'] || '1.5rem',
+        '3xl': typography?.fontSizes?.['3xl'] || '1.875rem',
+        '4xl': typography?.fontSizes?.['4xl'] || '2.25rem',
+        '5xl': typography?.fontSizes?.['5xl'] || '3rem',
+        '6xl': typography?.fontSizes?.['6xl'] || '3.75rem',
       },
     },
   }

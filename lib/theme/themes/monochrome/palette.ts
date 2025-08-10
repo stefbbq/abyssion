@@ -2,7 +2,7 @@
  * root colors for the monochrome palette
  */
 export const monochromeDarkPalette = {
-  primary: 0xffffff,
+  primary: 0xe6e6e6,
   secondary: 0xcccccc,
   tertiary: 0x999999,
   foreground: 0xffffff,
@@ -14,7 +14,7 @@ export const monochromeDarkPalette = {
  * root colors for the monochrome palette (light)
  */
 export const monochromeLightPalette = {
-  primary: 0x000000,
+  primary: 0x1a1a1a,
   secondary: 0x333333,
   tertiary: 0x666666,
   foreground: 0x000000,
