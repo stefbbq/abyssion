@@ -9,6 +9,7 @@ import { getShapeLayerConfig } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
 import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
 import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
+import { MOBILE_SCALE_FACTOR } from '@libgl/constants.ts'
 
 /**
  * Creates a responsive 3D shape layer that surrounds the logo
@@ -44,11 +45,11 @@ export const createUILayer = (
   // adjust shape layer configuration for mobile
   const responsiveConfig = {
     radius: shapeConfig.radius * scale,
-    techShapesCount: isMobile ? Math.floor(shapeConfig.techShapesCount * 0.8) : shapeConfig.techShapesCount,
+    techShapesCount: isMobile ? Math.floor(shapeConfig.techShapesCount * MOBILE_SCALE_FACTOR) : shapeConfig.techShapesCount,
     minDistance: shapeConfig.minDistance * scale,
     maxDistance: shapeConfig.maxDistance * scale,
     height: shapeConfig.height * scale,
-    rotationSpeed: isMobile ? shapeConfig.rotationSpeed * 0.8 : shapeConfig.rotationSpeed,
+    rotationSpeed: isMobile ? shapeConfig.rotationSpeed * MOBILE_SCALE_FACTOR : shapeConfig.rotationSpeed,
   }
 
   // First create the base shape layer using the existing function
@@ -110,7 +111,7 @@ export const createUILayer = (
       if (index === 0) return // Skip base layer
 
       const shape = child as Three.Mesh
-      const baseScale = isMobileDevice() ? 0.8 : 1.0
+      const baseScale = isMobileDevice() ? MOBILE_SCALE_FACTOR : 1.0
       shape.scale.setScalar(baseScale * newScale)
     })
   }

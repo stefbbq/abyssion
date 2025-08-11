@@ -37,7 +37,8 @@ export const GLCanvas = ({ style }: { style?: CSSProperties }) => {
   return (
     <canvas
       ref={canvasRef}
-      class='fixed inset-0 w-full h-full block bg-black -z-10'
+      class='fixed inset-0 w-full h-full block -z-10'
+      /* allow underlying themed background to show through */
       style={style}
     />
   )

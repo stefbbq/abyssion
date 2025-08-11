@@ -1,4 +1,5 @@
 import ms from 'ms'
+
 import { isMobileDevice } from './isMobileDevice.ts'
 import { getBaselineDimensions } from './getBaselineDimensions.ts'
 import { lc, log } from '@lib/logger/index.ts'

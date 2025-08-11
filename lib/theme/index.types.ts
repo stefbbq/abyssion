@@ -188,11 +188,6 @@ export type GLTheme = {
     primaryColor: HexColor
     secondaryColor: HexColor
   }
-  lensFlare: {
-    mainFlareColor: HexColor
-    secondaryFlareColor: HexColor
-    tertiaryFlareColor: HexColor
-  }
 }
 
 export type BaseColorPalette = {

@@ -3,6 +3,19 @@ import type { RendererState } from '../types.ts'
 import { lc, log } from '../../logger/index.ts'
 import configPostProcessing from '../configPostProcessing.json' with { type: 'json' }
 import { getScrollCorruptionProgress } from '../scene/utils/getScrollCorruptionProgress.ts'
+import {
+  DITHERING_BASE_INTENSITY,
+  DITHERING_VELOCITY_MAX,
+  DITHERING_VELOCITY_MULTIPLIER,
+  FINAL_PASS_CHROMA_BASE,
+  FINAL_PASS_CHROMA_MAX,
+  PIXELATION_BASE_SIZE,
+  PIXELATION_MAX_SIZE,
+  WAVE_NOISE_MIN_SCALE,
+  WAVE_NOISE_RANGE,
+  WHITE_NOISE_JITTER_MODULO,
+  WHITE_NOISE_JITTER_STEP,
+} from '@libgl/constants.ts'
 import { getResponsiveScrollSpeed } from '../utils/getResponsiveScrollSpeed.ts'
 import { type CorruptionParams, updateCRTShaderUniforms } from '../shaders/CRTShader.ts'
 import type { PostProcessingConfig } from '../configPostProcessing.types.ts'
@@ -114,8 +127,8 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       const base = minIntensity + (corruptionIntensity * (maxIntensity - minIntensity))
       if (fps && fps > 0) {
         const t = Math.floor(performance.now() / (1000 / fps))
-        // pseudo-random step between base*0.8..base*1.2 to avoid too repetitive
-        const jitter = ((t % 7) - 3) * 0.05
+        // pseudo-random jitter range around base to avoid repetition
+        const jitter = ((t % WHITE_NOISE_JITTER_MODULO) - Math.floor(WHITE_NOISE_JITTER_MODULO / 2)) * WHITE_NOISE_JITTER_STEP
         whiteNoiseIntensity = Math.max(0, base * (1 + jitter))
       } else {
         whiteNoiseIntensity = base
@@ -132,7 +145,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
       if (fps && fps > 0) {
         const t = Math.floor(performance.now() / (1000 / fps))
         // subtle stepping wave
-        waveNoiseIntensity = base * (0.9 + 0.2 * ((t % 5) / 4))
+        waveNoiseIntensity = base * (WAVE_NOISE_MIN_SCALE + WAVE_NOISE_RANGE * ((t % 5) / 4))
       } else {
         waveNoiseIntensity = base
       }
@@ -253,16 +266,12 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   }
 
   if (state.pixelationPass) {
-    const basePixelSize = 16
-    const maxPixelSize = 64
-    const pixelSize = basePixelSize + (corruptionIntensity * (maxPixelSize - basePixelSize))
+    const pixelSize = PIXELATION_BASE_SIZE + (corruptionIntensity * (PIXELATION_MAX_SIZE - PIXELATION_BASE_SIZE))
     if (state.pixelationPass.uniforms.pixelSize) state.pixelationPass.uniforms.pixelSize.value = pixelSize
   }
 
   if (state.finalPass?.uniforms) {
-    const baseChroma = 0.002
-    const maxChroma = 0.02
-    const chromaStrength = baseChroma + (corruptionIntensity * (maxChroma - baseChroma))
+    const chromaStrength = FINAL_PASS_CHROMA_BASE + (corruptionIntensity * (FINAL_PASS_CHROMA_MAX - FINAL_PASS_CHROMA_BASE))
     state.finalPass.uniforms.chromaStrength.value = chromaStrength
   }
 }
@@ -277,8 +286,7 @@ export const updateScrollMetrics = (scrollVelocity: number, glState: RendererSta
   const velocity = scrollVelocity || scrollState.velocity
 
   if (glState.ditheringPass?.uniforms) {
-    const baseIntensity = 0.8
-    const velocityMultiplier = Math.min(Math.abs(velocity) * 0.0001, 2.0) // Adjusted for pixels/second
-    glState.ditheringPass.uniforms.intensity.value = baseIntensity + velocityMultiplier
+    const velocityMultiplier = Math.min(Math.abs(velocity) * DITHERING_VELOCITY_MULTIPLIER, DITHERING_VELOCITY_MAX)
+    glState.ditheringPass.uniforms.intensity.value = DITHERING_BASE_INTENSITY + velocityMultiplier
   }
 }

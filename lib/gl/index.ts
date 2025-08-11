@@ -29,7 +29,7 @@ import { createInitialGLState } from './setup/setupState.ts'
 // scene components
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
-import { addLensFlares } from './scene/addLensFlares.ts'
+import { isMobileDevice } from './scene/utils/isMobileDevice.ts'
 
 // layers and controls
 import { createUILayer } from './layers/UILayer.ts'
@@ -141,9 +141,9 @@ export const initGL = async (options: InitOptions) => {
     const { scene, camera, renderer } = glState
     const { innerWidth: width, innerHeight: height } = globalThis
 
-    if (postProcessingConfig.enabled) {
+    if (postProcessingConfigEffective.enabled) {
       log(lc.GL, 'Creating post-processing...')
-      const postProcessing = await createPostProcessing(THREE, scene, camera, renderer, width, height, postProcessingConfig)
+      const postProcessing = await createPostProcessing(THREE, scene, camera, renderer, width, height, postProcessingConfigEffective)
       Object.assign(glState, postProcessing)
       log(lc.GL, 'Post-processing created, composer available:', !!glState.composer)
     } else {
@@ -250,7 +250,7 @@ export const initGL = async (options: InitOptions) => {
     setupUIAndResponsive()
 
     // add visual effects
-    await addLensFlares(THREE, scene)
+    // lens flares removed
 
     // load textures
     const textures = await setupTextureLoading(THREE, stencilTexturePath, outlineTexturePath)
@@ -276,12 +276,29 @@ export const initGL = async (options: InitOptions) => {
   const { canvas, stencilTexturePath, outlineTexturePath } = options
 
   // load configuration files
-  const [rendererConfig, postProcessingConfig, controlsConfig, animationConfig] = await Promise.all([
+  const [rendererConfig, basePostProcessingConfig, controlsConfig, animationConfig] = await Promise.all([
     import('./configScene.json').then((m) => m.default.rendererConfig),
     import('./configPostProcessing.json').then((m) => m.default as PostProcessingConfig),
     import('./configControls.json').then((m) => m.default),
     import('./configAnimation.json').then((m) => m.default),
   ])
+
+  // create lighter post-processing on mobile/iOS to improve perf
+  const postProcessingConfigEffective: PostProcessingConfig = (() => {
+    const cfg = JSON.parse(JSON.stringify(basePostProcessingConfig)) as PostProcessingConfig
+    if (!isMobileDevice()) return cfg
+    // reduce film scanlines and disable heavy effects
+    cfg.film.scanlineCount = Math.min(cfg.film.scanlineCount ?? 2048, 800)
+    cfg.bloom.bloomStrength = Math.min(cfg.bloom.bloomStrength, 0.15)
+    cfg.bloom.bloomStrengthMultiplier = Math.min(cfg.bloom.bloomStrengthMultiplier ?? 1, 2)
+    cfg.sharpening.enabled = false
+    if (cfg.pixelate) cfg.pixelate.enabled = false
+    if (cfg.crtScrollCorruption) {
+      cfg.crtScrollCorruption.enabled = false
+      if (cfg.crtScrollCorruption.debugOverlay) cfg.crtScrollCorruption.debugOverlay.enabled = false
+    }
+    return cfg
+  })()
 
   // initialize core rendering
   const core = await setupCoreRendering(THREE, options)

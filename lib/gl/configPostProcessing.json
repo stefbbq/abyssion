@@ -122,27 +122,5 @@
       "useThemeColors": true
     },
     "debugOverlay": { "enabled": true }
-  },
-  "lensFlare": {
-    "lightIntensity": 0.8,
-    "lightDistance": 100,
-    "lightPosition": [5, 5, 15],
-    "mainFlare": {
-      "size": 500,
-      "intensity": 0.5,
-      "colorHex": 16777215
-    },
-    "secondaryFlare": {
-      "size": 100,
-      "intensity": 0.3,
-      "position": 0.2,
-      "colorHex": 16777215
-    },
-    "tertiaryFlare": {
-      "size": 50,
-      "intensity": 0.2,
-      "position": 0.6,
-      "colorHex": 16777215
-    }
   }
 }

@@ -6,7 +6,7 @@
  */
 
 // constants
-export { FPS_OPTIONS } from './constants.ts'
+export { FPS_OPTIONS } from '@libgl/constants.ts'
 export { getOrbitalParticlesConfig, getShapeLayerConfig, getStaticLogoLayers, getUIOverlayConfig, randomLayerConfig } from './config.ts'
 
 // types

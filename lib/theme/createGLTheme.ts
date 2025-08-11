@@ -1,6 +1,5 @@
 import type { BaseTheme, GLTheme } from './index.types.ts'
 import { rgbToHex } from './colorUtils/rgbToHex.ts'
-import { darkenHex } from './colorUtils/darkenHex.ts'
 import { resolveColorReference } from './utils/resolveColorReference.ts'
 import { hexStringToRGB } from './colorUtils/hexStringToRGB.ts'
 import { createShades } from './colorUtils/createShades.ts'
@@ -57,11 +56,6 @@ export const createGLTheme = (baseTheme: BaseTheme): GLTheme => {
     geometric: {
       primaryColor: rgbToHex(primary),
       secondaryColor: rgbToHex(accent),
-    },
-    lensFlare: {
-      mainFlareColor: rgbToHex(primary),
-      secondaryFlareColor: darkenHex(rgbToHex(primary))(0.8),
-      tertiaryFlareColor: rgbToHex(accent),
     },
   }
 }

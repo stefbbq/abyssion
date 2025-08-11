@@ -1,0 +1,37 @@
+{
+  "name": "abyssion",
+  "version": "1.0.0",
+  "description": "A modern, interactive website for the music band abyssion built with Deno and Fresh.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.17",
+    "cssnano": "^6.0.3",
+    "framer-motion": "^10.18.0",
+    "lodash": "^4.17.21",
+    "ms": "^2.1.3",
+    "phosphor-react": "^1.4.1",
+    "postcss": "^8.4.35",
+    "puppeteer": "^24.15.0",
+    "tailwindcss": "^3.4.1",
+    "three": "^0.149.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefbbq/abyssion.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stefbbq/abyssion/issues"
+  },
+  "homepage": "https://github.com/stefbbq/abyssion#readme"
+}

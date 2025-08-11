@@ -1,4 +1,5 @@
 import * as Three from 'three'
+import { IOS_MAX_DPR } from '@libgl/constants.ts'
 import { getResponsiveCameraZ } from '../scene/utils/getResponsiveCameraZ.ts'
 import { debugMobileResponsiveness } from '../scene/utils/debugMobileResponsiveness.ts'
 import type { UIOverlay } from '@libgl/types.ts'
@@ -40,10 +41,10 @@ export const setupResponsiveHandling = (config: ResponsiveConfig) => {
     camera.updateProjectionMatrix()
     uiLayer.resize(globalThis.innerWidth, globalThis.innerHeight)
     composer.setSize(globalThis.innerWidth, globalThis.innerHeight)
-    composer.setPixelRatio(Math.min(
-      globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
-      rendererConfig.pixelRatioMax,
-    ))
+    const dpr = globalThis.devicePixelRatio || 1
+    const isIOS = /iPad|iPhone|iPod/.test(globalThis.navigator?.userAgent || '')
+    const maxDpr = isIOS ? Math.min(rendererConfig.pixelRatioMax, IOS_MAX_DPR) : rendererConfig.pixelRatioMax
+    composer.setPixelRatio(Math.min(dpr * rendererConfig.pixelRatioMultiplier, maxDpr))
     if (videoBackground?.handleResize) videoBackground.handleResize()
 
     debugMobileResponsiveness()

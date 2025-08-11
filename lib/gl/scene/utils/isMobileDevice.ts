@@ -1,3 +1,5 @@
+import { MOBILE_BREAKPOINT_PX } from '@libgl/constants.ts'
+
 /**
  * Detects if the current device is a mobile device based on comprehensive criteria
  *
@@ -15,7 +17,8 @@ export const isMobileDevice = (): boolean => {
 
   const userAgent = globalThis.navigator.userAgent || ''
   const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-  const isSmallScreen = globalThis.innerWidth <= 768 || globalThis.innerHeight <= 768
+  // Inline import avoided to keep this sync; constants are static
+  const isSmallScreen = globalThis.innerWidth <= MOBILE_BREAKPOINT_PX || globalThis.innerHeight <= MOBILE_BREAKPOINT_PX
   const isTouchDevice = 'ontouchstart' in globalThis || (globalThis.navigator && globalThis.navigator.maxTouchPoints > 0)
 
   // Device is considered mobile if it has mobile UA OR (small screen AND touch)

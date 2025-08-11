@@ -15,6 +15,7 @@
   border-color: var(--surfaces-main-border-color);
   border-radius: var(--surfaces-main-borderRadius);
   backdrop-filter: var(--surfaces-main-backdropBlur);
+  -webkit-backdrop-filter: var(--surfaces-main-backdropBlur);
   box-shadow: var(--surfaces-main-boxShadow);
   filter: var(--surfaces-main-filter);
 }
@@ -26,6 +27,7 @@
   border-color: var(--surfaces-shell-border-color);
   border-radius: var(--surfaces-shell-borderRadius);
   backdrop-filter: var(--surfaces-shell-backdropBlur);
+  -webkit-backdrop-filter: var(--surfaces-shell-backdropBlur);
   box-shadow: var(--surfaces-shell-boxShadow);
   filter: var(--surfaces-shell-filter);
   overflow: hidden;
@@ -38,6 +40,7 @@
   border-color: var(--surfaces-header-border-color);
   border-radius: var(--surfaces-header-borderRadius);
   backdrop-filter: var(--surfaces-header-backdropBlur);
+  -webkit-backdrop-filter: var(--surfaces-header-backdropBlur);
   box-shadow: var(--surfaces-header-boxShadow);
   filter: var(--surfaces-header-filter);
 }
@@ -49,6 +52,7 @@
   border-color: var(--surfaces-elevated-border-color);
   border-radius: var(--surfaces-elevated-borderRadius);
   backdrop-filter: var(--surfaces-elevated-backdropBlur);
+  -webkit-backdrop-filter: var(--surfaces-elevated-backdropBlur);
   box-shadow: var(--surfaces-elevated-boxShadow);
   filter: var(--surfaces-elevated-filter);
 }
@@ -61,6 +65,7 @@
   border-color: var(--surfaces-title-border-color);
   border-radius: var(--surfaces-title-borderRadius);
   backdrop-filter: var(--surfaces-title-backdropBlur);
+  -webkit-backdrop-filter: var(--surfaces-title-backdropBlur);
   box-shadow: var(--surfaces-title-boxShadow);
   filter: var(--surfaces-title-filter);
 }

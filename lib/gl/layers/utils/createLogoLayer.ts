@@ -2,7 +2,7 @@ import * as Three from 'three'
 
 import type { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { randomLayerConfig } from '@libgl/layers/config.ts'
-import { FPS_OPTIONS } from '@libgl/layers/constants.ts'
+import { FPS_OPTIONS } from '@libgl/constants.ts'
 import { getRandomColor } from './getRandomColor.ts'
 import { currentGLTheme } from '@lib/theme/index.ts'
 

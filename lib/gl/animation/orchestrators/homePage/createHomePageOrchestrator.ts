@@ -8,6 +8,7 @@ import { calculatePlaneUpdate } from './calculations/calculatePlaneUpdate.ts'
 import { calculatePostProcessingUpdate } from './calculations/calculatePostProcessingUpdate.ts'
 import { calculateRandomLayerPosition } from './calculations/calculateRandomLayerPosition.ts'
 import { calculateFadeOpacity } from './calculations/calculateFadeOpacity.ts'
+import { GLOBAL_FADE_END_THRESHOLD, GLOBAL_FADE_START_THRESHOLD } from '@libgl/constants.ts'
 import { calculateScrollProgress } from '@libgl/animation/calculations/calculateScrollProgress.ts'
 import { updateDashedOrbitRotations } from './utils/updateDashedOrbitRotations.ts'
 import { applyPlaneUpdate } from './utils/applyPlaneUpdate.ts'
@@ -73,8 +74,10 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
   const applyGlobalFadeToShadow = (shadowLayer: RendererState['shadowLayer'], fadeMultiplier: number) => {
     if (!shadowLayer?.mesh) return
     const material = shadowLayer.mesh.material
+
     if (!(material instanceof Three.ShaderMaterial)) return
     const uniforms = material.uniforms
+
     if (!uniforms?.opacity) return
 
     if (typeof shadowLayer.mesh.userData.baseShadowOpacity !== 'number') {
@@ -90,8 +93,8 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
 
       const fadeResult = calculateFadeOpacity({
         scrollProgress,
-        fadeStartThreshold: 0.65,
-        fadeEndThreshold: 0.80,
+        fadeStartThreshold: GLOBAL_FADE_START_THRESHOLD,
+        fadeEndThreshold: GLOBAL_FADE_END_THRESHOLD,
         layerIndex: i,
         totalLayers: state.logoLayers.length,
       })
@@ -151,8 +154,8 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
     const scrollProgress = calculateScrollProgress(scrollState.y, globalThis.innerHeight)
     const globalFade = calculateFadeOpacity({
       scrollProgress,
-      fadeStartThreshold: 0.65,
-      fadeEndThreshold: 0.80,
+      fadeStartThreshold: GLOBAL_FADE_START_THRESHOLD,
+      fadeEndThreshold: GLOBAL_FADE_END_THRESHOLD,
       layerIndex: 0,
       totalLayers: 1,
     }).fadeMultiplier

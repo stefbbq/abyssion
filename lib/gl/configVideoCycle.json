@@ -15,7 +15,7 @@
     "videoLoadTimeoutMS": 30000
   },
   "appearance": {
-    "opacity": 0.6
+    "opacity": 0.7
   },
   "position": {
     "z": -100,

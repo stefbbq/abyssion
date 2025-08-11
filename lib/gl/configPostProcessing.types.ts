@@ -73,36 +73,6 @@ export type SharpeningParams = {
   enabled: boolean
 }
 
-/** Parameters for lens flare effects */
-export type LensFlareParams = {
-  /** Light source intensity */
-  lightIntensity: number
-  /** Light source distance */
-  lightDistance: number
-  /** Light source position [x, y, z] */
-  lightPosition: number[]
-  /** Main flare configuration */
-  mainFlare: {
-    size: number
-    intensity: number
-    colorHex: number
-  }
-  /** Secondary flare configuration */
-  secondaryFlare: {
-    size: number
-    intensity: number
-    position: number
-    colorHex: number
-  }
-  /** Tertiary flare configuration */
-  tertiaryFlare: {
-    size: number
-    intensity: number
-    position: number
-    colorHex: number
-  }
-}
-
 /** Parameters for pixelation effect */
 export type PixelateParams = {
   /** Whether pixelation is enabled */
@@ -254,8 +224,6 @@ export type PostProcessingConfig = {
   pixelate?: PixelateParams
   /** CRT scroll corruption parameters */
   crtScrollCorruption?: CrtScrollCorruptionParams
-  /** Lens flare parameters */
-  lensFlare: LensFlareParams
   /** Selective colorization parameters (grayscale with selective color preservation/remapping) */
   selectiveColorization?: SelectiveColorizationParams
 }

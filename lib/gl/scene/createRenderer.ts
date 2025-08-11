@@ -1,4 +1,5 @@
 import * as Three from 'three'
+import { IOS_MAX_DPR } from '@libgl/constants.ts'
 import configScene from '@libgl/configScene.json' with { type: 'json' }
 import type { ConfigScene } from '@libgl/configScene.types.ts'
 import { lc, log } from '@lib/logger/index.ts'
@@ -22,9 +23,12 @@ export const createRenderer = (
     canvas,
     antialias: rendererConfig.antialias,
     alpha: rendererConfig.alpha,
+    premultipliedAlpha: true,
+    powerPreference: 'high-performance',
   })
 
-  renderer.setClearColor(0x000000, 1)
+  // transparent canvas to allow themed background and frosted sections to composite in Safari
+  renderer.setClearColor(0x000000, 0)
 
   // Debug: Check if WebGL context is available
   const gl = renderer.getContext()
@@ -39,15 +43,20 @@ export const createRenderer = (
   // set overall exposure (scene brightness) from config
   renderer.toneMappingExposure = rendererConfig.exposure
 
+  const getClampedDPR = () => {
+    const dpr = globalThis.devicePixelRatio || 1
+    const isIOS = /iPad|iPhone|iPod/.test(globalThis.navigator?.userAgent || '')
+    // slightly lower DPR on iOS to improve perf and avoid Safari GPU stalls
+    const maxDpr = isIOS ? Math.min(rendererConfig.pixelRatioMax, IOS_MAX_DPR) : rendererConfig.pixelRatioMax
+    return Math.min(dpr * rendererConfig.pixelRatioMultiplier, maxDpr)
+  }
+
   const updateSize = () => {
     // Use actual viewport dimensions, not the initial width/height parameters
     const w = globalThis.innerWidth
     const h = globalThis.innerHeight
     renderer.setSize(w, h)
-    renderer.setPixelRatio(Math.min(
-      globalThis.devicePixelRatio * rendererConfig.pixelRatioMultiplier,
-      rendererConfig.pixelRatioMax,
-    ))
+    renderer.setPixelRatio(getClampedDPR())
     canvas.style.width = `${w}px`
     canvas.style.height = `${h}px`
   }
@@ -59,7 +68,7 @@ export const createRenderer = (
   canvas.style.display = 'block'
   canvas.style.position = 'fixed'
   canvas.style.inset = '0'
-  canvas.style.background = 'black'
+  canvas.style.background = 'transparent'
 
   return renderer
 }

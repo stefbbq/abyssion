@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": ["{main,mod}.{ts,tsx}", "src/{main,index}.{ts,tsx}"],
+  "project": ["**/*.{ts,tsx}"],
+  "ignore": ["**/*.{test,spec}.ts", "**/deps.ts"],
+  "paths": {
+    "@/*": ["./*"]
+  }
+}

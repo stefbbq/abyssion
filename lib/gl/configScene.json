@@ -4,9 +4,9 @@
   "planeHeight": 5.12,
   "rendererConfig": {
     "pixelRatioMultiplier": 1.5,
-    "pixelRatioMax": 2.5,
+    "pixelRatioMax": 2.0,
     "antialias": true,
-    "alpha": false,
+    "alpha": true,
     "exposure": 1
   },
   "postProcessingEnabled": true
