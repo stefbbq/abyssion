@@ -36,7 +36,11 @@ export const createSingleVideoManager = async (
   video.muted = true
   video.crossOrigin = 'anonymous'
   video.playsInline = true
-  video.preload = 'none'
+  // Safari/iOS hints for inline, local decode, and smoother playback
+  video.setAttribute('playsinline', '')
+  video.setAttribute('webkit-playsinline', '')
+  ;(video as HTMLVideoElement & { disableRemotePlayback?: boolean }).disableRemotePlayback = true
+  video.preload = 'auto'
   video.playbackRate = singlePlaybackSpeed
   video.src = singleVideoPath
 
@@ -45,6 +49,7 @@ export const createSingleVideoManager = async (
   texture.minFilter = THREE.LinearFilter
   texture.magFilter = THREE.LinearFilter
   texture.format = THREE.RGBAFormat
+  texture.generateMipmaps = false
 
   // Update buffer material
   frontBuffer.material.uniforms.videoTexture.value = texture
@@ -90,6 +95,34 @@ export const createSingleVideoManager = async (
     throw error
   }
 
+  // Drive texture updates using requestVideoFrameCallback if available (Safari/WebKit friendly)
+  const startVideoTextureUpdates = () => {
+    const v = video as HTMLVideoElement & {
+      requestVideoFrameCallback?: (cb: () => void) => number
+      cancelVideoFrameCallback?: (handle: number) => void
+    }
+    if (typeof v.requestVideoFrameCallback === 'function') {
+      let handle = v.requestVideoFrameCallback(() => {})
+      const onVideoFrame = () => {
+        texture.needsUpdate = true
+        if (!video.paused && !video.ended && v.requestVideoFrameCallback) handle = v.requestVideoFrameCallback(onVideoFrame)
+      }
+      if (v.cancelVideoFrameCallback && handle) v.cancelVideoFrameCallback(handle)
+      handle = v.requestVideoFrameCallback(onVideoFrame)
+      return () => v.cancelVideoFrameCallback && handle && v.cancelVideoFrameCallback(handle)
+    } else {
+      let rafId = 0
+      const tick = () => {
+        texture.needsUpdate = true
+        if (!video.paused && !video.ended) rafId = requestAnimationFrame(tick)
+      }
+      rafId = requestAnimationFrame(tick)
+      return () => cancelAnimationFrame(rafId)
+    }
+  }
+
+  const stopVideoTextureUpdates = startVideoTextureUpdates()
+
   // Check if already ready to play
   if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
     handleReady()
@@ -103,6 +136,7 @@ export const createSingleVideoManager = async (
       video.pause()
       video.src = ''
       video.load()
+      stopVideoTextureUpdates()
       texture.dispose()
     },
     mesh: frontBuffer.mesh,

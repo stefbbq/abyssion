@@ -60,6 +60,7 @@ export const updateVideoPool = async (
     texture.minFilter = Three.LinearFilter
     texture.magFilter = Three.LinearFilter
     texture.format = Three.RGBAFormat
+    texture.generateMipmaps = false
     return texture
   })
 

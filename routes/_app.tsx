@@ -97,7 +97,10 @@ export default function App({ Component, url }: PageProps) {
       <Head>
         <meta charset='utf-8' />
         <title>{ogTitle}</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
+        {/* safari/iOS toolbar translucency */}
+        <meta name='theme-color' content='rgba(0,0,0,0)' media='(prefers-color-scheme: dark)' />
+        <meta name='theme-color' content='rgba(255,255,255,0)' media='(prefers-color-scheme: light)' />
         <meta name='description' content={description} />
         <meta name='robots' content='index,follow' />
         <link rel='canonical' href={canonicalUrl} />
@@ -124,7 +127,7 @@ export default function App({ Component, url }: PageProps) {
         <link rel='stylesheet' href='/styles.css' />
       </Head>
 
-      <body f-client-nav class='min-h-screen relative text-foreground bg-black' style={{ fontFamily: theme.typography.fontFamily.body }}>
+      <body f-client-nav class='min-h-screen relative text-foreground bg-transparent' style={{ fontFamily: theme.typography.fontFamily.body }}>
         {/** global theme state and CSS custom properties */}
         <ThemeProvider />
 
