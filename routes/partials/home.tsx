@@ -1,7 +1,8 @@
 export default function HomeSection() {
   return (
     <section>
-      {/* Home content goes here. Add hero, intro, etc. */}
+      {/* primary site heading for SEO; logo is rendered in GL layer */}
+      <h1 class='sr-only'>abyssion — official site</h1>
     </section>
   )
 }

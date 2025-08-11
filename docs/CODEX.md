@@ -1,7 +1,11 @@
-# Codex
+# abyssion engineering codex
 
-Reference for the codebase structure.
-Use this as a starting point before doing anything!
+authoritative guide to the abyssion codebase: architecture, theme system, gl/shaders, and ui patterns. optimized for quick scanning and external indexing.
+
+- primary keywords: abyssion, metal band website, fresh deno, three.js shaders, theme system, video background, tailwind css
+- secondary: mobile navigation, action zone, debug tools, post-processing, pixel bleed shader, selective colorization, ui theme variables
+
+> this document is public-facing safe. keep it concise, structured, and linkable.
 
 ## Core Architecture
 
@@ -10,6 +14,26 @@ Use this as a starting point before doing anything!
 - **Data & Types**: All static content is in `/data`, with all corresponding TypeScript types co-located in `data/types.ts`.
 - **Theme & Styling**: A unified, CSS-variable-driven system. See the "Theme System" section for details.
 - **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic.
+
+## SEO & JSON‑LD
+
+- **Global Meta**: Set in `routes/_app.tsx`
+  - `<title>` and `<meta name="description">` (derived from `data/content-bio.json`)
+  - Canonical, robots, OpenGraph, and Twitter Card
+- **JSON‑LD Types**: Centralized in `lib/seo/ld.types.ts` (WebSite, MusicGroup, Person, MusicEvent, MusicAlbum, ItemList, PostalAddress)
+- **JSON‑LD Helpers**: Single-function utilities in `lib/seo/`
+  - `createWebsiteLD(siteName, origin)`
+  - `createMusicGroupLD({ origin, logoUrl, imageUrl, description, sameAs, contact, members })`
+  - `createMusicEventListLD(shows, { canonicalUrl, siteOrigin })` — upcoming shows only from `data/content-shows.json`
+  - `createMusicAlbumListLD(albums, { artistName })` — albums from `data/content-bio.json`
+- **Data Mapping**
+  - Social links from `data/nav.json` → `sameAs` on MusicGroup
+  - Email/location from `data/content-contact.json` → MusicGroup `email` and `address`
+  - Band members from `data/content-bio.json` → MusicGroup `member` as Person
+- **Headings & Accessibility**
+  - `routes/partials/home.tsx` exposes an `sr-only` H1 so the GL-rendered logo page still has a primary heading
+  - Content sections (`bio`, `shows`, `contact`) use consistent `Title` components for H2 semantics
+- **Per‑Section LD**: Not required; global head covers site, artist, albums, and events. Inline LD can be added later if needed.
 
 ## Theme System
 

@@ -1,5 +1,7 @@
 import { Shell } from '@components/Shell.tsx'
-import { DiscordIcon, FacebookIcon, InstagramIcon, SoundCloudIcon } from '@components/icons/index.ts'
+import contact from '@data/content-contact.json' with { type: 'json' }
+import nav from '@data/nav.json' with { type: 'json' }
+import { icons } from '@components/icons/index.ts'
 import { Title } from '@components/Title.tsx'
 // import ContactForm from '@islands/ContactForm.tsx'
 
@@ -15,7 +17,7 @@ export default function ContactSection() {
         }
 
         <Shell>
-          <Title>get in touch</Title>
+          <Title>{contact.title}</Title>
           <div class='space-y-4'>
             <div class='flex items-center space-x-3'>
               <div class='flex-shrink-0'>
@@ -34,7 +36,7 @@ export default function ContactSection() {
                 </svg>
               </div>
               <div>
-                <a class='text-[var(--colors-text-primary)]' href='mailto:hello@abyssion.com'>hello@abyssion.com</a>
+                <a class='text-[var(--colors-text-primary)]' href={`mailto:${contact.email}`}>{contact.email}</a>
               </div>
             </div>
             <div class='flex items-center space-x-3'>
@@ -55,45 +57,29 @@ export default function ContactSection() {
                 </svg>
               </div>
               <div>
-                <p class='text-sm text-[var(--colors-text-secondary)]'>Location</p>
-                <p class='text-[var(--colors-text-primary)]'>Toronto, ON</p>
+                <p class='text-sm text-[var(--colors-text-secondary)]'>{contact.locationLabel}</p>
+                <p class='text-[var(--colors-text-primary)]'>{contact.location}</p>
               </div>
             </div>
           </div>
         </Shell>
 
         <Shell>
-          {/* follow us section moved here */}
           <Title>follow us</Title>
           <div class='grid grid-cols-2 gap-4'>
-            <a
-              href='#'
-              class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
-            >
-              <FacebookIcon className='w-5 h-5 text-[var(--colors-text-tertiary)]' />
-              <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>Facebook</span>
-            </a>
-            <a
-              href='#'
-              class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
-            >
-              <InstagramIcon className='w-5 h-5 text-[var(--colors-text-tertiary)]' />
-              <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>Instagram</span>
-            </a>
-            <a
-              href='#'
-              class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
-            >
-              <SoundCloudIcon className='w-5 h-5 text-[var(--colors-text-tertiary)]' />
-              <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>SoundCloud</span>
-            </a>
-            <a
-              href='#'
-              class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
-            >
-              <DiscordIcon className='w-5 h-5 text-[var(--colors-text-tertiary)]' />
-              <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>Discord</span>
-            </a>
+            {nav.socialLinks.map((link: { key: string; url: string; label: string; icon?: string }) => {
+              const Icon = link.icon ? icons[link.icon as keyof typeof icons] : undefined
+              return (
+                <a
+                  key={link.key}
+                  href={link.url}
+                  class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
+                >
+                  {Icon ? <Icon className='w-5 h-5 text-[var(--colors-text-tertiary)]' /> : null}
+                  <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>{link.label}</span>
+                </a>
+              )
+            })}
           </div>
         </Shell>
       </div>

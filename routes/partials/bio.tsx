@@ -1,4 +1,4 @@
-import { bio } from '@data/content-bio.ts'
+import bio from '@data/content-bio.json' with { type: 'json' }
 import { Shell } from '@components/Shell.tsx'
 import { Card } from '@components/Card.tsx'
 import { TextBlock } from '@components/TextBlock.tsx'
@@ -26,6 +26,7 @@ export default function BioSection() {
               left={<span class='text-2xl md:text-3xl text-[var(--colors-foreground)]'>{album.year}</span>}
               main={
                 <div>
+                  <h3 class='text-xl font-semibold text-[var(--colors-text-primary)]'>{album.title}</h3>
                   <p class='text-md text-[var(--colors-text-tertiary)]'>{album.description}</p>
                 </div>
               }
@@ -35,7 +36,8 @@ export default function BioSection() {
       </Shell>
 
       {/* members */}
-      <section class='grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'>
+      <section aria-labelledby='band-members' class='grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'>
+        <h2 id='band-members' class='sr-only'>band members</h2>
         {bio.members.map((member) => (
           <Card
             key={member.id}

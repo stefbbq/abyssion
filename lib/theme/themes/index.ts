@@ -8,8 +8,8 @@ import { neonGridOSDarkTheme } from './neonGridOS/dark.ts'
 import { neonGridOSLightTheme } from './neonGridOS/light.ts'
 import { deepSpaceHUDDarkTheme } from './deepSpaceHUD/dark.ts'
 import { deepSpaceHUDLightTheme } from './deepSpaceHUD/light.ts'
-import { geomodAtlasDarkTheme } from './geomodAtlas/dark.ts'
-import { geomodAtlasLightTheme } from './geomodAtlas/light.ts'
+// import { geomodAtlasDarkTheme } from './geomodAtlas/dark.ts'
+// import { geomodAtlasLightTheme } from './geomodAtlas/light.ts'
 import { techscapeDarkTheme } from './techscape/dark.ts'
 import { techscapeLightTheme } from './techscape/light.ts'
 import { synthwaveDarkTheme } from './synthwave/dark.ts'
@@ -31,11 +31,11 @@ export const themeFamilies: ThemeFamily[] = [
     light: deepSpaceHUDLightTheme,
     dark: deepSpaceHUDDarkTheme,
   },
-  {
-    name: 'GeoMod Atlas',
-    light: geomodAtlasLightTheme,
-    dark: geomodAtlasDarkTheme,
-  },
+  // {
+  //   name: 'GeoMod Atlas',
+  //   light: geomodAtlasLightTheme,
+  //   dark: geomodAtlasDarkTheme,
+  // },
   {
     name: 'Techscape',
     light: techscapeLightTheme,

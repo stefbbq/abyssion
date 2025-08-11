@@ -1,0 +1,44 @@
+{
+  "aboutTitle": "about the band",
+  "about": "**Abyssion** is a metal band from the depths of the Toronto area. \n    \nTechnical, heavy as sin, a 'lil proggy, but most definitely loud as hell. Born in 2023, we mash chaos and complexity into riffy, brain-melting instrumental goodness. Think *eldritch sorcerers with distortion pedals*, conjuring riffs to coax the old great ones back out from the depths.\n\nVocals? Not yet. We're summoning the right screamer to ride the storm. Until then, it's all groove, shred, and cosmic noise. We're not your cousin's basement band — we actually practice.\n\n> dreamt by ancient machines\n",
+  "members": [
+    {
+      "id": "1",
+      "name": "Dan",
+      "role": "Bass",
+      "bio": "Dan is the backbone of the rhythm section.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "image": "/images/dan.webp"
+    },
+    {
+      "id": "2",
+      "name": "Klaus",
+      "role": "Guitar",
+      "bio": "Klaus shreds with technical precision.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "image": "/images/klaus.webp"
+    },
+    {
+      "id": "3",
+      "name": "Dez",
+      "role": "Guitar",
+      "bio": "Dez brings the heavy riffs.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+      "image": "/images/dez.webp"
+    },
+    {
+      "id": "4",
+      "name": "Stef",
+      "role": "Drums",
+      "bio": "Stef is the heartbeat of Abyssion.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "image": "/images/stef.webp"
+    }
+  ],
+  "albumsTitle": "Albums",
+  "albums": [
+    {
+      "year": "??",
+      "title": "It's a secret",
+      "description": "... to be announced (we're not ready yet)",
+      "type": "Album",
+      "tracks": 12
+    }
+  ]
+}

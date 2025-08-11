@@ -52,6 +52,7 @@ export type SocialLink = {
   key: string
   url: string
   label: string
+  icon?: string
 }
 
 /**
@@ -65,6 +66,16 @@ export type Show = {
   location: string
   ticketLink: string
   isPast: boolean
+}
+
+/**
+ * A single show entry as stored in JSON content.
+ */
+export type ContentShowsEntry = {
+  date: string
+  venue: string
+  location: string
+  ticketLink?: string
 }
 
 /**
@@ -89,6 +100,17 @@ export type Album = {
 }
 
 /**
+ * Album entry in `content-bio.json` list. Allows optional description for public copy.
+ */
+export type BioAlbumEntry = {
+  year: string
+  title?: string
+  description?: string
+  type?: string
+  tracks?: number
+}
+
+/**
  * Defines the titles and descriptions for sections on the biography page.
  */
 export type BioSection = {
@@ -97,4 +119,33 @@ export type BioSection = {
   aboutTitle: string
   membersTitle: string
   albumsTitle: string
+}
+
+/**
+ * JSON shape for `content-bio.json`.
+ */
+export type ContentBio = {
+  aboutTitle: string
+  about: string
+  members: BandMember[]
+  albumsTitle: string
+  albums: BioAlbumEntry[]
+}
+
+/**
+ * JSON shape for `content-contact.json`.
+ */
+export type ContentContact = {
+  title: string
+  email: string
+  locationLabel: string
+  location: string
+}
+
+/**
+ * JSON shape for `nav.json`.
+ */
+export type SiteNav = {
+  mainNav: MenuItem[]
+  socialLinks: SocialLink[]
 }
