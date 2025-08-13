@@ -16,6 +16,7 @@ import * as $ContactForm from './islands/ContactForm.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
 import * as $Header from './islands/Header.tsx'
+import * as $MobileImageBackground from './islands/MobileImageBackground.tsx'
 import * as $SinglePageScrollManager from './islands/SinglePageScrollManager.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
 import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
@@ -40,6 +41,7 @@ const manifest = {
     './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
     './islands/Header.tsx': $Header,
+    './islands/MobileImageBackground.tsx': $MobileImageBackground,
     './islands/SinglePageScrollManager.tsx': $SinglePageScrollManager,
     './islands/ThemeProvider.tsx': $ThemeProvider,
     './islands/ThemeVisualizer.tsx': $ThemeVisualizer,

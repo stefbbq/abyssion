@@ -23,7 +23,7 @@ export const setupLayerSystem = (
   scene: Three.Scene,
   outlineTexture: Three.Texture,
   stencilTexture: Three.Texture,
-): LayerSystem => {
+): Promise<LayerSystem> => {
   // Logo Layers
   const planeGeometry = createLogoPlaneGeometry(THREE)
   const logoController = createLogoLayer(THREE)
@@ -43,16 +43,20 @@ export const setupLayerSystem = (
   scene.add(shapeLayer)
   log(lc.GL_GEOMETRY, 'Geometric layer added to scene. Children:', shapeLayer.children)
 
-  // Shadow Layer
-  const shadowLayer = createShadowLayer(THREE)
-  if (shadowLayer) scene.add(shadowLayer.mesh)
+  // Shadow Layer (enable for all devices to maintain consistent depth)
+  let shadowLayer: Three.Mesh | null = null
+  const layer = createShadowLayer(THREE)
+  if (layer) {
+    scene.add(layer.mesh)
+    shadowLayer = layer.mesh
+  }
 
-  return {
+  return Promise.resolve({
     logoController,
     logoPlanes,
     logoLayers,
     shapeLayer,
-    shadowLayer,
+    shadowLayer: shadowLayer as unknown as Three.Mesh,
     planeGeometry,
-  }
+  })
 }

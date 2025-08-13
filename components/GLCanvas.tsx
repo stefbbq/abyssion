@@ -15,8 +15,8 @@ export const GLCanvas = ({ style }: { style?: CSSProperties }) => {
 
     // Initialize GL environment
     const options: InitOptions = {
-      outlineTexturePath: '/images/abyssion_logo_outline.png',
-      stencilTexturePath: '/images/abyssion_logo_stencil.png',
+      outlineTexturePath: '/images/abyssion_logo_outline-transparent.png',
+      stencilTexturePath: '/images/abyssion_logo_stencil-transparent.png',
       canvas: canvasRef.current,
     }
 
@@ -37,8 +37,7 @@ export const GLCanvas = ({ style }: { style?: CSSProperties }) => {
   return (
     <canvas
       ref={canvasRef}
-      class='fixed inset-0 w-full h-full block -z-10'
-      /* allow underlying themed background to show through */
+      class='fixed inset-0 w-full h-full block -z-20'
       style={style}
     />
   )

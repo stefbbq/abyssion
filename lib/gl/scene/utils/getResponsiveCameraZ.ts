@@ -32,12 +32,12 @@ export const getResponsiveCameraZ = (aspect: number): number => {
     return 8.2 + (aspect - 0.75) * (6.1 - 8.2) / (1.0 - 0.75)
   } else if (aspect >= 0.46) {
     // iPad vertical to iPhone 14 Pro Max: interpolate between 14 and 8.2
-    return 14 + (aspect - 0.46) * (8.2 - 14) / (0.75 - 0.46)
+    return 13 + (aspect - 0.46) * (8.2 - 14) / (0.75 - 0.46)
   } else if (aspect >= 0.43) {
     // iPhone 14 Pro Max to Pixel 7: interpolate between 14.7 and 14
-    return 14.7 + (aspect - 0.43) * (14 - 14.7) / (0.46 - 0.43)
+    return 13.7 + (aspect - 0.43) * (14 - 14.7) / (0.46 - 0.43)
   } else {
     // Very narrow screens: use ~Pixel 7 value
-    return 14.7
+    return 13.7
   }
 }

@@ -21,6 +21,7 @@ import { type CorruptionParams, updateCRTShaderUniforms } from '../shaders/CRTSh
 import type { PostProcessingConfig } from '../configPostProcessing.types.ts'
 import { scrollState } from '../animation/state/scrollState.ts'
 import { isDebugModeEnabled } from '../../debug/index.ts'
+import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
 
 const ppConfig = configPostProcessing as PostProcessingConfig
 
@@ -31,15 +32,6 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   // check if state is provided; no state means no update
   if (!state) {
     log.error(lc.GL, 'updateScrollCorruption: No state provided')
-    return
-  }
-
-  // get the CRT scroll corruption config
-  const crtConfig = ppConfig.crtScrollCorruption
-
-  // if the CRT scroll corruption is disabled, return
-  if (!crtConfig?.enabled) {
-    log.debug(lc.GL, 'updateScrollCorruption: CRT scroll corruption is disabled')
     return
   }
 
@@ -59,8 +51,21 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     state.camera.updateProjectionMatrix()
   }
 
+  // on mobile devices, still update camera movement, but skip corruption shader math below
+  const skipCorruption = isMobileDevice()
+
+  // get the CRT scroll corruption config
+  const crtConfig = ppConfig.crtScrollCorruption
+
+  // if the CRT scroll corruption is disabled, return
+  if (!crtConfig?.enabled) {
+    log.debug(lc.GL, 'updateScrollCorruption: CRT scroll corruption is disabled')
+    return
+  }
+
   // get scroll corruption progress and intensity
-  const { progress: scrollProgress, intensity: corruptionIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
+  const { progress: scrollProgress, intensity: rawIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
+  const corruptionIntensity = skipCorruption ? 0 : rawIntensity
 
   // log the scroll corruption progress and intensity
   log.trace(lc.GL, '📊 updateScrollCorruption:', {
@@ -76,7 +81,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   })
 
   // update the CRT shader uniforms if the material is available
-  if (state.crtPass?.material) {
+  if (!skipCorruption && state.crtPass?.material) {
     const material = state.crtPass.material as ShaderMaterial
 
     // compute readable, intermediate values instead of ternaries

@@ -13,10 +13,9 @@ const noiseImages = [
 const getRandomInterval = () => 150 + Math.random() * 150 // 200-300ms
 
 const getRandomIndex = (exclude: number, length: number) => {
-  let idx
-  do {
-    idx = Math.floor(Math.random() * length)
-  } while (idx === exclude && length > 1)
+  let idx = Math.floor(Math.random() * length)
+  if (length <= 1) return 0
+  while (idx === exclude) idx = Math.floor(Math.random() * length)
   return idx
 }
 
@@ -58,20 +57,14 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
 
   // shared classes
   const baseClasses = 'fixed inset-0 pointer-events-none'
-  const zIndexClass = 'z-10'
+  const zIndexClass = '-z-10'
   const transitionClass = 'transition-opacity duration-400'
-
-  // background
-  const backgroundClasses = 'bg-[var(--colors-background)]'
+  // subtle gradient with a slightly darker bottom; fallback to base background var
+  const backgroundClasses = 'bg-gradient-to-b from-[var(--colors-background)] to-[color-mix(in_srgb,var(--colors-background)_85%,#000_15%)]'
   const backgroundOpacity = theme.backgroundOpacity
-
-  const fadeOpacity = backgroundOpacity * intensity
-
-  // noise
-  const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]'
-
-  // fade in noise with intensity (max 0.05 for opacity-5)
-  const noiseFadeOpacity = isHomePage ? 0 : 0.05 * intensity
+  const fadeOpacity = backgroundOpacity * intensity // 0-1
+  const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]' // noise background
+  const noiseFadeOpacity = isHomePage ? 0 : Math.min(0.06, 0.06 * intensity)
 
   return (
     <>

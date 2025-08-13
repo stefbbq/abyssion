@@ -2,7 +2,7 @@ import { type PageProps } from '$fresh/server.ts'
 import { Head, Partial } from '$fresh/runtime.ts'
 
 import type { ContentContact, ContentShowsEntry, PagesConfig, SiteNav } from '@data/types.ts'
-import type { MusicAlbumListLD, MusicEventListLD, MusicGroupLD, PersonLD, WebSiteLD } from '@lib/seo/ld.types.ts'
+import type { MusicAlbumListLD, MusicEventListLD, MusicGroupLD, WebSiteLD } from '@lib/seo/ld.types.ts'
 import Header from '@islands/Header.tsx'
 import ActionZoneController from '@islands/ActionZoneController.tsx'
 import { DebugPanels } from '@islands/DebugPanels.tsx'
@@ -10,66 +10,41 @@ import pagesConfig from '@data/pages.json' with { type: 'json' }
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentUITheme } from '@lib/theme/index.ts'
 import SinglePageScrollManager from '@islands/SinglePageScrollManager.tsx'
-import { createWebsiteLD } from '@lib/seo/createWebsiteLD.ts'
-import { createMusicGroupLD } from '@lib/seo/createMusicGroupLD.ts'
-import { createMusicAlbumListLD } from '@lib/seo/createMusicAlbumListLD.ts'
-import { createMusicEventListLD } from '@lib/seo/createMusicEventListLD.ts'
+import {
+  createMusicAlbumListLD,
+  createMusicEventListLD,
+  createMusicGroupLD,
+  createWebsiteLD,
+  getCleanDescription,
+  getSameAs,
+  getSeoMeta,
+  mapMembersToPersons,
+} from '@lib/seo/index.ts'
+import seoConfig from '@data/seo.json' with { type: 'json' }
 import bio from '@data/content-bio.json' with { type: 'json' }
 import shows from '@data/content-shows.json' with { type: 'json' }
 import nav from '@data/nav.json' with { type: 'json' }
 import contact from '@data/content-contact.json' with { type: 'json' }
+import type { BandMember } from '@data/types.ts'
+
+type BioData = { about?: string; members?: BandMember[]; albums?: unknown }
 
 export default function App({ Component, url }: PageProps) {
+  const { siteName, ogTitle } = seoConfig as { siteName: string; ogTitle: string; twitterCard?: string }
+  const twitterCard = (seoConfig as { twitterCard?: string }).twitterCard || 'summary_large_image'
   const pagePath = url.pathname
   const config = (pagesConfig as PagesConfig)[pagePath] || {}
-  const showHeader = config.showHeader !== false // Default to true
-  const showActionZone = config.showActionZone !== false // Default to true
+  const showHeader = config.showHeader !== false
+  const showActionZone = config.showActionZone !== false
   const theme = currentUITheme.value
-  const origin = url.origin
-  const canonicalUrl = url.href
 
-  const siteName = 'abyssion'
-  const ogTitle = 'abyssion — official site'
-
-  const rawDescription: string = typeof bio?.about === 'string' ? bio.about : ''
-  const description = rawDescription
-    .replace(/\s+/g, ' ')
-    .slice(0, 160)
-    .trim()
-
-  type ShowData = ContentShowsEntry
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const _upcomingShows: ShowData[] = Array.isArray(shows)
-    ? (shows as ShowData[]).filter((s: ShowData) => {
-      const d = new Date(s.date)
-      d.setHours(0, 0, 0, 0)
-      return d >= today
-    })
-    : []
-
-  const navData = nav as unknown as SiteNav
-  const sameAs = Array.isArray(navData?.socialLinks) ? navData.socialLinks.map((s) => s.url).filter(Boolean) : []
-
-  const logoUrl = `${origin}/static/logo.svg`
-  const imageUrl = `${origin}/static/images/abyssion_logo_plain.png`
-
+  // seo meta
+  const description = getCleanDescription((bio as unknown as { about?: string })?.about)
+  const sameAs = getSameAs(nav as unknown as SiteNav)
+  const { origin, canonicalUrl, logoUrl, imageUrl } = getSeoMeta(url, seoConfig, description)
   const websiteLd: WebSiteLD = createWebsiteLD(siteName, origin)
-
-  type BioMember = { id: string; name: string; role: string; bio?: string; image?: string }
-  type BioData = { about?: string; members?: BioMember[]; albums?: unknown }
-
   const bioData = bio as unknown as BioData
-
-  const members: PersonLD[] = Array.isArray(bioData?.members)
-    ? bioData.members.map((m: BioMember) => ({
-      '@type': 'Person',
-      name: m.name,
-      image: m.image,
-      description: m.bio,
-    }))
-    : []
-
+  const members = mapMembersToPersons(bioData?.members || [])
   const organizationLd: MusicGroupLD = createMusicGroupLD({
     origin,
     logoUrl,
@@ -79,16 +54,14 @@ export default function App({ Component, url }: PageProps) {
     description: typeof bioData?.about === 'string' ? bioData.about : undefined,
     members,
   })
-
   const eventsLd: MusicEventListLD | null = createMusicEventListLD(shows as ContentShowsEntry[], {
     canonicalUrl,
     siteOrigin: origin,
   })
-
   const albumsLd: MusicAlbumListLD | null = createMusicAlbumListLD(
     (bioData?.albums as { year: string; title?: string; description?: string; type?: string; tracks?: number }[]) || [],
     {
-      artistName: 'Abyssion',
+      artistName: (seoConfig as { artistName?: string }).artistName || 'Abyssion',
     },
   )
 
@@ -98,6 +71,9 @@ export default function App({ Component, url }: PageProps) {
         <meta charset='utf-8' />
         <title>{ogTitle}</title>
         <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
+        <link rel='icon' href='/favicon.webp' />
+        <link rel='stylesheet' href='/styles.css' />
+
         {/* safari/iOS toolbar translucency */}
         <meta name='theme-color' content='rgba(0,0,0,0)' media='(prefers-color-scheme: dark)' />
         <meta name='theme-color' content='rgba(255,255,255,0)' media='(prefers-color-scheme: light)' />
@@ -105,6 +81,7 @@ export default function App({ Component, url }: PageProps) {
         <meta name='robots' content='index,follow' />
         <link rel='canonical' href={canonicalUrl} />
 
+        {/* open graph */}
         <meta property='og:site_name' content={siteName} />
         <meta property='og:type' content='website' />
         <meta property='og:title' content={ogTitle} />
@@ -112,22 +89,36 @@ export default function App({ Component, url }: PageProps) {
         <meta property='og:url' content={canonicalUrl} />
         <meta property='og:image' content={imageUrl} />
 
-        <meta name='twitter:card' content='summary_large_image' />
+        {/* twitter */}
+        <meta name='twitter:card' content={twitterCard} />
         <meta name='twitter:title' content={ogTitle} />
         <meta name='twitter:description' content={description} />
         <meta name='twitter:image' content={imageUrl} />
 
+        {/* json-ld */}
         <script type='application/ld+json'>{JSON.stringify(websiteLd)}</script>
         <script type='application/ld+json'>{JSON.stringify(organizationLd)}</script>
         {eventsLd && <script type='application/ld+json'>{JSON.stringify(eventsLd)}</script>}
         {albumsLd && <script type='application/ld+json'>{JSON.stringify(albumsLd)}</script>}
 
+        {/* fonts */}
         <link rel='preconnect' href='https://fonts.googleapis.com' />
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
-        <link rel='stylesheet' href='/styles.css' />
       </Head>
 
-      <body f-client-nav class='min-h-screen relative text-foreground bg-transparent' style={{ fontFamily: theme.typography.fontFamily.body }}>
+      <body
+        f-client-nav
+        class='min-h-screen relative text-foreground'
+        style={{
+          fontFamily: theme.typography.fontFamily.body,
+          backgroundColor: '#1a1a1a',
+          backgroundImage: 'linear-gradient(to bottom, #3a3a3a 0%, #121212 100%), url("/images/noise.png")',
+          backgroundBlendMode: 'normal, soft-light',
+          backgroundRepeat: 'no-repeat, repeat',
+          backgroundSize: 'auto, 200px 100px',
+          backgroundAttachment: 'fixed, fixed',
+        }}
+      >
         {/** global theme state and CSS custom properties */}
         <ThemeProvider />
 

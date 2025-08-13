@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
+
 import { isGLDisabled } from '@lib/debug/index.ts'
 import { getGLState, isGLInitialized, updateScrollCorruption, updateScrollMetrics } from '@lib/gl/index.ts'
 import { updateScrollState } from '@lib/gl/animation/state/scrollState.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
+import MobileImageBackground from '@islands/MobileImageBackground.tsx'
+import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
 import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
 import configPostProcessing from '@lib/gl/configPostProcessing.json' with { type: 'json' }
 
@@ -82,13 +85,9 @@ export default function SinglePageScrollManager() {
     )
     sections.forEach((section) => observer.observe(section))
 
-    // Helper function to get scroll offset based on device
-    const getScrollOffset = () => {
-      const isMobile = globalThis.innerWidth < 768 // md breakpoint
-      return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop
-    }
+    const getScrollOffset = () => globalThis.innerWidth < 768 ? 20 : 75
 
-    // Smooth scroll on hashchange (browser navigation)
+    // smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {
       const hash = globalThis.location.hash
 
@@ -102,7 +101,7 @@ export default function SinglePageScrollManager() {
       }
     }
 
-    // Intercept anchor clicks for smooth scroll
+    // intercept anchor clicks for smooth scroll
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const anchor = target.closest ? target.closest('a') as HTMLAnchorElement | null : null
@@ -120,7 +119,7 @@ export default function SinglePageScrollManager() {
       }
     }
 
-    // Scroll corruption tracking
+    // scroll corruption tracking
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
@@ -129,7 +128,7 @@ export default function SinglePageScrollManager() {
           // Update shared scroll state
           updateScrollState(scrollY)
 
-          // Update scroll corruption effect if GL is initialized
+          // Update GL camera and effects on all devices; corruption gated in updater for mobile
           if (isGLInitialized.value) {
             const glState = getGLState()
             if (glState) updateScrollCorruption(scrollY, glState)
@@ -147,7 +146,7 @@ export default function SinglePageScrollManager() {
       }
     }
 
-    // Update scroll metrics when layout changes
+    // update scroll metrics when layout changes
     const handleResize = () => {
       if (isGLInitialized.value) {
         const glState = getGLState()
@@ -180,10 +179,11 @@ export default function SinglePageScrollManager() {
     }
   }, [])
 
-  // Render ThemedBackground and GLCanvas if not disabled, fixed position
+  // render backgrounds and GLCanvas if not disabled, fixed position
   return (
     <>
-      <ThemedBackground intensity={backgroundIntensity} showNoise={false} />
+      <MobileImageBackground />
+      <ThemedBackground intensity={backgroundIntensity} showNoise={isMobileDevice()} />
       {showGL ? <GLCanvas /> : null}
     </>
   )

@@ -249,16 +249,13 @@ export const initGL = async (options: InitOptions) => {
     // setup UI and responsive handling
     setupUIAndResponsive()
 
-    // add visual effects
-    // lens flares removed
-
     // load textures
     const textures = await setupTextureLoading(THREE, stencilTexturePath, outlineTexturePath)
     Object.assign(glState, textures)
 
     // setup layer system
     log(lc.GL, 'Setting up layer system...')
-    const layerSystem = setupLayerSystem(THREE, scene, textures.outlineTexture, textures.stencilTexture)
+    const layerSystem = await setupLayerSystem(THREE, scene, textures.outlineTexture, textures.stencilTexture)
     Object.assign(glState, layerSystem)
     log(lc.GL, 'Layer system setup complete, logoController available:', !!glState.logoController)
 
@@ -270,6 +267,27 @@ export const initGL = async (options: InitOptions) => {
 
     // mark scene as ready
     readiness.setSceneReady()
+  }
+
+  /**
+   * Setup video background
+   * This plays a single video or cycles through a sequence of videos on loop
+   */
+  const setupVideo = async () => {
+    // on mobile, skip video background and mark as ready so the scene starts
+    if (isMobileDevice()) {
+      readiness.setVideoReady()
+      return
+    }
+
+    try {
+      const videoBackground = await addVideoBackground(THREE, core.scene, readiness.setVideoReady)
+      glState!.videoBackground = videoBackground
+      log(lc.GL, 'Video background added, waiting for video ready callback...')
+    } catch (error) {
+      log.error(lc.GL, 'Failed to load video background:', error)
+      readiness.setVideoReady() // continue without video
+    }
   }
 
   // main initialization logic
@@ -285,19 +303,22 @@ export const initGL = async (options: InitOptions) => {
 
   // create lighter post-processing on mobile/iOS to improve perf
   const postProcessingConfigEffective: PostProcessingConfig = (() => {
-    const cfg = JSON.parse(JSON.stringify(basePostProcessingConfig)) as PostProcessingConfig
-    if (!isMobileDevice()) return cfg
+    const config = JSON.parse(JSON.stringify(basePostProcessingConfig)) as PostProcessingConfig
+    if (!isMobileDevice()) return config
     // reduce film scanlines and disable heavy effects
-    cfg.film.scanlineCount = Math.min(cfg.film.scanlineCount ?? 2048, 800)
-    cfg.bloom.bloomStrength = Math.min(cfg.bloom.bloomStrength, 0.15)
-    cfg.bloom.bloomStrengthMultiplier = Math.min(cfg.bloom.bloomStrengthMultiplier ?? 1, 2)
-    cfg.sharpening.enabled = false
-    if (cfg.pixelate) cfg.pixelate.enabled = false
-    if (cfg.crtScrollCorruption) {
-      cfg.crtScrollCorruption.enabled = false
-      if (cfg.crtScrollCorruption.debugOverlay) cfg.crtScrollCorruption.debugOverlay.enabled = false
+    // on mobile, disable post-processing entirely to preserve canvas transparency
+    config.enabled = false
+    config.film.scanlineCount = Math.min(config.film.scanlineCount ?? 2048, 800)
+    config.bloom.bloomStrength = Math.min(config.bloom.bloomStrength, 0.15)
+    config.bloom.bloomStrengthMultiplier = Math.min(config.bloom.bloomStrengthMultiplier ?? 1, 2)
+    config.sharpening.enabled = false
+    if (config.pixelate) config.pixelate.enabled = false
+    if (config.crtScrollCorruption) {
+      config.crtScrollCorruption.enabled = false
+      if (config.crtScrollCorruption.debugOverlay) config.crtScrollCorruption.debugOverlay.enabled = false
     }
-    return cfg
+
+    return config
   })()
 
   // initialize core rendering
@@ -312,21 +333,8 @@ export const initGL = async (options: InitOptions) => {
     sceneOrchestrator: createSceneOrchestrator(glState),
   })
 
-  // start parallel initialization
-  const initPromises = [
-    setupScene(),
-    addVideoBackground(THREE, core.scene, readiness.setVideoReady)
-      .then((videoBackground) => {
-        glState!.videoBackground = videoBackground
-        log(lc.GL, 'Video background added, waiting for video ready callback...')
-      })
-      .catch((error) => {
-        log.error(lc.GL, 'Failed to load video background:', error)
-        readiness.setVideoReady() // continue without video
-      }),
-  ]
-
-  await Promise.all(initPromises)
+  // setup scene and video
+  await Promise.all([setupScene(), setupVideo()])
 
   // mark as initialized
   isGLInitialized.value = true
