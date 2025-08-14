@@ -7,6 +7,7 @@ uniform float time;
 uniform float noiseScale;
 uniform float noiseOffset;
 uniform bool isStencil;
+uniform float mobileBrightness; // 0.0 desktop, ~0.2-0.4 mobile
 
 varying vec2 vUv;
 
@@ -59,14 +60,18 @@ void main() {
   float flicker = sharpTransition(snoise(vec2(time * 0.2, 0.0)), 0.4, 0.1);
   noise *= mix(0.85, 1.0, flicker);
 
+  // Compute brightness-adjusted color (blend toward white for mobile)
+  vec3 baseColor = color * texColor.rgb;
+  vec3 boostedColor = mix(baseColor, vec3(1.0), clamp(mobileBrightness, 0.0, 1.0));
+
   // Stencil: solid, minimal noise. Outline: full effect
   if (isStencil) {
     float stencilNoise = mix(0.95, 1.0, noise); // subtle
     float boostedOpacity = min(opacity * 2.0, 1.0);
     float alpha = texColor.a * stencilNoise * boostedOpacity;
-    gl_FragColor = vec4(color * texColor.rgb, alpha);
+    gl_FragColor = vec4(boostedColor, alpha);
   } else {
     float alpha = texColor.a * noise * opacity;
-    gl_FragColor = vec4(color * texColor.rgb, alpha);
+    gl_FragColor = vec4(boostedColor, alpha);
   }
 } 

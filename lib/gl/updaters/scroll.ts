@@ -1,4 +1,5 @@
 import { ShaderMaterial } from 'three'
+
 import type { RendererState } from '../types.ts'
 import { lc, log } from '../../logger/index.ts'
 import configPostProcessing from '../configPostProcessing.json' with { type: 'json' }
@@ -7,8 +8,6 @@ import {
   DITHERING_BASE_INTENSITY,
   DITHERING_VELOCITY_MAX,
   DITHERING_VELOCITY_MULTIPLIER,
-  FINAL_PASS_CHROMA_BASE,
-  FINAL_PASS_CHROMA_MAX,
   PIXELATION_BASE_SIZE,
   PIXELATION_MAX_SIZE,
   WAVE_NOISE_MIN_SCALE,
@@ -21,7 +20,7 @@ import { type CorruptionParams, updateCRTShaderUniforms } from '../shaders/CRTSh
 import type { PostProcessingConfig } from '../configPostProcessing.types.ts'
 import { scrollState } from '../animation/state/scrollState.ts'
 import { isDebugModeEnabled } from '../../debug/index.ts'
-import { isMobileDevice } from '../scene/utils/isMobileDevice.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 
 const ppConfig = configPostProcessing as PostProcessingConfig
 
@@ -35,7 +34,12 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     return
   }
 
-  // update the camera position and lookAt target based on scrollY
+  /**
+   * CAMERA
+   * DESKTOP and MOBILE
+   *
+   * update the camera Y position and lookAt target based on scrollY
+   */
   if (state.camera) {
     const currentWidth = globalThis.innerWidth
     const currentHeight = globalThis.innerHeight
@@ -54,20 +58,29 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   // on mobile devices, still update camera movement, but skip corruption shader math below
   const skipCorruption = isMobileDevice()
 
-  // get the CRT scroll corruption config
+  /**
+   * CRT SCROLL CORRUPTION bootstrap
+   * DESKTOP ONLY from here on
+   *
+   * - applies a CRT-style scroll corruption effect to the camera
+   * - only applies on desktop devices
+   * - only applies when the CRT scroll corruption is enabled
+   * - only applies when the scroll corruption intensity is greater than 0
+   * - only applies when the scroll corruption progress is greater than 0
+   * - only applies when the scroll corruption progress is less than 1
+   */
   const crtConfig = ppConfig.crtScrollCorruption
-
-  // if the CRT scroll corruption is disabled, return
   if (!crtConfig?.enabled) {
     log.debug(lc.GL, 'updateScrollCorruption: CRT scroll corruption is disabled')
     return
   }
-
-  // get scroll corruption progress and intensity
   const { progress: scrollProgress, intensity: rawIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
   const corruptionIntensity = skipCorruption ? 0 : rawIntensity
 
-  // log the scroll corruption progress and intensity
+  /**
+   * LOGGING
+   * log the scroll corruption progress and intensity
+   */
   log.trace(lc.GL, '📊 updateScrollCorruption:', {
     scrollY,
     cameraY: state.camera?.position.y,
@@ -80,7 +93,29 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
   })
 
-  // update the CRT shader uniforms if the material is available
+  /**
+   * SHADOW LAYER
+   * fade out the shadow layer at the same scroll thresholds/rate as the logo fade
+   */
+  if (state.shadowLayer?.mesh) {
+    const material = state.shadowLayer.mesh.material as ShaderMaterial & { uniforms: { opacity?: { value: number } } }
+    const uniforms = material.uniforms
+    if (uniforms?.opacity) {
+      if (typeof state.shadowLayer.mesh.userData.baseShadowOpacity !== 'number') {
+        state.shadowLayer.mesh.userData.baseShadowOpacity = uniforms.opacity.value
+      }
+      const base = state.shadowLayer.mesh.userData.baseShadowOpacity as number
+      uniforms.opacity.value = base * (1 - corruptionIntensity)
+    }
+  }
+
+  /**
+   * CRT SCROLL CORRUPTION ends
+   *
+   * - updates the CRT shader uniforms if the material is available
+   * - only updates when the CRT scroll corruption is enabled
+   * - only updates when the scroll corruption intensity is greater than 0
+   */
   if (!skipCorruption && state.crtPass?.material) {
     const material = state.crtPass.material as ShaderMaterial
 
@@ -263,7 +298,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     } catch (_) { /* no-op */ }
   }
 
-  if (state.pixelBleedPass && state.pixelBleedPass.material) {
+  if (state.pixelBleedPass?.material) {
     const material = state.pixelBleedPass.material as ShaderMaterial
     if (material.uniforms && state.pixelBleedPass.enabled) {
       material.uniforms.time.value = performance.now() / 1000
@@ -273,11 +308,6 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
   if (state.pixelationPass) {
     const pixelSize = PIXELATION_BASE_SIZE + (corruptionIntensity * (PIXELATION_MAX_SIZE - PIXELATION_BASE_SIZE))
     if (state.pixelationPass.uniforms.pixelSize) state.pixelationPass.uniforms.pixelSize.value = pixelSize
-  }
-
-  if (state.finalPass?.uniforms) {
-    const chromaStrength = FINAL_PASS_CHROMA_BASE + (corruptionIntensity * (FINAL_PASS_CHROMA_MAX - FINAL_PASS_CHROMA_BASE))
-    state.finalPass.uniforms.chromaStrength.value = chromaStrength
   }
 }
 

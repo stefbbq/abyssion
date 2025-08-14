@@ -72,7 +72,10 @@ export const ShowListItem = ({ show, isPast }: { show: ShowData; isPast?: boolea
     ? (
       <div class='flex items-center gap-2 text-[var(--colors-foreground)] opacity-70'>
         <WarningIcon className='w-4 h-4' />
-        <span class='text-xs md:text-sm font-medium tracking-wider'>PAST EVENT</span>
+        <span class='text-xs font-medium tracking-wider leading-tight md:hidden'>
+          PAST<br />EVENT
+        </span>
+        <span class='hidden md:inline text-sm font-medium tracking-wider'>PAST EVENT</span>
       </div>
     )
     : null

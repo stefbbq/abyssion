@@ -156,8 +156,8 @@ export const createGeometricLayer = (
   const dashedOrbitsConfig = getDashedOrbitsConfig()
   const dashedOrbits = createDashedOrbits(THREE, {
     ...dashedOrbitsConfig,
-    zBase: 0, // center behind
-    zSpread: 1, // random spread
+    zBase: -1, // center behind
+    zSpread: 0, // random spread
   })
   shapeGroup.add(dashedOrbits)
 

@@ -36,8 +36,8 @@ short, practical engineering rules for working on abyssion with an llm. this gui
 ### tool usage
 
 - **Act, don't ask:** Use available tools directly instead of asking user to perform actions
-- **Available tools:** `codebase_search`, `read_file`, `edit_file`, `run_terminal_cmd`, `grep_search`, `list_dir`, `file_search`, `delete_file`, `reapply`, `web_search`
-- **Continuous discovery:** Update "Repo Map" section with structural findings
+- **Available tools:** `codebase_search`, `read_file`, `apply_patch`, `edit_file`, `run_terminal_cmd`, `grep_search`, `list_dir`, `glob_file_search`, `delete_file`, `web_search`
+- **Continuous discovery:** Keep mental notes; no dedicated "Repo Map" section maintained here
 
 ## code standards
 

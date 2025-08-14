@@ -16,6 +16,12 @@ uniform float burstProbability; // chance of global burst
 uniform vec3 themePrimary;
 uniform vec3 themeAccent;
 uniform vec3 themeSecondary;
+// Vignette controls
+uniform float vignetteEnabled;       // 0.0 disabled, 1.0 enabled
+uniform float vignetteStart;         // radius where vignette starts [0..1]
+uniform float vignetteEnd;           // radius where vignette is fully dark [0..1]
+uniform float vignetteDarkness;      // max darkening amount [0..1]
+uniform float vignetteDesaturation;  // max desaturation toward grayscale [0..1]
 varying vec2 vUv;
 
 // Hash for randomness. See: https://en.wikipedia.org/wiki/Hash_function
@@ -48,17 +54,18 @@ void main() {
 
     // Apply contrast
     color.rgb = ((color.rgb - 0.5) * contrast) + 0.5;
-    
-      // Apply contrast
-  color.rgb = ((color.rgb - 0.5) * contrast) + 0.5;
-  
-  // Vignette for focus
-  vec2 uv = vUv * (1.0 - vUv.yx);
-  float vig = uv.x * uv.y * 15.0;
-  vig = pow(vig, 0.25);
-  color *= vec4(vig, vig, vig, 1.0);
 
-  gl_FragColor = color * gain;
+    // Configurable vignette
+    if (vignetteEnabled > 0.5) {
+      float r = distance(vUv, vec2(0.5));
+      float t = smoothstep(vignetteStart, vignetteEnd, r);
+      float luminance = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
+      vec3 desaturated = mix(color.rgb, vec3(luminance), t * vignetteDesaturation);
+      float darkness = mix(1.0, 1.0 - vignetteDarkness, t);
+      color.rgb = desaturated * darkness;
+    }
+
+    gl_FragColor = color * gain;
     return;
   }
 
@@ -96,11 +103,15 @@ void main() {
   popColor = mix(popColor, themeSecondary, hash2(block + 40.0));
   color.rgb = mix(color.rgb, popColor, colorPop * 0.15 * colorPopIntensity);
 
-  // Vignette for focus
-  vec2 uv = vUv * (1.0 - vUv.yx);
-  float vig = uv.x * uv.y * 15.0;
-  vig = pow(vig, 0.25);
-  color *= vec4(vig, vig, vig, 1.0);
+  // Configurable vignette
+  if (vignetteEnabled > 0.5) {
+    float r = distance(vUv, vec2(0.5));
+    float t = smoothstep(vignetteStart, vignetteEnd, r);
+    float luminance = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
+    vec3 desaturated = mix(color.rgb, vec3(luminance), t * vignetteDesaturation);
+    float darkness = mix(1.0, 1.0 - vignetteDarkness, t);
+    color.rgb = desaturated * darkness;
+  }
 
   gl_FragColor = color * gain;
 } 

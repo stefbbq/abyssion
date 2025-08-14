@@ -39,6 +39,8 @@ export type BokehParams = {
 
 /** Parameters for film grain effect */
 export type FilmParams = {
+  /** Whether film pass is enabled (optional; defaults to true if provided) */
+  enabled?: boolean
   /** Intensity of noise/grain */
   noiseIntensity: number
   /** Intensity of scanlines */
@@ -51,6 +53,8 @@ export type FilmParams = {
 
 /** Parameters for final color grading pass */
 export type FinalPassParams = {
+  /** Whether the final pass is enabled */
+  enabled: boolean
   /** Chromatic aberration strength */
   chromaStrength: number
   /** Dithering strength */
@@ -63,6 +67,19 @@ export type FinalPassParams = {
   gain?: number
   /** Contrast adjustment (default 1.0) */
   contrast?: number
+  /** Vignette parameters */
+  vignette?: {
+    /** Whether vignette is enabled (default true) */
+    enabled?: boolean
+    /** Radius where vignette starts [0..1] */
+    start: number
+    /** Radius where vignette ends/darkens fully [0..1] */
+    end: number
+    /** Max darkness applied at the edges [0..1] */
+    darkness: number
+    /** Desaturation applied at the edges [0..1] */
+    desaturation: number
+  }
 }
 
 /** Parameters for sharpening effect */
@@ -209,17 +226,17 @@ export type SelectiveColorizationParams = {
 /** Complete post-processing configuration */
 export type PostProcessingConfig = {
   /** Whether post-processing is enabled */
-  enabled: boolean
+  enabled?: boolean
   /** Bokeh/depth of field parameters */
-  bokeh: BokehParams
+  bokeh?: BokehParams
   /** Bloom effect parameters */
-  bloom: BloomParams
+  bloom?: BloomParams
   /** Film grain parameters */
-  film: FilmParams
+  film?: FilmParams
   /** Final pass parameters */
-  finalPass: FinalPassParams
+  finalPass?: FinalPassParams
   /** Sharpening parameters */
-  sharpening: SharpeningParams
+  sharpening?: SharpeningParams
   /** Pixelation parameters */
   pixelate?: PixelateParams
   /** CRT scroll corruption parameters */

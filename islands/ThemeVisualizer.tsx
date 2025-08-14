@@ -1,19 +1,6 @@
-// import { Head } from '$fresh/runtime.ts'
-// import { useSignal } from '@preact/signals'
-// import {
-//   deepSpaceHUDLightTheme,
-//   deepSpaceHUDTheme,
-//   geomodAtlasTheme,
-//   monochromeTheme,
-//   neonGridOSTheme,
-//   synthwaveTheme,
-//   techscapeTheme,
-// } from '../lib/theme/index.ts'
-// import type { BaseTheme, UITheme } from '../lib/theme/types.ts'
-// import { Dropdown } from '@components/Dropdown.tsx'
-// import { ComponentChildren } from 'preact'
-// import { JSX } from 'preact/jsx-runtime'
-// import { createUITheme } from '@lib/theme/createUITheme.ts'
+// minimal placeholder to keep the island import resolvable without shipping heavy UI
+const ThemeVisualizer = () => null
+export default ThemeVisualizer
 
 // const themeOptions = Object.keys(themes).map((key) => ({ value: key, label: key }))
 

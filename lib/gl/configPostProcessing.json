@@ -23,18 +23,27 @@
     }
   },
   "film": {
+    "enabled": true,
     "noiseIntensity": 0.05,
     "scanlineIntensity": 2,
     "scanlineCount": 2000,
     "grayscale": false
   },
   "finalPass": {
-    "chromaStrength": 0.002,
+    "enabled": true,
+    "chromaStrength": 0.0,
     "ditherStrength": 10,
     "ditherFrequency": 1000.0,
     "ditherAnimation": 0.1,
-    "gain": 1.2,
-    "contrast": 1.1
+    "gain": 1,
+    "contrast": 1,
+    "vignette": {
+      "enabled": true,
+      "start": 0.2,
+      "end": 0.9,
+      "darkness": 1,
+      "desaturation": 1.5
+    }
   },
   "selectiveColorization": {
     "enabled": false,

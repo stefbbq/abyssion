@@ -17,6 +17,7 @@ import type { VideoBackgroundManager } from './textures/VideoCycle/types.ts'
 // utilities
 import { lc, log } from '../logger/index.ts'
 import { isDebugModeEnabled } from '../debug/index.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 
 // setup functions
 import { setupCoreRendering } from './setup/setupCoreRendering.ts'
@@ -29,7 +30,6 @@ import { createInitialGLState } from './setup/setupState.ts'
 // scene components
 import { createPostProcessing } from './scene/createPostProcessing.ts'
 import { addVideoBackground } from './scene/addVideoBackground.ts'
-import { isMobileDevice } from './scene/utils/isMobileDevice.ts'
 
 // layers and controls
 import { createUILayer } from './layers/UILayer.ts'
@@ -250,7 +250,7 @@ export const initGL = async (options: InitOptions) => {
     setupUIAndResponsive()
 
     // load textures
-    const textures = await setupTextureLoading(THREE, stencilTexturePath, outlineTexturePath)
+    const textures = await setupTextureLoading(THREE, stencilTexturePath, effectiveOutlineTexturePath)
     Object.assign(glState, textures)
 
     // setup layer system
@@ -292,6 +292,7 @@ export const initGL = async (options: InitOptions) => {
 
   // main initialization logic
   const { canvas, stencilTexturePath, outlineTexturePath } = options
+  const effectiveOutlineTexturePath = isMobileDevice() ? '/images/abyssion_logo_outline_mobile-transparent.webp' : outlineTexturePath
 
   // load configuration files
   const [rendererConfig, basePostProcessingConfig, controlsConfig, animationConfig] = await Promise.all([
@@ -308,10 +309,12 @@ export const initGL = async (options: InitOptions) => {
     // reduce film scanlines and disable heavy effects
     // on mobile, disable post-processing entirely to preserve canvas transparency
     config.enabled = false
-    config.film.scanlineCount = Math.min(config.film.scanlineCount ?? 2048, 800)
-    config.bloom.bloomStrength = Math.min(config.bloom.bloomStrength, 0.15)
-    config.bloom.bloomStrengthMultiplier = Math.min(config.bloom.bloomStrengthMultiplier ?? 1, 2)
-    config.sharpening.enabled = false
+    if (config.film) config.film.scanlineCount = Math.min(config.film.scanlineCount ?? 2048, 800)
+    if (config.bloom) {
+      config.bloom.bloomStrength = Math.min(config.bloom.bloomStrength ?? 0.2, 0.15)
+      config.bloom.bloomStrengthMultiplier = Math.min(config.bloom.bloomStrengthMultiplier ?? 1, 2)
+    }
+    if (config.sharpening) config.sharpening.enabled = false
     if (config.pixelate) config.pixelate.enabled = false
     if (config.crtScrollCorruption) {
       config.crtScrollCorruption.enabled = false

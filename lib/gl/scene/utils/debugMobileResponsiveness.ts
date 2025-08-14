@@ -1,8 +1,8 @@
 import ms from 'ms'
 
-import { isMobileDevice } from './isMobileDevice.ts'
-import { getBaselineDimensions } from './getBaselineDimensions.ts'
 import { lc, log } from '@lib/logger/index.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
+import { getBaselineDimensions } from './getBaselineDimensions.ts'
 
 let resizeTimeout: number | null = null
 

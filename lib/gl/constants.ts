@@ -1,8 +1,8 @@
 // shared gl constants
 
 // global fade thresholds used across animations for scroll-based fading
-export const GLOBAL_FADE_START_THRESHOLD = 0.65
-export const GLOBAL_FADE_END_THRESHOLD = 0.8
+export const GLOBAL_FADE_START_THRESHOLD = 0.55
+export const GLOBAL_FADE_END_THRESHOLD = 0.9
 
 // fps options for random layer animation
 export const FPS_OPTIONS = [1, 2, 4, 8, 12, 24, 48]
@@ -17,10 +17,6 @@ export const CORRUPTION_INTENSITY_EXPONENT = 0.5
 // pixelation effect bounds
 export const PIXELATION_BASE_SIZE = 16
 export const PIXELATION_MAX_SIZE = 64
-
-// final pass chromatic aberration bounds
-export const FINAL_PASS_CHROMA_BASE = 0.002
-export const FINAL_PASS_CHROMA_MAX = 0.02
 
 // white noise jitter controls
 export const WHITE_NOISE_JITTER_STEP = 0.05

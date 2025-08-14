@@ -1,5 +1,6 @@
 import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
 import { currentThemeFamilyName, currentThemeMode, getAllThemeFamilies, setThemeFamily } from '@lib/theme/index.ts'
+import { lc, log } from '@lib/logger/index.ts'
 import { useState } from 'preact/hooks'
 import type { CorruptionParams } from './DebugPanels.tsx'
 
@@ -146,7 +147,8 @@ export const DebugControls = (props: Props) => {
   const handleCorruptionIntensityInput = (e: Event) => {
     const target = e.target as HTMLInputElement
     const value = parseFloat(target.value)
-    console.log('🎛️ Corruption intensity slider input:', value)
+    // use logger for debug diagnostics
+    log.debug(lc.GL, 'Corruption intensity slider input', value)
     props.onCorruptionChange({
       ...props.corruptionParams,
       intensity: value,
@@ -243,7 +245,7 @@ export const DebugControls = (props: Props) => {
                 value={props.videoBackgroundOpacity}
                 onInput={(e) => {
                   const value = parseFloat((e.target as HTMLInputElement).value)
-                  console.log('🎛️ Video background opacity slider INPUT:', value)
+                  log.debug(lc.GL_VIDEO, 'Video background opacity slider input', value)
                   props.onVideoBackgroundOpacityChange(value)
                 }}
                 className='flex-1'

@@ -1,4 +1,5 @@
 import * as Three from 'three'
+
 import { createElectricShaderMaterial } from '@libgl/shaders/ElectricShader.ts'
 import { LogoLayer } from '@libgl/layers/LogoLayer.ts'
 
@@ -26,7 +27,7 @@ export const createPlanesFromLayers = (
       {
         texture: layer.isStencil ? stencilTexture : outlineTexture,
         color: threeColor,
-        opacity: layer.opacity,
+        opacity: Math.min(1, layer.opacity),
         noiseScale: layer.noiseScale,
         noiseOffset: layer.noiseOffset,
         isStencil: layer.isStencil,

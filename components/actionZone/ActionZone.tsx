@@ -47,7 +47,7 @@ export const ActionZone = ({
 
   // shell container classes with height transition
   const shellClasses =
-    'fixed bottom-4 left-4 right-4 z-50 md:hidden max-w-sm mx-auto flex items-center justify-center transition-all duration-300 overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] p-2'
+    'fixed bottom-4 left-3 right-3 z-50 md:hidden mx-auto flex items-center justify-center transition-all duration-300 overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] p-2'
 
   return (
     <>
@@ -69,16 +69,12 @@ export const ActionZone = ({
         }}
       >
         {/* collapsed state */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-300 ${!showCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-        >
+        <div className={`absolute inset-0 transition-opacity duration-300 ${!showCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           {collapsedChildren}
         </div>
 
         {/* expanded state */}
-        <div
-          className={`transition-opacity duration-300 ${showExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        >
+        <div className={`transition-opacity duration-300 ${showExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           {expandedChildren}
         </div>
       </Shell>

@@ -4,7 +4,7 @@ import type { SharedBehaviors } from '../core/createSharedBehaviors.ts'
 import { alignFocusPlane } from './alignFocusPlane.ts'
 import { updateBokehFocus } from './updateBokehFocus.ts'
 import { calculateFocusDistance } from '../calculations/calculateFocusDistance.ts'
-import { isMobileDevice } from '../../scene/utils/isMobileDevice.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 
 /**
  * creates a function that applies all frame-based side effects

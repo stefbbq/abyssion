@@ -8,7 +8,7 @@ import { createShapeLayer } from './utils/createShapeLayer.ts'
 import { getShapeLayerConfig } from './config.ts'
 import { createRandomTechShape } from './utils/createTechShapes.ts'
 import { getBaselineDimensions } from '@lib/gl/scene/utils/getBaselineDimensions.ts'
-import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 import { MOBILE_SCALE_FACTOR } from '@libgl/constants.ts'
 
 /**

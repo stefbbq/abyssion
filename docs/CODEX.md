@@ -13,7 +13,7 @@ authoritative guide to the abyssion codebase: architecture, theme system, gl/sha
 - **Access Control**: Centralized in `routes/_middleware.ts` for `debugOnly` pages.
 - **Data & Types**: All static content is in `/data`, with all corresponding TypeScript types co-located in `data/types.ts`.
 - **Theme & Styling**: A unified, CSS-variable-driven system. See the "Theme System" section for details.
-- **3D Scene**: Managed via `/scene`, `/gl`, and related directories, containing all Three.js logic.
+- **3D Scene**: Managed via `/lib/gl/scene` and related directories, containing all Three.js logic.
 
 ## SEO & JSON‑LD
 
@@ -41,8 +41,8 @@ The application uses a reactive, CSS-variable-driven theme system that supports 
 
 ### Theme Definitions
 
-- **Available Themes:**
-  - All themes are defined in `lib/theme/themes/` (e.g., `deepSpaceHUD`, `deepSpaceHUDLight`, `synthwave`, `glitchCore`, `geomodAtlas`, `hypertag`, `monochrome`, `neonGridOS`, `synthDrift`, `techscape`, `cyberpunk`).
+ - **Available Themes:**
+   - All themes are defined in `lib/theme/themes/` (families: Deep Space HUD, Neon Grid OS, Techscape, Synthwave, Monochrome).
   - Each theme is a `BaseTheme` object with a palette, mode, and variants.
 
 ### Theme Objects
@@ -71,33 +71,33 @@ Theme preferences are automatically saved to browser cookies with 1-year expirat
 
 ### CSS Variables & Tailwind Integration
 
-- All theme values (backgrounds, surfaces, text, borders, interactive states) are exposed as CSS variables (e.g., `--colors-background-primary`).
-- Tailwind is configured to use these variables, so you can use semantic classes like `bg-background-primary`, `text-text-secondary`, or arbitrary values like `bg-[var(--colors-background-primary)]`.
-- For alpha blending, set the variable to an `rgba` value in your theme system, or use inline style to convert a hex to `rgba` with the desired alpha.
+- Theme values are exposed as CSS variables like `--colors-background`, `--colors-foreground`, `--colors-primary`.
+- Tailwind maps semantic tokens, so you can use classes like `bg-background` and `text-foreground`, or arbitrary values like `bg-[var(--colors-background)]`.
+- For alpha blending, set the variable to an `rgba` in the theme or compute inline as needed.
 - **Example:**
 
   ```tsx
-  <div className="bg-[var(--colors-background-primary)] text-[var(--colors-text-primary)]" />
+  <div className="bg-background text-foreground" />
   // or
-  <div style={{ background: 'var(--colors-background-primary)' }} />
+  <div style={{ background: 'var(--colors-background)' }} />
   ```
 
 ### Theme Visualizer
 
-- **ThemeVisualizer Island:** An interactive UI for previewing and switching between all available themes. Located at `/theme` route. Uses the same theme system and signals as the rest of the app.
+- **ThemeVisualizer Island:** An interactive UI for previewing and switching between all available themes. Exists as `islands/ThemeVisualizer.tsx` (currently disabled). You can wire it up later with a route if needed.
 
 ### Themed Background System
 
 - **ThemedBackground Island:** Manages the dynamic background overlay that appears on content pages (not homepage)
-- **Theme-Aware Opacity:** Uses `backgroundOpacity.light` and `backgroundOpacity.dark` values from the current theme
+- **Theme-Aware Opacity:** Uses the computed `backgroundOpacity` from the current UI theme
 - **Route-Dependent:** Automatically hides on homepage to show GL canvas, appears with theme opacity on content pages
 - **Real-Time Updates:** Opacity updates instantly when switching themes or toggling light/dark mode
 - **Noise Animation:** Includes subtle animated noise texture overlay for visual interest
 
 ### 3D/GL Theme System
 
-- **GL Theme System:** Located in `lib/gl/theme/`, this system extends `BaseTheme` for 3D rendering (Three.js). It provides additional colors for overlays, geometric elements, and lens flares.
-- **getGLTheme():** Returns a `GLTheme` object based on the current base theme, used for 3D scene rendering.
+- **GL Theme System:** Located in `lib/theme/`, this system extends `BaseTheme` for 3D rendering (Three.js). It provides additional colors for overlays and geometric elements.
+- **currentGLTheme:** A computed signal exported from `lib/theme/index.ts` that yields a `GLTheme` based on the current base theme.
 - **Real-Time Theme Updates:** The GL system supports real-time theme switching without reloading. Video background selective colorization and other GL effects automatically update their colors when themes change.
 - **Selective Colorization:** The video background features advanced selective colorization that:
   - Grayscales the video while preserving high brightness/saturation areas
@@ -105,7 +105,7 @@ Theme preferences are automatically saved to browser cookies with 1-year expirat
   - Supports configurable targeting (brightness-based, saturation-based, or mixed)
   - Provides smooth transitions using `smoothstep` for natural blending
   - Updates instantly when themes change via the shared animation behaviors
-- **Post-Processing Integration:** Visual effects in Three.js (such as glitch bands and bloom highlights) are fully theme-aware and update instantly with theme changes. The canonical way to access theme colors for any Three.js effect is to call `getGLTheme()` and use its fields (e.g., `primary`, `accent`, `secondary`, or any of the `ui`, `geometric`, or `lensFlare` colors).
+ - **Post-Processing Integration:** Visual effects in Three.js (such as glitch bands and bloom highlights) are fully theme-aware and update instantly with theme changes. Access theme colors for any Three.js effect via `currentGLTheme.value` (e.g., `primary`, `accent`, `secondary`, or any of the `ui`, `geometric`, or `lensFlare` colors).
 
 #### Selective Colorization Configuration
 
@@ -778,13 +778,12 @@ This refactored ActionZone system provides:
 - **`/routes`**: Pages & API
   - `_app.tsx`: Main app wrapper. Renders global UI (`Header`, `ActionZone`) and the `ThemeProvider`.
   - `_middleware.ts`: Global middleware for server-side logic (e.g., `debugOnly` access).
-  - `theme.tsx`: Renders the `ThemeVisualizer` island.
   - `/partials/*.tsx`: Page content for Fresh's partial navigation.
 
 - **`/islands`**: Interactive Components
   - `ActionZoneController.tsx`: Interactive mobile navigation controller.
   - `ThemeProvider.tsx`: Injects theme CSS variables and handles dynamic updates.
-  - `ThemeVisualizer.tsx`: UI for visualizing themes.
+  - `ThemeVisualizer.tsx`: UI for visualizing themes (currently disabled/commented; wire up via a route if needed).
   - `Header.tsx`, `GLCanvas.tsx` Other major interactive components.
   - `ThemedBackground.tsx`: Dynamic background overlay that uses the current theme's CSS variable for background color and fades in/out based on route. Uses direct CSS variable access for background and Tailwind for layout/opacity transitions.
   - `DebugPanels.tsx`: Main debug overlay island. Manages debug state and renders `DebugControls` and `DebugInfo`.
@@ -819,8 +818,7 @@ This refactored ActionZone system provides:
 - **`/lib/gl/textures/VideoCycle/`**: Video background management system with efficient memory usage and smooth transitions.
 
 - **`/lib`**: Core Libraries
-  - `/theme`: The core UI theme system. See "Theme System" section above.
-  - `/gl/theme`: The 3D-specific theme system.
+  - `/theme`: The core UI and GL theme system. See "Theme System" section above.
   - `/debug`: Debug mode detection and control.
   - `/logger`: Structured logging system.
 
@@ -843,7 +841,7 @@ This refactored ActionZone system provides:
 
 - `/lib/gl/index.ts` - `initGL()`, `InitOptions`, `RendererState` - Main GL system initialization
 - `/lib/gl/types.ts` - Core GL types and interfaces
-- `/lib/gl/state.ts` - Global GL state management
+- `/lib/gl/setup/setupState.ts` - `createInitialGLState()` and initial renderer state
 - `/lib/gl/configScene.json` - Core scene configuration (geometry, renderer settings)
 - `/lib/gl/configPostProcessing.json` - Post-processing effects configuration
 - `/lib/gl/configAnimation.json` - Animation timing and behavior configuration
@@ -855,11 +853,11 @@ This refactored ActionZone system provides:
 
 ### Core Theme System (`lib/theme/`)
 
-- `types.ts` - `UITheme`, `GLTheme`, and re-exports of theme shape types
-- `themes/types.ts` - `BaseTheme`, `BaseTypography`, `BaseSpacing` (theme shape types, colocated with theme definitions)
-- `themes/index.ts` - Theme exports barrel
-- `utils/createBaseTheme.ts` - `createBaseTheme()`
-- `utils/hexToCSS.ts` - `hexToCSS()`
+- `index.ts` - `currentUITheme`, `currentGLTheme`, and exports of creation utilities
+- `index.types.ts` - `BaseTheme`, `UITheme`, `GLTheme`, and related theme shape types
+- `themes/index.ts` - Theme families export barrel
+- `createUITheme.ts`, `createGLTheme.ts`
+- `colorUtils/hexToCSS.ts` - `hexToCSS()`
 
 #### CSS Variables and Dynamic Backgrounds
 
@@ -869,8 +867,8 @@ ThemedBackground uses the CSS variable directly for its background and applies o
 
 ### GL Theme System (`lib/theme/`)
 
-- `index.ts` - `getGLTheme()`, `createGLTheme()`
-- `types.ts` - `GLTheme`
+- `index.ts` - `currentGLTheme`, `createGLTheme()`
+- `index.types.ts` - `GLTheme`
 
 ## Logger System
 
@@ -1006,7 +1004,7 @@ The animation system was recently refactored to address several critical issues:
 
 These improvements ensure the animation system is more robust, maintainable, and performant.
 
-> **Note:** All theme shape types (`BaseTheme`, `BaseTypography`, `BaseSpacing`) are now defined in `lib/theme/themes/types.ts` alongside the theme objects themselves. They are re-exported from `lib/theme/types.ts` for convenience. This keeps type definitions close to the data and supports feature-based organization.
+> Note: Theme shape types (`BaseTheme`, `BaseTypography`, `BaseSpacing`) live in `lib/theme/index.types.ts` alongside the theme system and theme definitions.
 
 ## Debug Overlay
 

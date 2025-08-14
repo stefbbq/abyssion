@@ -1,4 +1,6 @@
 import * as Three from 'three'
+
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 import { GeometricOptions } from '@libgl/layers/GeometricLayer.ts'
 import { getDashedOrbitsConfig } from '@libgl/layers/config.ts'
 import { lc, log } from '@lib/logger/index.ts'
@@ -25,14 +27,15 @@ export const createDashedOrbits = (
     zBase = 0,
     zSpread = 0,
     thickness = 0.01, // Base thickness
-    // Thickness variation parameters
-    minThicknessMultiplier = 0.3, // Thinnest orbit multiplier (30% of base)
-    maxThicknessMultiplier = 3.0, // Thickest orbit multiplier (300% of base)
+    minThicknessMultiplier = 0.4,
+    maxThicknessMultiplier = 2.2,
   } = options
 
-  // Calculate thickness variation range
-  const minThickness = thickness * minThicknessMultiplier
-  const maxThickness = thickness * maxThicknessMultiplier
+  const isMobile = isMobileDevice()
+
+  const thicknessMultiplier = isMobile ? thickness * 2 : thickness
+  const minThickness = minThicknessMultiplier * thicknessMultiplier
+  const maxThickness = maxThicknessMultiplier * thicknessMultiplier
 
   const orbitGroup = new THREE.Group()
   const orbitCount = typeof options.count === 'number' ? options.count : 4
@@ -52,7 +55,7 @@ export const createDashedOrbits = (
     // Evenly space orbits, add randomness based on variationFactor
     const baseRadius = lerp(minRadius, maxRadius, t)
     const orbitRadius = baseRadius + rand() * variationFactor * radiusJitterAmount
-    const baseOpacity = lerp(maxOpacity, minOpacity, t) // Opacity: most opaque in the center, least on the outside, add randomness
+    const baseOpacity = lerp(maxOpacity, minOpacity, t) * (isMobile ? 2 : 1) // Opacity: most opaque in the center, least on the outside, add randomness
 
     // calculate radius-based fading
     const radiusRatio = orbitRadius / maxRadius

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
+
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 import { isSlowConnection } from '@lib/utils/isSlowConnection.ts'
 import { useViewportAspect } from './useViewportAspect.ts'
 

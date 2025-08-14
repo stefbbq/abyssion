@@ -6,8 +6,6 @@ import { updateScrollState } from '@lib/gl/animation/state/scrollState.ts'
 import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
-import MobileImageBackground from '@islands/MobileImageBackground.tsx'
-import { isMobileDevice } from '@lib/gl/scene/utils/isMobileDevice.ts'
 import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
 import configPostProcessing from '@lib/gl/configPostProcessing.json' with { type: 'json' }
 
@@ -54,24 +52,6 @@ export default function SinglePageScrollManager() {
               if (globalThis.location.hash !== newHash) {
                 history.replaceState(null, '', newHash)
               }
-              // GL scene switching logic
-              // if (isGLInitialized.value) {
-              // const orchestrator = getSceneOrchestrator()
-              // if (orchestrator) {
-              //   // If home is mostly visible, use home-page; otherwise, use content-page
-              //   if (topSection.id === 'home') {
-              //     if (lastScene.current !== 'home-page') {
-              //       orchestrator.switchToPage('home-page')
-              //       lastScene.current = 'home-page'
-              //     }
-              //   } else {
-              //     if (lastScene.current !== 'content-page') {
-              //       orchestrator.switchToPage('content-page')
-              //       lastScene.current = 'content-page'
-              //     }
-              //   }
-              // }
-              // }
             }
             ticking.current = false
           })
@@ -182,8 +162,7 @@ export default function SinglePageScrollManager() {
   // render backgrounds and GLCanvas if not disabled, fixed position
   return (
     <>
-      <MobileImageBackground />
-      <ThemedBackground intensity={backgroundIntensity} showNoise={isMobileDevice()} />
+      <ThemedBackground intensity={backgroundIntensity} showNoise />
       {showGL ? <GLCanvas /> : null}
     </>
   )

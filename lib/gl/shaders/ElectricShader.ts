@@ -39,6 +39,14 @@ export const createElectricShaderMaterial = (
   params: ShaderParams,
 ) => {
   const { texture, color, opacity, noiseScale, noiseOffset, isStencil } = params
+  const isMobile = typeof globalThis !== 'undefined' && 'navigator' in globalThis && /Mobi|Android/i.test(globalThis.navigator.userAgent)
+  const brightness = isMobile ? 1.5 : 1.0
+
+  const adjustedColor = new THREE.Color(
+    Math.min(1, (color as Three.Color).r * brightness),
+    Math.min(1, (color as Three.Color).g * brightness),
+    Math.min(1, (color as Three.Color).b * brightness),
+  )
 
   // Different material settings based on layer type
   if (isStencil) {
@@ -46,12 +54,13 @@ export const createElectricShaderMaterial = (
     return new THREE.ShaderMaterial({
       uniforms: {
         map: { value: texture },
-        color: { value: color },
+        color: { value: adjustedColor },
         opacity: { value: opacity },
         time: { value: 0.0 },
         noiseScale: { value: noiseScale },
         noiseOffset: { value: noiseOffset },
         isStencil: { value: true },
+        brightness: { value: brightness },
       },
       vertexShader,
       fragmentShader,
@@ -66,12 +75,13 @@ export const createElectricShaderMaterial = (
     return new THREE.ShaderMaterial({
       uniforms: {
         map: { value: texture },
-        color: { value: color },
+        color: { value: adjustedColor },
         opacity: { value: opacity },
         time: { value: 0.0 },
         noiseScale: { value: noiseScale },
         noiseOffset: { value: noiseOffset },
         isStencil: { value: false },
+        brightness: { value: brightness },
       },
       vertexShader,
       fragmentShader,

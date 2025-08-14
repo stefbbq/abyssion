@@ -1,6 +1,6 @@
 import * as Three from 'three'
 import { currentGLTheme } from '@lib/theme/index.ts'
-import { isMobileDevice } from './utils/isMobileDevice.ts'
+import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 
 /**
  * Create and initialize the basic 3D scene

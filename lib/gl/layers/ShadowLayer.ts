@@ -30,12 +30,12 @@ export const createShadowLayer = (THREE: typeof Three, logoWidth?: number, logoH
   // Calculate shadow dimensions and setup
   const actualLogoWidth = logoWidth || planeWidth
   const actualLogoHeight = logoHeight || planeHeight
-  const shadowWidth = actualLogoWidth * 2.4
-  const shadowHeight = actualLogoHeight * .8
+  const shadowWidth = actualLogoWidth * 3.2
+  const shadowHeight = actualLogoHeight * 1
   const geometry = new THREE.PlaneGeometry(shadowWidth, shadowHeight)
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      opacity: { value: .7 },
+      opacity: { value: 0.8 },
     },
     vertexShader: shadowVertexShader,
     fragmentShader: shadowFragmentShader,

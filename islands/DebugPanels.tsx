@@ -300,10 +300,10 @@ export const DebugPanels = (props: Props) => {
   }
 
   const handleCorruptionChange = (params: CorruptionParams) => {
-    console.log('🔄 handleCorruptionChange called in DebugPanels with:', params)
-    console.log('🔄 Old corruptionParams.value:', corruptionParams.value)
+    log.debug(lc.GL, 'handleCorruptionChange called in DebugPanels', params)
+    log.debug(lc.GL, 'Old corruptionParams.value', corruptionParams.value)
     corruptionParams.value = params
-    console.log('🔄 New corruptionParams.value:', corruptionParams.value)
+    log.debug(lc.GL, 'New corruptionParams.value', corruptionParams.value)
     if (onCorruptionChangeCallback) onCorruptionChangeCallback(params)
   }
 
@@ -403,10 +403,10 @@ export const DebugPanels = (props: Props) => {
   }
 
   const handleVideoBackgroundOpacityChange = (opacity: number) => {
-    console.log('🔄 handleVideoBackgroundOpacityChange called in DebugPanels with:', opacity)
-    console.log('🔄 Old videoBackgroundOpacity.value:', videoBackgroundOpacity.value)
+    log.debug(lc.GL_VIDEO, 'handleVideoBackgroundOpacityChange called', opacity)
+    log.debug(lc.GL_VIDEO, 'Old videoBackgroundOpacity.value', videoBackgroundOpacity.value)
     videoBackgroundOpacity.value = opacity
-    console.log('🔄 New videoBackgroundOpacity.value:', videoBackgroundOpacity.value)
+    log.debug(lc.GL_VIDEO, 'New videoBackgroundOpacity.value', videoBackgroundOpacity.value)
     if (onVideoBackgroundOpacityChangeCallback) onVideoBackgroundOpacityChangeCallback(opacity)
   }
 

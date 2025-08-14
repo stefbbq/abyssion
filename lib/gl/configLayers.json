@@ -11,8 +11,8 @@
       "variationFactor": 1,
       "linewidth": 1,
       "thickness": 0.01,
-      "minThicknessMultiplier": 0.2,
-      "maxThicknessMultiplier": 1.8,
+      "minThicknessMultiplier": 0.4,
+      "maxThicknessMultiplier": 2.2,
       "count": 8,
       "zPosition": 0
     },
