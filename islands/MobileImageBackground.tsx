@@ -16,6 +16,7 @@ export default function MobileImageBackground({ enabledOverride }: { enabledOver
         backgroundImage: `url(${images[index]})`,
         transform: `scale(1.2)`,
         backgroundPosition: `center calc(50% + ${totalY}px)`,
+        backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
       }}
       aria-hidden='true'

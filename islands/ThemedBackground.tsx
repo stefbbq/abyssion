@@ -3,6 +3,7 @@ import { currentUITheme } from '@lib/theme/index.ts'
 import { currentBaseTheme } from '@lib/theme/state.ts'
 import { createShades } from '@lib/theme/colorUtils/createShades.ts'
 import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
+import { hexStringToCSSRGB } from '@lib/theme/colorUtils/hexStringToCSSRGB.ts'
 import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 import { useMobileBackground } from '@lib/ui/useMobileBackground.ts'
 import { useParallax } from '@lib/ui/useParallax.ts'
@@ -29,6 +30,7 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
   const theme = currentUITheme.value
   const baseTheme = currentBaseTheme.value
   const [noiseIndex, setNoiseIndex] = useState(0)
+  const previousBodyStylesRef = useRef<Record<string, string> | null>(null)
   const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -84,6 +86,63 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
   const { shouldEnable: showMobileBackground, index, images } = useMobileBackground()
   const parallaxY = useParallax(showMobileBackground, { driftSpeed: 0, scrollFactor: -0.01 })
 
+  // set body background on ios so it paints behind safari toolbars
+  useEffect(() => {
+    const isIOS = () => typeof globalThis.navigator !== 'undefined' && /iPad|iPhone|iPod/i.test(globalThis.navigator.userAgent)
+    if (!isIOS()) return
+
+    const body = globalThis.document?.body
+    if (!body) return
+
+    if (!previousBodyStylesRef.current) {
+      previousBodyStylesRef.current = {
+        backgroundImage: body.style.backgroundImage,
+        backgroundRepeat: body.style.backgroundRepeat,
+        backgroundSize: body.style.backgroundSize,
+        backgroundPosition: body.style.backgroundPosition,
+        backgroundAttachment: body.style.backgroundAttachment,
+      }
+    }
+
+    const rgb = hexStringToCSSRGB(computedBackgroundColor)
+    const tintLayer = `linear-gradient(rgba(${rgb}, ${fadeOpacity}), rgba(${rgb}, ${fadeOpacity}))`
+
+    const layers: string[] = [tintLayer]
+    const repeats: string[] = ['no-repeat']
+    const sizes: string[] = ['auto']
+    const positions: string[] = ['0 0']
+
+    if (showMobileBackground) {
+      layers.push(`url(${images[index]})`)
+      repeats.push('no-repeat')
+      sizes.push('cover')
+      positions.push('center center')
+    }
+
+    if (showMobileBackground && showNoise) {
+      layers.push(`url(${noiseImages[noiseIndex]})`)
+      repeats.push('repeat')
+      sizes.push('150px 75px')
+      positions.push('0 0')
+    }
+
+    body.style.backgroundImage = layers.join(', ')
+    body.style.backgroundRepeat = repeats.join(', ')
+    body.style.backgroundSize = sizes.join(', ')
+    body.style.backgroundPosition = positions.join(', ')
+    body.style.backgroundAttachment = 'scroll'
+
+    return () => {
+      if (!previousBodyStylesRef.current) return
+      body.style.backgroundImage = previousBodyStylesRef.current.backgroundImage
+      body.style.backgroundRepeat = previousBodyStylesRef.current.backgroundRepeat
+      body.style.backgroundSize = previousBodyStylesRef.current.backgroundSize
+      body.style.backgroundPosition = previousBodyStylesRef.current.backgroundPosition
+      body.style.backgroundAttachment = previousBodyStylesRef.current.backgroundAttachment
+      previousBodyStylesRef.current = null
+    }
+  }, [computedBackgroundColor, fadeOpacity, showMobileBackground, images, index, parallaxY, showNoise, noiseIndex])
+
   return (
     <>
       {/* tinted background */}
@@ -111,8 +170,9 @@ const ThemedBackground = ({ intensity = 0, showNoise = true }: { intensity?: num
           class='fixed inset-0 -z-30'
           style={{
             backgroundImage: `url(${images[index]})`,
-            transform: `scale(1.2)`,
+            transform: `scale(1.1)`,
             backgroundPosition: `center calc(50% + ${parallaxY}px)`,
+            backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
           }}
           aria-hidden='true'
