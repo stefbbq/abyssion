@@ -45,7 +45,45 @@ export const createSingleVideoManager = async (
   // try preferred source, then fallback to alternate container if initial play fails
   const pickAlternate = (src: string) => src.endsWith('.mp4') ? src.replace(/\.mp4$/, '.webm') : src.replace(/\.webm$/, '.mp4')
   let currentSrc = singleVideoPath
-  video.src = currentSrc
+  // lazy-loaded hls.js instance for .m3u8 streams
+  type HlsPublic = { destroy: () => void; attachMedia: (media: HTMLVideoElement) => void; loadSource: (url: string) => void }
+  type HlsClass = typeof import('hls.js').default
+  let hlsInstance: HlsPublic | null = null
+
+  // set video source with support for hls (.m3u8) using native safari support or hls.js esm fallback
+  const setVideoSource = async (): Promise<void> => {
+    const isHls = /\.m3u8(\?|$)/.test(currentSrc)
+    if (!isHls) {
+      video.src = currentSrc
+      return
+    }
+
+    const canUseNativeHls = video.canPlayType('application/vnd.apple.mpegurl') !== ''
+    if (canUseNativeHls) {
+      video.src = currentSrc
+      return
+    }
+
+    try {
+      // dynamic import of npm module via deno import map
+      const mod = await import('hls.js')
+      const Hls = (mod as unknown as { default: HlsClass }).default
+      if (!Hls || !Hls.isSupported()) {
+        log.error(lc.GL_VIDEO, 'hls.js not supported and no native hls available')
+        return
+      }
+
+      type HlsConfig = import('hls.js').HlsConfig
+      hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true } as HlsConfig) as unknown as HlsPublic
+      hlsInstance.attachMedia(video)
+      hlsInstance.loadSource(currentSrc)
+      // rely on existing 'canplay' readiness; no need to wait for Hls.Events
+    } catch (e) {
+      log.error(lc.GL_VIDEO, 'failed to initialize hls.js', e)
+    }
+  }
+
+  await setVideoSource()
 
   // Create texture
   const texture = new THREE.VideoTexture(video)
@@ -99,11 +137,13 @@ export const createSingleVideoManager = async (
     if (alt !== currentSrc) {
       log.warn(lc.GL_VIDEO, `Primary failed, trying fallback source: ${alt}`)
       try {
-        video.pause()
+        video.pause() // fully reset element and source (including hls instance) before retry
+        ;(hlsInstance as unknown as { destroy?: () => void }).destroy?.()
+        hlsInstance = null
         video.src = ''
         video.load()
         currentSrc = alt
-        video.src = currentSrc
+        await setVideoSource()
         await video.play()
         log.debug(lc.GL_VIDEO, 'Fallback video playing successfully')
       } catch (fallbackError) {
@@ -155,6 +195,7 @@ export const createSingleVideoManager = async (
     update: () => {},
     dispose: () => {
       video.pause()
+      ;(hlsInstance as unknown as { destroy?: () => void }).destroy?.()
       video.src = ''
       video.load()
       stopVideoTextureUpdates()

@@ -10,7 +10,7 @@
     "path": "/media/videos/"
   },
   "single": {
-    "path": "/media/videos/background.mp4",
+    "path": "https://stream.mux.com/GQsJ1RsIOT8RKocxUyuOhJie2CIEFsKG2rM02QieTaoM.m3u8",
     "playbackSpeed": 1,
     "videoLoadTimeoutMS": 30000
   },
