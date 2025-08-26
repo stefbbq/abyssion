@@ -12,6 +12,17 @@ type Props = {
 }
 
 export const Title = ({ children, className, innerClassName }: Props) => {
+  /**
+   * Title component
+   * provides consistent h2 styling with a themed surface label and default spacing
+   *
+   * @param children content to render inside the title
+   * @param className optional class names for the outer h2
+   * @param innerClassName optional class names for the inner span
+   *
+   * @example
+   *   <Title className='mb-6'>Shows</Title>
+   */
   const outer = `text-3xl mb-8 ${className || ''}`
   const inner = `surface-title py-1 uppercase tracking-wider ${innerClassName || ''}`
 

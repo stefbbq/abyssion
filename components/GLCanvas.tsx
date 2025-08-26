@@ -15,8 +15,8 @@ export const GLCanvas = ({ style }: { style?: CSSProperties }) => {
 
     // Initialize GL environment
     const options: InitOptions = {
-      outlineTexturePath: '/images/abyssion_logo_outline-transparent.png',
-      stencilTexturePath: '/images/abyssion_logo_stencil-transparent.png',
+      outlineTexturePath: '/media/images/abyssion_logo_outline-transparent.png',
+      stencilTexturePath: '/media/images/abyssion_logo_stencil-transparent.png',
       canvas: canvasRef.current,
     }
 

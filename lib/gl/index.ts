@@ -292,7 +292,7 @@ export const initGL = async (options: InitOptions) => {
 
   // main initialization logic
   const { canvas, stencilTexturePath, outlineTexturePath } = options
-  const effectiveOutlineTexturePath = isMobileDevice() ? '/images/abyssion_logo_outline_mobile-transparent.webp' : outlineTexturePath
+  const effectiveOutlineTexturePath = isMobileDevice() ? '/media/images/abyssion_logo_outline_mobile-transparent.webp' : outlineTexturePath
 
   // load configuration files
   const [rendererConfig, basePostProcessingConfig, controlsConfig, animationConfig] = await Promise.all([

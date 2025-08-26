@@ -15,6 +15,7 @@ type Props = {
 export const ThemeSwitcher = ({ className = '' }: Props) => {
   // Read current UI theme (already resolves full palette and CSS colors)
   const ui = currentUITheme.value
+
   const primaryCSS = ui.colors.primary
   const secondaryCSS = ui.colors.secondary
   const tertiaryCSS = ui.colors.tertiary

@@ -51,7 +51,9 @@ export const updateVideoPool = async (
     video.playsInline = true
     video.preload = 'auto'
     video.playbackRate = videoCycleConfig.cycling.playbackSpeed
-    video.src = `/videos/${videoPool.manifest[i]}`
+    // use configured base path for videos
+    const basePath = (videoCycleConfig.cycling?.path || '/media/videos/').replace(/\/?$/, '/')
+    video.src = `${basePath}${videoPool.manifest[i]}`
     return video
   })
 

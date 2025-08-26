@@ -2,39 +2,9 @@ import controlsConfig from '@libgl/configControls.json' with { type: 'json' }
 import { currentThemeFamilyName, currentThemeMode, getAllThemeFamilies, setThemeFamily } from '@lib/theme/index.ts'
 import { lc, log } from '@lib/logger/index.ts'
 import { useState } from 'preact/hooks'
-import type { CorruptionParams } from './DebugPanels.tsx'
+import type { CorruptionParams, DOFParams, FinalPassParams, SelectiveColorizationParams } from '@lib/debug/types.ts'
 
-type DOFParams = {
-  focus: number
-  aperture: number
-  maxblur: number
-  /** live focus distance being used by the animation loop */
-  liveFocusDistance: number
-}
-
-type FinalPassParams = {
-  chromaStrength: number
-  gain: number
-  contrast: number
-}
-
-type SelectiveColorizationParams = {
-  enabled: boolean
-  useThemeColors: boolean
-  primaryTargetColor: string
-  secondaryTargetColor: string
-  targeting: {
-    brightnessWeight: number
-    saturationWeight: number
-    brightnessThreshold: number
-    saturationThreshold: number
-    blendSmoothness: number
-  }
-  colorBlending: {
-    blendMode: 'mixed' | 'overlay' | 'multiply'
-    blendBalance: number
-  }
-}
+// types imported from shared lib
 
 type ThemeColors = {
   highlight: string

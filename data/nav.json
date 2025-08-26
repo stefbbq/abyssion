@@ -25,13 +25,13 @@
   "socialLinks": [
     {
       "key": "facebook",
-      "url": "https://facebook.com/abyssionofficial",
+      "url": "https://www.facebook.com/profile.php?id=61554946837458&notif_id=1755700481587242&notif_t=page_user_activity&ref=notif",
       "label": "Facebook",
       "icon": "FacebookIcon"
     },
     {
       "key": "instagram",
-      "url": "https://instagram.com/abyssionofficial",
+      "url": "https://www.instagram.com/challenge/?next=https%3A%2F%2Fwww.instagram.com%2Fabyssion_band%2F%3F__coig_challenged%3D1",
       "label": "Instagram",
       "icon": "InstagramIcon"
     },
@@ -43,7 +43,7 @@
     },
     {
       "key": "soundcloud",
-      "url": "https://soundcloud.com/abyssionofficial",
+      "url": "https://soundcloud.com/abyssionmetal",
       "label": "SoundCloud",
       "icon": "SoundCloudIcon"
     }

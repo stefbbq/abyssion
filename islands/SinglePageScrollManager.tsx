@@ -7,9 +7,10 @@ import { GLCanvas } from '@components/GLCanvas.tsx'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
 import { getScrollCorruptionProgress } from '@lib/gl/scene/utils/getScrollCorruptionProgress.ts'
+import { getScrollOffset, sectionIds } from '@lib/ui/sections.ts'
 import configPostProcessing from '@lib/gl/configPostProcessing.json' with { type: 'json' }
 
-const sectionIds = ['home', 'shows', 'bio', 'contact']
+// section ids unified via lib/ui/sections
 
 /**
  * SinglePageScrollManager
@@ -64,8 +65,6 @@ export default function SinglePageScrollManager() {
       },
     )
     sections.forEach((section) => observer.observe(section))
-
-    const getScrollOffset = () => globalThis.innerWidth < 768 ? 20 : 75
 
     // smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {

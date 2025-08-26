@@ -2,7 +2,6 @@ import { ComponentChildren } from 'preact'
 import { JSX } from 'preact/jsx-runtime'
 import { forwardRef } from 'preact/compat'
 
-/** dropdown option value and label */
 export type Option = {
   value: string
   label: string
@@ -24,6 +23,15 @@ type Props = {
  */
 export const Dropdown = forwardRef<HTMLSelectElement, Props>(
   ({ options, value, onChange, children, ...props }, ref) => {
+    /**
+     * Dropdown component
+     * theme-aware select with support for custom options and ref forwarding
+     *
+     * @param options list of options to render when no custom children provided
+     * @param value selected value (controlled)
+     * @param onChange select change handler
+     * @param children optional custom option elements
+     */
     return (
       <div class='relative w-full'>
         <select

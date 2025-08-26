@@ -42,7 +42,10 @@ export const createSingleVideoManager = async (
   ;(video as HTMLVideoElement & { disableRemotePlayback?: boolean }).disableRemotePlayback = true
   video.preload = 'auto'
   video.playbackRate = singlePlaybackSpeed
-  video.src = singleVideoPath
+  // try preferred source, then fallback to alternate container if initial play fails
+  const pickAlternate = (src: string) => src.endsWith('.mp4') ? src.replace(/\.mp4$/, '.webm') : src.replace(/\.webm$/, '.mp4')
+  let currentSrc = singleVideoPath
+  video.src = currentSrc
 
   // Create texture
   const texture = new THREE.VideoTexture(video)
@@ -91,8 +94,26 @@ export const createSingleVideoManager = async (
     await video.play()
     log.debug(lc.GL_VIDEO, 'Single video playing successfully')
   } catch (error) {
-    log.error(lc.GL_VIDEO, 'Failed to play single video:', error)
-    throw error
+    // attempt fallback container once
+    const alt = pickAlternate(currentSrc)
+    if (alt !== currentSrc) {
+      log.warn(lc.GL_VIDEO, `Primary failed, trying fallback source: ${alt}`)
+      try {
+        video.pause()
+        video.src = ''
+        video.load()
+        currentSrc = alt
+        video.src = currentSrc
+        await video.play()
+        log.debug(lc.GL_VIDEO, 'Fallback video playing successfully')
+      } catch (fallbackError) {
+        log.error(lc.GL_VIDEO, 'Failed to play fallback single video:', fallbackError)
+        throw fallbackError
+      }
+    } else {
+      log.error(lc.GL_VIDEO, 'Failed to play single video and no fallback available:', error)
+      throw error
+    }
   }
 
   // Drive texture updates using requestVideoFrameCallback if available (Safari/WebKit friendly)

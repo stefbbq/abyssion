@@ -13,8 +13,10 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
   if (
     url.pathname.startsWith('/images/') ||
     url.pathname.startsWith('/static/images/') ||
+    url.pathname.startsWith('/media/images/') ||
     url.pathname.startsWith('/videos/') ||
-    url.pathname.startsWith('/static/videos/')
+    url.pathname.startsWith('/static/videos/') ||
+    url.pathname.startsWith('/media/videos/')
   ) {
     const resp = await ctx.next()
     resp.headers.set('Cache-Control', 'public, max-age=31536000, immutable')

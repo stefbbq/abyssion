@@ -1,6 +1,7 @@
 // deno-lint-ignore-file react-no-danger
 import { Head } from '$fresh/runtime.ts'
 import { useSignalEffect } from '@preact/signals'
+
 import { currentUITheme } from '@lib/theme/index.ts'
 import { currentThemeFamilyName, currentThemeMode } from '@lib/theme/state.ts'
 import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
@@ -9,7 +10,7 @@ import { createThemeVariables } from '@lib/theme/utils/createThemeVariables.ts'
  * A global provider that injects the current theme's CSS variables into the document head.
  * It automatically updates whenever the theme changes.
  */
-export default function ThemeProvider() {
+export const ThemeProvider = () => {
   const themeVariables = createThemeVariables(currentUITheme.value)
   const fontUrls = currentUITheme.value.typography.fontUrls || []
 
@@ -45,3 +46,5 @@ export default function ThemeProvider() {
     </Head>
   )
 }
+
+export default ThemeProvider

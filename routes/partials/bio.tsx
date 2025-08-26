@@ -20,18 +20,7 @@ export default function BioSection() {
       <Shell>
         <Title>{bio.albumsTitle}</Title>
         <div class='space-y-6'>
-          {bio.albums.map((album, idx) => (
-            <RichLineItem
-              key={idx}
-              left={<span class='text-2xl md:text-3xl text-[var(--colors-foreground)]'>{album.year}</span>}
-              main={
-                <div>
-                  <h3 class='text-xl font-semibold text-[var(--colors-text-primary)]'>{album.title}</h3>
-                  <p class='text-md text-[var(--colors-text-tertiary)]'>{album.description}</p>
-                </div>
-              }
-            />
-          ))}
+          {bio.albums.map((album, idx) => <RichLineItem key={idx} leftText={album.year} title={album.title} subtitle={album.description} />)}
         </div>
       </Shell>
 

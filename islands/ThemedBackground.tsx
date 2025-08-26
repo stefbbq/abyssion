@@ -9,11 +9,11 @@ import { useMobileBackground } from '@lib/ui/useMobileBackground.ts'
 import { useParallax } from '@lib/ui/useParallax.ts'
 
 const noiseImages = [
-  '/images/noiseB.png',
-  '/images/noiseC.png',
-  '/images/noiseD.png',
-  '/images/noiseE.png',
-  '/images/noiseF.png',
+  '/media/images/noiseB.png',
+  '/media/images/noiseC.png',
+  '/media/images/noiseD.png',
+  '/media/images/noiseE.png',
+  '/media/images/noiseF.png',
 ]
 
 const getRandomInterval = () => 150 + Math.random() * 150 // 200-300ms

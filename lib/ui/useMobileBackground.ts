@@ -5,13 +5,13 @@ import { isSlowConnection } from '@lib/utils/isSlowConnection.ts'
 import { useViewportAspect } from './useViewportAspect.ts'
 
 const defaultImages = [
-  '/videos/videoCycle_mobileBG_1.webp',
-  '/videos/videoCycle_mobileBG_2.webp',
-  '/videos/videoCycle_mobileBG_3.webp',
-  '/videos/videoCycle_mobileBG_4.webp',
-  '/videos/videoCycle_mobileBG_5.webp',
-  '/videos/videoCycle_mobileBG_6.webp',
-  '/videos/videoCycle_mobileBG_7.webp',
+  '/media/videos/videoCycle_mobileBG_1.webp',
+  '/media/videos/videoCycle_mobileBG_2.webp',
+  '/media/videos/videoCycle_mobileBG_3.webp',
+  '/media/videos/videoCycle_mobileBG_4.webp',
+  '/media/videos/videoCycle_mobileBG_5.webp',
+  '/media/videos/videoCycle_mobileBG_6.webp',
+  '/media/videos/videoCycle_mobileBG_7.webp',
 ]
 
 type Options = {

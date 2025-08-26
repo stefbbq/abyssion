@@ -60,9 +60,7 @@ export default function App({ Component, url }: PageProps) {
   })
   const albumsLd: MusicAlbumListLD | null = createMusicAlbumListLD(
     (bioData?.albums as { year: string; title?: string; description?: string; type?: string; tracks?: number }[]) || [],
-    {
-      artistName: (seoConfig as { artistName?: string }).artistName || 'Abyssion',
-    },
+    { artistName: (seoConfig as { artistName?: string }).artistName || 'Abyssion' },
   )
 
   return (

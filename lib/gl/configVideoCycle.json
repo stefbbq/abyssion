@@ -7,10 +7,10 @@
     "antiRepeat": 2,
     "videoSwapTimeoutMS": 3000,
     "videoLoadTimeoutMS": 30000,
-    "path": "/videos/manifest.json"
+    "path": "/media/videos/"
   },
   "single": {
-    "path": "/videos/background.mp4",
+    "path": "/media/videos/background.mp4",
     "playbackSpeed": 1,
     "videoLoadTimeoutMS": 30000
   },

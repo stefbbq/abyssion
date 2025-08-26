@@ -6,20 +6,18 @@ import * as $_404 from './routes/_404.tsx'
 import * as $_app from './routes/_app.tsx'
 import * as $_middleware from './routes/_middleware.ts'
 import * as $index from './routes/index.tsx'
+import * as $media_path_ from './routes/media/[...path].ts'
 import * as $partials_bio from './routes/partials/bio.tsx'
 import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
-import * as $videos_path_ from './routes/videos/[...path].ts'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
 import * as $Header from './islands/Header.tsx'
-import * as $MobileImageBackground from './islands/MobileImageBackground.tsx'
 import * as $SinglePageScrollManager from './islands/SinglePageScrollManager.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
-import * as $ThemeVisualizer from './islands/ThemeVisualizer.tsx'
 import * as $ThemedBackground from './islands/ThemedBackground.tsx'
 import type { Manifest } from '$fresh/server.ts'
 
@@ -29,11 +27,11 @@ const manifest = {
     './routes/_app.tsx': $_app,
     './routes/_middleware.ts': $_middleware,
     './routes/index.tsx': $index,
+    './routes/media/[...path].ts': $media_path_,
     './routes/partials/bio.tsx': $partials_bio,
     './routes/partials/contact.tsx': $partials_contact,
     './routes/partials/home.tsx': $partials_home,
     './routes/partials/shows.tsx': $partials_shows,
-    './routes/videos/[...path].ts': $videos_path_,
   },
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
@@ -41,10 +39,8 @@ const manifest = {
     './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
     './islands/Header.tsx': $Header,
-    './islands/MobileImageBackground.tsx': $MobileImageBackground,
     './islands/SinglePageScrollManager.tsx': $SinglePageScrollManager,
     './islands/ThemeProvider.tsx': $ThemeProvider,
-    './islands/ThemeVisualizer.tsx': $ThemeVisualizer,
     './islands/ThemedBackground.tsx': $ThemedBackground,
   },
   baseUrl: import.meta.url,

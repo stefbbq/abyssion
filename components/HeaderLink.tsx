@@ -36,7 +36,6 @@ export const HeaderLink = ({
   compact = false,
   style = {},
 }: Props) => {
-  // dynamic classes
   const margin = compact ? 'mx-.5' : 'mx-1.5'
   const activeClass = isActive ? 'bg-interactive-ghostActive text-text-inverse' : ''
 

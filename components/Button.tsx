@@ -74,7 +74,7 @@ export const Button = ({
   ...props
 }: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] disabled:opacity-50 disabled:cursor-not-allowed'
+    'inline-flex items-center justify-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] disabled:opacity-50 disabled:cursor-not-allowed'
   const transitionClasses = 'transition-all duration-200'
   const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 
@@ -82,12 +82,16 @@ export const Button = ({
   const { ref, ...rest } = props as { ref?: any }
 
   if (props.href) {
+    const href = (props as any).href as string
+    const isHashLink = typeof href === 'string' && href.startsWith('#')
+    const isExternal = typeof href === 'string' && (/^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:'))
     return (
       <a
         {...rest}
         ref={ref as any}
         class={classes}
-        f-partial={`/partials${props.href === '/' ? '/home' : props.href}`}
+        {...(isHashLink || isExternal ? {} : { 'f-partial': `/partials${href === '/' ? '/home' : href}` })}
+        {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         {children}
       </a>

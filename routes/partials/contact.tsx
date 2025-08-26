@@ -3,6 +3,7 @@ import contact from '@data/content-contact.json' with { type: 'json' }
 import nav from '@data/nav.json' with { type: 'json' }
 import { icons } from '@components/icons/index.ts'
 import { Title } from '@components/Title.tsx'
+import { Button } from '@components/Button.tsx'
 // import ContactForm from '@islands/ContactForm.tsx'
 
 export default function ContactSection() {
@@ -66,18 +67,24 @@ export default function ContactSection() {
 
         <Shell>
           <Title>follow us</Title>
-          <div class='grid grid-cols-2 gap-4'>
+          <div class='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {nav.socialLinks.map((link: { key: string; url: string; label: string; icon?: string }) => {
               const Icon = link.icon ? icons[link.icon as keyof typeof icons] : undefined
               return (
-                <a
+                <Button
                   key={link.key}
                   href={link.url}
-                  class='flex items-center space-x-3 p-3 rounded-lg transition-colors border border-[var(--colors-border-primary)]'
+                  variant='primary'
+                  size='md'
+                  class='group w-full justify-start items-center h-12 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 focus-visible:translate-y-0 transition-transform'
                 >
-                  {Icon ? <Icon className='w-5 h-5 text-[var(--colors-text-tertiary)]' /> : null}
-                  <span class='text-sm font-medium text-[var(--colors-text-secondary)]'>{link.label}</span>
-                </a>
+                  <span class='flex items-center gap-3 w-full'>
+                    {Icon ? <Icon className='w-5 h-5 text-current flex-shrink-0 opacity-90 group-hover:opacity-100 transition-opacity' /> : null}
+                    <span class='text-sm font-medium text-current whitespace-nowrap'>
+                      {link.label}
+                    </span>
+                  </span>
+                </Button>
               )
             })}
           </div>
