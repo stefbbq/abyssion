@@ -1,4 +1,4 @@
-import type { HexColor } from '../index.types.ts'
+import type { HexColor } from '../types.ts'
 
 /**
  * Darken a hex color by multiplication factor

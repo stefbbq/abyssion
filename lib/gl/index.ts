@@ -7,10 +7,10 @@
  */
 
 import * as THREE from 'three'
-import { signal } from '@preact/signals'
+import { effect } from '@preact/signals'
 
 // types
-import type { InitOptions, RendererState } from './types.ts'
+import type { InitOptions } from './types.ts'
 import type { PostProcessingConfig } from './configPostProcessing.types.ts'
 import type { VideoBackgroundManager } from './textures/VideoCycle/types.ts'
 
@@ -38,16 +38,110 @@ import { createControlsSystem } from './controls/index.ts'
 // animation and orchestration
 import { createSceneOrchestrator } from './animation/index.ts'
 import { createHomePageOrchestrator } from './animation/orchestrators/homePage/createHomePageOrchestrator.ts'
+import { createContentPageOrchestrator } from './animation/orchestrators/contentPage/createContentPageOrchestrator.ts'
+import type { AnimationOrchestrator } from './animation/core/types.ts'
 
 // updaters
 import { updateScrollCorruption, updateScrollMetrics } from './updaters/index.ts'
+import { scrollState, updateScrollState } from './animation/state/scrollState.ts'
+import { getScrollCorruptionProgress } from './scene/utils/getScrollCorruptionProgress.ts'
+import { setBackgroundIntensity } from '@lib/ui/state.ts'
+import {
+  currentPath,
+  getCurrentPostProcessingConfig,
+  getGLState,
+  getSceneOrchestrator as _getSceneOrchestrator,
+  isGLInitialized,
+  scrollY,
+  setCurrentPostProcessingConfig,
+  setGLState,
+  viewportSize,
+} from './state.ts'
+
+// cached orchestrator instances to avoid re-creating on every switch
+let homeOrchestratorInstance: AnimationOrchestrator | null = null
+let contentOrchestratorInstance: AnimationOrchestrator | null = null
+
+const getOrchestrator = (name: 'home-page' | 'content-page'): AnimationOrchestrator | null => {
+  const state = getGLState()
+  if (!state) return null
+  if (name === 'home-page') {
+    if (!homeOrchestratorInstance) homeOrchestratorInstance = createHomePageOrchestrator(state)
+    return homeOrchestratorInstance
+  }
+  if (!contentOrchestratorInstance) contentOrchestratorInstance = createContentPageOrchestrator(state)
+  return contentOrchestratorInstance
+}
+
+export const switchOrchestratorForPath = (path: string) => {
+  const state = getGLState()
+  if (!state?.sceneOrchestrator) return
+  const target = path === '/' ? getOrchestrator('home-page') : getOrchestrator('content-page')
+  if (target) state.sceneOrchestrator.switchToOrchestrator(target)
+}
 
 /**
- * A signal that indicates whether the GL context has been initialized.
+ * Receive scroll telemetry from the app shell and fan it into GL subsystems.
+ * - updates shared scroll state
+ * - updates camera/effects
+ * - updates background intensity signal
  */
-export const isGLInitialized = signal(false)
+// react to scroll signal
+effect(() => {
+  const y = scrollY.value
+  updateScrollState(y)
+  const state = getGLState()
+  if (state) {
+    try {
+      updateScrollCorruption(y, state)
+      updateScrollMetrics(0, state)
+    } catch {
+      // ignore update timing errors
+    }
+  }
+  try {
+    const cfg = getCurrentPostProcessingConfig()
+    const crtCfg = cfg?.crtScrollCorruption
+    if (crtCfg && crtCfg.enabled) {
+      const { intensity } = getScrollCorruptionProgress(y, crtCfg)
+      setBackgroundIntensity(intensity)
+    } else setBackgroundIntensity(0)
+  } catch {
+    // ignore if config unavailable
+  }
+})
 
-let glState: RendererState | null = null
+// react to viewport size signal
+effect(() => {
+  const _size = viewportSize.value
+  const state = getGLState()
+  if (!state) return
+  try {
+    updateScrollMetrics(scrollState.velocity, state)
+  } catch {
+    // ignore resize timing errors
+  }
+})
+
+// react to route path signal
+effect(() => {
+  const path = currentPath.value
+  try {
+    switchOrchestratorForPath(path)
+  } catch {
+    // ignore switch errors
+  }
+  const y = typeof globalThis !== 'undefined' ? (globalThis.scrollY || 0) : 0
+  updateScrollState(y)
+  const state = getGLState()
+  if (state) {
+    try {
+      updateScrollCorruption(y, state)
+    } catch {
+      // ignore update timing errors
+    }
+  }
+})
 
 /**
  * Creates a cleanup function to dispose of all GL resources
@@ -55,33 +149,34 @@ let glState: RendererState | null = null
  */
 const createCleanupFunction = () => {
   return () => {
-    if (!glState) return
+    const state = getGLState()
+    if (!state) return
     log(lc.GL, 'Cleanup function called')
 
     // dispose orchestrator and controls
-    glState.sceneOrchestrator?.dispose()
-    glState.responsiveCleanup?.()
-    glState.videoBackground?.dispose()
-    glState.controls?.dispose()
+    state.sceneOrchestrator?.dispose()
+    state.responsiveCleanup?.()
+    state.videoBackground?.dispose()
+    state.controls?.dispose()
 
     // dispose logo system
-    if (glState.logoController && glState.scene && glState.logoPlanes) {
-      glState.logoController.dispose(glState.scene, glState.logoPlanes)
+    if (state.logoController && state.scene && state.logoPlanes) {
+      state.logoController.dispose(state.scene, state.logoPlanes)
     }
 
     // remove scene objects
-    if (glState.scene) {
-      glState.shapeLayer && glState.scene.remove(glState.shapeLayer)
-      glState.shadowLayer?.mesh && glState.scene.remove(glState.shadowLayer.mesh)
-      glState.uiOverlay?.scene && glState.scene.remove(glState.uiOverlay.scene)
+    if (state.scene) {
+      state.shapeLayer && state.scene.remove(state.shapeLayer)
+      state.shadowLayer?.mesh && state.scene.remove(state.shadowLayer.mesh)
+      state.uiOverlay?.scene && state.scene.remove(state.uiOverlay.scene)
     }
 
     // dispose rendering pipeline
-    glState.composer?.dispose()
-    glState.renderer?.dispose()
+    state.composer?.dispose()
+    state.renderer?.dispose()
 
     // clear state
-    glState = null
+    setGLState(null)
   }
 }
 
@@ -96,15 +191,18 @@ const createReadinessManager = () => {
   const checkAndStart = () => {
     if (!sceneReady || !videoReady) return false
 
-    if (!glState?.sceneOrchestrator || !glState?.logoController) {
+    const state = getGLState()
+    if (!state?.sceneOrchestrator || !state?.logoController) {
       log.error(lc.GL, 'Cannot start - orchestrator or logoController not ready')
       return false
     }
 
-    log(lc.GL, 'Both scene and video ready, starting animation loop and home orchestrator')
-    glState.sceneOrchestrator.start()
-    const homeOrchestrator = createHomePageOrchestrator(glState)
-    glState.sceneOrchestrator.switchToOrchestrator(homeOrchestrator)
+    log(lc.GL, 'Both scene and video ready, starting animation loop and selecting initial orchestrator')
+    state.sceneOrchestrator.start()
+    // choose initial orchestrator based on current route (cached instances)
+    const path = typeof globalThis !== 'undefined' ? (globalThis.location?.pathname || '/') : '/'
+    const initial = path === '/' ? getOrchestrator('home-page') : getOrchestrator('content-page')
+    if (initial) state.sceneOrchestrator.switchToOrchestrator(initial)
     return true
   }
 
@@ -136,16 +234,17 @@ export const initGL = async (options: InitOptions) => {
    * Setup post-processing effects
    */
   const setupPostProcessingEffects = async () => {
-    if (!glState) return
+    const state = getGLState()
+    if (!state) return
 
-    const { scene, camera, renderer } = glState
+    const { scene, camera, renderer } = state
     const { innerWidth: width, innerHeight: height } = globalThis
 
     if (postProcessingConfigEffective.enabled) {
       log(lc.GL, 'Creating post-processing...')
       const postProcessing = await createPostProcessing(THREE, scene, camera, renderer, width, height, postProcessingConfigEffective)
-      Object.assign(glState, postProcessing)
-      log(lc.GL, 'Post-processing created, composer available:', !!glState.composer)
+      Object.assign(state, postProcessing)
+      log(lc.GL, 'Post-processing created, composer available:', !!state.composer)
     } else {
       log.warn(lc.GL, 'Post-processing disabled in config')
     }
@@ -155,20 +254,21 @@ export const initGL = async (options: InitOptions) => {
    * Setup UI and responsive systems
    */
   const setupUIAndResponsive = () => {
-    if (!glState) return
+    const state = getGLState()
+    if (!state) return
 
-    const { camera } = glState
+    const { camera } = state
     const { innerWidth: width, innerHeight: height } = globalThis
 
     // create the UI layer
-    glState.uiOverlay = createUILayer(THREE, width, height)
+    state.uiOverlay = createUILayer(THREE, width, height)
 
     // setup responsive handling
-    glState.responsiveCleanup = setupResponsiveHandling({
+    state.responsiveCleanup = setupResponsiveHandling({
       camera,
-      composer: glState.composer,
-      uiLayer: glState.uiOverlay,
-      videoBackground: glState.videoBackground as VideoBackgroundManager,
+      composer: state.composer,
+      uiLayer: state.uiOverlay,
+      videoBackground: state.videoBackground as VideoBackgroundManager,
       rendererConfig,
     })
   }
@@ -177,9 +277,10 @@ export const initGL = async (options: InitOptions) => {
    * Setup debug mode features
    */
   const setupDebugMode = async () => {
-    if (!isDebugModeEnabled() || !glState?.logoController) return
+    const state = getGLState()
+    if (!isDebugModeEnabled() || !state?.logoController) return
 
-    const { scene, camera, renderer } = glState
+    const { scene, camera, renderer } = state
     const { debugMobileResponsiveness } = await import('./scene/utils/debugMobileResponsiveness.ts')
     debugMobileResponsiveness()
 
@@ -188,9 +289,9 @@ export const initGL = async (options: InitOptions) => {
       canvas,
       camera,
       scene,
-      bokehPass: glState.bokehPass,
-      logoController: glState.logoController,
-      state: glState,
+      bokehPass: state.bokehPass,
+      logoController: state.logoController,
+      state,
       THREE,
     })
 
@@ -201,13 +302,13 @@ export const initGL = async (options: InitOptions) => {
       onToggleRotation: () => log(lc.GL, 'Rotation toggled'),
       onRegenerateLayers: debug.handleRegenerateRandomLayers,
     })
-    glState.controls = controls.orbitControls
+    state.controls = controls.orbitControls
 
     // override composer render for debug UI
-    const origRender = glState.composer?.render || (() => renderer.render(scene, camera))
-    if (glState.composer) {
-      const currentState = glState // capture reference
-      const composer = glState.composer
+    const origRender = state.composer?.render || (() => renderer.render(scene, camera))
+    if (state.composer) {
+      const currentState = state // capture reference
+      const composer = state.composer
 
       composer.render = () => {
         debug.updateDebugInfo()
@@ -236,12 +337,13 @@ export const initGL = async (options: InitOptions) => {
    * This orchestrates all scene setup operations
    */
   const setupScene = async () => {
-    if (!glState?.scene || !glState?.camera || !glState?.renderer) {
+    const state = getGLState()
+    if (!state?.scene || !state?.camera || !state?.renderer) {
       log.error(lc.GL, 'Scene, camera, or renderer not available when setting up scene')
       return
     }
 
-    const { scene } = glState
+    const { scene } = state
 
     // setup post-processing
     await setupPostProcessingEffects()
@@ -251,19 +353,19 @@ export const initGL = async (options: InitOptions) => {
 
     // load textures
     const textures = await setupTextureLoading(THREE, stencilTexturePath, effectiveOutlineTexturePath)
-    Object.assign(glState, textures)
+    Object.assign(state, textures)
 
     // setup layer system
     log(lc.GL, 'Setting up layer system...')
     const layerSystem = await setupLayerSystem(THREE, scene, textures.outlineTexture, textures.stencilTexture)
-    Object.assign(glState, layerSystem)
-    log(lc.GL, 'Layer system setup complete, logoController available:', !!glState.logoController)
+    Object.assign(state, layerSystem)
+    log(lc.GL, 'Layer system setup complete, logoController available:', !!state.logoController)
 
     // setup debug mode if enabled
     await setupDebugMode()
 
     // update the orchestrator with the fully initialized state
-    glState.sceneOrchestrator?.setRenderState(glState)
+    state.sceneOrchestrator?.setRenderState(state)
 
     // mark scene as ready
     readiness.setSceneReady()
@@ -282,7 +384,8 @@ export const initGL = async (options: InitOptions) => {
 
     try {
       const videoBackground = await addVideoBackground(THREE, core.scene, readiness.setVideoReady)
-      glState!.videoBackground = videoBackground
+      const state = getGLState()
+      if (state) state.videoBackground = videoBackground
       log(lc.GL, 'Video background added, waiting for video ready callback...')
     } catch (error) {
       log.error(lc.GL, 'Failed to load video background:', error)
@@ -305,9 +408,10 @@ export const initGL = async (options: InitOptions) => {
   // create lighter post-processing on mobile/iOS to improve perf
   const postProcessingConfigEffective: PostProcessingConfig = (() => {
     const config = JSON.parse(JSON.stringify(basePostProcessingConfig)) as PostProcessingConfig
-    if (!isMobileDevice()) return config
-    // reduce film scanlines and disable heavy effects
+
     // on mobile, disable post-processing entirely to preserve canvas transparency
+    if (!isMobileDevice()) return config
+
     config.enabled = false
     if (config.film) config.film.scanlineCount = Math.min(config.film.scanlineCount ?? 2048, 800)
     if (config.bloom) {
@@ -328,13 +432,19 @@ export const initGL = async (options: InitOptions) => {
   const core = await setupCoreRendering(THREE, options)
 
   // create and populate initial GL state
-  glState = createInitialGLState(THREE)
-  Object.assign(glState, {
+  const initialState = createInitialGLState(THREE)
+  Object.assign(initialState, {
     scene: core.scene,
     camera: core.camera,
     renderer: core.renderer,
-    sceneOrchestrator: createSceneOrchestrator(glState),
   })
+
+  // scene orchestrator depends on state reference
+  initialState.sceneOrchestrator = createSceneOrchestrator(initialState)
+  setGLState(initialState)
+
+  // expose effective PP config to telemetry helpers
+  setCurrentPostProcessingConfig(postProcessingConfigEffective)
 
   // setup scene and video
   await Promise.all([setupScene(), setupVideo()])
@@ -345,7 +455,8 @@ export const initGL = async (options: InitOptions) => {
   // ensure initial camera position reflects current scroll on first load
   try {
     const currentScrollY = typeof globalThis !== 'undefined' ? globalThis.scrollY : 0
-    if (glState) updateScrollCorruption(currentScrollY, glState)
+    const state = getGLState()
+    if (state) updateScrollCorruption(currentScrollY, state)
   } catch (error) {
     log.warn(lc.GL, 'Failed to apply initial scroll-based camera update:', error)
   }
@@ -354,7 +465,5 @@ export const initGL = async (options: InitOptions) => {
   return createCleanupFunction()
 }
 
-export const getSceneOrchestrator = () => glState?.sceneOrchestrator
-export const getGLState = () => glState
-
 export { type InitOptions, updateScrollCorruption, updateScrollMetrics }
+export { getGLState, getSceneOrchestrator, isGLInitialized } from './state.ts'

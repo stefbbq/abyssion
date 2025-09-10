@@ -1,5 +1,3 @@
-// shared gl constants
-
 // global fade thresholds used across animations for scroll-based fading
 export const GLOBAL_FADE_START_THRESHOLD = 0.55
 export const GLOBAL_FADE_END_THRESHOLD = 0.9

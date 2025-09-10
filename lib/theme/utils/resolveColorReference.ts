@@ -1,4 +1,4 @@
-import type { ColorPalette, HexColor } from '../index.types.ts'
+import type { ColorPalette, HexColor } from '../types.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
 /**

@@ -103,7 +103,7 @@ export default function ActionZoneController() {
         isScrollingRef.current = true
         setCurrentHash(hash) // Immediately update to target hash
 
-        // Match SinglePageScrollManager's scroll offset logic exactly
+        // Match PageManager's scroll offset logic exactly
         const getScrollOffset = () => {
           const isMobile = globalThis.innerWidth < 768 // md breakpoint
           return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop
@@ -142,7 +142,7 @@ export default function ActionZoneController() {
         isScrollingRef.current = true
         setCurrentHash(path) // Immediately update to target hash
 
-        // Match SinglePageScrollManager's scroll offset logic exactly
+        // Match PageManager's scroll offset logic exactly
         const getScrollOffset = () => {
           const isMobile = globalThis.innerWidth < 768 // md breakpoint
           return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop

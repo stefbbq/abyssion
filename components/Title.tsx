@@ -1,8 +1,5 @@
 import { ComponentChildren } from 'preact'
 
-// title component for consistent h2 styling across the app
-// wraps text in a themed surface label and applies default sizing/margins
-
 type Props = {
   children: ComponentChildren
   // optional class names for the outer h2
@@ -11,6 +8,10 @@ type Props = {
   innerClassName?: string
 }
 
+/**
+ * Title component
+ * provides consistent h2 styling with a themed surface label and default spacing
+ */
 export const Title = ({ children, className, innerClassName }: Props) => {
   /**
    * Title component
@@ -25,6 +26,8 @@ export const Title = ({ children, className, innerClassName }: Props) => {
    */
   const outer = `text-3xl mb-8 ${className || ''}`
   const inner = `surface-title py-1 uppercase tracking-wider ${innerClassName || ''}`
+
+  // no glitch effect: no data-text needed
 
   return (
     <div class='-mx-8 -mt-8 pt-8 px-8' style={{ backgroundColor: 'rgba(0,0,0,.2)' }}>

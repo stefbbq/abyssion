@@ -9,7 +9,7 @@ import { DebugPanels } from '@islands/DebugPanels.tsx'
 import pagesConfig from '@data/pages.json' with { type: 'json' }
 import ThemeProvider from '@islands/ThemeProvider.tsx'
 import { currentUITheme } from '@lib/theme/index.ts'
-import SinglePageScrollManager from '@islands/SinglePageScrollManager.tsx'
+import PageManager from '@islands/PageManager.tsx'
 import {
   createMusicAlbumListLD,
   createMusicEventListLD,
@@ -124,7 +124,7 @@ export default function App({ Component, url }: PageProps) {
         <DebugPanels />
 
         {/** scroll events, themed background, GL canvas */}
-        <SinglePageScrollManager />
+        <PageManager />
 
         {/** desktop only, navigation and branding elements */}
         {showHeader && <Header />}

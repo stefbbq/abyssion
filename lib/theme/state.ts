@@ -4,7 +4,8 @@
  * Includes cookie persistence for user preferences
  */
 import { computed, effect, signal } from '@preact/signals'
-import type { BaseTheme, ThemeFamily } from './index.types.ts'
+
+import type { BaseTheme, ThemeFamily } from './types.ts'
 import { themeFamilies } from './themes/index.ts'
 import { getNextThemeFamily } from './utils/themeFamilyUtils.ts'
 import { getCookie, setCookie } from '@lib/utils/cookies.ts'

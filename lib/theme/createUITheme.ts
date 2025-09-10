@@ -1,4 +1,4 @@
-import type { BaseTheme, UITheme } from './index.types.ts'
+import type { BaseTheme, UITheme } from './types.ts'
 import { createShades } from './colorUtils/createShades.ts'
 import { createDefaultSurfaces, createUISurfaces } from './utils/createUISurfaces.ts'
 import { hexToCSS } from './colorUtils/hexToCSS.ts'

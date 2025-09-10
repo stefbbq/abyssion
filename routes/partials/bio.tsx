@@ -4,6 +4,7 @@ import { Card } from '@components/Card.tsx'
 import { TextBlock } from '@components/TextBlock.tsx'
 import { Title } from '@components/Title.tsx'
 import { RichLineItem } from '@components/RichLineItem.tsx'
+import { ShellImage } from '@components/ShellImage.tsx'
 
 export default function BioSection() {
   return (
@@ -11,9 +12,8 @@ export default function BioSection() {
       {/* about */}
       <Shell>
         <Title className='mb-6'>{bio.aboutTitle}</Title>
-        <TextBlock>
-          {bio.about}
-        </TextBlock>
+        <ShellImage height='300px' yPosition={25} src='/images/band_live.webp' alt='Abyssion live' />
+        <TextBlock>{bio.about}</TextBlock>
       </Shell>
 
       {/* albums */}

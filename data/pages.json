@@ -8,6 +8,9 @@
   "/contact": {
     "layout": "collapsedPage"
   },
+  "/auditions": {
+    "layout": "collapsedPage"
+  },
   "/theme": {
     "debugOnly": true,
     "showHeader": false,

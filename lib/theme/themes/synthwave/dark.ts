@@ -1,4 +1,4 @@
-import type { BaseTheme } from '../../index.types.ts'
+import type { BaseTheme } from '../../types.ts'
 import { synthwaveDarkPalette, synthwaveSemanticPalette } from './palette.ts'
 
 /**

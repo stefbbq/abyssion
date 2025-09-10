@@ -74,7 +74,7 @@ export const Button = ({
   ...props
 }: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] disabled:opacity-50 disabled:cursor-not-allowed'
+    'inline-flex items-center justify-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] focus:ring-offset-[var(--colors-background)] disabled:opacity-50 disabled:cursor-not-allowed'
   const transitionClasses = 'transition-all duration-200'
   const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
 

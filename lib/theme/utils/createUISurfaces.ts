@@ -1,4 +1,4 @@
-import type { BaseSurface, BaseSurfaces, ColorPalette, UISurface, UISurfaces } from '../index.types.ts'
+import type { BaseSurface, BaseSurfaces, ColorPalette, UISurface, UISurfaces } from '../types.ts'
 import { hexToCSS } from '../colorUtils/hexToCSS.ts'
 import { rgbToCSS } from '../colorUtils/rgbToCSS.ts'
 import { hexStringToRGB } from '../colorUtils/hexStringToRGB.ts'

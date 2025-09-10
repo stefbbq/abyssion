@@ -5,18 +5,21 @@
 import * as $_404 from './routes/_404.tsx'
 import * as $_app from './routes/_app.tsx'
 import * as $_middleware from './routes/_middleware.ts'
+import * as $auditions from './routes/auditions.tsx'
 import * as $index from './routes/index.tsx'
 import * as $media_path_ from './routes/media/[...path].ts'
+import * as $partials_auditions from './routes/partials/auditions.tsx'
 import * as $partials_bio from './routes/partials/bio.tsx'
 import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
 import * as $ContactForm from './islands/ContactForm.tsx'
+import * as $ContentPageOrchestrator from './islands/ContentPageOrchestrator.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
 import * as $Header from './islands/Header.tsx'
-import * as $SinglePageScrollManager from './islands/SinglePageScrollManager.tsx'
+import * as $PageManager from './islands/PageManager.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
 import * as $ThemedBackground from './islands/ThemedBackground.tsx'
 import type { Manifest } from '$fresh/server.ts'
@@ -26,8 +29,10 @@ const manifest = {
     './routes/_404.tsx': $_404,
     './routes/_app.tsx': $_app,
     './routes/_middleware.ts': $_middleware,
+    './routes/auditions.tsx': $auditions,
     './routes/index.tsx': $index,
     './routes/media/[...path].ts': $media_path_,
+    './routes/partials/auditions.tsx': $partials_auditions,
     './routes/partials/bio.tsx': $partials_bio,
     './routes/partials/contact.tsx': $partials_contact,
     './routes/partials/home.tsx': $partials_home,
@@ -36,10 +41,11 @@ const manifest = {
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
     './islands/ContactForm.tsx': $ContactForm,
+    './islands/ContentPageOrchestrator.tsx': $ContentPageOrchestrator,
     './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
     './islands/Header.tsx': $Header,
-    './islands/SinglePageScrollManager.tsx': $SinglePageScrollManager,
+    './islands/PageManager.tsx': $PageManager,
     './islands/ThemeProvider.tsx': $ThemeProvider,
     './islands/ThemedBackground.tsx': $ThemedBackground,
   },

@@ -1,4 +1,4 @@
-import type { HexColor, RGBColor } from '../index.types.ts'
+import type { HexColor, RGBColor } from '../types.ts'
 
 /**
  * Convert RGB color to hex number

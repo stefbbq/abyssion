@@ -1,5 +1,6 @@
 import shows from '@data/content-shows.json' with { type: 'json' }
 import { Shell } from '@components/Shell.tsx'
+import { TextBlock } from '@components/TextBlock.tsx'
 import { Title } from '@components/Title.tsx'
 import { RichLineItem } from '@components/RichLineItem.tsx'
 
@@ -34,18 +35,22 @@ export default function ShowsSection() {
       <Shell>
         <Title>upcoming shows</Title>
         <div class='space-y-4'>
-          {upcomingShows.map((show: ShowData, index: number) => {
-            const { month, day } = formatDateParts(show.date)
-            return (
-              <RichLineItem
-                key={`upcoming-${index}`}
-                leftDate={{ month, day }}
-                title={show.venue}
-                subtitle={show.location}
-                leftBgRole='primary'
-              />
-            )
-          })}
+          {upcomingShows.length === 0 && <TextBlock>No upcoming shows. Yet.</TextBlock>}
+          {upcomingShows.length > 0 && (
+            upcomingShows.map((show: ShowData, index: number) => {
+              const { month, day } = formatDateParts(show.date)
+              return (
+                <RichLineItem
+                  key={`upcoming-${index}`}
+                  leftDate={{ month, day }}
+                  title={show.venue}
+                  subtitle={show.location}
+                  leftBgRole='primary'
+                  height='100px'
+                />
+              )
+            })
+          )}
         </div>
       </Shell>
 
@@ -63,6 +68,7 @@ export default function ShowsSection() {
                 subtitle={show.location}
                 rightStatus='pastEvent'
                 leftBgRole='secondary'
+                height='100px'
               />
             )
           })}

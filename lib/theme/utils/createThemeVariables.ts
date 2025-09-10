@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import type { UITheme } from '@lib/theme/index.types.ts'
+import type { UITheme } from '../types.ts'
 import { hexStringToCSSRGB } from '../colorUtils/hexStringToCSSRGB.ts'
 
 /**

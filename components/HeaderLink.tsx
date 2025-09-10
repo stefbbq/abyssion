@@ -8,6 +8,7 @@ type Props = {
   isActive?: boolean // whether the link is currently active
   compact?: boolean // for icon-only (social) links
   style?: JSX.CSSProperties // inline styles
+  onClick?: (e: MouseEvent) => void // optional click handler override
 }
 
 const baseClasses = 'rounded-theme-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-focus'
@@ -35,6 +36,7 @@ export const HeaderLink = ({
   isActive = false,
   compact = false,
   style = {},
+  onClick,
 }: Props) => {
   const margin = compact ? 'mx-.5' : 'mx-1.5'
   const activeClass = isActive ? 'bg-interactive-ghostActive text-text-inverse' : ''
@@ -43,7 +45,7 @@ export const HeaderLink = ({
     <a
       aria-label={ariaLabel}
       class={`${baseClasses} ${transitionClasses} ${textClasses} ${hoverClasses} ${activeStateClasses} ${margin} ${paddingClasses} ${activeClass} ${className}`}
-      {...{ style, href }}
+      {...{ style, href, onClick }}
     >
       {children}
     </a>

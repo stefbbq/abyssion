@@ -131,6 +131,15 @@ export const createHomePageOrchestrator = (glState: RendererState): AnimationOrc
   const update = (context: AnimationContext) => {
     const { state, time } = context
 
+    // defensively clear any background overrides on first update
+    // clear any background override set by content-page orchestrator
+    try {
+      // dynamic import without await to satisfy linter
+      import('@lib/ui/state.ts').then((m) => m.setBackgroundIntensityOverride?.(null)).catch(() => {})
+    } catch {
+      // ignore if dynamic import fails
+    }
+
     // Check layer regeneration timing
     const currentTime = Date.now()
     const regenerationResult = calculateRegenerationTiming(currentTime, stateLocal.lastRegenerateTime, stateLocal.nextRegenerateInterval)

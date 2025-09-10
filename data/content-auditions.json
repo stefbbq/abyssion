@@ -1,0 +1,57 @@
+{
+  "title": "So, you wanna sing, eh?",
+  "sections": {
+    "introBody": "Abyssion is a metal band with technical and progressive leanings. We value energy, groove, and precision. We're heavy as sin, but we also know when to pull back and create moments of calm. Think thrash with more technical leanings and a pinch of atmosphere. If that sounds like the type of project you'd be interested in, read on.",
+    "youMightBeAGoodFitTitle": "You might be a good fit if:",
+    "youMightBeAGoodFitBody": [
+      "You're in your late 20s or older",
+      "You like to sing, but also like to scream",
+      "Pitchiness is anathema to you, but technical precision doesn't trump all",
+      "You like thrash; bands like Metallica, Megadeth, Slayer, Testament and the like",
+      "But you also like proggy stuff; think Dream Theater, Opeth, Porcupine Tree and so on",
+      "You're established with an existing career (we're not looking to be career musicians)",
+      "You're able and desire to rehearse weekly and gig monthly"
+    ],
+    "requirementsTitle": "Ready to apply?",
+    "requirementsBody": [
+      "A demo of existing material: a link and a short description",
+      "A brief description of your vocal style",
+      "A brief description of your past experience"
+    ],
+    "processTitle": "The audition process",
+    "processBody": [
+      "**Step one**: This step. We'll get back to you if we think you're a good fit.",
+      "**Step two**: Record a verse/chorus (~1 minute) of your own take on one of our songs. Write your own lyrics.",
+      "**Step three**: An in-person audition of that song, preferably more fleshed out, plus another song of ours or a few song options you'd like to do as a cover. We'll do our best to learn one."
+    ],
+    "moreAboutUs": "A little more about us",
+    "moreAboutUsBody": "We're four dedicated musicians whom rehearse at The Farm Rehearsal space in Markham. We have a ton of fun and goof around but we also take our music and the time we put into it seriously. So much of what we do is about celebrating the music we love and the joy in the craft of creating it. That in and of itself has to be it's own reward; it's not like playing metal is going to make us any serious money! Though that _would_ be nice. The four of us also have fully established, independent careers outside of Abyssion. We want to write a lot, we want to gig a lot, and with a little bit of luck, we'll also tour a lot.\n\nWe expect anyone joining this band to be at a similar point in life, with their own independent life and career, but with the deep desire to sing in pretty feakin' cool metal band (we think!) and the amenties and resources to do so.",
+    "finalNote": "If that sounds like the type of project you'd be interested in **we want to hear from you**!"
+  },
+  "form": {
+    "nameLabel": "Your name",
+    "emailLabel": "Your email address",
+    "confirmRequirementsHeading": "Confirm critical requirements",
+    "toggles": {
+      "ageRangeThirtyToFortyFive": "I'm in my late 20s or older",
+      "singsAndScreams": "I like to sing and to scream",
+      "likesListedBands": "**THRASH** and **PROG** are my jam",
+      "canRehearseAndGig": "I can rehearse weekly and gig at least monthly, and will protect this time",
+      "iCanTravel": "I have the amenities to travel for an audition, rehearsals and gigs"
+    },
+    "demoUrlLabel": "Demo link",
+    "demoDescriptionLabel": "Demo description",
+    "additionalDetailsLabel": "About yourself (and any other details you'd like to share)",
+    "submitLabel": "Submit application",
+    "errorFixHighlighted": "Please complete highlighted fields"
+  },
+  "submitted": {
+    "title": "Thank you for your submission",
+    "thanksBody": "We will review your materials and get back to you if it feels like a fit.",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "demoLabel": "Demo",
+    "demoDescriptionLabel": "Demo description",
+    "additionalDetailsLabel": "Additional details"
+  }
+}

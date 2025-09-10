@@ -31,4 +31,5 @@
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
   "explorerExclude.backup": {},
+  "typescript.updateImportsOnFileMove.enabled": "always"
 }

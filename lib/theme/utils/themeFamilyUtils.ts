@@ -1,4 +1,4 @@
-import type { BaseTheme, ThemeFamily } from '../index.types.ts'
+import type { BaseTheme, ThemeFamily } from '../types.ts'
 import { themeFamilies } from '../themes/index.ts'
 
 /**

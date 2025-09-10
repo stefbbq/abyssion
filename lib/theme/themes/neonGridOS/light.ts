@@ -1,4 +1,4 @@
-import type { BaseTheme } from '../../index.types.ts'
+import type { BaseTheme } from '../../types.ts'
 import { neonGridLightPalette, neonGridSemanticPalette } from './palette.ts'
 
 export const neonGridOSLightTheme: BaseTheme = {

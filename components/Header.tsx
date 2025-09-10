@@ -9,6 +9,10 @@ import { HeaderLink } from './HeaderLink.tsx'
 
 type SocialIconKey = keyof SocialIconMap
 
+type Props = {
+  alwaysShowBackground?: boolean
+}
+
 /**
  * Desktop navigation bar for the app, styled with utility classes and CSS variables.
  * Responsive, sticky, and theme-aware. Includes logo, navigation links, social icons, and theme toggle.
@@ -18,7 +22,7 @@ type SocialIconKey = keyof SocialIconMap
  * @example
  *   <Header />
  */
-export const Header = () => {
+export const Header = ({ alwaysShowBackground = false }: Props) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false)
   const themeMode = useSignal(currentThemeMode.value)
@@ -29,7 +33,9 @@ export const Header = () => {
       setCurrentHash(globalThis.location.hash)
       const onHashChange = () => setCurrentHash(globalThis.location.hash)
       globalThis.addEventListener('hashchange', onHashChange)
-      return () => globalThis.removeEventListener('hashchange', onHashChange)
+      return () => {
+        globalThis.removeEventListener('hashchange', onHashChange)
+      }
     }
   }, [])
 
@@ -65,7 +71,7 @@ export const Header = () => {
   const headerClasses = isScrolled ? 'mx-4' : 'mx-2'
 
   // in light mode, always show background for readability; in dark mode, show only when scrolled
-  const shouldShowBackground = isScrolled || themeMode.value === 'light'
+  const shouldShowBackground = alwaysShowBackground || isScrolled || themeMode.value === 'light'
   const containerClasses = shouldShowBackground ? 'surface-header' : 'bg-transparent'
 
   return (
@@ -77,9 +83,23 @@ export const Header = () => {
         {/* Logo */}
         <h1 class='flex items-center m-0'>
           <HeaderLink
-            href='#home'
-            className={`text-xl font-semibold ${getFocusClass()}`}
+            href='/'
+            className={`text-xl font-semibold ${getFocusClass()} lowercase`}
             ariaLabel='Abyssion home'
+            onClick={(e) => {
+              // Only intercept when already on home
+              try {
+                const url = new URL('/', globalThis.location.href)
+                const samePath = url.pathname === globalThis.location.pathname
+                if (samePath) {
+                  e.preventDefault()
+                  globalThis.scrollTo({ top: 0, behavior: 'smooth' })
+                  history.replaceState(null, '', '/')
+                }
+              } catch {
+                // ignore
+              }
+            }}
           >
             abyssion
           </HeaderLink>

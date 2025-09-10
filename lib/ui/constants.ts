@@ -1,0 +1,3 @@
+export const MOBILE_BREAKPOINT_PX = 768
+export const MOBILE_SCROLL_OFFSET = 20
+export const DESKTOP_SCROLL_OFFSET = 75

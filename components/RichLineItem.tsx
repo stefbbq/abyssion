@@ -20,13 +20,15 @@ type Props = {
   className?: string
   /** left background theme role */
   leftBgRole?: 'primary' | 'secondary' | 'tertiary' | 'surface' | 'background' | 'foreground'
+  /** explicit container height (number treated as px, or any CSS length) */
+  height?: number | string
 }
 
 /**
  * rich line item
  * theme-aware surface with a responsive grid: [100px | 1fr | auto]
  */
-export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus, rightText, className, leftBgRole }: Props) => {
+export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus, rightText, className, leftBgRole, height }: Props) => {
   const listItemBaseClasses = [
     'surface-elevated',
     'pr-3',
@@ -128,7 +130,7 @@ export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus,
   }
 
   return (
-    <li class={mergedListItemClasses}>
+    <li class={mergedListItemClasses} style={{ height: height || '80px' }}>
       {renderLeft()}
       {renderMain()}
       {renderRight()}

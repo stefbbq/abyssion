@@ -1,4 +1,4 @@
-import type { Shades } from '../index.types.ts'
+import type { Shades } from '../types.ts'
 import { lightenHex } from './lightenHex.ts'
 import { darkenHex } from './darkenHex.ts'
 

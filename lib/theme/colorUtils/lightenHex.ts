@@ -1,4 +1,4 @@
-import type { HexColor } from '../index.types.ts'
+import type { HexColor } from '../types.ts'
 
 /**
  * Lighten a hex color by interpolation toward white

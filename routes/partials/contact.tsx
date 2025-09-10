@@ -76,9 +76,9 @@ export default function ContactSection() {
                   href={link.url}
                   variant='primary'
                   size='md'
-                  class='group w-full justify-start items-center h-12 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 focus-visible:translate-y-0 transition-transform'
+                  class='group relative overflow-hidden w-full justify-start items-center h-12 shadow-sm hover:shadow-md transition-transform before:content-["""] before:absolute before:inset-0 before:bg-[var(--colors-foreground)] before:transform before:-translate-x-full hover:before:translate-x-0 before:transition-transform before:duration-300 before:ease-out before:pointer-events-none before:z-0'
                 >
-                  <span class='flex items-center gap-3 w-full'>
+                  <span class='relative z-10 flex items-center gap-3 w-full'>
                     {Icon ? <Icon className='w-5 h-5 text-current flex-shrink-0 opacity-90 group-hover:opacity-100 transition-opacity' /> : null}
                     <span class='text-sm font-medium text-current whitespace-nowrap'>
                       {link.label}

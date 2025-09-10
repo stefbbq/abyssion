@@ -16,6 +16,11 @@ export type PageConfig = {
 export type PagesConfig = Record<string, PageConfig>
 
 /**
+ * Represents a single item in a navigation menu.
+ */
+export type NavItem = { key: string; label: string; path: string }
+
+/**
  * Defines the state and behavior of a navigation button in the Action Zone.
  * Used by framer-motion to animate the navigation buttons.
  */
@@ -148,4 +153,49 @@ export type ContentContact = {
 export type SiteNav = {
   mainNav: MenuItem[]
   socialLinks: SocialLink[]
+}
+
+/**
+ * JSON shape for `content-auditions.json`.
+ */
+export type ContentAuditions = {
+  title: string
+  sections: {
+    introBody: string
+    youMightBeAGoodFitTitle: string
+    youMightBeAGoodFitBody: string[]
+    requirementsTitle: string
+    requirementsBody: string[]
+    processTitle: string
+    processBody: string[]
+    moreAboutUs?: string
+    moreAboutUsBody?: string
+    finalNote?: string
+  }
+  form: {
+    nameLabel: string
+    emailLabel: string
+    confirmRequirementsHeading: string
+    toggles: {
+      ageRangeThirtyToFortyFive: string
+      singsAndScreams: string
+      likesListedBands: string
+      canRehearseAndGig: string
+      iCanTravel: string
+    }
+    demoUrlLabel: string
+    demoDescriptionLabel: string
+    additionalDetailsLabel: string
+    submitLabel: string
+    errorFixHighlighted: string
+  }
+  submitted: {
+    title: string
+    thanksBody: string
+    nameLabel: string
+    emailLabel: string
+    demoLabel: string
+    demoDescriptionLabel: string
+    additionalDetailsLabel: string
+  }
 }

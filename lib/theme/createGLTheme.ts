@@ -1,4 +1,4 @@
-import type { BaseTheme, GLTheme } from './index.types.ts'
+import type { BaseTheme, GLTheme } from './types.ts'
 import { rgbToHex } from './colorUtils/rgbToHex.ts'
 import { resolveColorReference } from './utils/resolveColorReference.ts'
 import { hexStringToRGB } from './colorUtils/hexStringToRGB.ts'

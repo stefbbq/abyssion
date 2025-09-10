@@ -3,7 +3,7 @@
  * @description Comprehensive theme definitions for both Preact and GL usage
  */
 
-import type { ThemeFamily } from '../index.types.ts'
+import type { ThemeFamily } from '../types.ts'
 import { neonGridOSDarkTheme } from './neonGridOS/dark.ts'
 import { neonGridOSLightTheme } from './neonGridOS/light.ts'
 import { deepSpaceHUDDarkTheme } from './deepSpaceHUD/dark.ts'
