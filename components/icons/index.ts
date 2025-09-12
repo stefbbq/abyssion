@@ -8,6 +8,8 @@ export { MenuIcon } from './MenuIcon.tsx'
 export { SunIcon } from './SunIcon.tsx'
 export { MoonIcon } from './MoonIcon.tsx'
 export { WarningIcon } from './WarningIcon.tsx'
+export { CheckCircleIcon } from './CheckCircleIcon.tsx'
+export { XCircleIcon } from './XCircleIcon.tsx'
 
 import { FacebookIcon } from './FacebookIcon.tsx'
 import { InstagramIcon } from './InstagramIcon.tsx'
@@ -19,6 +21,8 @@ import { MenuIcon } from './MenuIcon.tsx'
 import { SunIcon } from './SunIcon.tsx'
 import { MoonIcon } from './MoonIcon.tsx'
 import { WarningIcon } from './WarningIcon.tsx'
+import { CheckCircleIcon } from './CheckCircleIcon.tsx'
+import { XCircleIcon } from './XCircleIcon.tsx'
 
 export const icons = {
   FacebookIcon,
@@ -31,6 +35,8 @@ export const icons = {
   SunIcon,
   MoonIcon,
   WarningIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 }
 
 export type SocialIconMap = typeof icons

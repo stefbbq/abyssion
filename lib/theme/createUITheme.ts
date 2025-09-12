@@ -30,6 +30,17 @@ export const createUITheme = (baseTheme: BaseTheme): UITheme => {
     foreground: hexToCSS(resolveColorReference('foreground.500', fullPalette)),
     background: hexToCSS(resolveColorReference('background.500', fullPalette)),
     surface: hexToCSS(resolveColorReference('surface.500', fullPalette)),
+    text: {
+      primary: hexToCSS(resolveColorReference('foreground.500', fullPalette)),
+      secondary: hexToCSS(resolveColorReference('foreground.300', fullPalette)),
+      tertiary: hexToCSS(resolveColorReference('foreground.200', fullPalette)),
+    },
+    semantic: {
+      success: hexToCSS(resolveColorReference('semantic.success', fullPalette)),
+      warning: hexToCSS(resolveColorReference('semantic.warning', fullPalette)),
+      error: hexToCSS(resolveColorReference('semantic.error', fullPalette)),
+      info: hexToCSS(resolveColorReference('semantic.info', fullPalette)),
+    },
     border: {
       primary: hexToCSS(resolveColorReference('surface.500', fullPalette)),
       hover: hexToCSS(resolveColorReference('primary.400', fullPalette)),

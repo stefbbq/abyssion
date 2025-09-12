@@ -126,11 +126,14 @@ export default function App({ Component, url }: PageProps) {
         {/** scroll events, themed background, GL canvas */}
         <PageManager />
 
-        {/** desktop only, navigation and branding elements */}
-        {showHeader && <Header />}
+        {/** page chrome that must react to route changes */}
+        <Partial name='app-chrome'>
+          {/** desktop only, navigation and branding elements */}
+          {showHeader && <Header />}
 
-        {/** mobile only, floating action button and navigation menu */}
-        {showActionZone && <ActionZoneController />}
+          {/** mobile only, floating action button and navigation menu */}
+          {showActionZone && <ActionZoneController />}
+        </Partial>
 
         {/** main content area for each route */}
         <Partial name='page-content'>

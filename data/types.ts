@@ -165,12 +165,12 @@ export type ContentAuditions = {
     youMightBeAGoodFitTitle: string
     youMightBeAGoodFitBody: string[]
     requirementsTitle: string
+    requirementsSubtitle: string
     requirementsBody: string[]
     processTitle: string
     processBody: string[]
     moreAboutUs?: string
     moreAboutUsBody?: string
-    finalNote?: string
   }
   form: {
     nameLabel: string
@@ -186,6 +186,7 @@ export type ContentAuditions = {
     demoUrlLabel: string
     demoDescriptionLabel: string
     additionalDetailsLabel: string
+    submitNote?: string
     submitLabel: string
     errorFixHighlighted: string
   }

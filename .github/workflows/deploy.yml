@@ -23,6 +23,15 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Prepare secrets for runtime fallback
+        env:
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          deno eval "const data={MAIL_FROM:Deno.env.get('MAIL_FROM')||'',MAIL_TO:Deno.env.get('MAIL_TO')||'',SENDGRID_API_KEY:Deno.env.get('SENDGRID_API_KEY')||'',SENDGRID_KEY:Deno.env.get('SENDGRID_API_KEY')||''}; await Deno.writeTextFile('secrets.json', JSON.stringify(data));"
+          echo "SECRETS_PATH=$GITHUB_WORKSPACE/secrets.json" >> $GITHUB_ENV
+
       - name: Build step
         run: |
           deno task build:shaders

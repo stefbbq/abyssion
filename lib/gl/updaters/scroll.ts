@@ -60,22 +60,39 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
 
   /**
    * CRT SCROLL CORRUPTION bootstrap
-   * DESKTOP ONLY from here on
-   *
-   * - applies a CRT-style scroll corruption effect to the camera
-   * - only applies on desktop devices
-   * - only applies when the CRT scroll corruption is enabled
-   * - only applies when the scroll corruption intensity is greater than 0
-   * - only applies when the scroll corruption progress is greater than 0
-   * - only applies when the scroll corruption progress is less than 1
+   * DESKTOP ONLY from here on (for shader effects),
+   * but we still compute scroll progress/intensity to drive non-CRT fades (e.g., backdrop shadow) on all devices
    */
   const crtConfig = ppConfig.crtScrollCorruption
-  if (!crtConfig?.enabled) {
+  const { progress: scrollProgress, intensity: fadeIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
+
+  /**
+   * SHADOW LAYER
+   * fade out the shadow layer at the same scroll thresholds/rate as the logo fade
+   *
+   * this should occur on all devices regardless of CRT enablement
+   */
+  if (state.shadowLayer?.mesh) {
+    const material = state.shadowLayer.mesh.material as ShaderMaterial & { uniforms: { opacity?: { value: number } } }
+    const uniforms = material.uniforms
+    if (uniforms?.opacity) {
+      if (typeof state.shadowLayer.mesh.userData.baseShadowOpacity !== 'number') {
+        state.shadowLayer.mesh.userData.baseShadowOpacity = uniforms.opacity.value
+      }
+      const base = state.shadowLayer.mesh.userData.baseShadowOpacity as number
+      // fade a bit faster than other elements (e.g., 2x), clamped to [0,1]
+      const shadowFadeIntensity = Math.min(1, fadeIntensity * 2)
+      uniforms.opacity.value = base * (1 - shadowFadeIntensity)
+    }
+  }
+
+  if (!crtConfig?.enabled) { // if CRT corruption is disabled, skip the rest
     log.debug(lc.GL, 'updateScrollCorruption: CRT scroll corruption is disabled')
     return
   }
-  const { progress: scrollProgress, intensity: rawIntensity } = getScrollCorruptionProgress(scrollY, crtConfig ?? {})
-  const corruptionIntensity = skipCorruption ? 0 : rawIntensity
+
+  // for shader effects, respect mobile gating
+  const corruptionIntensity = skipCorruption ? 0 : fadeIntensity
 
   /**
    * LOGGING
@@ -92,22 +109,6 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     windowHeight: globalThis.innerHeight,
     scrollPercentage: (scrollProgress * 100).toFixed(1) + '%',
   })
-
-  /**
-   * SHADOW LAYER
-   * fade out the shadow layer at the same scroll thresholds/rate as the logo fade
-   */
-  if (state.shadowLayer?.mesh) {
-    const material = state.shadowLayer.mesh.material as ShaderMaterial & { uniforms: { opacity?: { value: number } } }
-    const uniforms = material.uniforms
-    if (uniforms?.opacity) {
-      if (typeof state.shadowLayer.mesh.userData.baseShadowOpacity !== 'number') {
-        state.shadowLayer.mesh.userData.baseShadowOpacity = uniforms.opacity.value
-      }
-      const base = state.shadowLayer.mesh.userData.baseShadowOpacity as number
-      uniforms.opacity.value = base * (1 - corruptionIntensity)
-    }
-  }
 
   /**
    * CRT SCROLL CORRUPTION ends

@@ -41,7 +41,7 @@ export const Shell = ({ children, className, as = 'section', id, style }: Props)
   }
 
   // base classes with appropriate surface styling
-  const baseClasses = `${getSurfaceClass()} p-8`
+  const baseClasses = `${getSurfaceClass()} p-8 space-y-8`
   const classes = `${baseClasses} ${className || ''}`
 
   // common props for all elements

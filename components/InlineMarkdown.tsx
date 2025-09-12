@@ -28,5 +28,3 @@ export const InlineMarkdown = ({ children, as = 'span', className }: Props) => {
     />
   )
 }
-
-export default InlineMarkdown

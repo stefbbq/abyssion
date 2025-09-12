@@ -1,33 +1,62 @@
+import { Handlers, PageProps } from '$fresh/server.ts'
+
 import { Shell } from '@components/Shell.tsx'
 import contact from '@data/content-contact.json' with { type: 'json' }
-import nav from '@data/nav.json' with { type: 'json' }
-import { icons } from '@components/icons/index.ts'
 import { Title } from '@components/Title.tsx'
-import { Button } from '@components/Button.tsx'
-// import ContactForm from '@islands/ContactForm.tsx'
+import FormManager, { type FormConfig } from '@islands/FormManager.tsx'
+import formSchema from '@data/form-contact.json' with { type: 'json' }
+import { createDefinitionListHtml } from '@lib/email/sendEmailSendGrid.ts'
+import { sendEmail } from '@lib/email/emailService.ts'
+import LinksPartial from './links.tsx'
 
-export default function ContactSection() {
+type PageData = { submitted?: { fullName: string; email: string; subject: string; message: string; extra?: string }; errors?: Record<string, string> }
+
+export const handler: Handlers<PageData> = {
+  async POST(req, ctx) {
+    const form = await req.formData()
+    const get = (k: string) => String(form.get(k) || '')
+    const submission = {
+      fullName: get('fullName'),
+      email: get('email'),
+      subject: get('subject'),
+      message: get('message'),
+      extra: get('extra'),
+    }
+    const errors: Record<string, string> = {}
+    if (!submission.fullName.trim()) errors.fullName = 'your name is required'
+    if (!submission.email.trim()) errors.email = 'email is required'
+    if (!submission.subject.trim()) errors.subject = 'subject is required'
+    if (!submission.message.trim()) errors.message = 'message is required'
+
+    if (Object.keys(errors).length > 0) return await ctx.render({ errors }, { status: 400 })
+
+    try {
+      const html = createDefinitionListHtml('New Contact Message', submission)
+      const subject = `Contact: ${submission.subject}`
+      const result = await sendEmail({ kind: 'contact', subject, text: submission.message, html, replyTo: submission.email })
+      if (!result.ok) return await ctx.render({ errors: { _form: result.message } }, { status: 500 })
+    } catch (err) {
+      console.error('contact email send failed (unexpected)', err)
+      return await ctx.render({ errors: { _form: 'failed to send your message, please try again later' } }, { status: 500 })
+    }
+
+    return await ctx.render({ submitted: submission })
+  },
+}
+
+export default function ContactSection(props?: PageProps<PageData>) {
+  const { submitted: _submitted, errors } = props?.data || {}
+  const labels = { submitLabel: 'Send', nameLabel: 'Your name', emailLabel: 'Your email address', subjectLabel: 'Subject', messageLabel: 'Message' }
+
   return (
     <>
-      {/* send us a message */}
       <div class='grid gap-8 lg:grid-cols-1'>
-        {
-          /* <Shell>
-          <ContactForm />
-        </Shell> */
-        }
-
         <Shell>
           <Title>{contact.title}</Title>
           <div class='space-y-4'>
             <div class='flex items-center space-x-3'>
               <div class='flex-shrink-0'>
-                <svg
-                  class='w-5 h-5 text-[var(--colors-text-tertiary)]'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
+                <svg class='w-5 h-5 text-[var(--colors-text-tertiary)]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path
                     strokeLinecap='round'
                     strokeLinejoin='round'
@@ -42,12 +71,7 @@ export default function ContactSection() {
             </div>
             <div class='flex items-center space-x-3'>
               <div class='flex-shrink-0'>
-                <svg
-                  class='w-5 h-5 text-[var(--colors-text-tertiary)]'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
+                <svg class='w-5 h-5 text-[var(--colors-text-tertiary)]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path
                     strokeLinecap='round'
                     strokeLinejoin='round'
@@ -66,29 +90,10 @@ export default function ContactSection() {
         </Shell>
 
         <Shell>
-          <Title>follow us</Title>
-          <div class='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            {nav.socialLinks.map((link: { key: string; url: string; label: string; icon?: string }) => {
-              const Icon = link.icon ? icons[link.icon as keyof typeof icons] : undefined
-              return (
-                <Button
-                  key={link.key}
-                  href={link.url}
-                  variant='primary'
-                  size='md'
-                  class='group relative overflow-hidden w-full justify-start items-center h-12 shadow-sm hover:shadow-md transition-transform before:content-["""] before:absolute before:inset-0 before:bg-[var(--colors-foreground)] before:transform before:-translate-x-full hover:before:translate-x-0 before:transition-transform before:duration-300 before:ease-out before:pointer-events-none before:z-0'
-                >
-                  <span class='relative z-10 flex items-center gap-3 w-full'>
-                    {Icon ? <Icon className='w-5 h-5 text-current flex-shrink-0 opacity-90 group-hover:opacity-100 transition-opacity' /> : null}
-                    <span class='text-sm font-medium text-current whitespace-nowrap'>
-                      {link.label}
-                    </span>
-                  </span>
-                </Button>
-              )
-            })}
-          </div>
+          <FormManager config={formSchema as unknown as FormConfig} labels={labels} errors={errors || {}} />
         </Shell>
+
+        <LinksPartial />
       </div>
     </>
   )

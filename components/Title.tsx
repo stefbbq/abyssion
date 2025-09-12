@@ -24,13 +24,13 @@ export const Title = ({ children, className, innerClassName }: Props) => {
    * @example
    *   <Title className='mb-6'>Shows</Title>
    */
-  const outer = `text-3xl mb-8 ${className || ''}`
+  const outer = `text-3xl ${className || ''}`
   const inner = `surface-title py-1 uppercase tracking-wider ${innerClassName || ''}`
 
   // no glitch effect: no data-text needed
 
   return (
-    <div class='-mx-8 -mt-8 pt-8 px-8' style={{ backgroundColor: 'rgba(0,0,0,.2)' }}>
+    <div class='-mx-8 -mt-8 mb-8 pt-8 px-8' style={{ backgroundColor: 'rgba(0,0,0,.2)' }}>
       <h2 class={outer.trim()}>
         <span class={inner.trim()}>{children}</span>
       </h2>

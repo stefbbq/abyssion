@@ -3,6 +3,7 @@ import { createLogoPlaneGeometry } from '@libgl/scene/createLogoPlaneGeometry.ts
 import { createLogoLayer } from '@libgl/layers/index.ts'
 import { createGeometricLayer } from '@libgl/layers/GeometricLayer.ts'
 import { createShadowLayer } from '@libgl/layers/ShadowLayer.ts'
+import type { ShadowLayer } from '@libgl/layers/ShadowLayer.ts'
 import type { LogoController, LogoLayer } from '@libgl/layers/LogoLayer.ts'
 import { lc, log } from '@lib/logger/index.ts'
 
@@ -11,7 +12,7 @@ type LayerSystem = {
   logoPlanes: Three.Mesh[]
   logoLayers: LogoLayer[]
   shapeLayer: Three.Group
-  shadowLayer: Three.Mesh
+  shadowLayer: ShadowLayer
   planeGeometry: Three.PlaneGeometry
 }
 
@@ -44,11 +45,11 @@ export const setupLayerSystem = (
   log(lc.GL_GEOMETRY, 'Geometric layer added to scene. Children:', shapeLayer.children)
 
   // Shadow Layer (enable for all devices to maintain consistent depth)
-  let shadowLayer: Three.Mesh | null = null
+  let shadowLayer: ShadowLayer | null = null
   const layer = createShadowLayer(THREE)
   if (layer) {
     scene.add(layer.mesh)
-    shadowLayer = layer.mesh
+    shadowLayer = layer
   }
 
   return Promise.resolve({
@@ -56,7 +57,7 @@ export const setupLayerSystem = (
     logoPlanes,
     logoLayers,
     shapeLayer,
-    shadowLayer: shadowLayer as unknown as Three.Mesh,
+    shadowLayer: shadowLayer as unknown as ShadowLayer,
     planeGeometry,
   })
 }

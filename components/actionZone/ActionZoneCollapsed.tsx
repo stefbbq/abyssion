@@ -22,7 +22,7 @@ export const ActionZoneCollapsed = ({ buttons, onAction }: Props) => {
   const defaultButtonClasses = 'bg-transparent text-text-secondary'
 
   return (
-    <div class='w-full flex items-center justify-center gap-1 px-4 h-full'>
+    <div class='w-full flex items-center justify-center gap-1 px-3 h-full'>
       {/* Render nav buttons with equal flex */}
       {navButtons.map((button) => {
         const isHovered = hoveredButtonId === button.id

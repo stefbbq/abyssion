@@ -1,0 +1,12 @@
+{
+  "id": "contact-form",
+  "action": "/partials/contact",
+  "method": "POST",
+  "fields": [
+    { "type": "text", "name": "fullName", "required": true, "label": "Your name" },
+    { "type": "email", "name": "email", "required": true, "label": "Your email address" },
+    { "type": "text", "name": "subject", "required": true, "label": "Subject" },
+    { "type": "textarea", "name": "message", "rows": 5, "required": true, "label": "Message" }
+  ],
+  "toggles": []
+}

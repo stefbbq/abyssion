@@ -47,6 +47,12 @@ export const createSingleVideoManager = async (
   let currentSrc = singleVideoPath
   // lazy-loaded hls.js instance for .m3u8 streams
   type HlsPublic = { destroy: () => void; attachMedia: (media: HTMLVideoElement) => void; loadSource: (url: string) => void }
+  type HlsWithLevels = HlsPublic & {
+    currentLevel?: number
+    nextLevel?: number
+    autoLevelEnabled?: boolean
+    levels?: Array<{ bitrate: number; width?: number; height?: number }>
+  }
   type HlsClass = typeof import('hls.js').default
   let hlsInstance: HlsPublic | null = null
 
@@ -74,7 +80,16 @@ export const createSingleVideoManager = async (
       }
 
       type HlsConfig = import('hls.js').HlsConfig
-      hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true } as HlsConfig) as unknown as HlsPublic
+      // start with the lowest available level for a quick first frame, then we will switch to auto
+      hlsInstance = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        startLevel: 0,
+        capLevelToPlayerSize: true,
+        // encourage faster ramp-up
+        abrMaxWithRealBitrate: true,
+        maxBufferLength: 5,
+      } as HlsConfig) as unknown as HlsPublic
       hlsInstance.attachMedia(video)
       hlsInstance.loadSource(currentSrc)
       // rely on existing 'canplay' readiness; no need to wait for Hls.Events
@@ -131,6 +146,33 @@ export const createSingleVideoManager = async (
   try {
     await video.play()
     log.debug(lc.GL_VIDEO, 'Single video playing successfully')
+    // after initial playback starts, ramp to higher quality quickly
+    if (hlsInstance) {
+      const hls = hlsInstance as HlsWithLevels
+      const bumpQuality = () => {
+        try {
+          // push to the highest available level immediately, then enable ABR
+          if (Array.isArray(hls.levels) && hls.levels.length > 0 && typeof hls.nextLevel !== 'undefined') {
+            hls.nextLevel = Math.max(0, hls.levels.length - 1)
+          }
+          if (typeof hls.autoLevelEnabled === 'boolean') hls.autoLevelEnabled = true
+          if (typeof hls.currentLevel === 'number') hls.currentLevel = -1 // -1 enables ABR
+          log.debug(lc.GL_VIDEO, 'Requested rapid quality ramp-up and enabled auto level')
+        } catch (e) {
+          log.debug(lc.GL_VIDEO, 'Failed to bump HLS quality (non-fatal)', e)
+        }
+      }
+
+      if (!video.paused) {
+        setTimeout(bumpQuality, 300)
+      } else {
+        const once = () => {
+          video.removeEventListener('playing', once)
+          setTimeout(bumpQuality, 300)
+        }
+        video.addEventListener('playing', once)
+      }
+    }
   } catch (error) {
     // attempt fallback container once
     const alt = pickAlternate(currentSrc)

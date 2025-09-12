@@ -52,7 +52,7 @@ export const createRenderer = (
   }
 
   const updateSize = () => {
-    // Use actual viewport dimensions, not the initial width/height parameters
+    // Use actual viewport dimensions
     const w = globalThis.innerWidth
     const h = globalThis.innerHeight
     renderer.setSize(w, h)

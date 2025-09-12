@@ -14,7 +14,9 @@ type Props = {
 export const Toggle = ({ name, label, error, required, className, labelNode }: Props) => {
   const inputId = name
 
-  const wrapperClasses = `flex items-center gap-3 text-sm ${error ? 'text-red-500' : 'text-[var(--colors-text-primary)]'} ${className || ''}`
+  const wrapperClasses = `flex items-center gap-3 text-sm ${error ? 'text-[var(--colors-semantic-error)]' : 'text-[var(--colors-text-primary)]'} ${
+    className || ''
+  }`
 
   return (
     <label for={inputId} class={wrapperClasses.trim()}>
@@ -52,5 +54,3 @@ export const Toggle = ({ name, label, error, required, className, labelNode }: P
     </label>
   )
 }
-
-export default Toggle

@@ -2,14 +2,9 @@
   "/": {
     "layout": "collapsed"
   },
-  "/shows": {
-    "layout": "collapsedPage"
-  },
-  "/contact": {
-    "layout": "collapsedPage"
-  },
   "/auditions": {
-    "layout": "collapsedPage"
+    "showActionZone": false,
+    "showHeader": false
   },
   "/theme": {
     "debugOnly": true,

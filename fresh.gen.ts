@@ -12,12 +12,13 @@ import * as $partials_auditions from './routes/partials/auditions.tsx'
 import * as $partials_bio from './routes/partials/bio.tsx'
 import * as $partials_contact from './routes/partials/contact.tsx'
 import * as $partials_home from './routes/partials/home.tsx'
+import * as $partials_links from './routes/partials/links.tsx'
 import * as $partials_shows from './routes/partials/shows.tsx'
 import * as $ActionZoneController from './islands/ActionZoneController.tsx'
-import * as $ContactForm from './islands/ContactForm.tsx'
 import * as $ContentPageOrchestrator from './islands/ContentPageOrchestrator.tsx'
 import * as $DebugControls from './islands/DebugControls.tsx'
 import * as $DebugPanels from './islands/DebugPanels.tsx'
+import * as $FormManager from './islands/FormManager.tsx'
 import * as $Header from './islands/Header.tsx'
 import * as $PageManager from './islands/PageManager.tsx'
 import * as $ThemeProvider from './islands/ThemeProvider.tsx'
@@ -36,14 +37,15 @@ const manifest = {
     './routes/partials/bio.tsx': $partials_bio,
     './routes/partials/contact.tsx': $partials_contact,
     './routes/partials/home.tsx': $partials_home,
+    './routes/partials/links.tsx': $partials_links,
     './routes/partials/shows.tsx': $partials_shows,
   },
   islands: {
     './islands/ActionZoneController.tsx': $ActionZoneController,
-    './islands/ContactForm.tsx': $ContactForm,
     './islands/ContentPageOrchestrator.tsx': $ContentPageOrchestrator,
     './islands/DebugControls.tsx': $DebugControls,
     './islands/DebugPanels.tsx': $DebugPanels,
+    './islands/FormManager.tsx': $FormManager,
     './islands/Header.tsx': $Header,
     './islands/PageManager.tsx': $PageManager,
     './islands/ThemeProvider.tsx': $ThemeProvider,

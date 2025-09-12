@@ -1,32 +1,33 @@
 {
   "title": "So, you wanna sing, eh?",
   "sections": {
-    "introBody": "Abyssion is a metal band with technical and progressive leanings. We value energy, groove, and precision. We're heavy as sin, but we also know when to pull back and create moments of calm. Think thrash with more technical leanings and a pinch of atmosphere. If that sounds like the type of project you'd be interested in, read on.",
-    "youMightBeAGoodFitTitle": "You might be a good fit if:",
+    "introBody": "Abyssion is a metal band. We value energy, groove, and precision. We're also heavy as sin, but we know when to pull back and create moments of calm. Think thrash with more technical leanings and a pinch of atmosphere. If that sounds like the type of project you'd be interested in, read on.",
+    "youMightBeAGoodFitTitle": "You might be a good fit if...",
     "youMightBeAGoodFitBody": [
-      "You're in your late 20s or older",
-      "You like to sing, but also like to scream",
-      "Pitchiness is anathema to you, but technical precision doesn't trump all",
-      "You like thrash; bands like Metallica, Megadeth, Slayer, Testament and the like",
-      "But you also like proggy stuff; think Dream Theater, Opeth, Porcupine Tree and so on",
-      "You're established with an existing career (we're not looking to be career musicians)",
-      "You're able and desire to rehearse weekly and gig monthly"
+      "You sing, but also catapult your being from the nether by breathing dragonfire through **MONSTER** gutterals!",
+      "Pitchiness is anathema to you, but technical precision doesn't trump all. Raw delivery, feel and emotion matter to yoy. Sometimes more.",
+      "You love **THRASH**. Bands like **Metallica**, **Megadeth**, **Slayer** and **Testament**.",
+      "But you also like your **PROG**. Think stuff like **Dream Theater**, **Opeth** and **Porcupine Tree**.",
+      "You're established with an existing career (we're not looking to be career musicians 😢).",
+      "You're in your late 20s or older.",
+      "You're able and willing to rehearse weekly and gig monthly."
     ],
     "requirementsTitle": "Ready to apply?",
+    "requirementsSubtitle": "Here's what what you'll need",
     "requirementsBody": [
-      "A demo of existing material: a link and a short description",
-      "A brief description of your vocal style",
-      "A brief description of your past experience"
+      "A demo of existing material: a link and a short description.",
+      "A brief description of your vocal style.",
+      "A brief description of your past experience."
     ],
     "processTitle": "The audition process",
     "processBody": [
       "**Step one**: This step. We'll get back to you if we think you're a good fit.",
-      "**Step two**: Record a verse/chorus (~1 minute) of your own take on one of our songs. Write your own lyrics.",
-      "**Step three**: An in-person audition of that song, preferably more fleshed out, plus another song of ours or a few song options you'd like to do as a cover. We'll do our best to learn one."
+      "**Step two**: Record a verse + chorus (about 1 minute is all you need) of your own take on one of our songs. Write your own lyrics.",
+      "**Step three**: Come out for an in-person audition of that song, preferably more fleshed out, plus another song of ours or a few song options you'd like to do as a cover. We'll do our best to learn one."
     ],
     "moreAboutUs": "A little more about us",
-    "moreAboutUsBody": "We're four dedicated musicians whom rehearse at The Farm Rehearsal space in Markham. We have a ton of fun and goof around but we also take our music and the time we put into it seriously. So much of what we do is about celebrating the music we love and the joy in the craft of creating it. That in and of itself has to be it's own reward; it's not like playing metal is going to make us any serious money! Though that _would_ be nice. The four of us also have fully established, independent careers outside of Abyssion. We want to write a lot, we want to gig a lot, and with a little bit of luck, we'll also tour a lot.\n\nWe expect anyone joining this band to be at a similar point in life, with their own independent life and career, but with the deep desire to sing in pretty feakin' cool metal band (we think!) and the amenties and resources to do so.",
-    "finalNote": "If that sounds like the type of project you'd be interested in **we want to hear from you**!"
+    "moreAboutUsBody": "We're four dedicated metal heads whom rehearse at The Farm Rehearsal space in Markham. We have a ton of fun and goof around! But we also take our music and the time we put into it seriously. So much of what we do is about celebrating the music we love and the joy in the craft of creating it. That in itself has to be it's own reward; it's not like playing metal is going to make us any serious money! Though that _would_ be nice.\n\nThe four of us also have fully established, independent careers outside of Abyssion. We want to write a lot, we want to gig a lot, and we want to tour. That means we balance our lives with Abyssion in mind. So while it's not the main thing, it is a main thing.\n\nWe expect anyone joining this band to be at a similar point in life, with their own independent life, career and family obligations, but also with the deep desire to sing in pretty feakin' cool metal band (we think!) and the resources and willingness to do so.\n\nIf that sounds like a compelling project **we want to hear from you**!",
+    "finalNote": "I know we're asking for a lot and being really prickly about a bunch of stuff. We do that so that we don't waste each other's time on a doomed bid. We promise, we're actually really nice when you meet us! Our bassist may even be a cat person."
   },
   "form": {
     "nameLabel": "Your name",
@@ -34,14 +35,14 @@
     "confirmRequirementsHeading": "Confirm critical requirements",
     "toggles": {
       "ageRangeThirtyToFortyFive": "I'm in my late 20s or older",
-      "singsAndScreams": "I like to sing and to scream",
-      "likesListedBands": "**THRASH** and **PROG** are my jam",
-      "canRehearseAndGig": "I can rehearse weekly and gig at least monthly, and will protect this time",
-      "iCanTravel": "I have the amenities to travel for an audition, rehearsals and gigs"
+      "singsAndScreams": "I like to **SING** and **SCREAM**. Gutterals for the win!",
+      "likesListedBands": "**THRASH** is my jam and I'm not afraid of **5/4**.",
+      "canRehearseAndGig": "I can rehearse weekly and gig monthly and I have the means to travel."
     },
     "demoUrlLabel": "Demo link",
     "demoDescriptionLabel": "Demo description",
-    "additionalDetailsLabel": "About yourself (and any other details you'd like to share)",
+    "additionalDetailsLabel": "About your vocal style and experience (and any other details you'd like to share)",
+    "submitNote": "All fields must be filled and all toggles checked before submitting.",
     "submitLabel": "Submit application",
     "errorFixHighlighted": "Please complete highlighted fields"
   },

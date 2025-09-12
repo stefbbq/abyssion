@@ -7,6 +7,8 @@ type Props = {
   height?: number | string
   /** vertical focal point as a percentage from top (0-100), default 50 */
   yPosition?: number
+  /** placement of the image within the container, default 'bottom' */
+  placement?: 'top' | 'bottom'
 }
 
 /**
@@ -18,18 +20,22 @@ type Props = {
  *   <ShellImage yPosition={26} src='/images/band_live.webp' alt='Abyssion live' />
  *   <ShellImage height='280px' yPosition={26} src='/images/band_live.webp' alt='Abyssion live' />
  */
-export const ShellImage = ({ src, alt, height, yPosition }: Props) => {
+export const ShellImage = ({ src, alt, height, yPosition, placement }: Props) => {
   const containerStyle: Record<string, string | number> = {}
+
   containerStyle.height = height || '100%'
+
   const positionY = typeof yPosition === 'number' ? yPosition : 50
+  const classNames = `relative -mx-8 overflow-hidden ${placement === 'top' ? '!-mt-8' : ''}`
 
   return (
-    <div class='relative -mx-8 overflow-hidden' style={containerStyle}>
+    <div class={classNames} style={containerStyle}>
       <img
         src={src}
         alt={alt}
         class='absolute inset-0 w-full h-full object-cover'
         style={{ objectPosition: `50% ${positionY}%` }}
+        loading='lazy'
       />
     </div>
   )

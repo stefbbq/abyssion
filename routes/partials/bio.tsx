@@ -11,8 +11,8 @@ export default function BioSection() {
     <>
       {/* about */}
       <Shell>
-        <Title className='mb-6'>{bio.aboutTitle}</Title>
-        <ShellImage height='300px' yPosition={25} src='/images/band_live.webp' alt='Abyssion live' />
+        <Title>{bio.aboutTitle}</Title>
+        <ShellImage height='340px' yPosition={27} placement='top' src='/images/band_live.webp' alt='Abyssion live' />
         <TextBlock>{bio.about}</TextBlock>
       </Shell>
 
@@ -26,7 +26,6 @@ export default function BioSection() {
 
       {/* members */}
       <section aria-labelledby='band-members' class='grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'>
-        <h2 id='band-members' class='sr-only'>band members</h2>
         {bio.members.map((member) => (
           <Card
             key={member.id}

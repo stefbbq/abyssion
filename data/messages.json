@@ -1,0 +1,6 @@
+{
+  "email": {
+    "CONFIG_MISSING": "email service not configured (missing SENDGRID_KEY/SENDGRID_API_KEY or MAIL_TO)",
+    "SEND_FAILED": "failed to send your message, please try again later"
+  }
+}

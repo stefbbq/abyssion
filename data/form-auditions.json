@@ -1,0 +1,18 @@
+{
+  "id": "auditions-form",
+  "action": "/partials/auditions",
+  "method": "POST",
+  "fields": [
+    { "type": "text", "name": "fullName", "required": true, "labelKey": "nameLabel" },
+    { "type": "email", "name": "email", "required": true, "labelKey": "emailLabel" },
+    { "type": "url", "name": "demoUrl", "required": true, "labelKey": "demoUrlLabel" },
+    { "type": "textarea", "name": "demoDescription", "rows": 4, "required": true, "labelKey": "demoDescriptionLabel" },
+    { "type": "textarea", "name": "additionalDetails", "rows": 5, "required": true, "labelKey": "additionalDetailsLabel" }
+  ],
+  "toggles": [
+    { "name": "ageRangeThirtyToFortyFive", "required": true, "labelKey": "toggles.ageRangeThirtyToFortyFive" },
+    { "name": "singsAndScreams", "required": true, "labelKey": "toggles.singsAndScreams" },
+    { "name": "likesListedBands", "required": true, "labelKey": "toggles.likesListedBands" },
+    { "name": "canRehearseAndGig", "required": true, "labelKey": "toggles.canRehearseAndGig" }
+  ]
+}

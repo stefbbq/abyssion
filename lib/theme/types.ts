@@ -72,6 +72,19 @@ export type UITheme = {
     foreground: string
     background: string
     surface: string
+    /** text color roles */
+    text?: {
+      primary: string
+      secondary: string
+      tertiary: string
+    }
+    /** semantic status colors */
+    semantic?: {
+      success: string
+      warning: string
+      error: string
+      info: string
+    }
     border: {
       primary: string
       hover: string

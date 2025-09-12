@@ -45,6 +45,7 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
           alt={imageAlt || ''}
           class='aspect-[9/21] w-full h-full object-cover max-h-[50vh] md:max-h-none'
           onError={handleError}
+          loading='lazy'
         />
       )
     }

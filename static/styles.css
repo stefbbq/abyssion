@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* robust full-viewport sizing helpers for mobile safari toolbars */
+html, body { min-height: 100vh; min-height: 100dvh; min-height: 100svh; min-height: 100lvh }
+.full-viewport { 
+  width: 100vw; width: 100dvw; width: 100svw; width: 100lvw; 
+  height: 100vh; height: 100dvh; height: 100svh; height: 100lvh 
+}
+
 /* Background utilities */
 .background {
   background-color: var(--colors-background);
@@ -105,6 +112,84 @@
   border-radius: var(--borderRadius-none);
 }
 
+/* form validity gating */
+/* default to invalid state */
+.form-requires-valid [data-requires-valid] { display: none }
+.form-requires-valid [data-show-when-invalid] { display: block }
+/* switch when valid (either native :valid or explicit data-valid) */
+.form-requires-valid:valid [data-requires-valid],
+.form-requires-valid[data-valid="true"] [data-requires-valid] { display: inline-block }
+.form-requires-valid:valid [data-show-when-invalid],
+.form-requires-valid[data-valid="true"] [data-show-when-invalid] { display: none }
+
+/* themed error styles */
+.text-error { color: var(--colors-semantic-error) }
+.border-error { border-color: var(--colors-semantic-error) }
+
+/* invalid/touched field highlighting */
+input[data-touched="true"]:invalid,
+textarea[data-touched="true"]:invalid { border-color: var(--colors-semantic-error) }
+
+/* field status icons visibility */
+.field-input:valid ~ .field-status-icon .icon-valid { display: inline }
+.field-input:valid ~ .field-status-icon .icon-invalid { display: none }
+.field-input[data-touched="true"]:invalid ~ .field-status-icon .icon-valid { display: none }
+.field-input[data-touched="true"]:invalid ~ .field-status-icon .icon-invalid { display: inline }
+
+/* smooth icon transitions and crisp rendering */
+.field-status-icon svg { transition: opacity 120ms ease, transform 120ms ease; transform-origin: 50% 50%; shape-rendering: geometricPrecision; display: block }
+
+/* switch to a fixed-size circular badge to avoid optical drift */
+.status-dot { width: 28px; height: 28px; border-radius: 9999px; display: grid; place-items: center; box-shadow: 0 0 0 1px color-mix(in srgb, var(--colors-foreground) 16%, transparent) inset }
+.status-dot--success { background-color: var(--colors-semantic-success) }
+.status-dot--error { background-color: var(--colors-semantic-error) }
+
+/* align border style with focus for invalid when touched; keep original focus ring */
+.field-input[data-touched="true"]:invalid { border-color: var(--colors-semantic-error) }
+
+/* neutralize browser autofill visuals so theme controls states entirely */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: inset 0 0 0 1000px var(--colors-background), inset 0 0 0 1px var(--colors-border-primary) !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), inset 0 0 0 1000px var(--colors-background), inset 0 0 0 1px var(--colors-border-primary) !important;
+  -webkit-text-fill-color: var(--colors-text-primary) !important;
+  caret-color: var(--colors-text-primary) !important;
+  outline: none !important;
+  background-clip: padding-box !important;
+}
+/* safari private mode/internal selector */
+input:-internal-autofill-selected,
+textarea:-internal-autofill-selected { background-color: var(--colors-background) !important }
+
+/* ensure generated theme exposes text variables */
+:root {
+  --colors-text-primary: var(--colors-foreground);
+  --colors-text-secondary: color-mix(in srgb, var(--colors-foreground) 65%, transparent);
+  --colors-text-tertiary: color-mix(in srgb, var(--colors-foreground) 50%, transparent);
+}
+
+
+
+
+/* keep valid state colors consistent */
+input:valid,
+textarea:valid {
+  background-color: var(--colors-background);
+  color: var(--colors-text-primary);
+}
+
+/* invalid/touched toggle label coloring using :has for modern browsers */
+label:has(> input[data-touched="true"]:invalid) {
+  color: var(--colors-semantic-error);
+}
+label:has(> input[data-touched="true"]:invalid) > span[aria-hidden="true"] {
+  border-color: var(--colors-semantic-error);
+}
+
 .rounded-theme-sm {
   border-radius: var(--borderRadius-sm);
 }
@@ -130,9 +215,26 @@
 
   h1, h2, h3, h4, h5, h6 { @apply font-heading font-bold }
 
-  h1 { @apply text-2xl uppercase leading-tight tracking-tight }
-  h2 { @apply text-xl uppercase leading-snug tracking-tight }
+  h1 { @apply text-2xl uppercase leading-tight  }
+  h2 { @apply text-xl uppercase leading-snug  }
   h3 { @apply text-lg uppercase leading-snug }
+}
+
+/* global subtitle type for headings using <small> */
+h1 > small,
+h2 > small,
+h3 > small,
+h4 > small,
+h5 > small,
+h6 > small {
+  display: block;
+  font-size: 0.63em;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  opacity: 0.6;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 blockquote {

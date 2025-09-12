@@ -18,7 +18,7 @@ export const deepSpaceHUDLightPalette = {
   secondary: 0x7c3aed,
   tertiary: 0xff2d55,
   foreground: 0x000000,
-  background: 0xfaf8f5,
+  background: 0xE9E9E9,
   surface: 0xffffff,
 }
 

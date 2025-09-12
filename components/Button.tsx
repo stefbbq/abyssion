@@ -13,6 +13,8 @@ type BaseProps = {
   size?: ButtonSize
   children: ComponentChildren
   class?: string
+  /** enable desktop-only reveal hover overlay effect */
+  hoverReveal?: boolean
 }
 
 /**
@@ -71,12 +73,16 @@ export const Button = ({
   size = 'md',
   children,
   class: className,
+  hoverReveal = false,
   ...props
 }: Props) => {
   const baseClasses =
     'inline-flex items-center justify-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] focus:ring-offset-[var(--colors-background)] disabled:opacity-50 disabled:cursor-not-allowed'
   const transitionClasses = 'transition-all duration-200'
-  const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`
+  const hoverRevealClasses = hoverReveal
+    ? 'group relative overflow-hidden md:hover:shadow-md before:content-["""] before:absolute before:inset-0 before:bg-[var(--colors-foreground)] before:transform before:-translate-x-full md:hover:before:translate-x-0 before:transition-transform before:duration-300 before:ease-out before:pointer-events-none before:z-0'
+    : ''
+  const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${hoverRevealClasses} ${className || ''}`
 
   // Separate ref from props
   const { ref, ...rest } = props as { ref?: any }
@@ -85,6 +91,7 @@ export const Button = ({
     const href = (props as any).href as string
     const isHashLink = typeof href === 'string' && href.startsWith('#')
     const isExternal = typeof href === 'string' && (/^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:'))
+    const wrappedChildren = hoverReveal ? <span class='relative z-10'>{children}</span> : children
     return (
       <a
         {...rest}
@@ -93,12 +100,13 @@ export const Button = ({
         {...(isHashLink || isExternal ? {} : { 'f-partial': `/partials${href === '/' ? '/home' : href}` })}
         {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
-        {children}
+        {wrappedChildren}
       </a>
     )
   }
 
   // TypeScript knows these are ButtonElementProps
+  const wrappedChildren = hoverReveal ? <span class='relative z-10'>{children}</span> : children
   return (
     <button
       {...rest}
@@ -106,7 +114,7 @@ export const Button = ({
       class={classes}
       disabled={!IS_BROWSER || props.disabled}
     >
-      {children}
+      {wrappedChildren}
     </button>
   )
 }

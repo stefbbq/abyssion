@@ -58,7 +58,7 @@ export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus,
         <div class={leftSlotClasses} style={{ backgroundColor: `var(--colors-${leftBgRole || 'secondary'})` }}>
           <div class='flex flex-col items-center leading-none select-none'>
             <span
-              class='block text-2xl md:text-3xl'
+              class='block text-xl md:text-2xl'
               style={{
                 fontFamily: 'var(--typography-fontFamily-shows-date, var(--typography-fontFamily-heading))',
                 fontWeight: 700,
@@ -69,7 +69,7 @@ export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus,
               {leftDate.month}
             </span>
             <span
-              class='block -mt-1 text-5xl md:text-6xl'
+              class='block -mt-1 text-4xl md:text-5xl'
               style={{
                 fontFamily: 'var(--typography-fontFamily-shows-date, var(--typography-fontFamily-heading))',
                 fontWeight: 800,
@@ -130,7 +130,7 @@ export const RichLineItem = ({ leftDate, leftText, title, subtitle, rightStatus,
   }
 
   return (
-    <li class={mergedListItemClasses} style={{ height: height || '80px' }}>
+    <li class={mergedListItemClasses} style={{ height: height || '100px' }}>
       {renderLeft()}
       {renderMain()}
       {renderRight()}
