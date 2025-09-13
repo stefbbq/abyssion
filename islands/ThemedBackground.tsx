@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import {} from 'preact/hooks'
 
 import { currentUITheme } from '@lib/theme/index.ts'
 import { currentBaseTheme } from '@lib/theme/state.ts'
@@ -7,6 +7,8 @@ import { hexToCSS } from '@lib/theme/colorUtils/hexToCSS.ts'
 import { isMobileDevice } from '@lib/utils/isMobileDevice.ts'
 import { useMobileBackground } from '@lib/ui/useMobileBackground.ts'
 import { useParallax } from '@lib/ui/useParallax.ts'
+import { useNoiseBackground } from '@lib/ui/useNoiseBackground.ts'
+import { useScrollMask } from '@lib/ui/useScrollMask.ts'
 
 type Props = {
   intensity: number
@@ -27,31 +29,10 @@ type Props = {
  *   <ThemedBackground intensity={0.5} showNoise={true} />
  */
 export default function ThemedBackground({ intensity = 0, showNoise = true }: Props) {
-  // array of noise images to choose from
-  const noiseImages = [
-    '/media/images/noiseB.png',
-    '/media/images/noiseC.png',
-    '/media/images/noiseD.png',
-    '/media/images/noiseE.png',
-    '/media/images/noiseF.png',
-  ]
-
-  // random interval for noise cycling
-  const getRandomInterval = () => 150 + Math.random() * 150 // 200-300ms
-
-  // random index for noise cycling
-  const getRandomIndex = (exclude: number, length: number) => {
-    let idx = Math.floor(Math.random() * length)
-    if (length <= 1) return 0
-    while (idx === exclude) idx = Math.floor(Math.random() * length)
-    return idx
-  }
-
   const theme = currentUITheme.value
   const baseTheme = currentBaseTheme.value
-  const [noiseIndex, setNoiseIndex] = useState(0)
-  const timeoutRef = useRef<number | null>(null)
-  const [maskStyle, setMaskStyle] = useState<Record<string, string>>({})
+  const isMobile = isMobileDevice()
+  const maskStyle = useScrollMask(isMobile, { topFadeStartPx: 35, bottomFadeStartPx: 65, solidBandPx: 150 })
 
   // shared styling classes
   const baseClasses = 'fixed inset-0 pointer-events-none'
@@ -67,7 +48,7 @@ export default function ThemedBackground({ intensity = 0, showNoise = true }: Pr
 
   // noise-background
   const noiseClasses = 'fixed inset-0 pointer-events-none bg-repeat bg-[length:150px_75px]' // noise background
-  const isMobile = isMobileDevice()
+  const { index: noiseIndex, images: noiseImages } = useNoiseBackground(isMobile && showNoise, { cycleMs: 5000 })
 
   // on mobile: start at 0.15, rise to 0.30 as themed bg fully fades in
   const mobileNoiseOpacity = 0.03 + 0.01 * Math.min(1, Math.max(0, intensity))
@@ -76,85 +57,7 @@ export default function ThemedBackground({ intensity = 0, showNoise = true }: Pr
 
   // mobile image background (behind tint/noise), only when enabled
   const { shouldEnable: showMobileBackground, index, images } = useMobileBackground()
-  const parallaxY = useParallax(showMobileBackground, { driftSpeed: 0, scrollFactor: -0.01 })
-
-  // noise cycling effect
-  useEffect(() => {
-    if (!showNoise) return
-
-    // Preload all noise images
-    noiseImages.forEach((src) => {
-      const img = new globalThis.Image()
-      img.src = src
-    })
-
-    // Start noise cycling
-    let isMounted = true
-    const cycle = () => {
-      setNoiseIndex((prev) => {
-        const next = getRandomIndex(prev, noiseImages.length)
-        return next
-      })
-
-      if (isMounted) timeoutRef.current = globalThis.setTimeout(cycle, getRandomInterval())
-    }
-
-    timeoutRef.current = globalThis.setTimeout(cycle, getRandomInterval()) // Start cycling immediately
-
-    return () => {
-      isMounted = false
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [showNoise])
-
-  // dynamic top/bottom gradient mask that follows scroll position
-  // disabled on mobile devices
-  useEffect(() => {
-    if (!isMobile) return
-
-    const updateMask = () => {
-      // get the scroll position
-      const scrollY = Math.max(0, globalThis.scrollY || 0)
-
-      // get the document element and its height and progress through it
-      const docEl = globalThis.document?.documentElement
-      const scrollHeight = docEl?.scrollHeight || 0
-      const clientHeight = docEl?.clientHeight || globalThis.innerHeight || 0
-      const maxScroll = Math.max(1, scrollHeight - clientHeight)
-      const progress = Math.min(1, Math.max(0, scrollY / maxScroll))
-      const fromBottom = Math.abs(progress * maxScroll - maxScroll)
-
-      // top: when at top, start=50px and fade to 120px; as you scroll to 50px, move start to 0
-      const topStart = Math.max(0, 35 - scrollY)
-      const bottomStart = Math.max(0, 65 - fromBottom)
-
-      const mask = `linear-gradient(
-        to bottom,
-        rgba(0,0,0,0) ${topStart}px,
-        rgba(0,0,0,1) 150px,
-        rgba(0,0,0,1) calc(100% - 150px),
-        rgba(0,0,0,0) calc(100% - ${bottomStart}px)
-      )`
-
-      setMaskStyle({
-        WebkitMaskImage: mask,
-        maskImage: mask,
-        WebkitMaskRepeat: 'no-repeat',
-        maskRepeat: 'no-repeat',
-        WebkitMaskSize: '100% 100%',
-        maskSize: '100% 100%',
-      })
-    }
-
-    updateMask()
-    globalThis.addEventListener('scroll', updateMask, { passive: true })
-    globalThis.addEventListener('resize', updateMask)
-
-    return () => {
-      globalThis.removeEventListener('scroll', updateMask)
-      globalThis.removeEventListener('resize', updateMask)
-    }
-  }, [!isMobile])
+  const parallaxY = useParallax(showMobileBackground, { driftSpeed: 0, scrollFactor: -0.015 })
 
   return (
     <>

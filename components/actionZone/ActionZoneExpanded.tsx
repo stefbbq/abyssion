@@ -2,6 +2,8 @@ import type { MenuItem, SocialLink } from '@data/types.ts'
 import { ActionZoneMenuButton } from '@components/actionZone/ActionZoneMenuButton.tsx'
 import { icons as SocialIcons, type SocialIconMap } from '@components/icons/index.ts'
 import type { ActionZoneButton } from '@components/actionZone/types.ts'
+import { ThemeToggle } from '@components/ThemeToggle.tsx'
+import { ThemeSwitcher } from '@components/ThemeSwitcher.tsx'
 
 type SocialIconKey = keyof SocialIconMap
 
@@ -26,6 +28,15 @@ export const ActionZoneExpanded = ({ socialLinks, onAction, buttons }: Props) =>
 
   return (
     <div class='px-4 pb-4 space-y-4'>
+      {/* theme controls */}
+      <div class='pt-2'>
+        <div class='flex items-center justify-center space-x-3'>
+          <ThemeSwitcher />
+          <ThemeToggle />
+        </div>
+        <div class='mt-3 h-px w-full bg-gradient-to-r from-transparent via-[var(--colors-border-primary)] to-transparent opacity-30' />
+      </div>
+
       {/* social links */}
       <div
         key='social-links'

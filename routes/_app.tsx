@@ -70,7 +70,7 @@ export default function App({ Component, url }: PageProps) {
         <title>{ogTitle}</title>
         <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
         <link rel='icon' href='/favicon.webp' />
-        <link rel='stylesheet' href='/styles.css' />
+        <link rel='stylesheet' defer href='/styles.css' />
 
         {/* safari/iOS toolbar translucency */}
         <meta name='theme-color' content='rgba(0,0,0,0)' media='(prefers-color-scheme: dark)' />
@@ -100,8 +100,8 @@ export default function App({ Component, url }: PageProps) {
         {albumsLd && <script type='application/ld+json'>{JSON.stringify(albumsLd)}</script>}
 
         {/* fonts */}
-        <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
+        <link media='print' href='https://fonts.googleapis.com' />
+        <link media='print' href='https://fonts.gstatic.com' crossOrigin='true' />
       </Head>
 
       <body
