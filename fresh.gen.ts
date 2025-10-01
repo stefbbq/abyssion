@@ -5,7 +5,8 @@
 import * as $_404 from './routes/_404.tsx'
 import * as $_app from './routes/_app.tsx'
 import * as $_middleware from './routes/_middleware.ts'
-import * as $auditions from './routes/auditions.tsx'
+import * as $auditions_index from './routes/auditions/index.tsx'
+import * as $auditions_thankyou from './routes/auditions/thankyou.tsx'
 import * as $index from './routes/index.tsx'
 import * as $media_path_ from './routes/media/[...path].ts'
 import * as $partials_auditions from './routes/partials/auditions.tsx'
@@ -30,7 +31,8 @@ const manifest = {
     './routes/_404.tsx': $_404,
     './routes/_app.tsx': $_app,
     './routes/_middleware.ts': $_middleware,
-    './routes/auditions.tsx': $auditions,
+    './routes/auditions/index.tsx': $auditions_index,
+    './routes/auditions/thankyou.tsx': $auditions_thankyou,
     './routes/index.tsx': $index,
     './routes/media/[...path].ts': $media_path_,
     './routes/partials/auditions.tsx': $partials_auditions,

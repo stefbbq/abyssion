@@ -6,6 +6,10 @@
     "showActionZone": false,
     "showHeader": false
   },
+  "/auditions/thankyou": {
+    "showActionZone": false,
+    "showHeader": false
+  },
   "/theme": {
     "debugOnly": true,
     "showHeader": false,

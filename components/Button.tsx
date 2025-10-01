@@ -15,6 +15,8 @@ type BaseProps = {
   class?: string
   /** enable desktop-only reveal hover overlay effect */
   hoverReveal?: boolean
+  /** when true, do not add Fresh partial navigation attribute */
+  noPartial?: boolean
 }
 
 /**
@@ -74,6 +76,7 @@ export const Button = ({
   children,
   class: className,
   hoverReveal = false,
+  noPartial = false,
   ...props
 }: Props) => {
   const baseClasses =
@@ -97,7 +100,7 @@ export const Button = ({
         {...rest}
         ref={ref as any}
         class={classes}
-        {...(isHashLink || isExternal ? {} : { 'f-partial': `/partials${href === '/' ? '/home' : href}` })}
+        {...(isHashLink || isExternal || noPartial ? {} : { 'f-partial': `/partials${href === '/' ? '/home' : href}` })}
         {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         {wrappedChildren}

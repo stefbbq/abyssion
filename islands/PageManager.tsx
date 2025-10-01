@@ -13,9 +13,19 @@ import { getScrollOffset, getSectionIDs } from '@lib/ui/index.ts'
  * PageManager
  * Handles scroll/hash sync, smooth scrolling, GL scene switching, and parallax effect.
  */
-export default function PageManager() {
-  const [showGL, setShowGL] = useState(() => !isGLDisabled())
-  const [_currentPath, setCurrentPath] = useState<string>(() => (typeof window !== 'undefined' ? globalThis.location.pathname : '/'))
+type PageManagerProps = { disableGL?: boolean; enabledPaths?: string[]; disabledPaths?: string[] }
+
+export default function PageManager({ disableGL, enabledPaths, disabledPaths }: PageManagerProps) {
+  const resolveDisableForPath = (path: string): boolean => {
+    if (typeof disableGL === 'boolean') return disableGL
+    if (Array.isArray(enabledPaths)) return !enabledPaths.includes(path)
+    if (Array.isArray(disabledPaths)) return disabledPaths.includes(path)
+    return isGLDisabled()
+  }
+
+  const initialPath = typeof window !== 'undefined' ? globalThis.location.pathname : '/'
+  const [showGL, setShowGL] = useState(() => !resolveDisableForPath(initialPath))
+  const [_currentPath, setCurrentPath] = useState<string>(() => initialPath)
   const ticking = useRef(false)
 
   // switch orchestrator based on path
@@ -30,25 +40,83 @@ export default function PageManager() {
 
   // initialize GL scene and scroll management
   useEffect(() => {
-    // bail if not in a browser or GL is disabled
+    // helper to force recalculation for listeners that depend on scroll/resize
+    const triggerRecalc = () => {
+      try {
+        globalThis.dispatchEvent(new Event('resize'))
+        globalThis.dispatchEvent(new Event('scroll'))
+      } catch {
+        // noop
+      }
+    }
+    // bail if not in a browser
     if (typeof globalThis.window === 'undefined') return
 
-    // bail if GL is disabled
-    if (isGLDisabled()) {
-      setShowGL(false)
-      return
-    } else setShowGL(true)
+    // compute GL enablement per current path and do not early-return so non-GL features still work
+    const glDisabledForPath = resolveDisableForPath(globalThis.location.pathname)
+    setShowGL(!glDisabledForPath)
 
-    // get sections (may be empty on some pages)
-    const sections = getSectionIDs()
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el))
+    // helper to manage an intersection observer that only runs on home
+    let observer: IntersectionObserver | null = null
+    const setupObserverIfHome = () => {
+      // always disconnect previous instance first
+      if (observer) {
+        observer.disconnect()
+        observer = null
+      }
+
+      // only set up on home route
+      if (globalThis.location.pathname !== '/') return
+
+      // compute sections (may be empty depending on content)
+      const sections = getSectionIDs()
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => Boolean(el))
+
+      if (!sections.length) return
+
+      observer = new globalThis.IntersectionObserver(
+        (entries) => {
+          if (!ticking.current) {
+            globalThis.requestAnimationFrame(() => {
+              const visible = entries
+                .filter((entry) => entry.isIntersecting && entry.intersectionRatio > 0.5)
+                .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+              if (visible.length > 0) {
+                // only sync hash on home route
+                if (globalThis.location.pathname === '/') {
+                  const topSection = visible[0].target as HTMLElement
+                  const newHash = `#${topSection.id}`
+                  if (globalThis.location.hash !== newHash) {
+                    history.replaceState(null, '', newHash)
+                  }
+                }
+              }
+              ticking.current = false
+            })
+
+            ticking.current = true
+          }
+        },
+        {
+          threshold: [0.5],
+        },
+      )
+
+      sections.forEach((section) => observer?.observe(section))
+    }
 
     // observe navigation changes to update current path (for content-page behavior)
     const onPopState = () => {
       const path = globalThis.location.pathname
       setCurrentPath(path)
       switchOrchestratorForPath(path)
+      // update GL enablement on route change
+      setShowGL(!resolveDisableForPath(path))
+      // update intersection observer according to route
+      setupObserverIfHome()
+      // ensure backgrounds recalc immediately
+      triggerRecalc()
     }
     const onClickPath = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -87,6 +155,12 @@ export default function PageManager() {
         // default internal nav: update path signal and orchestrator
         setCurrentPath(url.pathname)
         switchOrchestratorForPath(url.pathname)
+        // update GL enablement on route change (pre-popstate)
+        setShowGL(!resolveDisableForPath(url.pathname))
+        // re-evaluate observer on navigation
+        setupObserverIfHome()
+        // ensure backgrounds recalc immediately
+        triggerRecalc()
       } catch {
         // ignore invalid URLs
       }
@@ -94,34 +168,8 @@ export default function PageManager() {
     globalThis.addEventListener('popstate', onPopState)
     document.addEventListener('click', onClickPath, { capture: true })
 
-    // intersection observer to update hash and switch GL scene
-    const observer = sections.length
-      ? new globalThis.IntersectionObserver(
-        (entries) => {
-          if (!ticking.current) {
-            globalThis.requestAnimationFrame(() => {
-              const visible = entries
-                .filter((entry) => entry.isIntersecting && entry.intersectionRatio > 0.5)
-                .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-              if (visible.length > 0) {
-                const topSection = visible[0].target as HTMLElement
-                const newHash = `#${topSection.id}`
-                if (globalThis.location.hash !== newHash) {
-                  history.replaceState(null, '', newHash)
-                }
-              }
-              ticking.current = false
-            })
-
-            ticking.current = true
-          }
-        },
-        {
-          threshold: [0.5],
-        },
-      )
-      : null
-    if (observer) sections.forEach((section) => observer.observe(section))
+    // initialize observer state for current route
+    setupObserverIfHome()
 
     // smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {
@@ -160,8 +208,11 @@ export default function PageManager() {
       if (!ticking.current) {
         requestAnimationFrame(() => {
           const scrollY = globalThis.scrollY
-          setScrollY(scrollY)
-          updateScrollState(scrollY)
+          // update GL state only if GL is enabled for this path
+          if (!resolveDisableForPath(globalThis.location.pathname)) {
+            setScrollY(scrollY)
+            updateScrollState(scrollY)
+          }
 
           ticking.current = false
         })
@@ -172,7 +223,9 @@ export default function PageManager() {
 
     // resize telemetry
     const handleResize = () => {
-      setViewportSize(globalThis.innerWidth, globalThis.innerHeight)
+      if (!resolveDisableForPath(globalThis.location.pathname)) {
+        setViewportSize(globalThis.innerWidth, globalThis.innerHeight)
+      }
     }
 
     globalThis.addEventListener('scroll', handleScroll)
@@ -182,10 +235,15 @@ export default function PageManager() {
 
     // initial telemetry on mount
     const scrollY = globalThis.scrollY
-    _setCurrentPath(globalThis.location.pathname)
-    setViewportSize(globalThis.innerWidth, globalThis.innerHeight)
-    setScrollY(scrollY)
-    updateScrollState(scrollY)
+    if (!resolveDisableForPath(globalThis.location.pathname)) {
+      _setCurrentPath(globalThis.location.pathname)
+      setViewportSize(globalThis.innerWidth, globalThis.innerHeight)
+      setScrollY(scrollY)
+      updateScrollState(scrollY)
+    }
+
+    // kick a recalc for any non-GL listeners, even when GL is disabled
+    triggerRecalc()
 
     return () => {
       if (observer) observer.disconnect()
@@ -207,7 +265,7 @@ export default function PageManager() {
         intensity={backgroundIntensityOverride.value !== null ? backgroundIntensityOverride.value : backgroundIntensitySignal.value}
         showNoise
       />
-      {showGL ? <GLCanvas /> : null}
+      {showGL && <GLCanvas />}
     </>
   )
 }

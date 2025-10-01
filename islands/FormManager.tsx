@@ -96,7 +96,13 @@ export default function FormManager({ config, labels, errors }: Props) {
   }
 
   return (
-    <form id={id} method={config.method} action={config.action} f-partial={config.action} class='form-requires-valid mt-8 space-y-6'>
+    <form
+      id={id}
+      method={config.method}
+      action={config.action}
+      {...(((config.method || 'GET').toUpperCase() === 'GET') ? { 'f-partial': config.action } : {})}
+      class='form-requires-valid mt-8 space-y-6'
+    >
       {errors?._form && <Snackbar message={errors._form} variant='error' />}
       <div class='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {config.fields.map((field) => {

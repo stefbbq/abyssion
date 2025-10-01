@@ -19,14 +19,12 @@ type Submission = {
   singsAndScreams: string | null
   likesListedBands: string | null
   canRehearseAndGig: string | null
-  iCanTravel: string | null
   demoUrl: string
   demoDescription: string
   additionalDetails: string
 }
 
 export type PageData = {
-  submitted?: Submission
   errors?: Record<string, string>
 }
 
@@ -35,7 +33,6 @@ const requiredCheckboxKeys = [
   'singsAndScreams',
   'likesListedBands',
   'canRehearseAndGig',
-  'iCanTravel',
 ] as const
 
 const content = auditionsContent as unknown as ContentAuditions
@@ -53,7 +50,6 @@ export const handler: Handlers<PageData> = {
       singsAndScreams: getMaybe('singsAndScreams'),
       likesListedBands: getMaybe('likesListedBands'),
       canRehearseAndGig: getMaybe('canRehearseAndGig'),
-      iCanTravel: getMaybe('iCanTravel'),
       demoUrl: get('demoUrl'),
       demoDescription: get('demoDescription'),
       additionalDetails: get('additionalDetails'),
@@ -87,7 +83,6 @@ export const handler: Handlers<PageData> = {
         singsAndScreams: submission.singsAndScreams,
         likesListedBands: submission.likesListedBands,
         canRehearseAndGig: submission.canRehearseAndGig,
-        iCanTravel: submission.iCanTravel,
       })
       const subject = `Audition submission from ${submission.fullName}`
       const text = `New audition submission from ${submission.fullName} (${submission.email}). Demo: ${submission.demoUrl}`
@@ -98,48 +93,21 @@ export const handler: Handlers<PageData> = {
       return await ctx.render({ errors: { _form: 'failed to send your submission, please try again later' } }, { status: 500 })
     }
 
-    return await ctx.render({ submitted: submission })
+    // redirect to thank-you page on success; include small summary in query
+    const u = new URL(req.url)
+    const q = new URLSearchParams()
+    q.set('n', submission.fullName.slice(0, 80))
+    q.set('e', submission.email.slice(0, 120))
+    if (submission.demoUrl) q.set('d', submission.demoUrl.slice(0, 300))
+    if (submission.demoDescription.trim()) q.set('dd', submission.demoDescription.slice(0, 500))
+    if (submission.additionalDetails.trim()) q.set('ad', submission.additionalDetails.slice(0, 900))
+    const thankYouUrl = new URL(`/auditions/thankyou?${q.toString()}`, u.origin)
+    return Response.redirect(thankYouUrl, 303)
   },
 }
 
 export default function AuditionsPartial(props?: PageProps<PageData>) {
-  const { submitted, errors } = props?.data || {}
-
-  // on submitted
-  if (submitted) {
-    return (
-      <div class='max-w-3xl mx-auto'>
-        <Shell>
-          <Title>{content.submitted.title}</Title>
-          <div class='flex flex-col items-center gap-6'>
-            <p class='text-[var(--colors-text-secondary)]'>{content.submitted.thanksBody}</p>
-            <div class='w-full text-sm text-[var(--colors-text-tertiary)] space-y-1'>
-              <p>
-                <span class='opacity-70'>{content.submitted.nameLabel}:</span> {submitted.fullName}
-              </p>
-              <p>
-                <span class='opacity-70'>{content.submitted.emailLabel}:</span> {submitted.email}
-              </p>
-              <p>
-                <span class='opacity-70'>{content.submitted.demoLabel}:</span>{' '}
-                <a class='underline' href={submitted.demoUrl} target='_blank' rel='noreferrer'>{submitted.demoUrl}</a>
-              </p>
-              <p class='whitespace-pre-wrap'>
-                <span class='opacity-70'>{content.submitted.demoDescriptionLabel}:</span> {submitted.demoDescription}
-              </p>
-              {submitted.additionalDetails && (
-                <p class='whitespace-pre-wrap'>
-                  <span class='opacity-70'>{content.submitted.additionalDetailsLabel}:</span> {submitted.additionalDetails}
-                </p>
-              )}
-            </div>
-          </div>
-        </Shell>
-      </div>
-    )
-  }
-
-  const _errorText = (field: string) => (errors && errors[field] ? errors[field] : null)
+  const { errors } = props?.data || {}
 
   // form
   return (

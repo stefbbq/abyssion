@@ -124,7 +124,9 @@ export default function App({ Component, url }: PageProps) {
         <DebugPanels />
 
         {/** scroll events, themed background, GL canvas */}
-        <PageManager />
+        <div key={pagePath}>
+          <PageManager enabledPaths={['/']} />
+        </div>
 
         {/** page chrome that must react to route changes */}
         <Partial name='app-chrome'>
