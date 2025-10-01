@@ -46,6 +46,15 @@ export const Card = ({ children, className, imageUrl, imageAlt, fallbackAvatarTe
           class='aspect-[9/21] w-full h-full object-cover max-h-[50vh] md:max-h-none'
           onError={handleError}
           loading='lazy'
+          sizes='(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw'
+          srcset={(() => {
+            try {
+              const base = imageUrl.replace(/\.webp.*/, '')
+              return `${base}-320.webp 320w, ${base}-480.webp 480w, ${base}-640.webp 640w, ${imageUrl} 960w`
+            } catch {
+              return undefined
+            }
+          })()}
         />
       )
     }

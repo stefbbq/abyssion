@@ -26,23 +26,29 @@ export const ThemeProvider = () => {
     document.documentElement.setAttribute('data-theme-family', kebab(currentThemeFamilyName.value))
     document.documentElement.setAttribute('data-theme-mode', currentThemeMode.value)
 
-    // Inject font links dynamically
-    fontUrls.forEach((url) => {
-      if (!document.querySelector(`link[data-theme-font="${url}"]`)) {
-        const link = document.createElement('link')
-        link.rel = 'stylesheet'
-        link.href = url
-        link.setAttribute('data-theme-font', url)
-        document.head.appendChild(link)
-      }
-    })
+    // Inject font links after first paint/idle to avoid blocking LCP
+    const injectFonts = () => {
+      fontUrls.forEach((url) => {
+        if (!document.querySelector(`link[data-theme-font="${url}"]`)) {
+          const link = document.createElement('link')
+          link.rel = 'stylesheet'
+          link.href = url
+          link.setAttribute('data-theme-font', url)
+          document.head.appendChild(link)
+        }
+      })
+    }
+    if ('requestIdleCallback' in window) {
+      ;(window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(injectFonts)
+    } else {
+      setTimeout(injectFonts, 0)
+    }
   })
 
-  // During SSR, we inject the initial theme variables and font links.
+  // During SSR, inject only theme variables (defer fonts to client)
   return (
     <Head>
       <style id='theme-variables' dangerouslySetInnerHTML={{ __html: themeVariables }} />
-      {fontUrls.map((url) => <link key={url} rel='stylesheet' href={url} data-theme-font={url} />)}
     </Head>
   )
 }

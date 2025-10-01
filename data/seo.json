@@ -1,8 +1,10 @@
 {
   "siteName": "abyssion",
   "ogTitle": "abyssion — official site",
-  "ogImagePath": "/static/images/abyssion_logo_plain.png",
-  "logoPath": "/static/logo.svg",
+  "ogImagePath": "/static/images/abyssion_unfurl.webp",
+  "logoPath": "/static/images/abyssion_logo_plain.png",
   "twitterCard": "summary_large_image",
-  "artistName": "Abyssion"
+  "artistName": "Abyssion",
+  "description": "A metal band from the Toronto area — heavy, technical, and loud. Join the cult.",
+  "faviconPath": "/static/favicon.webp"
 }

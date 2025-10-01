@@ -12,7 +12,18 @@ export default function BioSection() {
       {/* about */}
       <Shell>
         <Title>{bio.aboutTitle}</Title>
-        <ShellImage height='340px' yPosition={27} placement='top' src='/images/band_live.webp' alt='Abyssion live' />
+        <ShellImage
+          height='340px'
+          yPosition={27}
+          placement='top'
+          src='/images/band_live.webp'
+          srcSet='/images/band_live-640.webp 640w, /images/band_live-1024.webp 1024w, /images/band_live.webp 1433w'
+          alt='Abyssion live'
+          loading='eager'
+          fetchpriority='high'
+          decoding='async'
+          sizes='(min-width: 1024px) 1024px, (min-width: 640px) 640px, 100vw'
+        />
         <TextBlock>{bio.about}</TextBlock>
       </Shell>
 

@@ -15,7 +15,6 @@ import {
   createMusicEventListLD,
   createMusicGroupLD,
   createWebsiteLD,
-  getCleanDescription,
   getSameAs,
   getSeoMeta,
   mapMembersToPersons,
@@ -39,10 +38,20 @@ export default function App({ Component, url }: PageProps) {
   const theme = currentUITheme.value
 
   // seo meta
-  const description = getCleanDescription((bio as unknown as { about?: string })?.about)
+  const description = (seoConfig as { description?: string }).description || ''
   const sameAs = getSameAs(nav as unknown as SiteNav)
   const { origin, canonicalUrl, logoUrl, imageUrl } = getSeoMeta(url, seoConfig, description)
+  const ogImageWidth = 1200
+  const ogImageHeight = 675
+  const ogImageAlt = ogTitle
   const websiteLd: WebSiteLD = createWebsiteLD(siteName, origin)
+  // lcp preload attributes for hero image on home
+  const lcpPreload = pagePath === '/'
+    ? {
+      imagesrcset: '/images/band_live-640.webp 640w, /images/band_live-1024.webp 1024w, /images/band_live.webp 1433w',
+      imagesizes: '(min-width: 1024px) 1024px, (min-width: 640px) 640px, 100vw',
+    }
+    : null
   const bioData = bio as unknown as BioData
   const members = mapMembersToPersons(bioData?.members || [])
   const organizationLd: MusicGroupLD = createMusicGroupLD({
@@ -51,7 +60,7 @@ export default function App({ Component, url }: PageProps) {
     imageUrl,
     sameAs,
     contact: contact as ContentContact,
-    description: typeof bioData?.about === 'string' ? bioData.about : undefined,
+    description,
     members,
   })
   const eventsLd: MusicEventListLD | null = createMusicEventListLD(shows as ContentShowsEntry[], {
@@ -69,7 +78,7 @@ export default function App({ Component, url }: PageProps) {
         <meta charset='utf-8' />
         <title>{ogTitle}</title>
         <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
-        <link rel='icon' href='/favicon.webp' />
+        <link rel='icon' href={(seoConfig as { faviconPath?: string }).faviconPath || '/favicon.webp'} />
         <link rel='stylesheet' defer href='/styles.css' />
 
         {/* safari/iOS toolbar translucency */}
@@ -79,6 +88,16 @@ export default function App({ Component, url }: PageProps) {
         <meta name='robots' content='index,follow' />
         <link rel='canonical' href={canonicalUrl} />
 
+        {/* lcp image preload for home page to make request discoverable early */}
+        {lcpPreload && (
+          <link
+            rel='preload'
+            as='image'
+            href='/images/band_live.webp'
+            {...({ imagesrcset: lcpPreload.imagesrcset, imagesizes: lcpPreload.imagesizes } as unknown as Record<string, string>)}
+          />
+        )}
+
         {/* open graph */}
         <meta property='og:site_name' content={siteName} />
         <meta property='og:type' content='website' />
@@ -86,12 +105,16 @@ export default function App({ Component, url }: PageProps) {
         <meta property='og:description' content={description} />
         <meta property='og:url' content={canonicalUrl} />
         <meta property='og:image' content={imageUrl} />
+        <meta property='og:image:width' content={`${ogImageWidth}`} />
+        <meta property='og:image:height' content={`${ogImageHeight}`} />
+        <meta property='og:image:alt' content={ogImageAlt} />
 
         {/* twitter */}
         <meta name='twitter:card' content={twitterCard} />
         <meta name='twitter:title' content={ogTitle} />
         <meta name='twitter:description' content={description} />
         <meta name='twitter:image' content={imageUrl} />
+        <meta name='twitter:image:alt' content={ogImageAlt} />
 
         {/* json-ld */}
         <script type='application/ld+json'>{JSON.stringify(websiteLd)}</script>
@@ -100,6 +123,8 @@ export default function App({ Component, url }: PageProps) {
         {albumsLd && <script type='application/ld+json'>{JSON.stringify(albumsLd)}</script>}
 
         {/* fonts */}
+        <link rel='preconnect' href='https://fonts.googleapis.com' crossOrigin='anonymous' />
+        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
         <link media='print' href='https://fonts.googleapis.com' />
         <link media='print' href='https://fonts.gstatic.com' crossOrigin='true' />
       </Head>

@@ -182,14 +182,18 @@ const createCleanupFunction = () => {
 
 /**
  * Manages initialization readiness state for scene and video components
+ * Starts rendering as soon as the scene is ready; video attaches when ready
  * @returns A readiness manager object
  */
 const createReadinessManager = () => {
   let sceneReady = false
-  let videoReady = false
+  let _videoReady = false
+  let started = false
 
   const checkAndStart = () => {
-    if (!sceneReady || !videoReady) return false
+    // start immediately once the scene is ready; video can attach later
+    if (!sceneReady) return false
+    if (started) return true
 
     const state = getGLState()
     if (!state?.sceneOrchestrator || !state?.logoController) {
@@ -197,24 +201,25 @@ const createReadinessManager = () => {
       return false
     }
 
-    log(lc.GL, 'Both scene and video ready, starting animation loop and selecting initial orchestrator')
+    log(lc.GL, 'Scene ready, starting animation loop immediately (video will attach when ready)')
     state.sceneOrchestrator.start()
     // choose initial orchestrator based on current route (cached instances)
     const path = typeof globalThis !== 'undefined' ? (globalThis.location?.pathname || '/') : '/'
     const initial = path === '/' ? getOrchestrator('home-page') : getOrchestrator('content-page')
     if (initial) state.sceneOrchestrator.switchToOrchestrator(initial)
+    started = true
     return true
   }
 
   return {
     setSceneReady: () => {
       sceneReady = true
-      log(lc.GL, 'Scene ready, checking if video is also ready...')
+      log(lc.GL, 'Scene ready; starting without waiting for video')
       checkAndStart()
     },
     setVideoReady: () => {
-      videoReady = true
-      log(lc.GL, 'Video ready, checking if scene is also ready...')
+      _videoReady = true
+      log(lc.GL, 'Video ready; attaching/playing video if scene already started')
       checkAndStart()
     },
   }
