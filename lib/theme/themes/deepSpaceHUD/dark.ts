@@ -47,24 +47,4 @@ export const deepSpaceHUDDarkTheme: BaseTheme = {
     },
   },
   backgroundOpacity: 0.75,
-  borderRadius: {
-    sm: '0.375rem',
-    md: '0.75rem',
-    lg: '1rem',
-    xl: '1.25rem',
-    full: '9999px',
-    shellCollapsed: '28px',
-    shellExpanded: '18px',
-  },
-  typography: {
-    fontFamily: {
-      heading: '"Oxanium", sans-serif',
-      body: '"Oxanium", sans-serif',
-      quote: '"EB Garamond", serif',
-    },
-    fontUrls: [
-      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
-      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
-    ],
-  },
 }

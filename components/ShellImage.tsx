@@ -41,7 +41,7 @@ export const ShellImage = (
   containerStyle.height = height || '100%'
 
   const positionY = typeof yPosition === 'number' ? yPosition : 50
-  const classNames = `relative -mx-8 overflow-hidden ${placement === 'top' ? '!-mt-8' : ''}`
+  const classNames = `relative -mx-8 overflow-hidden ${placement === 'top' ? '!-mt-0' : ''}`
   const extraAttrs: Record<string, string> = { fetchpriority }
 
   return (

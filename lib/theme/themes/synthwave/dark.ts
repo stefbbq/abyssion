@@ -47,20 +47,4 @@ export const synthwaveDarkTheme: BaseTheme = {
     },
   },
   backgroundOpacity: 0.82,
-  borderRadius: {
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px',
-    shellCollapsed: '30px',
-    shellExpanded: '18px',
-  },
-  typography: {
-    fontFamily: {
-      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      quote: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    },
-  },
 }

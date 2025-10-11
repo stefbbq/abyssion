@@ -44,7 +44,7 @@ export const updateScrollCorruption = (scrollY: number, state: RendererState) =>
     const currentWidth = globalThis.innerWidth
     const currentHeight = globalThis.innerHeight
     const scrollSpeed = getResponsiveScrollSpeed(currentWidth, currentHeight)
-    const cameraYOffset = scrollY * scrollSpeed
+    const cameraYOffset = scrollY * scrollSpeed * 6
 
     state.camera.position.y = cameraYOffset
     const lookAtTarget = cameraYOffset

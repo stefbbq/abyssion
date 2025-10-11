@@ -119,29 +119,18 @@ export type UITheme = {
     shellExpanded: string
   }
   typography: {
-    fontFamily: {
-      heading: string
-      body: string
-      quote: string
-      /** optional font families for specific feature areas */
-      shows?: {
-        /** font family for the date block in shows list */
-        date?: string
-        /** font family for the venue line in shows list */
-        venue?: string
-        /** font family for the meta/secondary line in shows list */
-        meta?: string
-      }
+    heading: SemanticTypographyStyle
+    body: SemanticTypographyStyle
+    quote: SemanticTypographyStyle
+    logo: SemanticTypographyStyle
+    shows?: {
+      date?: SemanticTypographyStyle
+      venue?: SemanticTypographyStyle
+      meta?: SemanticTypographyStyle
     }
     fontUrls?: string[]
-    fontWeights: {
-      normal: number
-      medium: number
-      semibold: number
-      bold: number
-    }
-    /** semantic font sizes for ui usage (rem units recommended) */
-    fontSizes: {
+    /** legacy utility sizes for components that need them */
+    fontSizes?: {
       xs: string
       sm: string
       base: string
@@ -315,38 +304,31 @@ export type BaseTheme = {
 }
 
 /**
+ * typography style for a semantic element
+ */
+export type SemanticTypographyStyle = {
+  fontFamily: string
+  fontSize: string
+  fontWeight?: number
+  lineHeight?: number | string
+  letterSpacing?: string
+  fontStyle?: 'normal' | 'italic' | 'oblique'
+}
+
+/**
  * Typography settings for a theme
  */
 export type BaseTypography = {
-  fontFamily: {
-    heading?: string
-    body?: string
-    quote?: string
-    shows?: {
-      date?: string
-      venue?: string
-      meta?: string
-    }
+  heading?: Partial<SemanticTypographyStyle>
+  body?: Partial<SemanticTypographyStyle>
+  quote?: Partial<SemanticTypographyStyle>
+  logo?: Partial<SemanticTypographyStyle>
+  shows?: {
+    date?: Partial<SemanticTypographyStyle>
+    venue?: Partial<SemanticTypographyStyle>
+    meta?: Partial<SemanticTypographyStyle>
   }
   fontUrls?: string[]
-  fontWeights: {
-    normal: number
-    medium: number
-    semibold: number
-    bold: number
-  }
-  fontSizes?: Partial<{
-    xs: string
-    sm: string
-    base: string
-    lg: string
-    xl: string
-    '2xl': string
-    '3xl': string
-    '4xl': string
-    '5xl': string
-    '6xl': string
-  }>
 }
 
 /**

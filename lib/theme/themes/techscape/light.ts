@@ -50,24 +50,4 @@ export const techscapeLightTheme: BaseTheme = {
     },
   },
   backgroundOpacity: 0.9,
-  borderRadius: {
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px',
-    shellCollapsed: '30px',
-    shellExpanded: '18px',
-  },
-  typography: {
-    fontFamily: {
-      heading: '"Oxanium", sans-serif',
-      body: '"Oxanium", sans-serif',
-      quote: '"EB Garamond", serif',
-    },
-    fontUrls: [
-      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&display=swap',
-      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap',
-    ],
-  },
 }

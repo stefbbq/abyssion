@@ -46,36 +46,4 @@ export const techscapeDarkTheme: BaseTheme = {
     },
   },
   backgroundOpacity: 0.82,
-  borderRadius: {
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px',
-    shellCollapsed: '30px',
-    shellExpanded: '18px',
-  },
-  typography: {
-    fontFamily: {
-      heading: '"Oxanium", sans-serif',
-      body: '"Oxanium", sans-serif',
-      quote: '"EB Garamond", serif',
-    },
-    fontSizes: {
-      xs: '0.75rem',
-      sm: '0.875rem',
-      base: '1rem',
-      lg: '2rem',
-      xl: '2rem',
-      '2xl': '1.5rem',
-      '3xl': '1.875rem',
-      '4xl': '2.25rem',
-      '5xl': '3rem',
-      '6xl': '3.75rem',
-    },
-    fontUrls: [
-      'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&display=swap',
-      'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap',
-    ],
-  },
 }

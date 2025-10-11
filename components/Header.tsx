@@ -84,7 +84,14 @@ export const Header = ({ alwaysShowBackground = false }: Props) => {
         <h1 class='flex items-center m-0'>
           <HeaderLink
             href='/'
-            className={`text-xl font-semibold ${getFocusClass()} lowercase`}
+            className={`${getFocusClass()} lowercase`}
+            style={{
+              fontFamily: 'var(--typography-logo-fontFamily)',
+              fontSize: 'var(--typography-logo-fontSize)',
+              fontWeight: 'var(--typography-logo-fontWeight)',
+              lineHeight: 'var(--typography-logo-lineHeight)',
+              letterSpacing: 'var(--typography-logo-letterSpacing)',
+            }}
             ariaLabel='Abyssion home'
             onClick={(e) => {
               // Only intercept when already on home

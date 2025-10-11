@@ -133,7 +133,7 @@ export default function App({ Component, url }: PageProps) {
         f-client-nav
         class='min-h-screen relative text-foreground'
         style={{
-          fontFamily: theme.typography.fontFamily.body,
+          fontFamily: theme.typography.body.fontFamily,
           backgroundColor: '#1a1a1a',
           backgroundImage: 'linear-gradient(to bottom, #3a3a3a 0%, #121212 100%), url("/images/noise.png")',
           backgroundBlendMode: 'normal, soft-light',

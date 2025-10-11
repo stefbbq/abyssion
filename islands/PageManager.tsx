@@ -49,6 +49,23 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
         // noop
       }
     }
+
+    // helper to smooth scroll to a section by ID
+    const smoothScrollToSection = (sectionId: string) => {
+      const el = document.getElementById(sectionId)
+      if (el) {
+        const offsetTop = el.offsetTop - getScrollOffset()
+        globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+        history.replaceState(null, '', `#${sectionId}`)
+      }
+    }
+
+    // helper to check if a hash is a valid section
+    const isValidSectionHash = (hash: string): boolean => {
+      const sectionId = hash.replace('#', '')
+      return getSectionIDs().includes(sectionId)
+    }
+
     // bail if not in a browser
     if (typeof globalThis.window === 'undefined') return
 
@@ -56,7 +73,7 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
     const glDisabledForPath = resolveDisableForPath(globalThis.location.pathname)
     setShowGL(!glDisabledForPath)
 
-    // helper to manage an intersection observer that only runs on home
+    // intersection overserver on home to update hash as the user scrolls
     let observer: IntersectionObserver | null = null
     const setupObserverIfHome = () => {
       // always disconnect previous instance first
@@ -111,18 +128,30 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
       const path = globalThis.location.pathname
       setCurrentPath(path)
       switchOrchestratorForPath(path)
-      // update GL enablement on route change
-      setShowGL(!resolveDisableForPath(path))
-      // update intersection observer according to route
-      setupObserverIfHome()
-      // ensure backgrounds recalc immediately
-      triggerRecalc()
+      setShowGL(!resolveDisableForPath(path)) // update GL enablement on route change
+      setupObserverIfHome() // update intersection observer according to route
+      triggerRecalc() // ensure backgrounds recalc immediately
     }
+
+    // unified click handler for navigation and hash scrolling
     const onClickPath = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const anchor = target.closest ? (target.closest('a') as HTMLAnchorElement | null) : null
       if (!anchor) return
 
+      const href = anchor.getAttribute('href')
+      if (!href) return
+
+      // handle hash-only links (e.g., '#section')
+      if (href.startsWith('#')) {
+        if (isValidSectionHash(href)) {
+          e.preventDefault()
+          smoothScrollToSection(href.replace('#', ''))
+        }
+        return
+      }
+
+      // handle full URLs
       try {
         const url = new URL(anchor.href, globalThis.location.href)
         if (url.origin !== globalThis.location.origin) return
@@ -131,17 +160,11 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
 
         // same-page hash navigation like '/#section'
         if (samePath && url.hash) {
-          const id = url.hash.replace('#', '')
-          if (getSectionIDs().includes(id)) {
+          if (isValidSectionHash(url.hash)) {
             e.preventDefault()
-            const el = document.getElementById(id)
-            if (el) {
-              const offsetTop = el.offsetTop - getScrollOffset()
-              globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
-              history.replaceState(null, '', `#${id}`)
-            }
-            return
+            smoothScrollToSection(url.hash.replace('#', ''))
           }
+          return
         }
 
         // clicking home while already on home: smooth scroll to top
@@ -155,11 +178,8 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
         // default internal nav: update path signal and orchestrator
         setCurrentPath(url.pathname)
         switchOrchestratorForPath(url.pathname)
-        // update GL enablement on route change (pre-popstate)
         setShowGL(!resolveDisableForPath(url.pathname))
-        // re-evaluate observer on navigation
         setupObserverIfHome()
-        // ensure backgrounds recalc immediately
         triggerRecalc()
       } catch {
         // ignore invalid URLs
@@ -174,32 +194,8 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
     // smooth scroll on hashchange (browser navigation)
     const handleHashChange = () => {
       const hash = globalThis.location.hash
-
-      if (hash && getSectionIDs().includes(hash.replace('#', ''))) {
-        const el = document.getElementById(hash.replace('#', ''))
-
-        if (el) {
-          const offsetTop = el.offsetTop - getScrollOffset()
-          globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
-        }
-      }
-    }
-
-    // intercept anchor clicks for smooth scroll
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      const anchor = target.closest ? target.closest('a') as HTMLAnchorElement | null : null
-      if (anchor && anchor.getAttribute('href')?.startsWith('#')) {
-        const hash = anchor.getAttribute('href')!
-        if (getSectionIDs().includes(hash.replace('#', ''))) {
-          e.preventDefault()
-          const el = document.getElementById(hash.replace('#', ''))
-          if (el) {
-            const offsetTop = el.offsetTop - getScrollOffset()
-            globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
-          }
-          history.replaceState(null, '', hash)
-        }
+      if (hash && isValidSectionHash(hash)) {
+        smoothScrollToSection(hash.replace('#', ''))
       }
     }
 
@@ -231,7 +227,6 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
     globalThis.addEventListener('scroll', handleScroll)
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('hashchange', handleHashChange)
-    document.addEventListener('click', handleClick, { capture: true })
 
     // initial telemetry on mount
     const scrollY = globalThis.scrollY
@@ -247,12 +242,9 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
 
     return () => {
       if (observer) observer.disconnect()
-
-      // no glitch teardown needed
       globalThis.removeEventListener('hashchange', handleHashChange)
       globalThis.removeEventListener('popstate', onPopState)
       document.removeEventListener('click', onClickPath, { capture: true } as unknown as EventListenerOptions)
-      document.removeEventListener('click', handleClick, { capture: true } as unknown as EventListenerOptions)
       globalThis.removeEventListener('scroll', handleScroll)
       globalThis.removeEventListener('resize', handleResize)
     }
