@@ -77,7 +77,7 @@ export const calculatePostProcessingUpdate = (config: PostProcessingConfig): Pos
 
   // Final pass chromatic aberration calculation
   const finalPassTimeValue = currentTime % ms('1000ms')
-  const defaultChroma = postProcessingConfig.finalPass.chromaStrength
+  const defaultChroma = postProcessingConfig.finalPass?.chromaStrength ?? 0
 
   let newChromaStrength = currentChromaStrength
   let scheduleChromaReset = false
@@ -102,13 +102,13 @@ export const calculatePostProcessingUpdate = (config: PostProcessingConfig): Pos
 
   // Bloom effect calculation
   const bloomConfig = postProcessingConfig.bloom
-  const swellConfig = bloomConfig.bloomSwell || { enabled: false }
+  const swellConfig = bloomConfig?.bloomSwell || { enabled: false }
 
-  let bloomStrength = bloomConfig.bloomStrength
+  let bloomStrength = bloomConfig?.bloomStrength ?? 0.2
   let activateOverride = false
   let overrideDuration = 0
 
-  if (swellConfig.enabled) {
+  if (swellConfig.enabled && bloomConfig) {
     // Check if bloom override should be activated
     if (!bloomOverrideActive && Math.random() < swellConfig.overrideProbability) {
       activateOverride = true

@@ -44,8 +44,9 @@ export const handler: Handlers<PageData> = {
   },
 }
 
-export default function ContactSection(props?: PageProps<PageData>) {
-  const { submitted: _submitted, errors } = props?.data || {}
+export default function ContactSection(props?: PageProps<PageData> | Record<string, never>) {
+  const pageData = props && 'data' in props ? props.data : undefined
+  const { submitted: _submitted, errors } = pageData || {}
   const labels = { submitLabel: 'Send', nameLabel: 'Your name', emailLabel: 'Your email address', subjectLabel: 'Subject', messageLabel: 'Message' }
 
   return (

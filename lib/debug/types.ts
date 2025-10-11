@@ -81,4 +81,3 @@ export type CorruptionParams = {
   artifactNoiseFPS: number
   artifactNoiseEnabled: boolean
 }
-

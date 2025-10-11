@@ -22,7 +22,7 @@ export const synthwaveTypography = {
     fontWeight: 400,
     lineHeight: 1.7,
     letterSpacing: 'normal',
-    fontStyle: 'italic',
+    fontStyle: 'italic' as const,
   },
   logo: {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

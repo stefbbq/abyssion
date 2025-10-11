@@ -22,7 +22,7 @@ export const deepSpaceHUDTypography = {
     fontWeight: 400,
     lineHeight: 1.7,
     letterSpacing: 'normal',
-    fontStyle: 'italic',
+    fontStyle: 'italic' as const,
   },
   logo: {
     fontFamily: '"Oxanium", sans-serif',

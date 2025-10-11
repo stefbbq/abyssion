@@ -23,6 +23,3 @@ export const createSharpeningPass = async (
   pass.enabled = !!sharpening.enabled
   return pass
 }
-
-
-

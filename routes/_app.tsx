@@ -80,10 +80,24 @@ export default function App({ Component, url }: PageProps) {
         <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
         <link rel='icon' href={(seoConfig as { faviconPath?: string }).faviconPath || '/favicon.webp'} />
 
+        {/* prevent fouc - hide content until stylesheet loads */}
+        <style>
+          {`
+          body { opacity: 0; }
+          body.styles-loaded { opacity: 1; transition: opacity 150ms ease-in; }
+        `}
+        </style>
+
         {/* async css loading using media attribute trick - eliminates render blocking */}
-        <link rel='stylesheet' href='/styles.css' media='print' {...({ onload: "this.media='all'" } as unknown as Record<string, string>)} />
+        <link
+          rel='stylesheet'
+          href='/styles.css'
+          media='print'
+          {...({ onload: "this.media='all';document.body.classList.add('styles-loaded')" } as unknown as Record<string, string>)}
+        />
         <noscript>
           <link rel='stylesheet' href='/styles.css' />
+          <style>{`body { opacity: 1; }`}</style>
         </noscript>
 
         {/* safari/iOS toolbar translucency */}

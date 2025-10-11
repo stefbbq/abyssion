@@ -18,6 +18,3 @@ export const createBloomPass = async (
   if (typeof bloom.thresholdOverride === 'number') pass.threshold = bloom.thresholdOverride
   return pass
 }
-
-
-
