@@ -7,7 +7,7 @@ import { GLCanvas } from '@components/GLCanvas.tsx'
 import { backgroundIntensity as backgroundIntensitySignal, backgroundIntensityOverride } from '@lib/ui/state.ts'
 import { initializeClientLogger } from '@lib/logger/utils/initializeClientLogger.ts'
 import ThemedBackground from '@islands/ThemedBackground.tsx'
-import { getScrollOffset, getSectionIDs } from '@lib/ui/index.ts'
+import { getSectionIDs, isValidSectionHash, smoothScrollToSection } from '@lib/ui/index.ts'
 
 /**
  * PageManager
@@ -50,20 +50,11 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
       }
     }
 
-    // helper to smooth scroll to a section by ID
-    const smoothScrollToSection = (sectionId: string) => {
-      const el = document.getElementById(sectionId)
-      if (el) {
-        const offsetTop = el.offsetTop - getScrollOffset()
-        globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+    // smooth scroll and update history
+    const scrollToSectionAndUpdateHistory = (sectionId: string) => {
+      if (smoothScrollToSection(sectionId)) {
         history.replaceState(null, '', `#${sectionId}`)
       }
-    }
-
-    // helper to check if a hash is a valid section
-    const isValidSectionHash = (hash: string): boolean => {
-      const sectionId = hash.replace('#', '')
-      return getSectionIDs().includes(sectionId)
     }
 
     // bail if not in a browser
@@ -142,11 +133,11 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
       const href = anchor.getAttribute('href')
       if (!href) return
 
-      // handle hash-only links (e.g., '#section')
+      // handle hash-only links
       if (href.startsWith('#')) {
         if (isValidSectionHash(href)) {
           e.preventDefault()
-          smoothScrollToSection(href.replace('#', ''))
+          scrollToSectionAndUpdateHistory(href.replace('#', ''))
         }
         return
       }
@@ -158,11 +149,11 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
 
         const samePath = url.pathname === globalThis.location.pathname
 
-        // same-page hash navigation like '/#section'
+        // same-page hash navigation
         if (samePath && url.hash) {
           if (isValidSectionHash(url.hash)) {
             e.preventDefault()
-            smoothScrollToSection(url.hash.replace('#', ''))
+            scrollToSectionAndUpdateHistory(url.hash.replace('#', ''))
           }
           return
         }
@@ -191,12 +182,10 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
     // initialize observer state for current route
     setupObserverIfHome()
 
-    // smooth scroll on hashchange (browser navigation)
+    // smooth scroll on hashchange
     const handleHashChange = () => {
       const hash = globalThis.location.hash
-      if (hash && isValidSectionHash(hash)) {
-        smoothScrollToSection(hash.replace('#', ''))
-      }
+      if (hash && isValidSectionHash(hash)) scrollToSectionAndUpdateHistory(hash.replace('#', ''))
     }
 
     // scroll telemetry

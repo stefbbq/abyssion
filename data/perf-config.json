@@ -1,0 +1,18 @@
+{
+  "preload": {
+    "images": {
+      "gl": {
+        "stencil": "/media/images/abyssion_logo_stencil-transparent.png",
+        "outline": "/media/images/abyssion_logo_outline-transparent.png",
+        "outlineMobile": "/media/images/abyssion_logo_outline_mobile-transparent.webp"
+      }
+    },
+    "fonts": [],
+    "styles": ["/styles.css"]
+  },
+  "timing": {
+    "glLogoTargetMs": 500,
+    "glVideoTargetMs": 2000,
+    "glFullReadyTargetMs": 3000
+  }
+}

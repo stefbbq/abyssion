@@ -1,24 +1,18 @@
+import uiConfig from '@data/ui-config.json' with { type: 'json' }
 import type { ActionZoneLayoutStyles } from '../types.ts'
 
-// layout size constants
-const COLLAPSED_HEIGHT = 64
-const COLLAPSED_BORDER_RADIUS = 32
-const EXPANDED_BORDER_RADIUS = 20
-
 /**
- * Creates collapsed layout configuration
- * Pure function returning layout styling functions
+ * creates collapsed layout configuration
  */
 export const createCollapsedLayout = (): ActionZoneLayoutStyles => ({
-  height: () => COLLAPSED_HEIGHT,
-  borderRadius: () => COLLAPSED_BORDER_RADIUS,
+  height: () => uiConfig.actionZone.collapsedHeightPx,
+  borderRadius: () => uiConfig.actionZone.collapsedBorderRadiusPx,
 })
 
 /**
- * Creates expanded layout configuration
- * Pure function for expanded menu layout
+ * creates expanded layout configuration
  */
 export const createExpandedLayout = (): ActionZoneLayoutStyles => ({
   height: () => 'auto',
-  borderRadius: () => EXPANDED_BORDER_RADIUS,
+  borderRadius: () => uiConfig.actionZone.expandedBorderRadiusPx,
 })

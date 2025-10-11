@@ -79,7 +79,12 @@ export default function App({ Component, url }: PageProps) {
         <title>{ogTitle}</title>
         <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
         <link rel='icon' href={(seoConfig as { faviconPath?: string }).faviconPath || '/favicon.webp'} />
-        <link rel='stylesheet' defer href='/styles.css' />
+
+        {/* async css loading using media attribute trick - eliminates render blocking */}
+        <link rel='stylesheet' href='/styles.css' media='print' {...({ onload: "this.media='all'" } as unknown as Record<string, string>)} />
+        <noscript>
+          <link rel='stylesheet' href='/styles.css' />
+        </noscript>
 
         {/* safari/iOS toolbar translucency */}
         <meta name='theme-color' content='rgba(0,0,0,0)' media='(prefers-color-scheme: dark)' />
@@ -87,6 +92,11 @@ export default function App({ Component, url }: PageProps) {
         <meta name='description' content={description} />
         <meta name='robots' content='index,follow' />
         <link rel='canonical' href={canonicalUrl} />
+
+        {/* gl logo textures preload for faster gl initialization */}
+        <link rel='preload' href='/media/images/abyssion_logo_stencil-transparent.png' as='image' />
+        <link rel='preload' href='/media/images/abyssion_logo_outline-transparent.png' as='image' />
+        <link rel='preload' href='/media/images/abyssion_logo_outline_mobile-transparent.webp' as='image' />
 
         {/* lcp image preload for home page to make request discoverable early */}
         {lcpPreload && (

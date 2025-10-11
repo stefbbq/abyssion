@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { ActionZoneExpanded } from '@components/actionZone/ActionZoneExpanded.tsx'
 import navData from '@data/nav.json' with { type: 'json' }
+import uiConfig from '@data/ui-config.json' with { type: 'json' }
 import { ActionZone } from '@components/actionZone/ActionZone.tsx'
 import { ActionZoneCollapsed } from '@components/actionZone/ActionZoneCollapsed.tsx'
 import { createActionZoneConfig } from '@components/actionZone/config/index.ts'
+import { getSectionIDs, smoothScrollToSection } from '@lib/ui/index.ts'
 import type { NavButtonState } from '@data/types.ts'
 import type { ActionZoneLayout } from '@components/actionZone/types.ts'
 
@@ -26,11 +28,8 @@ export default function ActionZoneController() {
       const onHashChange = () => setCurrentHash(globalThis.location.hash)
       globalThis.addEventListener('hashchange', onHashChange)
 
-      // Track current section via intersection observer (for auto-updating active states)
-      const sectionIds = ['home', 'bio', 'shows', 'contact']
-      const sections = sectionIds
-        .map((id) => document.getElementById(id))
-        .filter((el): el is HTMLElement => Boolean(el))
+      // track current section via intersection observer
+      const sections = getSectionIDs().map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el))
 
       if (sections.length > 0) {
         const observer = new globalThis.IntersectionObserver(
@@ -48,11 +47,11 @@ export default function ActionZoneController() {
                 const elementHeight = element.offsetHeight
                 const viewportHeight = globalThis.innerHeight
 
-                // If section is taller than viewport, just check if it's intersecting
-                if (elementHeight > viewportHeight * 1.2) return true
+                // if section is taller than viewport, just check if it's intersecting
+                if (elementHeight > viewportHeight * uiConfig.intersection.tallSectionMultiplier) return true
 
-                // For shorter sections, use intersection ratio
-                return entry.intersectionRatio > 0.5
+                // for shorter sections, use intersection ratio
+                return entry.intersectionRatio > uiConfig.intersection.minRatioForShortSections
               })
               .sort((a, b) => {
                 // Prioritize sections that are tall and currently intersecting
@@ -62,8 +61,8 @@ export default function ActionZoneController() {
                 const bHeight = bElement.offsetHeight
                 const viewportHeight = globalThis.innerHeight
 
-                const aIsTall = aHeight > viewportHeight * 1.2
-                const bIsTall = bHeight > viewportHeight * 1.2
+                const aIsTall = aHeight > viewportHeight * uiConfig.intersection.tallSectionMultiplier
+                const bIsTall = bHeight > viewportHeight * uiConfig.intersection.tallSectionMultiplier
 
                 if (aIsTall && !bIsTall) return -1
                 if (!aIsTall && bIsTall) return 1
@@ -77,7 +76,7 @@ export default function ActionZoneController() {
               setCurrentHash(newHash)
             }
           },
-          { threshold: [0.1, 0.3, 0.5, 0.7, 0.9] },
+          { threshold: uiConfig.intersection.thresholds },
         )
 
         sections.forEach((section) => observer.observe(section))
@@ -99,37 +98,20 @@ export default function ActionZoneController() {
       const element = document.getElementById(sectionId)
 
       if (element) {
-        // Set scrolling flag to pause intersection observer
         isScrollingRef.current = true
-        setCurrentHash(hash) // Immediately update to target hash
-
-        // Match PageManager's scroll offset logic exactly
-        const getScrollOffset = () => {
-          const isMobile = globalThis.innerWidth < 768 // md breakpoint
-          return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop
-        }
-
-        const offsetTop = element.offsetTop - getScrollOffset()
-
-        globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+        setCurrentHash(hash)
+        smoothScrollToSection(sectionId)
         setIsMenuOpen(false)
+        setTimeout(() => isScrollingRef.current = false, uiConfig.scroll.smoothScrollDurationMs)
 
-        // Clear scrolling flag after animation completes
-        setTimeout(() => isScrollingRef.current = false, 1000)
-
-        // Update the hash without triggering a navigation
         if (globalThis.history && globalThis.history.pushState) {
           globalThis.history.pushState(null, '', hash)
-          // Trigger hash change event manually for our listener
           globalThis.dispatchEvent(new HashChangeEvent('hashchange'))
         }
         return
       }
     }
-    // Handle remaining action types
-    if (action.type === 'menu') {
-      setIsMenuOpen(!isMenuOpen)
-    }
+    if (action.type === 'menu') setIsMenuOpen(!isMenuOpen)
   }
 
   const onAnchorLink = (path: string) => {
@@ -138,24 +120,11 @@ export default function ActionZoneController() {
       const element = document.getElementById(sectionId)
 
       if (element) {
-        // Set scrolling flag to pause intersection observer
         isScrollingRef.current = true
-        setCurrentHash(path) // Immediately update to target hash
-
-        // Match PageManager's scroll offset logic exactly
-        const getScrollOffset = () => {
-          const isMobile = globalThis.innerWidth < 768 // md breakpoint
-          return isMobile ? 20 : 75 // Smaller offset for mobile, larger for desktop
-        }
-
-        const offsetTop = element.offsetTop - getScrollOffset()
-
-        globalThis.scrollTo({ top: offsetTop, behavior: 'smooth' })
+        setCurrentHash(path)
+        smoothScrollToSection(sectionId)
         setIsMenuOpen(false)
-
-        // Clear scrolling flag after animation completes
-        setTimeout(() => isScrollingRef.current = false, 1000)
-
+        setTimeout(() => isScrollingRef.current = false, uiConfig.scroll.smoothScrollDurationMs)
         return true
       }
     }

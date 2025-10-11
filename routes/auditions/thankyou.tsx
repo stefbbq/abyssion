@@ -1,10 +1,10 @@
+import { Handlers, type PageProps } from '$fresh/server.ts'
+
 import { Head } from '$fresh/runtime.ts'
 import { Shell } from '@components/Shell.tsx'
 import { Title } from '@components/Title.tsx'
 import { Button } from '@components/Button.tsx'
 import auditionsContent from '@data/content-auditions.json' with { type: 'json' }
-// import { TextBlock } from '@components/TextBlock.tsx'
-import { Handlers, type PageProps } from '$fresh/server.ts'
 
 type QueryData = {
   name?: string

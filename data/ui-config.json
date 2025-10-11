@@ -1,0 +1,25 @@
+{
+  "viewport": {
+    "mobileBreakpointPx": 768
+  },
+  "scroll": {
+    "mobileOffsetPx": 20,
+    "desktopOffsetPx": 75,
+    "smoothScrollDurationMs": 1000
+  },
+  "actionZone": {
+    "collapsedHeightPx": 64,
+    "collapsedBorderRadiusPx": 32,
+    "expandedBorderRadiusPx": 20,
+    "expandedMaxHeightPx": 400,
+    "fadeInMs": 300,
+    "fadeOutMs": 200,
+    "expandDelayMs": 200,
+    "collapseDelayMs": 200
+  },
+  "intersection": {
+    "thresholds": [0.1, 0.3, 0.5, 0.7, 0.9],
+    "minRatioForShortSections": 0.5,
+    "tallSectionMultiplier": 1.2
+  }
+}

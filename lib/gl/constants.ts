@@ -1,3 +1,5 @@
+import uiConfig from '@data/ui-config.json' with { type: 'json' }
+
 // global fade thresholds used across animations for scroll-based fading
 export const GLOBAL_FADE_START_THRESHOLD = 0.55
 export const GLOBAL_FADE_END_THRESHOLD = 0.9
@@ -5,8 +7,8 @@ export const GLOBAL_FADE_END_THRESHOLD = 0.9
 // fps options for random layer animation
 export const FPS_OPTIONS = [1, 2, 4, 8, 12, 24, 48]
 
-// platform and device
-export const MOBILE_BREAKPOINT_PX = 768
+// platform and device - imported from shared UI config
+export const MOBILE_BREAKPOINT_PX = uiConfig.viewport.mobileBreakpointPx
 export const IOS_MAX_DPR = 1.5
 
 // scroll corruption intensity curve exponent (sqrt = 0.5)

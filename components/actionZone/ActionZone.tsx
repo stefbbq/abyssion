@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'preact/hooks'
 import { ComponentChildren } from 'preact'
+
 import { Shell } from '@components/Shell.tsx'
+import uiConfig from '@data/ui-config.json' with { type: 'json' }
 
 type Props = {
   isMenuOpen: boolean
@@ -27,21 +29,19 @@ export const ActionZone = ({
   const [showCollapsed, setShowCollapsed] = useState(true)
   const [showExpanded, setShowExpanded] = useState(false)
   const [containerExpanded, setContainerExpanded] = useState(false)
-  const collapsedHeight = typeof layoutConfig.height === 'function' ? layoutConfig.height() : 64
+  const collapsedHeight = typeof layoutConfig.height === 'function' ? layoutConfig.height() : uiConfig.actionZone.collapsedHeightPx
   const borderRadius = typeof layoutConfig.borderRadius === 'function' ? layoutConfig.borderRadius() : undefined
 
-  // Sequential animation: fade out first, expand container, then fade in
+  // sequential animation: fade out first, expand container, then fade in
   useEffect(() => {
     if (isMenuOpen) {
-      // Opening: fade out collapsed, then expand container, then fade in expanded
       setShowCollapsed(false)
-      setTimeout(() => setContainerExpanded(true), 200)
-      setTimeout(() => setShowExpanded(true), 300)
+      setTimeout(() => setContainerExpanded(true), uiConfig.actionZone.expandDelayMs)
+      setTimeout(() => setShowExpanded(true), uiConfig.actionZone.fadeInMs)
     } else {
-      // Closing: fade out expanded, then shrink container, then fade in collapsed
       setShowExpanded(false)
-      setTimeout(() => setContainerExpanded(false), 200)
-      setTimeout(() => setShowCollapsed(true), 300)
+      setTimeout(() => setContainerExpanded(false), uiConfig.actionZone.collapseDelayMs)
+      setTimeout(() => setShowCollapsed(true), uiConfig.actionZone.fadeOutMs)
     }
   }, [isMenuOpen])
 
@@ -64,7 +64,7 @@ export const ActionZone = ({
         as='nav'
         className={shellClasses}
         style={{
-          maxHeight: containerExpanded ? '400px' : `${collapsedHeight}px`,
+          maxHeight: containerExpanded ? `${uiConfig.actionZone.expandedMaxHeightPx}px` : `${collapsedHeight}px`,
           borderRadius,
         }}
       >

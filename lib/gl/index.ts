@@ -356,13 +356,15 @@ export const initGL = async (options: InitOptions) => {
     // setup UI and responsive handling
     setupUIAndResponsive()
 
-    // load textures
-    const textures = await setupTextureLoading(THREE, stencilTexturePath, effectiveOutlineTexturePath)
-    Object.assign(state, textures)
+    // textures already loaded in parallel at init, just ensure they're available
+    if (!state.stencilTexture || !state.outlineTexture) {
+      log.error(lc.GL, 'Textures not available when setting up layer system')
+      return
+    }
 
-    // setup layer system
+    // setup layer system with preloaded textures
     log(lc.GL, 'Setting up layer system...')
-    const layerSystem = await setupLayerSystem(THREE, scene, textures.outlineTexture, textures.stencilTexture)
+    const layerSystem = await setupLayerSystem(THREE, scene, state.outlineTexture, state.stencilTexture)
     Object.assign(state, layerSystem)
     log(lc.GL, 'Layer system setup complete, logoController available:', !!state.logoController)
 
@@ -402,12 +404,13 @@ export const initGL = async (options: InitOptions) => {
   const { canvas, stencilTexturePath, outlineTexturePath } = options
   const effectiveOutlineTexturePath = isMobileDevice() ? '/media/images/abyssion_logo_outline_mobile-transparent.webp' : outlineTexturePath
 
-  // load configuration files
-  const [rendererConfig, basePostProcessingConfig, controlsConfig, animationConfig] = await Promise.all([
+  // load configuration files and textures in parallel for faster startup
+  const [rendererConfig, basePostProcessingConfig, controlsConfig, animationConfig, textures] = await Promise.all([
     import('./configScene.json').then((m) => m.default.rendererConfig),
     import('./configPostProcessing.json').then((m) => m.default as PostProcessingConfig),
     import('./configControls.json').then((m) => m.default),
     import('./configAnimation.json').then((m) => m.default),
+    setupTextureLoading(THREE, stencilTexturePath, effectiveOutlineTexturePath),
   ])
 
   // create lighter post-processing on mobile/iOS to improve perf
@@ -436,12 +439,13 @@ export const initGL = async (options: InitOptions) => {
   // initialize core rendering
   const core = await setupCoreRendering(THREE, options)
 
-  // create and populate initial GL state
+  // create and populate initial GL state with textures already loaded
   const initialState = createInitialGLState(THREE)
   Object.assign(initialState, {
     scene: core.scene,
     camera: core.camera,
     renderer: core.renderer,
+    ...textures,
   })
 
   // scene orchestrator depends on state reference

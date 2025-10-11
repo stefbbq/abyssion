@@ -8,13 +8,13 @@
  * - Mobile background
  * - Parallax
  * - Viewport aspect
- * - Mobile background
- * - Parallax
- * - Viewport aspect
  */
 
+export * from './constants.ts'
 export * from './getScrollOffest.ts'
 export * from './getSectionIDs.ts'
+export * from './smoothScrollToSection.ts'
+export * from './isValidSectionHash.ts'
 export * from './useMobileBackground.ts'
 export * from './useParallax.ts'
 export * from './useViewportAspect.ts'

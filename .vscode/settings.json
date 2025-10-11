@@ -25,7 +25,12 @@
     "**/Thumbs.db": true,
     "**/.turbo": true,
     "node_modules": true,
-    "_fresh": true
+    "_fresh": true,
+    "**/.env": true,
+    ".env": true,
+    ".github/workflows": true,
+    ".github": true,
+    ".vscode": true
   },
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"

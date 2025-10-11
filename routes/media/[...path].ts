@@ -1,9 +1,10 @@
 import { extname, join } from 'https://deno.land/std@0.224.0/path/mod.ts'
+import { FreshContext } from '$fresh/server.ts'
 
 // search order for media assets; prefer /media, fallback to /static for legacy assets
 const MEDIA_DIRS = ['./media', './static'] as const
 
-export const handler = async (req: Request, ctx: HandlerContext) => {
+export const handler = async (req: Request, ctx: FreshContext) => {
   const { path } = ctx.params
   const relPath = Array.isArray(path) ? path.join('/') : path
   const filePath = await resolveExistingFile(relPath)
