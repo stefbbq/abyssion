@@ -160,10 +160,10 @@ export default function FormManager({ config, labels, errors }: Props) {
       <div class='pt-2'>
         <div class='flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4'>
           <div data-show-when-invalid class='inline-block'>
-            <Button hoverReveal type='submit' variant='primary' size='md' disabled>{String(labels.submitLabel)}</Button>
+            <Button hoverReveal type='submit' variant='primary' size='md' class='h-12' disabled>{String(labels.submitLabel)}</Button>
           </div>
           <div data-requires-valid class='inline-block'>
-            <Button hoverReveal type='submit' variant='primary' size='md'>{String(labels.submitLabel)}</Button>
+            <Button hoverReveal type='submit' variant='primary' size='md' class='h-12'>{String(labels.submitLabel)}</Button>
           </div>
           {Boolean(labels.submitNote) && <div class='text-xs md:mt-0 mt-2 text-[var(--colors-text-tertiary)]'>{String(labels.submitNote)}</div>}
         </div>

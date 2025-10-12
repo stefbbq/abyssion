@@ -277,14 +277,16 @@ export const DebugControls = (props: Props) => {
             </ul>
             <p className='font-bold mb-1'>Hotkeys:</p>
             <ul className='ml-4 space-y-0.5'>
+              {controlsConfig.inputKeys.toggleDebug && controlsConfig.inputKeys.toggleDebug.length > 0 && (
+                <li>
+                  <b>{(controlsConfig.inputKeys.toggleDebug[0] as string).toUpperCase()}</b>: Toggle debug panel
+                </li>
+              )}
               <li>
-                <b>{controlsConfig.inputKeys.toggleDebug?.[0]?.toUpperCase() || 'D'}</b>: Toggle debug panel
+                <b>{(controlsConfig.inputKeys.toggleRotation[0] as string).toUpperCase()}</b>: Toggle auto-rotation
               </li>
               <li>
-                <b>{controlsConfig.inputKeys.toggleRotation[0].toUpperCase()}</b>: Toggle auto-rotation
-              </li>
-              <li>
-                <b>{controlsConfig.inputKeys.regenerateLayers[0].toUpperCase()}</b>: Regenerate layers
+                <b>{(controlsConfig.inputKeys.regenerateLayers[0] as string).toUpperCase()}</b>: Regenerate layers
               </li>
             </ul>
           </div>

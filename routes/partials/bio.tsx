@@ -13,8 +13,8 @@ export default function BioSection() {
       <Shell>
         <Title>{bio.aboutTitle}</Title>
         <ShellImage
-          height='340px'
-          yPosition={27}
+          height='400px'
+          yPosition={28}
           placement='top'
           src='/images/band_live.webp'
           srcSet='/images/band_live-640.webp 640w, /images/band_live-1024.webp 1024w, /images/band_live.webp 1433w'

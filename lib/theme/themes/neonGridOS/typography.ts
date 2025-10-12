@@ -3,9 +3,9 @@
  */
 export const neonGridOSTypography = {
   heading: {
-    fontFamily: '"Oxanium", sans-serif',
+    fontFamily: '"Oswald", sans-serif',
     fontSize: '2.5rem',
-    fontWeight: 700,
+    fontWeight: 200,
     lineHeight: 1.2,
     letterSpacing: 'normal',
   },
@@ -32,6 +32,7 @@ export const neonGridOSTypography = {
     letterSpacing: 'normal',
   },
   fontUrls: [
+    'https://fonts.googleapis.com/css2?family=Oswald:wght@200..500&display=swap',
     'https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap',
     'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap',
   ],

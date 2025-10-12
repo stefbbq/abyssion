@@ -94,8 +94,9 @@ export default function PageManager({ disableGL, enabledPaths, disabledPaths }: 
                 // only sync hash on home route
                 if (globalThis.location.pathname === '/') {
                   const topSection = visible[0].target as HTMLElement
-                  const newHash = `#${topSection.id}`
-                  if (globalThis.location.hash !== newHash) {
+                  const newHash = topSection.id === 'home' ? '/' : `#${topSection.id}`
+                  const currentUrl = globalThis.location.pathname + globalThis.location.hash
+                  if (currentUrl !== newHash) {
                     history.replaceState(null, '', newHash)
                   }
                 }

@@ -3,8 +3,8 @@
     "mobileBreakpointPx": 768
   },
   "scroll": {
-    "mobileOffsetPx": 20,
-    "desktopOffsetPx": 75,
+    "mobileOffsetPx": 40,
+    "desktopOffsetPx": 100,
     "smoothScrollDurationMs": 1000
   },
   "actionZone": {

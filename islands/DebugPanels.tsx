@@ -189,7 +189,10 @@ export const DebugPanels = (props: Props) => {
 
     // keyboard handler
     const handleKeydown = (e: KeyboardEvent) => {
-      if (controlsConfig.inputKeys.toggleDebug?.includes(e.key)) {
+      if (
+        controlsConfig.inputKeys.toggleDebug && controlsConfig.inputKeys.toggleDebug.length > 0 &&
+        (controlsConfig.inputKeys.toggleDebug as string[]).includes(e.key)
+      ) {
         debugVisible.value = !debugVisible.value
         setDebugMode(debugVisible.value)
         if (onToggleDebugCallback) onToggleDebugCallback(debugVisible.value)

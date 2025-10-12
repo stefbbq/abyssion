@@ -1,7 +1,7 @@
 {
   "inputKeys": {
-    "toggleRotation": ["r", "R"],
-    "regenerateLayers": ["g", "G"],
-    "toggleDebug": ["d", "D"]
+    "toggleRotation": [],
+    "regenerateLayers": [],
+    "toggleDebug": []
   }
 }

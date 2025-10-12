@@ -80,12 +80,15 @@ export const Button = ({
   ...props
 }: Props) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] focus:ring-offset-[var(--colors-background)] disabled:opacity-50 disabled:cursor-not-allowed'
+    'inline-flex items-center font-medium uppercase focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--colors-interactive-focus)] focus:ring-offset-[var(--colors-background)] disabled:opacity-50 disabled:cursor-not-allowed'
+  const justifyClasses = className?.includes('justify-') ? '' : 'justify-center'
   const transitionClasses = 'transition-all duration-200'
   const hoverRevealClasses = hoverReveal
     ? 'group relative overflow-hidden md:hover:shadow-md before:content-["""] before:absolute before:inset-0 before:bg-[var(--colors-foreground)] before:transform before:-translate-x-full md:hover:before:translate-x-0 before:transition-transform before:duration-300 before:ease-out before:pointer-events-none before:z-0'
     : ''
-  const classes = `${baseClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${hoverRevealClasses} ${className || ''}`
+  const classes = `${baseClasses} ${justifyClasses} ${transitionClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${hoverRevealClasses} ${
+    className || ''
+  }`
 
   // Separate ref from props
   const { ref, ...rest } = props as { ref?: any }

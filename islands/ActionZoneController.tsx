@@ -72,7 +72,7 @@ export default function ActionZoneController() {
 
             if (visible.length > 0) {
               const topSection = visible[0].target as HTMLElement
-              const newHash = `#${topSection.id}`
+              const newHash = topSection.id === 'home' ? '' : `#${topSection.id}`
               setCurrentHash(newHash)
             }
           },
@@ -99,13 +99,14 @@ export default function ActionZoneController() {
 
       if (element) {
         isScrollingRef.current = true
-        setCurrentHash(hash)
+        const targetHash = sectionId === 'home' ? '' : hash
+        setCurrentHash(targetHash)
         smoothScrollToSection(sectionId)
         setIsMenuOpen(false)
         setTimeout(() => isScrollingRef.current = false, uiConfig.scroll.smoothScrollDurationMs)
 
         if (globalThis.history && globalThis.history.pushState) {
-          globalThis.history.pushState(null, '', hash)
+          globalThis.history.pushState(null, '', sectionId === 'home' ? '/' : hash)
           globalThis.dispatchEvent(new HashChangeEvent('hashchange'))
         }
         return
@@ -121,7 +122,8 @@ export default function ActionZoneController() {
 
       if (element) {
         isScrollingRef.current = true
-        setCurrentHash(path)
+        const targetHash = sectionId === 'home' ? '' : path
+        setCurrentHash(targetHash)
         smoothScrollToSection(sectionId)
         setIsMenuOpen(false)
         setTimeout(() => isScrollingRef.current = false, uiConfig.scroll.smoothScrollDurationMs)
@@ -141,10 +143,10 @@ export default function ActionZoneController() {
 
     // Mark active buttons based on current hash
     const buttons = config.buttons.map((button: NavButtonState) => {
-      // Mark button as active if its href matches the current hash
-      // For home section, consider it active if no hash or hash is #home
+      // mark button as active if its href matches the current hash
+      // for home section, consider it active if no hash or if at top of page
       const isActive = button.action?.href === currentHash ||
-        (button.action?.href === '#home' && (!currentHash || currentHash === '#home'))
+        (button.action?.href === '#home' && currentHash === '')
 
       return { ...button, isActive }
     })
